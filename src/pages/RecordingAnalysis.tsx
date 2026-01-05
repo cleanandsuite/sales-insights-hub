@@ -22,6 +22,7 @@ import { WaveformPlayer } from '@/components/playback/WaveformPlayer';
 import { TranscriptSync } from '@/components/playback/TranscriptSync';
 import { AIInsightsSidebar } from '@/components/playback/AIInsightsSidebar';
 import { SalesforceRecordingView } from '@/components/recording/SalesforceRecordingView';
+import { DealCoachPanel } from '@/components/coaching/DealCoachPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -451,6 +452,17 @@ export default function RecordingAnalysis() {
             />
           </div>
         </div>
+
+        {/* AI Deal Coach */}
+        {user && recording.live_transcription && (
+          <div className="mt-6">
+            <DealCoachPanel 
+              recordingId={recording.id}
+              transcript={recording.live_transcription}
+              userId={user.id}
+            />
+          </div>
+        )}
 
         {/* Comments Section */}
         <div className="card-gradient rounded-xl border border-border/50 p-6">
