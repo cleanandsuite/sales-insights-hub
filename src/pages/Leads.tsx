@@ -174,21 +174,21 @@ export default function Leads() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Leads</h1>
-            <p className="text-muted-foreground mt-1">AI-powered lead generation and management</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Leads</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">AI-powered lead generation and management</p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" className="gap-2">
+          <div className="flex gap-2 sm:gap-3">
+            <Button variant="outline" className="gap-2 flex-1 sm:flex-none" size="sm">
               <Download className="h-4 w-4" />
-              Export
+              <span className="hidden xs:inline">Export</span>
             </Button>
-            <Button className="gap-2">
+            <Button className="gap-2 flex-1 sm:flex-none" size="sm">
               <Plus className="h-4 w-4" />
-              Add Lead
+              <span className="hidden xs:inline">Add Lead</span>
             </Button>
           </div>
         </div>
