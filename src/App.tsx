@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import Profile from "./pages/Profile";
+import RecordingAnalysis from "./pages/RecordingAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recording/:id"
+              element={
+                <ProtectedRoute>
+                  <RecordingAnalysis />
                 </ProtectedRoute>
               }
             />
