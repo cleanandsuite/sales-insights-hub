@@ -197,39 +197,39 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-            <p className="text-muted-foreground mt-1">Configure your preferences and integrations</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Settings</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">Configure your preferences and integrations</p>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
+          <Button onClick={handleSave} disabled={saving} className="gap-2 w-full sm:w-auto">
             <Save className="h-4 w-4" />
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
 
-        <Tabs defaultValue="audio" className="space-y-6">
-          <TabsList className="bg-muted/50">
-            <TabsTrigger value="audio" className="gap-2">
-              <Mic className="h-4 w-4" />
-              Audio
+        <Tabs defaultValue="audio" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-muted/50 w-full flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="audio" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Audio</span>
             </TabsTrigger>
-            <TabsTrigger value="ai" className="gap-2">
-              <Brain className="h-4 w-4" />
-              AI
+            <TabsTrigger value="ai" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">AI</span>
             </TabsTrigger>
-            <TabsTrigger value="crm" className="gap-2">
-              <Link2 className="h-4 w-4" />
-              CRM
+            <TabsTrigger value="crm" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">CRM</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2">
-              <Bell className="h-4 w-4" />
-              Notifications
+            <TabsTrigger value="notifications" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Alerts</span>
             </TabsTrigger>
-            <TabsTrigger value="privacy" className="gap-2">
-              <Shield className="h-4 w-4" />
-              Privacy
+            <TabsTrigger value="privacy" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Privacy</span>
             </TabsTrigger>
           </TabsList>
 

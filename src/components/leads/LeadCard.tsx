@@ -152,50 +152,52 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onL
   return (
     <div className="card-gradient rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-all">
       {/* Header */}
-      <div className="p-5 border-b border-border/30">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-lg">
+      <div className="p-4 sm:p-5 border-b border-border/30">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-base sm:text-lg flex-shrink-0">
               {lead.contact_name.charAt(0)}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground">{lead.contact_name}</h3>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">{lead.contact_name}</h3>
                 {lead.is_hot_lead && (
-                  <Badge className="bg-destructive/20 text-destructive border-destructive/30">🔥 Hot</Badge>
+                  <Badge className="bg-destructive/20 text-destructive border-destructive/30 text-xs">🔥 Hot</Badge>
                 )}
                 {lead.ai_assisted && (
-                  <Badge variant="outline" className="gap-1 text-primary border-primary/30">
+                  <Badge variant="outline" className="gap-1 text-primary border-primary/30 text-xs">
                     <Brain className="h-3 w-3" />
                     AI
                   </Badge>
                 )}
               </div>
               {lead.company && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
-                  <Building className="h-3 w-3" />
+                <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                  <Building className="h-3 w-3 flex-shrink-0" />
                   {lead.company}
                 </p>
               )}
               {lead.title && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Briefcase className="h-3 w-3" />
+                <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1 truncate">
+                  <Briefcase className="h-3 w-3 flex-shrink-0" />
                   {lead.title}
                 </p>
               )}
             </div>
           </div>
-          <div className="text-right">
-            <div className={`text-2xl font-bold ${getConfidenceColor(lead.ai_confidence)}`}>
-              {lead.ai_confidence ? `${lead.ai_confidence}%` : 'N/A'}
+          <div className="flex items-center justify-between sm:block sm:text-right gap-3 mt-1 sm:mt-0">
+            <div className="flex items-center sm:block gap-2">
+              <div className={`text-xl sm:text-2xl font-bold ${getConfidenceColor(lead.ai_confidence)}`}>
+                {lead.ai_confidence ? `${lead.ai_confidence}%` : 'N/A'}
+              </div>
+              <p className="text-xs text-muted-foreground">AI Confidence</p>
             </div>
-            <p className="text-xs text-muted-foreground">AI Confidence</p>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleRunAIScore}
               disabled={isScoring}
-              className="mt-1 text-xs"
+              className="text-xs px-2"
             >
               <RefreshCw className={`h-3 w-3 mr-1 ${isScoring ? 'animate-spin' : ''}`} />
               {isScoring ? 'Scoring...' : 'Re-score'}
@@ -283,7 +285,7 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onL
 
         {isExpanded && (
           <div className="space-y-4 pt-2 animate-fade-in">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {lead.email && (
                 <div className="flex items-center gap-2 text-sm">
                   <Mail className="h-4 w-4 text-muted-foreground" />

@@ -142,19 +142,19 @@ export default function Dashboard() {
       )}
       
       <DashboardLayout>
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-4 sm:space-y-6 animate-fade-in">
           {/* Header with Start Recording CTA */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-muted-foreground mt-1">AI-powered sales call analytics and lead generation</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">AI-powered sales call analytics and lead generation</p>
             </div>
             <Button
               onClick={() => setIsRecording(true)}
               size="lg"
-              className="gap-3 text-lg px-8 py-6 glow-effect animate-pulse-glow"
+              className="gap-2 sm:gap-3 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 glow-effect animate-pulse-glow w-full sm:w-auto"
             >
-              <Mic className="h-6 w-6" />
+              <Mic className="h-5 w-5 sm:h-6 sm:w-6" />
               Start Recording
             </Button>
           </div>
