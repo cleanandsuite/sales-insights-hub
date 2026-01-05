@@ -38,6 +38,19 @@ interface Lead {
   engagement_score: number | null;
   key_quotes: any;
   agreed_next_steps: string[] | null;
+  // AI fields
+  bant_budget?: number;
+  bant_authority?: number;
+  bant_need?: number;
+  bant_timeline?: number;
+  sentiment_trend?: any;
+  objection_patterns?: string[] | null;
+  next_best_actions?: any;
+  risk_level?: string;
+  deal_velocity_days?: number | null;
+  predicted_close_date?: string | null;
+  predicted_deal_value?: number | null;
+  ai_assisted?: boolean;
 }
 
 export default function Leads() {
@@ -264,6 +277,9 @@ export default function Leads() {
                     onEmail={handleEmail}
                     onViewSummary={handleViewSummary}
                     onSchedule={handleSchedule}
+                    onLeadUpdated={(updatedLead: any) => {
+                      setLeads(prev => prev.map(l => l.id === updatedLead.id ? { ...l, ...updatedLead } : l));
+                    }}
                   />
                 ))}
               </div>
