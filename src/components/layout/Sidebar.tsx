@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, User, LogOut, Headphones } from 'lucide-react';
+import { LayoutDashboard, Upload, User, LogOut, Headphones, FileAudio } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/recordings', icon: FileAudio, label: 'Recordings' },
   { to: '/upload', icon: Upload, label: 'Upload Calls' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];

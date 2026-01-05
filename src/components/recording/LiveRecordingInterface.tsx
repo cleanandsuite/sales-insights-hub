@@ -154,11 +154,14 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     }
   };
 
+  const [processingStatus, setProcessingStatus] = useState('');
+
   // Handle stop recording and save
   const handleStopRecording = async () => {
     if (isSaving) return;
     
     setIsSaving(true);
+    setProcessingStatus('Stopping recording...');
     
     try {
       const audioBlob = await stopRecording();
@@ -167,38 +170,76 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         throw new Error('No recording data or user');
       }
 
-      // Save recording metadata to database
+      setProcessingStatus('Saving to database...');
+      
+      // Save recording metadata to database first with pending status
       const fileName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
       
+      const aiSuggestionsData = suggestions.length > 0 
+        ? JSON.parse(JSON.stringify({ suggestions, sentiment, keyTopics }))
+        : null;
+
       const { data: recording, error: dbError } = await supabase
         .from('call_recordings')
-        .insert({
+        .insert([{
           user_id: user.id,
           file_name: fileName,
-          status: 'analyzed',
+          file_size: audioBlob.size,
+          status: 'processing',
           duration_seconds: recordingDuration,
-          live_transcription: transcription,
-          ai_suggestions: { suggestions, sentiment, keyTopics } as unknown as Record<string, unknown>,
+          live_transcription: transcription || null,
+          ai_suggestions: aiSuggestionsData,
           sentiment_score: sentiment === 'positive' ? 0.8 : sentiment === 'negative' ? 0.3 : 0.5,
-          key_topics: keyTopics
-        } as never)
+          key_topics: keyTopics.length > 0 ? keyTopics : null
+        }])
         .select()
         .single();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database error:', dbError);
+        throw new Error('Failed to save recording metadata');
+      }
 
+      setProcessingStatus('Uploading audio file...');
+      
       // Upload audio to storage
+      const filePath = `${user.id}/${recording.id}/${fileName}`;
       const { error: uploadError } = await supabase.storage
         .from('call-recordings')
-        .upload(`${user.id}/${recording.id}/${fileName}`, audioBlob);
+        .upload(filePath, audioBlob, {
+          contentType: 'audio/webm',
+          upsert: false
+        });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
+        throw new Error('Failed to upload audio file');
+      }
+
+      // Get the public URL for the audio
+      const { data: urlData } = supabase.storage
+        .from('call-recordings')
+        .getPublicUrl(filePath);
+
+      setProcessingStatus('Finalizing...');
+      
+      // Update recording with audio URL and mark as analyzed
+      const { error: updateError } = await supabase
+        .from('call_recordings')
+        .update({
+          audio_url: filePath,
+          status: 'analyzed',
+          analyzed_at: new Date().toISOString()
+        })
+        .eq('id', recording.id);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
       }
 
       toast({
         title: 'Recording Saved',
-        description: 'Your call has been recorded and analyzed.'
+        description: 'Your call has been recorded and analyzed successfully.'
       });
 
       // Navigate to analysis page
@@ -209,10 +250,10 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       toast({
         variant: 'destructive',
         title: 'Error Saving Recording',
-        description: 'There was a problem saving your recording.'
+        description: error instanceof Error ? error.message : 'There was a problem saving your recording.'
       });
-    } finally {
       setIsSaving(false);
+      setProcessingStatus('');
     }
   };
 
@@ -284,7 +325,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
                 disabled={isSaving}
               >
                 <Square className="h-5 w-5" />
-                {isSaving ? 'Saving...' : 'Stop & Save'}
+                {isSaving ? processingStatus || 'Processing...' : 'Stop & Save'}
               </Button>
             </div>
           </div>

@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import Profile from "./pages/Profile";
 import RecordingAnalysis from "./pages/RecordingAnalysis";
+import Recordings from "./pages/Recordings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recordings"
+              element={
+                <ProtectedRoute>
+                  <Recordings />
                 </ProtectedRoute>
               }
             />
