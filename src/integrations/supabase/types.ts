@@ -494,6 +494,200 @@ export type Database = {
           },
         ]
       }
+      coaching_benchmarks: {
+        Row: {
+          average_score: number | null
+          average_win_probability: number | null
+          created_at: string
+          deals_lost: number | null
+          deals_won: number | null
+          id: string
+          period_end: string
+          period_start: string
+          skill_improvements: Json | null
+          suggestions_applied: number | null
+          suggestions_given: number | null
+          total_calls: number | null
+          total_coaching_sessions: number | null
+          total_deal_value: number | null
+          user_id: string
+        }
+        Insert: {
+          average_score?: number | null
+          average_win_probability?: number | null
+          created_at?: string
+          deals_lost?: number | null
+          deals_won?: number | null
+          id?: string
+          period_end: string
+          period_start: string
+          skill_improvements?: Json | null
+          suggestions_applied?: number | null
+          suggestions_given?: number | null
+          total_calls?: number | null
+          total_coaching_sessions?: number | null
+          total_deal_value?: number | null
+          user_id: string
+        }
+        Update: {
+          average_score?: number | null
+          average_win_probability?: number | null
+          created_at?: string
+          deals_lost?: number | null
+          deals_won?: number | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          skill_improvements?: Json | null
+          suggestions_applied?: number | null
+          suggestions_given?: number | null
+          total_calls?: number | null
+          total_coaching_sessions?: number | null
+          total_deal_value?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      coaching_metrics: {
+        Row: {
+          applied_at: string | null
+          coaching_session_id: string | null
+          created_at: string
+          deal_stage_after: string | null
+          deal_stage_before: string | null
+          deal_value: number | null
+          deal_won: boolean | null
+          id: string
+          outcome_notes: string | null
+          outcome_positive: boolean | null
+          outcome_recorded: boolean | null
+          recording_id: string | null
+          suggestion_text: string
+          suggestion_type: string
+          user_id: string
+          was_applied: boolean | null
+        }
+        Insert: {
+          applied_at?: string | null
+          coaching_session_id?: string | null
+          created_at?: string
+          deal_stage_after?: string | null
+          deal_stage_before?: string | null
+          deal_value?: number | null
+          deal_won?: boolean | null
+          id?: string
+          outcome_notes?: string | null
+          outcome_positive?: boolean | null
+          outcome_recorded?: boolean | null
+          recording_id?: string | null
+          suggestion_text: string
+          suggestion_type: string
+          user_id: string
+          was_applied?: boolean | null
+        }
+        Update: {
+          applied_at?: string | null
+          coaching_session_id?: string | null
+          created_at?: string
+          deal_stage_after?: string | null
+          deal_stage_before?: string | null
+          deal_value?: number | null
+          deal_won?: boolean | null
+          id?: string
+          outcome_notes?: string | null
+          outcome_positive?: boolean | null
+          outcome_recorded?: boolean | null
+          recording_id?: string | null
+          suggestion_text?: string
+          suggestion_type?: string
+          user_id?: string
+          was_applied?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_metrics_coaching_session_id_fkey"
+            columns: ["coaching_session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coaching_metrics_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_sessions: {
+        Row: {
+          action_items: string[] | null
+          better_responses: Json | null
+          created_at: string
+          deal_risks: Json | null
+          executive_summary: string | null
+          id: string
+          improvement_areas: Json | null
+          key_moments: Json | null
+          missed_opportunities: Json | null
+          overall_score: number | null
+          potential_win_probability: number | null
+          recording_id: string
+          strengths: string[] | null
+          updated_at: string
+          user_id: string
+          weaknesses: string[] | null
+          win_probability: number | null
+        }
+        Insert: {
+          action_items?: string[] | null
+          better_responses?: Json | null
+          created_at?: string
+          deal_risks?: Json | null
+          executive_summary?: string | null
+          id?: string
+          improvement_areas?: Json | null
+          key_moments?: Json | null
+          missed_opportunities?: Json | null
+          overall_score?: number | null
+          potential_win_probability?: number | null
+          recording_id: string
+          strengths?: string[] | null
+          updated_at?: string
+          user_id: string
+          weaknesses?: string[] | null
+          win_probability?: number | null
+        }
+        Update: {
+          action_items?: string[] | null
+          better_responses?: Json | null
+          created_at?: string
+          deal_risks?: Json | null
+          executive_summary?: string | null
+          id?: string
+          improvement_areas?: Json | null
+          key_moments?: Json | null
+          missed_opportunities?: Json | null
+          overall_score?: number | null
+          potential_win_probability?: number | null
+          recording_id?: string
+          strengths?: string[] | null
+          updated_at?: string
+          user_id?: string
+          weaknesses?: string[] | null
+          win_probability?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_sessions_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_connections: {
         Row: {
           access_token_encrypted: string | null
