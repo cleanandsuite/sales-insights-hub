@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       call_recordings: {
         Row: {
+          ai_suggestions: Json | null
           analyzed_at: string | null
+          audio_url: string | null
           created_at: string
           duration_seconds: number | null
           file_name: string
@@ -24,13 +26,16 @@ export type Database = {
           file_url: string | null
           id: string
           key_topics: string[] | null
+          live_transcription: string | null
           sentiment_score: number | null
           status: string | null
           summary: string | null
           user_id: string
         }
         Insert: {
+          ai_suggestions?: Json | null
           analyzed_at?: string | null
+          audio_url?: string | null
           created_at?: string
           duration_seconds?: number | null
           file_name: string
@@ -38,13 +43,16 @@ export type Database = {
           file_url?: string | null
           id?: string
           key_topics?: string[] | null
+          live_transcription?: string | null
           sentiment_score?: number | null
           status?: string | null
           summary?: string | null
           user_id: string
         }
         Update: {
+          ai_suggestions?: Json | null
           analyzed_at?: string | null
+          audio_url?: string | null
           created_at?: string
           duration_seconds?: number | null
           file_name?: string
@@ -52,6 +60,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           key_topics?: string[] | null
+          live_transcription?: string | null
           sentiment_score?: number | null
           status?: string | null
           summary?: string | null

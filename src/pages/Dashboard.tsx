@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatCard } from '@/components/ui/stat-card';
-import { Phone, TrendingUp, Clock, ThumbsUp } from 'lucide-react';
+import { Phone, TrendingUp, Clock, ThumbsUp, Mic } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
+import { useNavigate } from 'react-router-dom';
 
 interface CallRecording {
   id: string;
@@ -16,8 +19,10 @@ interface CallRecording {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     async function fetchRecordings() {
@@ -52,13 +57,28 @@ export default function Dashboard() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8 animate-fade-in">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Overview of your sales call analytics</p>
-        </div>
+    <>
+      {isRecording && (
+        <LiveRecordingInterface onClose={() => setIsRecording(false)} />
+      )}
+      
+      <DashboardLayout>
+        <div className="space-y-8 animate-fade-in">
+          {/* Header with Start Recording CTA */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-muted-foreground mt-1">Overview of your sales call analytics</p>
+            </div>
+            <Button
+              onClick={() => setIsRecording(true)}
+              size="lg"
+              className="gap-3 text-lg px-8 py-6 glow-effect animate-pulse-glow"
+            >
+              <Mic className="h-6 w-6" />
+              Start Recording
+            </Button>
+          </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -108,7 +128,8 @@ export default function Dashboard() {
                 {recordings.map((recording) => (
                   <div
                     key={recording.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/30 transition-colors"
+                    onClick={() => navigate(`/recording/${recording.id}`)}
+                    className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/30 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
@@ -147,5 +168,6 @@ export default function Dashboard() {
         </div>
       </div>
     </DashboardLayout>
+  </>
   );
 }
