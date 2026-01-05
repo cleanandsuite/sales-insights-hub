@@ -194,6 +194,7 @@ export type Database = {
           audio_url: string | null
           call_score_id: string | null
           created_at: string
+          crm_sync_status: string | null
           deal_analysis_id: string | null
           duration_seconds: number | null
           file_name: string
@@ -202,6 +203,10 @@ export type Database = {
           id: string
           key_topics: string[] | null
           live_transcription: string | null
+          salesforce_account_id: string | null
+          salesforce_contact_id: string | null
+          salesforce_lead_id: string | null
+          salesforce_opportunity_id: string | null
           sentiment_score: number | null
           status: string | null
           summary: string | null
@@ -216,6 +221,7 @@ export type Database = {
           audio_url?: string | null
           call_score_id?: string | null
           created_at?: string
+          crm_sync_status?: string | null
           deal_analysis_id?: string | null
           duration_seconds?: number | null
           file_name: string
@@ -224,6 +230,10 @@ export type Database = {
           id?: string
           key_topics?: string[] | null
           live_transcription?: string | null
+          salesforce_account_id?: string | null
+          salesforce_contact_id?: string | null
+          salesforce_lead_id?: string | null
+          salesforce_opportunity_id?: string | null
           sentiment_score?: number | null
           status?: string | null
           summary?: string | null
@@ -238,6 +248,7 @@ export type Database = {
           audio_url?: string | null
           call_score_id?: string | null
           created_at?: string
+          crm_sync_status?: string | null
           deal_analysis_id?: string | null
           duration_seconds?: number | null
           file_name?: string
@@ -246,6 +257,10 @@ export type Database = {
           id?: string
           key_topics?: string[] | null
           live_transcription?: string | null
+          salesforce_account_id?: string | null
+          salesforce_contact_id?: string | null
+          salesforce_lead_id?: string | null
+          salesforce_opportunity_id?: string | null
           sentiment_score?: number | null
           status?: string | null
           summary?: string | null
@@ -1072,6 +1087,50 @@ export type Database = {
             columns: ["shared_with_team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salesforce_sync_queue: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          payload: Json
+          processed_at: string | null
+          recording_id: string
+          retry_count: number | null
+          status: string
+          sync_type: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload: Json
+          processed_at?: string | null
+          recording_id: string
+          retry_count?: number | null
+          status?: string
+          sync_type: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          recording_id?: string
+          retry_count?: number | null
+          status?: string
+          sync_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salesforce_sync_queue_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
             referencedColumns: ["id"]
           },
         ]
