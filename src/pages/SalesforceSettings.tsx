@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,13 +14,13 @@ import {
   ExternalLink, 
   RefreshCw, 
   Key, 
-  Globe, 
   Bell, 
   Shield 
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { getToastErrorMessage } from '@/lib/errorSanitizer';
 
 interface CRMConnection {
   id: string;
@@ -103,10 +102,10 @@ export default function SalesforceSettings() {
           variant: 'destructive'
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Connection failed',
-        description: error.message,
+        description: getToastErrorMessage(error, 'sync'),
         variant: 'destructive'
       });
     }
@@ -128,10 +127,10 @@ export default function SalesforceSettings() {
         title: 'Disconnected',
         description: 'Salesforce connection has been removed.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Disconnect failed',
-        description: error.message,
+        description: getToastErrorMessage(error, 'sync'),
         variant: 'destructive'
       });
     }
@@ -162,10 +161,10 @@ export default function SalesforceSettings() {
       });
 
       checkSalesforceConnection();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Sync failed',
-        description: error.message,
+        description: getToastErrorMessage(error, 'sync'),
         variant: 'destructive'
       });
     }

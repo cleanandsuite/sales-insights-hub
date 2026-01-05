@@ -5,6 +5,7 @@ import { Upload as UploadIcon, File, X, CheckCircle, Loader2 } from 'lucide-reac
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { getToastErrorMessage } from '@/lib/errorSanitizer';
 
 interface UploadedFile {
   file: File;
@@ -80,7 +81,7 @@ export default function Upload() {
         );
         toast({
           title: 'Upload failed',
-          description: uploadError.message,
+          description: getToastErrorMessage(uploadError, 'upload'),
           variant: 'destructive',
         });
         continue;
@@ -103,8 +104,8 @@ export default function Upload() {
           prev.map((f, idx) => (idx === i ? { ...f, status: 'error' } : f))
         );
         toast({
-          title: 'Database error',
-          description: dbError.message,
+          title: 'Save failed',
+          description: getToastErrorMessage(dbError, 'save'),
           variant: 'destructive',
         });
         continue;

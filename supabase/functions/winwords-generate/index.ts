@@ -1,10 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schemas
+const personaSchema = z.object({
+  role: z.string().max(100).optional(),
+  industry: z.string().max(100).optional(),
+  companySize: z.string().max(100).optional(),
+  painPoints: z.array(z.string().max(200)).max(10).optional(),
+  personalityStyle: z.string().max(100).optional(),
+}).optional();
+
+const dealContextSchema = z.object({
+  stage: z.string().max(100).optional(),
+  budget: z.string().max(100).optional(),
+  timeline: z.string().max(100).optional(),
+  competition: z.string().max(100).optional(),
+  previousInteractions: z.string().max(500).optional(),
+  knownObjections: z.array(z.string().max(200)).max(10).optional(),
+}).optional();
+
+const requestSchema = z.object({
+  scenario: z.enum(['cold_call', 'discovery', 'demo', 'negotiation', 'renewal', 'objection_handling']),
+  persona: personaSchema,
+  dealContext: dealContextSchema,
+  style: z.enum(['confident', 'consultative', 'urgent', 'collaborative']).optional(),
+});
 
 // Scenario templates for different sales interactions
 const scenarioTemplates = {
@@ -46,16 +71,59 @@ serve(async (req) => {
   }
 
   try {
-    const { scenario, persona, dealContext, style } = await req.json();
+    // Parse and validate request
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const parseResult = requestSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.error('Validation error:', parseResult.error.issues);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request parameters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { scenario, persona, dealContext, style } = parseResult.data;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(
+        JSON.stringify({ error: 'Service not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
-    const scenarioKey = scenario as keyof typeof scenarioTemplates;
-    const template = scenarioTemplates[scenarioKey] || scenarioTemplates.discovery;
+    const template = scenarioTemplates[scenario];
     
+    // Sanitize inputs for AI prompt
+    const safeRole = (persona?.role || "Decision Maker").substring(0, 100);
+    const safeIndustry = (persona?.industry || "Technology").substring(0, 100);
+    const safeCompanySize = (persona?.companySize || "Mid-market").substring(0, 100);
+    const safePainPoints = (persona?.painPoints || ["efficiency", "cost reduction", "growth"])
+      .slice(0, 5)
+      .map(p => p.substring(0, 100))
+      .join(", ");
+    const safePersonalityStyle = (persona?.personalityStyle || "analytical").substring(0, 100);
+    const safeStage = (dealContext?.stage || "early").substring(0, 100);
+    const safeBudget = (dealContext?.budget || "unknown").substring(0, 100);
+    const safeTimeline = (dealContext?.timeline || "Q1").substring(0, 100);
+    const safeCompetition = (dealContext?.competition || "unknown").substring(0, 100);
+    const safePreviousInteractions = (dealContext?.previousInteractions || "none").substring(0, 200);
+    const safeKnownObjections = (dealContext?.knownObjections || [])
+      .slice(0, 5)
+      .map(o => o.substring(0, 100))
+      .join(", ") || "none yet";
+    const safeStyle = style || "confident";
+
     const systemPrompt = `You are WINWORDS, an elite AI sales coach that generates winning sales scripts. 
 You have analyzed millions of successful sales conversations and know exactly what works.
 
@@ -123,21 +191,21 @@ FOCUS: ${template.focus}
 SECTIONS TO INCLUDE: ${template.sections.join(", ")}
 
 BUYER PERSONA:
-- Role: ${persona?.role || "Decision Maker"}
-- Industry: ${persona?.industry || "Technology"}
-- Company Size: ${persona?.companySize || "Mid-market"}
-- Known Pain Points: ${(persona?.painPoints || ["efficiency", "cost reduction", "growth"]).join(", ")}
-- Personality Style: ${persona?.personalityStyle || "analytical"}
+- Role: ${safeRole}
+- Industry: ${safeIndustry}
+- Company Size: ${safeCompanySize}
+- Known Pain Points: ${safePainPoints}
+- Personality Style: ${safePersonalityStyle}
 
 DEAL CONTEXT:
-- Stage: ${dealContext?.stage || "early"}
-- Budget: ${dealContext?.budget || "unknown"}
-- Timeline: ${dealContext?.timeline || "Q1"}
-- Competition: ${dealContext?.competition || "unknown"}
-- Previous Interactions: ${dealContext?.previousInteractions || "none"}
-- Known Objections: ${(dealContext?.knownObjections || []).join(", ") || "none yet"}
+- Stage: ${safeStage}
+- Budget: ${safeBudget}
+- Timeline: ${safeTimeline}
+- Competition: ${safeCompetition}
+- Previous Interactions: ${safePreviousInteractions}
+- Known Objections: ${safeKnownObjections}
 
-STYLE: ${style || "confident"} (Options: confident, consultative, urgent, collaborative)
+STYLE: ${safeStyle} (Options: confident, consultative, urgent, collaborative)
 
 Generate a comprehensive, personalized script that will WIN this deal. Include specific language tailored to their industry and role. Make every word count.`;
 
@@ -173,14 +241,20 @@ Generate a comprehensive, personalized script that will WIN this deal. Include s
       }
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      return new Response(JSON.stringify({ error: "Failed to generate script" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
     
     if (!content) {
-      throw new Error("No content in AI response");
+      return new Response(JSON.stringify({ error: "Failed to generate script" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Parse the JSON from the response
@@ -229,7 +303,7 @@ Generate a comprehensive, personalized script that will WIN this deal. Include s
   } catch (error) {
     console.error("Error in winwords-generate:", error);
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Unknown error occurred" 
+      error: "An unexpected error occurred" 
     }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

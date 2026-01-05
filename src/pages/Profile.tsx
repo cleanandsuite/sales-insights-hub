@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getToastErrorMessage } from '@/lib/errorSanitizer';
 import { User, Building, Mail, Save, Loader2 } from 'lucide-react';
 
 interface Profile {
@@ -65,7 +66,7 @@ export default function Profile() {
     if (error) {
       toast({
         title: 'Error saving profile',
-        description: error.message,
+        description: getToastErrorMessage(error, 'save'),
         variant: 'destructive',
       });
     } else {

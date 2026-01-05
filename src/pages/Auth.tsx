@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Headphones, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getSafeErrorMessage } from '@/lib/errorSanitizer';
 
 export default function Auth() {
   const { user, loading: authLoading } = useAuth();
@@ -41,7 +42,7 @@ export default function Auth() {
         if (error) {
           toast({
             title: 'Sign in failed',
-            description: error.message,
+            description: getSafeErrorMessage(error, 'Invalid email or password'),
             variant: 'destructive',
           });
         }
@@ -59,7 +60,7 @@ export default function Auth() {
         if (error) {
           toast({
             title: 'Sign up failed',
-            description: error.message,
+            description: getSafeErrorMessage(error, 'Unable to create account'),
             variant: 'destructive',
           });
         } else {

@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { getToastErrorMessage } from '@/lib/errorSanitizer';
 import { 
   Trophy, Sparkles, ArrowRight, Loader2, 
   FileText, BarChart3, History 
@@ -110,9 +111,9 @@ export default function WinWords() {
       
       toast.success('Script generated! 🎉');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Generation error:', error);
-      toast.error(error.message || 'Failed to generate script');
+      toast.error(getToastErrorMessage(error, 'default'));
     },
   });
 
@@ -144,8 +145,8 @@ export default function WinWords() {
       setShowOutcomeTracker(false);
       queryClient.invalidateQueries({ queryKey: ['winwords-scripts'] });
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to track outcome');
+    onError: (error: unknown) => {
+      toast.error(getToastErrorMessage(error, 'save'));
     },
   });
 
