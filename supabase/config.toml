@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.analyze-conversation]
 verify_jwt = false
+
+[functions.analyze-recording]
+verify_jwt = false
+
+[functions.salesforce-sync]
+verify_jwt = true

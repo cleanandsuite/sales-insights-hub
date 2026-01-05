@@ -8,10 +8,14 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Recordings from "./pages/Recordings";
+import RecordingAnalysis from "./pages/RecordingAnalysis";
 import Upload from "./pages/Upload";
 import Profile from "./pages/Profile";
-import RecordingAnalysis from "./pages/RecordingAnalysis";
-import Recordings from "./pages/Recordings";
+import Team from "./pages/Team";
+import Schedule from "./pages/Schedule";
+import Coaching from "./pages/Coaching";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,46 +30,15 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/upload"
-              element={
-                <ProtectedRoute>
-                  <Upload />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/recordings"
-              element={
-                <ProtectedRoute>
-                  <Recordings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/recording/:id"
-              element={
-                <ProtectedRoute>
-                  <RecordingAnalysis />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
+            <Route path="/recording/:id" element={<ProtectedRoute><RecordingAnalysis /></ProtectedRoute>} />
+            <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
+            <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+            <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

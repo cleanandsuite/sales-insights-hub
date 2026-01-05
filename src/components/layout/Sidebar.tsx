@@ -1,13 +1,16 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, User, LogOut, Headphones, FileAudio } from 'lucide-react';
+import { LayoutDashboard, Upload, User, LogOut, Headphones, FileAudio, Users, Calendar, Trophy, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/recordings', icon: FileAudio, label: 'Recordings' },
-  { to: '/upload', icon: Upload, label: 'Upload Calls' },
-  { to: '/profile', icon: User, label: 'Profile' },
+  { to: '/schedule', icon: Calendar, label: 'Schedule' },
+  { to: '/coaching', icon: Trophy, label: 'Coaching' },
+  { to: '/team', icon: Users, label: 'Team' },
+  { to: '/upload', icon: Upload, label: 'Upload' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 export function Sidebar() {
