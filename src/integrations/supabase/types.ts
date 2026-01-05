@@ -105,6 +105,87 @@ export type Database = {
           },
         ]
       }
+      ai_lead_settings: {
+        Row: {
+          auto_bold_pain_points: boolean | null
+          auto_flag_budget: boolean | null
+          auto_highlight_competitors: boolean | null
+          auto_tag_timeline: boolean | null
+          capture_next_steps: boolean | null
+          create_30s_skim: boolean | null
+          created_at: string
+          custom_keywords: string[] | null
+          extract_key_points: boolean | null
+          highlight_urgency: boolean | null
+          id: string
+          identify_decision_makers: boolean | null
+          is_ai_active: boolean | null
+          is_test_mode: boolean | null
+          note_competitive_mentions: boolean | null
+          note_emotional_tone: boolean | null
+          record_questions: boolean | null
+          show_decision_signals: boolean | null
+          show_tone_markers: boolean | null
+          summary_length: string | null
+          track_objections: boolean | null
+          trigger_keywords: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_bold_pain_points?: boolean | null
+          auto_flag_budget?: boolean | null
+          auto_highlight_competitors?: boolean | null
+          auto_tag_timeline?: boolean | null
+          capture_next_steps?: boolean | null
+          create_30s_skim?: boolean | null
+          created_at?: string
+          custom_keywords?: string[] | null
+          extract_key_points?: boolean | null
+          highlight_urgency?: boolean | null
+          id?: string
+          identify_decision_makers?: boolean | null
+          is_ai_active?: boolean | null
+          is_test_mode?: boolean | null
+          note_competitive_mentions?: boolean | null
+          note_emotional_tone?: boolean | null
+          record_questions?: boolean | null
+          show_decision_signals?: boolean | null
+          show_tone_markers?: boolean | null
+          summary_length?: string | null
+          track_objections?: boolean | null
+          trigger_keywords?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_bold_pain_points?: boolean | null
+          auto_flag_budget?: boolean | null
+          auto_highlight_competitors?: boolean | null
+          auto_tag_timeline?: boolean | null
+          capture_next_steps?: boolean | null
+          create_30s_skim?: boolean | null
+          created_at?: string
+          custom_keywords?: string[] | null
+          extract_key_points?: boolean | null
+          highlight_urgency?: boolean | null
+          id?: string
+          identify_decision_makers?: boolean | null
+          is_ai_active?: boolean | null
+          is_test_mode?: boolean | null
+          note_competitive_mentions?: boolean | null
+          note_emotional_tone?: boolean | null
+          record_questions?: boolean | null
+          show_decision_signals?: boolean | null
+          show_tone_markers?: boolean | null
+          summary_length?: string | null
+          track_objections?: boolean | null
+          trigger_keywords?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       call_recordings: {
         Row: {
           ai_markers: Json | null
@@ -237,6 +318,113 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "call_scores_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_summaries: {
+        Row: {
+          agreed_next_steps: string[] | null
+          competitive_mentions: string[] | null
+          concern_signals: number | null
+          conversation_starters: string[] | null
+          created_at: string
+          decision_makers: string[] | null
+          emotional_tone: string | null
+          engagement_score: number | null
+          id: string
+          improvements: string[] | null
+          key_points: string[] | null
+          last_exchanges: Json | null
+          materials_needed: string[] | null
+          objections_raised: string[] | null
+          positive_signals: number | null
+          question_count_them: number | null
+          question_count_you: number | null
+          questions_asked: Json | null
+          questions_to_ask: string[] | null
+          quick_skim: Json | null
+          recording_id: string
+          review_before_calling: string[] | null
+          strengths: string[] | null
+          suggestions_next_call: string[] | null
+          talk_ratio_them: number | null
+          talk_ratio_you: number | null
+          updated_at: string
+          urgency_indicators: string[] | null
+          user_id: string
+          watch_out_for: string[] | null
+        }
+        Insert: {
+          agreed_next_steps?: string[] | null
+          competitive_mentions?: string[] | null
+          concern_signals?: number | null
+          conversation_starters?: string[] | null
+          created_at?: string
+          decision_makers?: string[] | null
+          emotional_tone?: string | null
+          engagement_score?: number | null
+          id?: string
+          improvements?: string[] | null
+          key_points?: string[] | null
+          last_exchanges?: Json | null
+          materials_needed?: string[] | null
+          objections_raised?: string[] | null
+          positive_signals?: number | null
+          question_count_them?: number | null
+          question_count_you?: number | null
+          questions_asked?: Json | null
+          questions_to_ask?: string[] | null
+          quick_skim?: Json | null
+          recording_id: string
+          review_before_calling?: string[] | null
+          strengths?: string[] | null
+          suggestions_next_call?: string[] | null
+          talk_ratio_them?: number | null
+          talk_ratio_you?: number | null
+          updated_at?: string
+          urgency_indicators?: string[] | null
+          user_id: string
+          watch_out_for?: string[] | null
+        }
+        Update: {
+          agreed_next_steps?: string[] | null
+          competitive_mentions?: string[] | null
+          concern_signals?: number | null
+          conversation_starters?: string[] | null
+          created_at?: string
+          decision_makers?: string[] | null
+          emotional_tone?: string | null
+          engagement_score?: number | null
+          id?: string
+          improvements?: string[] | null
+          key_points?: string[] | null
+          last_exchanges?: Json | null
+          materials_needed?: string[] | null
+          objections_raised?: string[] | null
+          positive_signals?: number | null
+          question_count_them?: number | null
+          question_count_you?: number | null
+          questions_asked?: Json | null
+          questions_to_ask?: string[] | null
+          quick_skim?: Json | null
+          recording_id?: string
+          review_before_calling?: string[] | null
+          strengths?: string[] | null
+          suggestions_next_call?: string[] | null
+          talk_ratio_them?: number | null
+          talk_ratio_you?: number | null
+          updated_at?: string
+          urgency_indicators?: string[] | null
+          user_id?: string
+          watch_out_for?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_summaries_recording_id_fkey"
             columns: ["recording_id"]
             isOneToOne: false
             referencedRelation: "call_recordings"
@@ -491,6 +679,175 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "deletion_requests_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          description: string | null
+          id: string
+          lead_id: string
+          metadata: Json | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          agreed_next_steps: string[] | null
+          ai_confidence: number | null
+          budget_info: string | null
+          call_duration_seconds: number | null
+          company: string | null
+          competitor_status: string | null
+          contact_name: string
+          created_at: string
+          decision_timeline_days: number | null
+          email: string | null
+          engagement_score: number | null
+          evaluation_stage: string | null
+          follow_up_count: number | null
+          id: string
+          is_hot_lead: boolean | null
+          key_moments: Json | null
+          key_quotes: Json | null
+          last_contacted_at: string | null
+          lead_status: string
+          location: string | null
+          materials_needed: string[] | null
+          next_action: string | null
+          next_action_due: string | null
+          phone: string | null
+          prep_questions: string[] | null
+          primary_pain_point: string | null
+          priority_score: number | null
+          recording_id: string | null
+          secondary_issues: string[] | null
+          source: string | null
+          talk_ratio: number | null
+          team_size: number | null
+          timeline: string | null
+          title: string | null
+          updated_at: string
+          urgency_level: string | null
+          user_id: string
+        }
+        Insert: {
+          agreed_next_steps?: string[] | null
+          ai_confidence?: number | null
+          budget_info?: string | null
+          call_duration_seconds?: number | null
+          company?: string | null
+          competitor_status?: string | null
+          contact_name: string
+          created_at?: string
+          decision_timeline_days?: number | null
+          email?: string | null
+          engagement_score?: number | null
+          evaluation_stage?: string | null
+          follow_up_count?: number | null
+          id?: string
+          is_hot_lead?: boolean | null
+          key_moments?: Json | null
+          key_quotes?: Json | null
+          last_contacted_at?: string | null
+          lead_status?: string
+          location?: string | null
+          materials_needed?: string[] | null
+          next_action?: string | null
+          next_action_due?: string | null
+          phone?: string | null
+          prep_questions?: string[] | null
+          primary_pain_point?: string | null
+          priority_score?: number | null
+          recording_id?: string | null
+          secondary_issues?: string[] | null
+          source?: string | null
+          talk_ratio?: number | null
+          team_size?: number | null
+          timeline?: string | null
+          title?: string | null
+          updated_at?: string
+          urgency_level?: string | null
+          user_id: string
+        }
+        Update: {
+          agreed_next_steps?: string[] | null
+          ai_confidence?: number | null
+          budget_info?: string | null
+          call_duration_seconds?: number | null
+          company?: string | null
+          competitor_status?: string | null
+          contact_name?: string
+          created_at?: string
+          decision_timeline_days?: number | null
+          email?: string | null
+          engagement_score?: number | null
+          evaluation_stage?: string | null
+          follow_up_count?: number | null
+          id?: string
+          is_hot_lead?: boolean | null
+          key_moments?: Json | null
+          key_quotes?: Json | null
+          last_contacted_at?: string | null
+          lead_status?: string
+          location?: string | null
+          materials_needed?: string[] | null
+          next_action?: string | null
+          next_action_due?: string | null
+          phone?: string | null
+          prep_questions?: string[] | null
+          primary_pain_point?: string | null
+          priority_score?: number | null
+          recording_id?: string | null
+          secondary_issues?: string[] | null
+          source?: string | null
+          talk_ratio?: number | null
+          team_size?: number | null
+          timeline?: string | null
+          title?: string | null
+          updated_at?: string
+          urgency_level?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_recording_id_fkey"
             columns: ["recording_id"]
             isOneToOne: false
             referencedRelation: "call_recordings"
