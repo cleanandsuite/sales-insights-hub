@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.test-db]
 verify_jwt = false
+
+[functions.ai-lead-score]
+verify_jwt = false

@@ -1,7 +1,15 @@
-import { Phone, Mail, Calendar, MapPin, Building, Briefcase, TrendingUp, Clock, MessageSquare, ChevronDown, ChevronUp, Play, FileText, ExternalLink } from 'lucide-react';
+import { Phone, Mail, Calendar, MapPin, Building, Briefcase, TrendingUp, Clock, ChevronDown, ChevronUp, FileText, Brain, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { AIIntelligenceBar } from './AIIntelligenceBar';
+import { BANTScoreVisualization } from './BANTScoreVisualization';
+import { AIActionSuggestion } from './AIActionSuggestion';
+import { AIRiskTimeline } from './AIRiskTimeline';
+import { SmartCRMActions } from './SmartCRMActions';
 
 interface Lead {
   id: string;
@@ -24,8 +32,21 @@ interface Lead {
   created_at: string;
   call_duration_seconds: number | null;
   engagement_score: number | null;
-  key_quotes: any[];
+  key_quotes: any;
   agreed_next_steps: string[] | null;
+  // New AI fields
+  bant_budget?: number;
+  bant_authority?: number;
+  bant_need?: number;
+  bant_timeline?: number;
+  sentiment_trend?: any;
+  objection_patterns?: string[] | null;
+  next_best_actions?: any;
+  risk_level?: string;
+  deal_velocity_days?: number | null;
+  predicted_close_date?: string | null;
+  predicted_deal_value?: number | null;
+  ai_assisted?: boolean;
 }
 
 interface LeadCardProps {
@@ -34,15 +55,19 @@ interface LeadCardProps {
   onEmail: (lead: Lead) => void;
   onViewSummary: (lead: Lead) => void;
   onSchedule: (lead: Lead) => void;
+  onLeadUpdated?: (lead: Lead) => void;
 }
 
-export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule }: LeadCardProps) {
+export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onLeadUpdated }: LeadCardProps) {
+  const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isScoring, setIsScoring] = useState(false);
+  const [appliedActions, setAppliedActions] = useState<number[]>([]);
 
   const getConfidenceColor = (confidence: number | null) => {
     if (!confidence) return 'text-muted-foreground';
-    if (confidence >= 80) return 'text-success';
-    if (confidence >= 60) return 'text-warning';
+    if (confidence >= 80) return 'text-green-500';
+    if (confidence >= 60) return 'text-yellow-500';
     return 'text-muted-foreground';
   };
 
@@ -51,7 +76,7 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule }: L
       case 'high':
         return <Badge className="bg-destructive/20 text-destructive border-destructive/30">Urgent</Badge>;
       case 'medium':
-        return <Badge className="bg-warning/20 text-warning border-warning/30">Medium</Badge>;
+        return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Medium</Badge>;
       default:
         return <Badge variant="secondary">Low</Badge>;
     }
@@ -63,6 +88,66 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule }: L
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  const handleRunAIScore = async () => {
+    if (!user?.id) return;
+    
+    setIsScoring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-lead-score', {
+        body: {
+          lead_id: lead.id,
+          user_id: user.id,
+          deal_context: {
+            budget_info: lead.budget_info,
+            timeline: lead.timeline,
+            primary_pain_point: lead.primary_pain_point
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success('AI analysis complete!');
+      if (onLeadUpdated) {
+        // Fetch updated lead
+        const { data: updatedLead } = await supabase
+          .from('leads')
+          .select('*')
+          .eq('id', lead.id)
+          .single();
+        if (updatedLead) onLeadUpdated(updatedLead);
+      }
+    } catch (error) {
+      console.error('AI scoring error:', error);
+      toast.error('Failed to run AI analysis');
+    } finally {
+      setIsScoring(false);
+    }
+  };
+
+  const handleApplyAction = async (action: any, index: number) => {
+    setAppliedActions(prev => [...prev, index]);
+    
+    // Track that the action was applied
+    if (user?.id) {
+      await supabase.from('ai_coaching_metrics').update({
+        was_applied: true,
+        applied_at: new Date().toISOString()
+      }).eq('lead_id', lead.id).eq('suggestion_text', action.action);
+    }
+    
+    toast.success(`Action applied: ${action.action}`);
+  };
+
+  const bantScores = {
+    budget: lead.bant_budget ?? 0,
+    authority: lead.bant_authority ?? 0,
+    need: lead.bant_need ?? 0,
+    timeline: lead.bant_timeline ?? 0
+  };
+
+  const hasAIData = lead.ai_assisted || (lead.bant_budget !== undefined && lead.bant_budget > 0);
 
   return (
     <div className="card-gradient rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-all">
@@ -78,6 +163,12 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule }: L
                 <h3 className="font-semibold text-foreground">{lead.contact_name}</h3>
                 {lead.is_hot_lead && (
                   <Badge className="bg-destructive/20 text-destructive border-destructive/30">🔥 Hot</Badge>
+                )}
+                {lead.ai_assisted && (
+                  <Badge variant="outline" className="gap-1 text-primary border-primary/30">
+                    <Brain className="h-3 w-3" />
+                    AI
+                  </Badge>
                 )}
               </div>
               {lead.company && (
@@ -99,9 +190,41 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule }: L
               {lead.ai_confidence ? `${lead.ai_confidence}%` : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">AI Confidence</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRunAIScore}
+              disabled={isScoring}
+              className="mt-1 text-xs"
+            >
+              <RefreshCw className={`h-3 w-3 mr-1 ${isScoring ? 'animate-spin' : ''}`} />
+              {isScoring ? 'Scoring...' : 'Re-score'}
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* AI Intelligence Section */}
+      {hasAIData && (
+        <div className="p-4 border-b border-border/30 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <AIIntelligenceBar
+              aiConfidence={lead.ai_confidence}
+              sentimentTrend={lead.sentiment_trend || []}
+              objectionPatterns={lead.objection_patterns || []}
+              riskLevel={lead.risk_level || 'medium'}
+            />
+            <BANTScoreVisualization scores={bantScores} />
+          </div>
+          
+          <AIRiskTimeline
+            riskLevel={lead.risk_level || 'medium'}
+            predictedCloseDate={lead.predicted_close_date || null}
+            predictedDealValue={lead.predicted_deal_value || null}
+            dealVelocityDays={lead.deal_velocity_days || null}
+          />
+        </div>
+      )}
 
       {/* Quick Info */}
       <div className="p-5 space-y-4">
@@ -126,7 +249,16 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule }: L
           </div>
         )}
 
-        {lead.next_action && (
+        {/* AI Next Best Actions */}
+        {lead.next_best_actions && lead.next_best_actions.length > 0 && (
+          <AIActionSuggestion
+            actions={lead.next_best_actions}
+            onApplyAction={handleApplyAction}
+            appliedActions={appliedActions}
+          />
+        )}
+
+        {lead.next_action && !hasAIData && (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Next:</span>
             <span className="text-foreground font-medium">{lead.next_action}</span>
@@ -217,23 +349,28 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule }: L
       </div>
 
       {/* Actions */}
-      <div className="p-4 border-t border-border/30 flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => onCall(lead)} className="gap-2">
-          <Phone className="h-4 w-4" />
-          Call Now
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => onViewSummary(lead)} className="gap-2">
-          <FileText className="h-4 w-4" />
-          Call Summary
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => onEmail(lead)} className="gap-2">
-          <Mail className="h-4 w-4" />
-          Email
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => onSchedule(lead)} className="gap-2">
-          <Calendar className="h-4 w-4" />
-          Schedule
-        </Button>
+      <div className="p-4 border-t border-border/30">
+        <SmartCRMActions
+          leadId={lead.id}
+          leadName={lead.contact_name}
+          leadEmail={lead.email}
+          onCall={() => onCall(lead)}
+          onEmail={() => onEmail(lead)}
+          onSchedule={() => onSchedule(lead)}
+          aiSuggestions={{
+            emailTemplates: [
+              { label: 'Follow-up on pain point', description: 'Reference their specific challenge' },
+              { label: 'Case study share', description: 'Send relevant success story' }
+            ],
+            callTimes: [
+              { label: 'Tomorrow 10:30 AM', description: 'Based on their typical response times' },
+              { label: 'Thursday 2:15 PM', description: 'High engagement window' }
+            ],
+            proposalTweaks: lead.objection_patterns && lead.objection_patterns.length > 0 ? [
+              { label: 'Address objections', description: `Counter: ${lead.objection_patterns[0]}` }
+            ] : undefined
+          }}
+        />
       </div>
     </div>
   );

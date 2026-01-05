@@ -4,6 +4,8 @@ import { StatCard } from '@/components/ui/stat-card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Phone, Clock, TrendingUp, MessageSquare, Target, Percent, Users, BarChart3, Lightbulb, AlertTriangle } from 'lucide-react';
+import { AICoachingAnalytics } from '@/components/coaching/AICoachingAnalytics';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 interface CallMetrics {
@@ -134,8 +136,20 @@ export default function Analytics() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Analytics</h1>
-          <p className="text-muted-foreground mt-1">Call performance metrics and conversation intelligence</p>
+          <p className="text-muted-foreground mt-1">Call performance metrics and AI coaching insights</p>
         </div>
+
+        <Tabs defaultValue="performance" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="performance">Call Performance</TabsTrigger>
+            <TabsTrigger value="ai-coaching">AI Coaching ROI</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="ai-coaching" className="space-y-6">
+            <AICoachingAnalytics />
+          </TabsContent>
+
+          <TabsContent value="performance" className="space-y-6">
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -347,6 +361,8 @@ export default function Analytics() {
             </div>
           </div>
         </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

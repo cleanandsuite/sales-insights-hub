@@ -105,6 +105,53 @@ export type Database = {
           },
         ]
       }
+      ai_coaching_metrics: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          deal_value_impact: number | null
+          id: string
+          lead_id: string | null
+          outcome_positive: boolean | null
+          suggestion_text: string
+          suggestion_type: string
+          user_id: string
+          was_applied: boolean | null
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          deal_value_impact?: number | null
+          id?: string
+          lead_id?: string | null
+          outcome_positive?: boolean | null
+          suggestion_text: string
+          suggestion_type: string
+          user_id: string
+          was_applied?: boolean | null
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          deal_value_impact?: number | null
+          id?: string
+          lead_id?: string | null
+          outcome_positive?: boolean | null
+          suggestion_text?: string
+          suggestion_type?: string
+          user_id?: string
+          was_applied?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_coaching_metrics_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_lead_settings: {
         Row: {
           auto_bold_pain_points: boolean | null
@@ -854,6 +901,48 @@ export type Database = {
           },
         ]
       }
+      deal_velocity_benchmarks: {
+        Row: {
+          ai_assisted_deals: number | null
+          ai_assisted_win_rate: number | null
+          avg_deal_value: number | null
+          avg_velocity_days: number | null
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          total_deals: number | null
+          user_id: string
+          win_rate: number | null
+        }
+        Insert: {
+          ai_assisted_deals?: number | null
+          ai_assisted_win_rate?: number | null
+          avg_deal_value?: number | null
+          avg_velocity_days?: number | null
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          total_deals?: number | null
+          user_id: string
+          win_rate?: number | null
+        }
+        Update: {
+          ai_assisted_deals?: number | null
+          ai_assisted_win_rate?: number | null
+          avg_deal_value?: number | null
+          avg_velocity_days?: number | null
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          total_deals?: number | null
+          user_id?: string
+          win_rate?: number | null
+        }
+        Relationships: []
+      }
       deletion_requests: {
         Row: {
           id: string
@@ -938,14 +1027,23 @@ export type Database = {
       }
       leads: {
         Row: {
+          actual_close_date: string | null
+          actual_deal_value: number | null
           agreed_next_steps: string[] | null
+          ai_assisted: boolean | null
+          ai_coaching_log: Json | null
           ai_confidence: number | null
+          bant_authority: number | null
+          bant_budget: number | null
+          bant_need: number | null
+          bant_timeline: number | null
           budget_info: string | null
           call_duration_seconds: number | null
           company: string | null
           competitor_status: string | null
           contact_name: string
           created_at: string
+          deal_velocity_days: number | null
           decision_timeline_days: number | null
           email: string | null
           engagement_score: number | null
@@ -961,12 +1059,20 @@ export type Database = {
           materials_needed: string[] | null
           next_action: string | null
           next_action_due: string | null
+          next_best_actions: Json | null
+          objection_patterns: string[] | null
+          outcome: string | null
+          outcome_reason: string | null
           phone: string | null
+          predicted_close_date: string | null
+          predicted_deal_value: number | null
           prep_questions: string[] | null
           primary_pain_point: string | null
           priority_score: number | null
           recording_id: string | null
+          risk_level: string | null
           secondary_issues: string[] | null
+          sentiment_trend: Json | null
           source: string | null
           talk_ratio: number | null
           team_size: number | null
@@ -977,14 +1083,23 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          actual_close_date?: string | null
+          actual_deal_value?: number | null
           agreed_next_steps?: string[] | null
+          ai_assisted?: boolean | null
+          ai_coaching_log?: Json | null
           ai_confidence?: number | null
+          bant_authority?: number | null
+          bant_budget?: number | null
+          bant_need?: number | null
+          bant_timeline?: number | null
           budget_info?: string | null
           call_duration_seconds?: number | null
           company?: string | null
           competitor_status?: string | null
           contact_name: string
           created_at?: string
+          deal_velocity_days?: number | null
           decision_timeline_days?: number | null
           email?: string | null
           engagement_score?: number | null
@@ -1000,12 +1115,20 @@ export type Database = {
           materials_needed?: string[] | null
           next_action?: string | null
           next_action_due?: string | null
+          next_best_actions?: Json | null
+          objection_patterns?: string[] | null
+          outcome?: string | null
+          outcome_reason?: string | null
           phone?: string | null
+          predicted_close_date?: string | null
+          predicted_deal_value?: number | null
           prep_questions?: string[] | null
           primary_pain_point?: string | null
           priority_score?: number | null
           recording_id?: string | null
+          risk_level?: string | null
           secondary_issues?: string[] | null
+          sentiment_trend?: Json | null
           source?: string | null
           talk_ratio?: number | null
           team_size?: number | null
@@ -1016,14 +1139,23 @@ export type Database = {
           user_id: string
         }
         Update: {
+          actual_close_date?: string | null
+          actual_deal_value?: number | null
           agreed_next_steps?: string[] | null
+          ai_assisted?: boolean | null
+          ai_coaching_log?: Json | null
           ai_confidence?: number | null
+          bant_authority?: number | null
+          bant_budget?: number | null
+          bant_need?: number | null
+          bant_timeline?: number | null
           budget_info?: string | null
           call_duration_seconds?: number | null
           company?: string | null
           competitor_status?: string | null
           contact_name?: string
           created_at?: string
+          deal_velocity_days?: number | null
           decision_timeline_days?: number | null
           email?: string | null
           engagement_score?: number | null
@@ -1039,12 +1171,20 @@ export type Database = {
           materials_needed?: string[] | null
           next_action?: string | null
           next_action_due?: string | null
+          next_best_actions?: Json | null
+          objection_patterns?: string[] | null
+          outcome?: string | null
+          outcome_reason?: string | null
           phone?: string | null
+          predicted_close_date?: string | null
+          predicted_deal_value?: number | null
           prep_questions?: string[] | null
           primary_pain_point?: string | null
           priority_score?: number | null
           recording_id?: string | null
+          risk_level?: string | null
           secondary_issues?: string[] | null
+          sentiment_trend?: Json | null
           source?: string | null
           talk_ratio?: number | null
           team_size?: number | null
