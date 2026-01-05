@@ -21,6 +21,7 @@ import {
 import { WaveformPlayer } from '@/components/playback/WaveformPlayer';
 import { TranscriptSync } from '@/components/playback/TranscriptSync';
 import { AIInsightsSidebar } from '@/components/playback/AIInsightsSidebar';
+import { SalesforceRecordingView } from '@/components/recording/SalesforceRecordingView';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -84,6 +85,11 @@ interface RecordingData {
   } | null;
   call_score_id: string | null;
   summary: string | null;
+  salesforce_lead_id?: string | null;
+  salesforce_contact_id?: string | null;
+  salesforce_opportunity_id?: string | null;
+  salesforce_account_id?: string | null;
+  crm_sync_status?: string | null;
 }
 
 export default function RecordingAnalysis() {
@@ -422,19 +428,27 @@ export default function RecordingAnalysis() {
           </div>
 
           {/* AI Insights */}
-          <div className="card-gradient rounded-xl border border-border/50 overflow-hidden">
-            <div className="px-6 py-4 border-b border-border/50">
-              <h2 className="text-lg font-semibold text-foreground">AI Insights</h2>
+          <div className="space-y-6">
+            <div className="card-gradient rounded-xl border border-border/50 overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/50">
+                <h2 className="text-lg font-semibold text-foreground">AI Insights</h2>
+              </div>
+              <div className="h-[300px]">
+                <AIInsightsSidebar
+                  markers={markers}
+                  coaching={coaching}
+                  dealIntelligence={dealIntelligence}
+                  summary={summary}
+                  onMarkerClick={handleMarkerClick}
+                />
+              </div>
             </div>
-            <div className="h-[400px]">
-              <AIInsightsSidebar
-                markers={markers}
-                coaching={coaching}
-                dealIntelligence={dealIntelligence}
-                summary={summary}
-                onMarkerClick={handleMarkerClick}
-              />
-            </div>
+
+            {/* Salesforce CRM Card */}
+            <SalesforceRecordingView 
+              recording={recording} 
+              onSyncComplete={fetchRecording}
+            />
           </div>
         </div>
 
