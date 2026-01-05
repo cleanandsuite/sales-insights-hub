@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, Headphones, FileAudio, Users, Calendar, Trophy, Settings, Target, Phone, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, Headphones, FileAudio, Users, Calendar, Trophy, Settings, Target, Phone, BarChart3, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leads', icon: Target, label: 'Leads' },
   { to: '/call-history', icon: Phone, label: 'Call History' },
   { to: '/recordings', icon: FileAudio, label: 'Recordings' },

@@ -1676,6 +1676,108 @@ export type Database = {
         }
         Relationships: []
       }
+      winwords_scripts: {
+        Row: {
+          call_duration_seconds: number | null
+          confidence_score: number | null
+          created_at: string
+          deal_context: Json
+          deal_size: number | null
+          feedback: string | null
+          generated_at: string
+          generated_script: Json
+          id: string
+          outcome: string | null
+          outcome_details: Json | null
+          persona: Json
+          scenario: string
+          style: string
+          updated_at: string
+          used_at: string | null
+          user_id: string
+          win_rate_impact: number | null
+        }
+        Insert: {
+          call_duration_seconds?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          deal_context?: Json
+          deal_size?: number | null
+          feedback?: string | null
+          generated_at?: string
+          generated_script?: Json
+          id?: string
+          outcome?: string | null
+          outcome_details?: Json | null
+          persona?: Json
+          scenario: string
+          style?: string
+          updated_at?: string
+          used_at?: string | null
+          user_id: string
+          win_rate_impact?: number | null
+        }
+        Update: {
+          call_duration_seconds?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          deal_context?: Json
+          deal_size?: number | null
+          feedback?: string | null
+          generated_at?: string
+          generated_script?: Json
+          id?: string
+          outcome?: string | null
+          outcome_details?: Json | null
+          persona?: Json
+          scenario?: string
+          style?: string
+          updated_at?: string
+          used_at?: string | null
+          user_id?: string
+          win_rate_impact?: number | null
+        }
+        Relationships: []
+      }
+      winwords_templates: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean | null
+          name: string
+          scenario: string
+          success_rate: number | null
+          template_structure: Json
+          updated_at: string
+          usage_count: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          name: string
+          scenario: string
+          success_rate?: number | null
+          template_structure?: Json
+          updated_at?: string
+          usage_count?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          scenario?: string
+          success_rate?: number | null
+          template_structure?: Json
+          updated_at?: string
+          usage_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
