@@ -418,15 +418,30 @@ export default function Settings() {
                       ) : (
                         <Button 
                           size="sm" 
-                          onClick={() => connectCRM(provider)}
+                          onClick={() => provider === 'salesforce' 
+                            ? window.location.href = '/settings/salesforce'
+                            : connectCRM(provider)
+                          }
                           className="w-full"
                         >
-                          Connect
+                          {provider === 'salesforce' ? 'Configure' : 'Connect'}
                         </Button>
                       )}
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Salesforce Advanced Settings Link */}
+              <div className="pt-4 border-t border-border/50">
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/settings/salesforce'}
+                  className="gap-2"
+                >
+                  <Link2 className="h-4 w-4" />
+                  Advanced Salesforce Settings
+                </Button>
               </div>
             </div>
           </TabsContent>

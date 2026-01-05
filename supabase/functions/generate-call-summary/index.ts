@@ -24,7 +24,7 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Get recording details
+    // Get recording data
     const { data: recording } = await supabase
       .from("call_recordings")
       .select("*")
@@ -59,11 +59,14 @@ serve(async (req) => {
 - improvements: array of areas to improve
 - questions_to_ask: array of follow-up questions
 - conversation_starters: array of good openers for next call
-- lead_info: { contact_name, company, title, email, phone, primary_pain_point, budget_info, timeline, ai_confidence (0-100), priority_score (0-10), urgency_level, is_hot_lead }
+- lead_info: { contact_name, company, title, email, phone, primary_pain_point, budget_info, timeline, ai_confidence (0-100), priority_score (0-10), urgency_level, is_hot_lead, secondary_issues, decision_timeline_days, team_size }
 - talk_ratio_them: percentage (0-100)
 - talk_ratio_you: percentage (0-100)
 - positive_signals: count of buying signals
-- engagement_score: 0-10 rating`
+- concern_signals: count of concerns
+- engagement_score: 0-10 rating
+- should_create_lead: boolean indicating if lead should be created in CRM
+- salesforce_sync_recommended: boolean for CRM sync`
           },
           {
             role: "user",
@@ -83,6 +86,11 @@ serve(async (req) => {
     const aiData = await aiResponse.json();
     const analysis = JSON.parse(aiData.choices[0].message.content);
 
+    console.log("AI Analysis complete:", { 
+      shouldCreateLead: analysis.should_create_lead,
+      confidence: analysis.lead_info?.ai_confidence 
+    });
+
     // Create call summary
     const { error: summaryError } = await supabase.from("call_summaries").upsert({
       recording_id,
@@ -99,14 +107,19 @@ serve(async (req) => {
       talk_ratio_them: analysis.talk_ratio_them,
       talk_ratio_you: analysis.talk_ratio_you,
       positive_signals: analysis.positive_signals,
+      concern_signals: analysis.concern_signals,
       engagement_score: analysis.engagement_score,
     }, { onConflict: 'recording_id' });
 
     if (summaryError) console.error("Summary error:", summaryError);
 
-    // Create lead if we have contact info
+    // Create lead if we have contact info and AI recommends it
     const leadInfo = analysis.lead_info || contact_info;
-    if (leadInfo?.contact_name) {
+    const shouldCreateLead = analysis.should_create_lead || 
+      (leadInfo?.ai_confidence && leadInfo.ai_confidence > 70);
+
+    let leadCreated = false;
+    if (shouldCreateLead && leadInfo?.contact_name) {
       const { error: leadError } = await supabase.from("leads").insert({
         user_id: recording.user_id,
         recording_id,
@@ -116,8 +129,11 @@ serve(async (req) => {
         email: leadInfo.email,
         phone: leadInfo.phone,
         primary_pain_point: leadInfo.primary_pain_point,
+        secondary_issues: leadInfo.secondary_issues || [],
         budget_info: leadInfo.budget_info,
         timeline: leadInfo.timeline,
+        decision_timeline_days: leadInfo.decision_timeline_days,
+        team_size: leadInfo.team_size,
         ai_confidence: leadInfo.ai_confidence || 75,
         priority_score: leadInfo.priority_score || 5,
         urgency_level: leadInfo.urgency_level || "medium",
@@ -125,12 +141,65 @@ serve(async (req) => {
         call_duration_seconds: recording.duration_seconds,
         engagement_score: analysis.engagement_score,
         agreed_next_steps: analysis.agreed_next_steps,
+        talk_ratio: analysis.talk_ratio_them,
       });
 
-      if (leadError) console.error("Lead error:", leadError);
+      if (leadError) {
+        console.error("Lead error:", leadError);
+      } else {
+        leadCreated = true;
+        console.log("Lead created for:", leadInfo.contact_name);
+      }
     }
 
-    return new Response(JSON.stringify({ success: true, analysis }), {
+    // Check if Salesforce sync is recommended
+    if (analysis.salesforce_sync_recommended && leadCreated) {
+      // Get user's Salesforce connection
+      const { data: connection } = await supabase
+        .from("crm_connections")
+        .select("*")
+        .eq("user_id", recording.user_id)
+        .eq("provider", "salesforce")
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (connection) {
+        // Queue for Salesforce sync
+        await supabase.from("salesforce_sync_queue").insert({
+          recording_id,
+          sync_type: "lead",
+          payload: {
+            contactInfo: leadInfo,
+            callContext: {
+              keyPoints: analysis.key_points,
+              painPoints: [leadInfo.primary_pain_point, ...(leadInfo.secondary_issues || [])],
+              nextSteps: analysis.agreed_next_steps,
+              confidence: leadInfo.ai_confidence,
+              decisionTimeline: leadInfo.timeline,
+              budgetRange: leadInfo.budget_info
+            },
+            recordingId: recording_id,
+            userId: recording.user_id
+          },
+          status: "pending"
+        });
+
+        // Update recording CRM sync status
+        await supabase
+          .from("call_recordings")
+          .update({ crm_sync_status: "pending" })
+          .eq("id", recording_id);
+
+        console.log("Queued for Salesforce sync");
+      }
+    }
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      analysis,
+      leadCreated,
+      syncQueued: analysis.salesforce_sync_recommended 
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {

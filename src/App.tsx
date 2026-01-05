@@ -16,6 +16,7 @@ import Team from "./pages/Team";
 import Schedule from "./pages/Schedule";
 import Coaching from "./pages/Coaching";
 import Settings from "./pages/Settings";
+import SalesforceSettings from "./pages/SalesforceSettings";
 import Leads from "./pages/Leads";
 import CallHistory from "./pages/CallHistory";
 import Analytics from "./pages/Analytics";
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
