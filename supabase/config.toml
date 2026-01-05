@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.salesforce-sync]
 verify_jwt = true
+
+[functions.generate-call-summary]
+verify_jwt = false

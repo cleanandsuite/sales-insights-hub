@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { StatCard } from '@/components/ui/stat-card';
-import { Phone, TrendingUp, Clock, ThumbsUp, Mic } from 'lucide-react';
+import { AILeadStatus } from '@/components/leads/AILeadStatus';
+import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
+import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
+import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
+import { Phone, TrendingUp, Clock, ThumbsUp, Mic, Users, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface CallRecording {
   id: string;
@@ -17,32 +22,57 @@ interface CallRecording {
   created_at: string;
 }
 
+interface Lead {
+  id: string;
+  contact_name: string;
+  company: string | null;
+  ai_confidence: number | null;
+  is_hot_lead: boolean | null;
+  primary_pain_point: string | null;
+  next_action_due: string | null;
+  created_at: string;
+  recording_id: string | null;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
+  const [aiActive, setAiActive] = useState(true);
 
   useEffect(() => {
-    async function fetchRecordings() {
+    async function fetchData() {
       if (!user) return;
       
-      const { data, error } = await supabase
-        .from('call_recordings')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
+      const [recordingsResult, leadsResult] = await Promise.all([
+        supabase
+          .from('call_recordings')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('leads')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20)
+      ]);
 
-      if (!error && data) {
-        setRecordings(data);
+      if (!recordingsResult.error && recordingsResult.data) {
+        setRecordings(recordingsResult.data);
+      }
+      if (!leadsResult.error && leadsResult.data) {
+        setLeads(leadsResult.data);
       }
       setLoading(false);
     }
 
-    fetchRecordings();
+    fetchData();
   }, [user]);
 
+  // Calculate stats
   const totalCalls = recordings.length;
   const analyzedCalls = recordings.filter(r => r.status === 'analyzed').length;
   const avgSentiment = recordings
@@ -50,11 +80,60 @@ export default function Dashboard() {
     .reduce((acc, r) => acc + (r.sentiment_score || 0), 0) / (analyzedCalls || 1);
   const totalDuration = recordings.reduce((acc, r) => acc + (r.duration_seconds || 0), 0);
 
+  // Lead stats
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todaysLeads = leads.filter(l => new Date(l.created_at) >= today).length;
+  const hotLeads = leads.filter(l => l.is_hot_lead).length;
+  const pendingFollowups = leads.filter(l => l.next_action_due && new Date(l.next_action_due) <= new Date()).length;
+  const last24hCalls = recordings.filter(r => {
+    const callDate = new Date(r.created_at);
+    const dayAgo = new Date();
+    dayAgo.setDate(dayAgo.getDate() - 1);
+    return callDate >= dayAgo;
+  }).length;
+
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
+
+  // Create activity feed from leads
+  const recentActivities = leads.slice(0, 5).map(lead => ({
+    id: lead.id,
+    type: lead.is_hot_lead ? 'ai_scored' as const : 'new_lead' as const,
+    title: `${lead.is_hot_lead ? 'AI scored lead:' : 'New lead:'} ${lead.contact_name}${lead.company ? ` (${lead.company})` : ''}`,
+    description: lead.primary_pain_point || 'Contact captured from call',
+    timestamp: lead.created_at,
+    leadId: lead.id,
+    confidence: lead.ai_confidence || undefined
+  }));
+
+  // Priority alerts
+  const alerts = [
+    ...(pendingFollowups > 0 ? [{
+      id: '1',
+      type: 'urgent_followup' as const,
+      title: 'Urgent Follow-ups',
+      count: pendingFollowups,
+      description: 'Waiting for response'
+    }] : []),
+    ...(hotLeads > 0 ? [{
+      id: '2',
+      type: 'high_score' as const,
+      title: 'High-Score Leads',
+      count: hotLeads,
+      description: '>90% confidence'
+    }] : []),
+    ...(last24hCalls > 0 ? [{
+      id: '3',
+      type: 'scheduled_today' as const,
+      title: 'Calls Today',
+      count: last24hCalls,
+      description: 'with lead potential'
+    }] : [])
+  ];
 
   return (
     <>
@@ -63,12 +142,12 @@ export default function Dashboard() {
       )}
       
       <DashboardLayout>
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-6 animate-fade-in">
           {/* Header with Start Recording CTA */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-muted-foreground mt-1">Overview of your sales call analytics</p>
+              <p className="text-muted-foreground mt-1">AI-powered sales call analytics and lead generation</p>
             </div>
             <Button
               onClick={() => setIsRecording(true)}
@@ -80,94 +159,153 @@ export default function Dashboard() {
             </Button>
           </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Total Calls"
-            value={totalCalls}
-            icon={Phone}
-            trend={{ value: 12, isPositive: true }}
+          {/* AI Lead Status */}
+          <AILeadStatus
+            isActive={aiActive}
+            todaysLeads={todaysLeads}
+            weeklyLeads={leads.length}
+            conversionRate={28}
+            avgResponseTime="1.2 hrs"
+            onToggleAI={() => setAiActive(!aiActive)}
+            onTestMode={() => toast.info('Test mode coming soon')}
+            onViewLogs={() => toast.info('Logs coming soon')}
           />
-          <StatCard
-            title="Analyzed"
-            value={analyzedCalls}
-            icon={TrendingUp}
-          />
-          <StatCard
-            title="Total Duration"
-            value={formatDuration(totalDuration)}
-            icon={Clock}
-          />
-          <StatCard
-            title="Avg Sentiment"
-            value={avgSentiment ? `${(avgSentiment * 100).toFixed(0)}%` : 'N/A'}
-            icon={ThumbsUp}
-          />
-        </div>
 
-        {/* Recent Calls */}
-        <div className="card-gradient rounded-xl border border-border/50 overflow-hidden">
-          <div className="border-b border-border/50 px-6 py-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Calls</h2>
+          {/* Quick Overview Cards */}
+          <QuickOverviewCards
+            newLeadsToday={todaysLeads}
+            pendingFollowups={pendingFollowups}
+            hotLeads={hotLeads}
+            recentCalls={last24hCalls}
+          />
+
+          {/* Priority Alerts */}
+          {alerts.length > 0 && (
+            <PriorityAlerts
+              alerts={alerts}
+              onAlertClick={(alert) => {
+                if (alert.type === 'high_score' || alert.type === 'urgent_followup') {
+                  navigate('/leads');
+                } else {
+                  navigate('/call-history');
+                }
+              }}
+            />
+          )}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard
+              title="Total Calls"
+              value={totalCalls}
+              icon={Phone}
+              trend={{ value: 12, isPositive: true }}
+            />
+            <StatCard
+              title="Leads Generated"
+              value={leads.length}
+              icon={Users}
+              trend={{ value: 8, isPositive: true }}
+            />
+            <StatCard
+              title="Total Duration"
+              value={formatDuration(totalDuration)}
+              icon={Clock}
+            />
+            <StatCard
+              title="Avg Sentiment"
+              value={avgSentiment ? `${(avgSentiment * 100).toFixed(0)}%` : 'N/A'}
+              icon={ThumbsUp}
+            />
           </div>
-          <div className="p-6">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Recent Calls */}
+            <div className="lg:col-span-2 card-gradient rounded-xl border border-border/50 overflow-hidden">
+              <div className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground">Recent Calls</h2>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/call-history')}>
+                  View All
+                </Button>
               </div>
-            ) : recordings.length === 0 ? (
-              <div className="text-center py-12">
-                <Phone className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-muted-foreground">No calls recorded yet</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">
-                  Upload your first call recording to get started
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {recordings.map((recording) => (
-                  <div
-                    key={recording.id}
-                    onClick={() => navigate(`/recording/${recording.id}`)}
-                    className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/30 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <Phone className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">{recording.file_name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(recording.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {recording.duration_seconds && (
-                        <span className="text-sm text-muted-foreground">
-                          {formatDuration(recording.duration_seconds)}
-                        </span>
-                      )}
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          recording.status === 'analyzed'
-                            ? 'bg-success/20 text-success'
-                            : recording.status === 'processing'
-                            ? 'bg-warning/20 text-warning'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {recording.status}
-                      </span>
-                    </div>
+              <div className="p-6">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                   </div>
-                ))}
+                ) : recordings.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Phone className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                    <p className="text-muted-foreground">No calls recorded yet</p>
+                    <p className="text-sm text-muted-foreground/70 mt-1">
+                      Start recording to see your calls here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {recordings.slice(0, 5).map((recording) => (
+                      <div
+                        key={recording.id}
+                        onClick={() => navigate(`/recording/${recording.id}`)}
+                        className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/30 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <Phone className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{recording.file_name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(recording.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {recording.duration_seconds && (
+                            <span className="text-sm text-muted-foreground">
+                              {formatDuration(recording.duration_seconds)}
+                            </span>
+                          )}
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              recording.status === 'analyzed'
+                                ? 'bg-success/20 text-success'
+                                : recording.status === 'processing'
+                                ? 'bg-warning/20 text-warning'
+                                : 'bg-muted text-muted-foreground'
+                            }`}
+                          >
+                            {recording.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Recent Activity */}
+            <RecentActivityFeed
+              activities={recentActivities}
+              onViewLead={(id) => navigate('/leads')}
+              onViewSummary={(id) => {
+                const lead = leads.find(l => l.id === id);
+                if (lead?.recording_id) navigate(`/recording/${lead.recording_id}`);
+              }}
+              onCallNow={(id) => {
+                const lead = leads.find(l => l.id === id);
+                toast.info(`Calling ${lead?.contact_name || 'lead'}...`);
+              }}
+              onSchedule={() => navigate('/schedule')}
+              onEmail={(id) => {
+                const lead = leads.find(l => l.id === id);
+                toast.info(`Emailing ${lead?.contact_name || 'lead'}...`);
+              }}
+            />
           </div>
         </div>
-      </div>
-    </DashboardLayout>
-  </>
+      </DashboardLayout>
+    </>
   );
 }
