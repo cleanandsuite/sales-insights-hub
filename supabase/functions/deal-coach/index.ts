@@ -1,11 +1,19 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  recordingId: z.string().uuid().optional(),
+  transcript: z.string().min(50).max(100000),
+  userId: z.string().uuid(),
+});
 
 const DEAL_COACH_PROMPT = `You are an elite sales coach with 20+ years of experience closing enterprise deals. Analyze this sales call transcript and provide comprehensive coaching.
 
@@ -108,22 +116,42 @@ serve(async (req) => {
   }
 
   try {
-    const { recordingId, transcript, userId } = await req.json();
-    
-    if (!transcript || transcript.trim().length < 50) {
+    // Parse and validate request
+    let body;
+    try {
+      body = await req.json();
+    } catch {
       return new Response(
-        JSON.stringify({ error: 'Transcript too short for meaningful analysis' }),
+        JSON.stringify({ error: 'Invalid JSON body' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const parseResult = requestSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.error('Validation error:', parseResult.error.issues);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request parameters. Transcript must be between 50 and 100,000 characters.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { recordingId, transcript, userId } = parseResult.data;
 
     console.log('Starting Deal Coach analysis for recording:', recordingId);
 
     // Use Lovable AI Gateway
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      console.error('LOVABLE_API_KEY not configured');
+      return new Response(
+        JSON.stringify({ error: 'Service not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    // Sanitize and limit transcript length for AI
+    const sanitizedTranscript = transcript.substring(0, 15000);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -137,7 +165,7 @@ serve(async (req) => {
           { role: 'system', content: DEAL_COACH_PROMPT },
           { 
             role: 'user', 
-            content: `Analyze this sales call transcript and provide comprehensive coaching:\n\n${transcript.substring(0, 15000)}`
+            content: `Analyze this sales call transcript and provide comprehensive coaching:\n\n${sanitizedTranscript}`
           }
         ],
       }),
@@ -160,7 +188,10 @@ serve(async (req) => {
         );
       }
       
-      throw new Error(`AI Gateway error: ${response.status}`);
+      return new Response(
+        JSON.stringify({ error: 'Failed to analyze transcript' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const result = await response.json();
@@ -179,7 +210,10 @@ serve(async (req) => {
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
       console.error('Raw content:', content.substring(0, 500));
-      throw new Error('Failed to parse coaching analysis');
+      return new Response(
+        JSON.stringify({ error: 'Failed to parse coaching analysis' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log('Deal Coach analysis complete. Score:', coaching.overall_score);
@@ -272,7 +306,7 @@ serve(async (req) => {
     console.error('Deal Coach error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: 'An unexpected error occurred'
       }),
       { 
         status: 500, 

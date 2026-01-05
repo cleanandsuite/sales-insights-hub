@@ -1,11 +1,19 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schema
+const requestSchema = z.object({
+  recordingId: z.string().uuid(),
+  transcription: z.string().max(100000).optional(),
+  audioBase64: z.string().max(50000000).optional(), // ~37MB limit for base64
+});
 
 const ANALYSIS_PROMPT = `You are an expert sales coach analyzing a sales call recording. Provide comprehensive analysis.
 
@@ -98,12 +106,42 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    if (!openAIKey) throw new Error('OPENAI_API_KEY not configured');
-    if (!supabaseUrl || !supabaseServiceKey) throw new Error('Supabase credentials not configured');
+    if (!openAIKey) {
+      console.error('OPENAI_API_KEY not configured');
+      return new Response(
+        JSON.stringify({ error: 'Service not configured', success: false }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase credentials not configured');
+      return new Response(
+        JSON.stringify({ error: 'Service not configured', success: false }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    const { recordingId, transcription, audioBase64 } = await req.json();
-    
-    if (!recordingId) throw new Error('Recording ID is required');
+    // Parse and validate request
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body', success: false }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const parseResult = requestSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.error('Validation error:', parseResult.error.issues);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request parameters', success: false }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { recordingId, transcription, audioBase64 } = parseResult.data;
 
     console.log(`Processing recording ${recordingId}`);
 
@@ -138,7 +176,10 @@ serve(async (req) => {
       if (!whisperResponse.ok) {
         const error = await whisperResponse.text();
         console.error('Whisper error:', error);
-        throw new Error('Transcription failed');
+        return new Response(
+          JSON.stringify({ error: 'Transcription failed', success: false }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
       
       const whisperResult = await whisperResponse.json();
@@ -173,6 +214,9 @@ serve(async (req) => {
 
     console.log('Analyzing with GPT-4...');
     
+    // Sanitize transcription before sending to AI (limit length)
+    const sanitizedTranscription = finalTranscription.substring(0, 50000);
+    
     const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -183,7 +227,7 @@ serve(async (req) => {
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: ANALYSIS_PROMPT },
-          { role: 'user', content: `Analyze this sales call transcription:\n\n${finalTranscription}` }
+          { role: 'user', content: `Analyze this sales call transcription:\n\n${sanitizedTranscription}` }
         ],
         temperature: 0.5,
         max_tokens: 2000,
@@ -194,7 +238,10 @@ serve(async (req) => {
     if (!analysisResponse.ok) {
       const error = await analysisResponse.text();
       console.error('GPT-4 error:', error);
-      throw new Error('Analysis failed');
+      return new Response(
+        JSON.stringify({ error: 'Analysis failed', success: false }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const analysisResult = await analysisResponse.json();
@@ -203,7 +250,7 @@ serve(async (req) => {
     console.log('Analysis complete, saving to database...');
 
     // Convert markers to the format expected by the database
-    const aiMarkers = analysis.markers?.map((m: any, index: number) => ({
+    const aiMarkers = analysis.markers?.map((m: { type: string; content: string; timestampSeconds?: number }, index: number) => ({
       id: `marker_${index}`,
       type: m.type,
       content: m.content,
@@ -233,7 +280,10 @@ serve(async (req) => {
 
     if (updateError) {
       console.error('Update error:', updateError);
-      throw updateError;
+      return new Response(
+        JSON.stringify({ error: 'Failed to save analysis', success: false }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Insert call score
@@ -275,7 +325,7 @@ serve(async (req) => {
         .insert({
           recording_id: recordingId,
           competitor_mentions: analysis.metrics?.competitorMentions?.map((c: string) => ({ name: c })),
-          buying_signals: analysis.markers?.filter((m: any) => m.type === 'buying_signal'),
+          buying_signals: analysis.markers?.filter((m: { type: string }) => m.type === 'buying_signal'),
           risk_factors: analysis.dealIntelligence.riskFactors?.map((r: string) => ({ description: r })),
           win_probability: analysis.dealIntelligence.winProbability,
           deal_stage_suggestion: analysis.dealIntelligence.suggestedStage,
@@ -312,7 +362,7 @@ serve(async (req) => {
     console.error('Analysis error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'An unexpected error occurred',
         success: false
       }),
       { 

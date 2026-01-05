@@ -1,10 +1,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation schemas
+const uuidSchema = z.string().uuid();
+
+const baseRequestSchema = z.object({
+  action: z.enum(['get_oauth_url', 'sync_contacts', 'link_recording', 'update_opportunity']),
+  userId: uuidSchema.optional(),
+  connectionId: uuidSchema.optional(),
+  recordingId: uuidSchema.optional(),
+  data: z.record(z.unknown()).optional(),
+});
+
+const linkRecordingDataSchema = z.object({
+  contactId: z.string().max(100),
+  accountId: z.string().max(100).optional(),
+  opportunityId: z.string().max(100).optional(),
+});
+
+const updateOpportunityDataSchema = z.object({
+  opportunityId: z.string().max(100),
+  stage: z.string().max(100),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -16,19 +39,37 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Supabase credentials not configured');
+      throw new Error('Service configuration error');
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    const { action, userId, connectionId, recordingId, data } = await req.json();
+    // Parse and validate request body
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Invalid JSON body', success: false }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const parseResult = baseRequestSchema.safeParse(body);
+    if (!parseResult.success) {
+      console.error('Validation error:', parseResult.error.issues);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request parameters', success: false }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { action, userId, connectionId, recordingId, data } = parseResult.data;
     
     console.log(`Salesforce sync action: ${action}`);
 
     switch (action) {
       case 'get_oauth_url': {
-        // In production, this would generate a Salesforce OAuth URL
-        // For now, we return a placeholder
         const clientId = Deno.env.get('SALESFORCE_CLIENT_ID');
         const redirectUri = `${supabaseUrl}/functions/v1/salesforce-callback`;
         
@@ -36,7 +77,7 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({ 
               error: 'Salesforce integration not configured',
-              message: 'Please add SALESFORCE_CLIENT_ID and SALESFORCE_CLIENT_SECRET to your secrets'
+              message: 'Please configure Salesforce credentials'
             }),
             { 
               status: 400,
@@ -55,7 +96,12 @@ serve(async (req) => {
       }
 
       case 'sync_contacts': {
-        if (!connectionId) throw new Error('Connection ID required');
+        if (!connectionId) {
+          return new Response(
+            JSON.stringify({ error: 'Connection ID required', success: false }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
         
         // Get connection details
         const { data: connection, error: connError } = await supabase
@@ -65,7 +111,10 @@ serve(async (req) => {
           .single();
           
         if (connError || !connection) {
-          throw new Error('Connection not found');
+          return new Response(
+            JSON.stringify({ error: 'Connection not found', success: false }),
+            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
         
         // Update sync status
@@ -74,7 +123,6 @@ serve(async (req) => {
           .update({ sync_status: 'syncing' })
           .eq('id', connectionId);
         
-        // In production, this would call Salesforce API
         // For demo, we create sample contacts
         const sampleContacts = [
           { name: 'John Smith', email: 'john.smith@acme.com', company: 'Acme Corp', title: 'VP Sales' },
@@ -113,9 +161,23 @@ serve(async (req) => {
       }
 
       case 'link_recording': {
-        if (!recordingId || !data?.contactId) {
-          throw new Error('Recording ID and contact ID required');
+        if (!recordingId || !connectionId) {
+          return new Response(
+            JSON.stringify({ error: 'Recording ID and connection ID required', success: false }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
+        
+        // Validate nested data
+        const dataParseResult = linkRecordingDataSchema.safeParse(data);
+        if (!dataParseResult.success) {
+          return new Response(
+            JSON.stringify({ error: 'Invalid link data parameters', success: false }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        
+        const { contactId, accountId, opportunityId } = dataParseResult.data;
         
         // Create CRM link
         const { error: linkError } = await supabase
@@ -123,16 +185,21 @@ serve(async (req) => {
           .insert({
             recording_id: recordingId,
             crm_connection_id: connectionId,
-            contact_id: data.contactId,
-            account_id: data.accountId,
-            opportunity_id: data.opportunityId,
+            contact_id: contactId,
+            account_id: accountId,
+            opportunity_id: opportunityId,
             sync_status: 'synced'
           });
           
-        if (linkError) throw linkError;
+        if (linkError) {
+          console.error('Link error:', linkError);
+          return new Response(
+            JSON.stringify({ error: 'Failed to link recording', success: false }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
         
-        // In production, this would also create an activity in Salesforce
-        console.log(`Recording ${recordingId} linked to Salesforce contact ${data.contactId}`);
+        console.log(`Recording ${recordingId} linked to Salesforce contact ${contactId}`);
         
         return new Response(
           JSON.stringify({ success: true }),
@@ -141,12 +208,18 @@ serve(async (req) => {
       }
 
       case 'update_opportunity': {
-        if (!data?.opportunityId || !data?.stage) {
-          throw new Error('Opportunity ID and stage required');
+        // Validate nested data
+        const dataParseResult = updateOpportunityDataSchema.safeParse(data);
+        if (!dataParseResult.success) {
+          return new Response(
+            JSON.stringify({ error: 'Opportunity ID and stage required', success: false }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
         
-        // In production, this would update the opportunity in Salesforce
-        console.log(`Updating opportunity ${data.opportunityId} to stage ${data.stage}`);
+        const { opportunityId, stage } = dataParseResult.data;
+        
+        console.log(`Updating opportunity ${opportunityId} to stage ${stage}`);
         
         return new Response(
           JSON.stringify({ success: true, message: 'Opportunity updated' }),
@@ -155,14 +228,17 @@ serve(async (req) => {
       }
 
       default:
-        throw new Error(`Unknown action: ${action}`);
+        return new Response(
+          JSON.stringify({ error: 'Unknown action', success: false }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
     }
 
   } catch (error) {
     console.error('Salesforce sync error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'An unexpected error occurred',
         success: false
       }),
       { 
