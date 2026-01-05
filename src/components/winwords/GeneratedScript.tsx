@@ -1,0 +1,323 @@
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Copy, Check, Sparkles, Target, MessageSquare, Shield, 
+  ChevronRight, Lightbulb, AlertTriangle, TrendingUp 
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+interface ScriptData {
+  script_id: string;
+  scenario: string;
+  confidence_score: number;
+  estimated_success_rate: string;
+  sections: Record<string, any>;
+  key_moments?: Array<{ moment: string; script: string; timing: string }>;
+  power_phrases?: string[];
+  words_to_avoid?: string[];
+  success_indicators?: string[];
+  suggested_next_steps?: string[];
+}
+
+interface GeneratedScriptProps {
+  script: ScriptData;
+  onUseScript: () => void;
+}
+
+export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
+  const [copiedSection, setCopiedSection] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, section: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedSection(section);
+    toast.success('Copied to clipboard!');
+    setTimeout(() => setCopiedSection(null), 2000);
+  };
+
+  const getConfidenceColor = (score: number) => {
+    if (score >= 80) return 'text-green-500 bg-green-500/10';
+    if (score >= 60) return 'text-yellow-500 bg-yellow-500/10';
+    return 'text-orange-500 bg-orange-500/10';
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header with confidence score */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">Your Winning Script</h3>
+            <p className="text-sm text-muted-foreground">{script.estimated_success_rate}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge className={cn('text-lg px-3 py-1', getConfidenceColor(script.confidence_score))}>
+            {script.confidence_score}% Confidence
+          </Badge>
+          <Button onClick={onUseScript} className="gap-2">
+            <Check className="h-4 w-4" />
+            Use This Script
+          </Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="script" className="w-full">
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="script" className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Script
+          </TabsTrigger>
+          <TabsTrigger value="objections" className="gap-2">
+            <Shield className="h-4 w-4" />
+            Objections
+          </TabsTrigger>
+          <TabsTrigger value="tips" className="gap-2">
+            <Lightbulb className="h-4 w-4" />
+            Tips & Insights
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="script" className="space-y-4 mt-4">
+          {Object.entries(script.sections || {}).map(([key, section]: [string, any]) => (
+            <Card key={key} className="overflow-hidden">
+              <CardHeader className="py-3 bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base capitalize flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    {key.replace(/_/g, ' ')}
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(JSON.stringify(section, null, 2), key)}
+                  >
+                    {copiedSection === key ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {section.goal && (
+                  <p className="text-sm text-muted-foreground">{section.goal}</p>
+                )}
+              </CardHeader>
+              <CardContent className="py-4 space-y-3">
+                {/* Variations */}
+                {section.variations && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Options</p>
+                    {section.variations.map((v: string, i: number) => (
+                      <div key={i} className="flex items-start gap-2 p-3 bg-muted/30 rounded-lg">
+                        <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <p className="text-sm">{v}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Key Points */}
+                {section.key_points && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Key Points</p>
+                    {section.key_points.map((point: string, i: number) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                        <p className="text-sm">{point}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Questions */}
+                {section.questions && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Questions</p>
+                    {section.questions.map((q: any, i: number) => (
+                      <div key={i} className="p-3 bg-muted/30 rounded-lg space-y-1">
+                        <p className="text-sm font-medium">{typeof q === 'string' ? q : q.question}</p>
+                        {q.why && <p className="text-xs text-muted-foreground">Why: {q.why}</p>}
+                        {q.listen_for && <p className="text-xs text-green-600">Listen for: {q.listen_for}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Options (CTAs) */}
+                {section.options && (
+                  <div className="space-y-2">
+                    {section.options.map((opt: string, i: number) => (
+                      <div key={i} className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                        <TrendingUp className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <p className="text-sm">{opt}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Tip */}
+                {section.tip && (
+                  <div className="flex items-start gap-2 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                    <Lightbulb className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">{section.tip}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="objections" className="space-y-4 mt-4">
+          {script.sections?.objection_handlers?.common_objections ? (
+            script.sections.objection_handlers.common_objections.map((obj: any, i: number) => (
+              <Card key={i}>
+                <CardHeader className="py-3">
+                  <CardTitle className="text-base flex items-center gap-2 text-orange-600">
+                    <AlertTriangle className="h-4 w-4" />
+                    "{obj.objection}"
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="py-3 space-y-3">
+                  <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Response:</p>
+                    <p className="text-sm">{obj.response}</p>
+                  </div>
+                  {obj.follow_up && (
+                    <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                      <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">Follow-up:</p>
+                      <p className="text-sm">{obj.follow_up}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card>
+              <CardContent className="py-6 text-center text-muted-foreground">
+                No specific objection handlers generated. Try adding known objections in the context form.
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="tips" className="space-y-4 mt-4">
+          {/* Power Phrases */}
+          {script.power_phrases && script.power_phrases.length > 0 && (
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base flex items-center gap-2 text-green-600">
+                  <Sparkles className="h-4 w-4" />
+                  Power Phrases
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-3">
+                <div className="flex flex-wrap gap-2">
+                  {script.power_phrases.map((phrase, i) => (
+                    <Badge key={i} variant="secondary" className="bg-green-500/10 text-green-700 dark:text-green-300">
+                      {phrase}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Words to Avoid */}
+          {script.words_to_avoid && script.words_to_avoid.length > 0 && (
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base flex items-center gap-2 text-red-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  Words to Avoid
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-3">
+                <div className="flex flex-wrap gap-2">
+                  {script.words_to_avoid.map((word, i) => (
+                    <Badge key={i} variant="secondary" className="bg-red-500/10 text-red-700 dark:text-red-300">
+                      {word}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Success Indicators */}
+          {script.success_indicators && script.success_indicators.length > 0 && (
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base flex items-center gap-2 text-blue-600">
+                  <TrendingUp className="h-4 w-4" />
+                  Success Indicators
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-3">
+                <ul className="space-y-2">
+                  {script.success_indicators.map((indicator, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                      {indicator}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Key Moments */}
+          {script.key_moments && script.key_moments.length > 0 && (
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base flex items-center gap-2 text-purple-600">
+                  <Target className="h-4 w-4" />
+                  Key Moments
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-3 space-y-3">
+                {script.key_moments.map((moment, i) => (
+                  <div key={i} className="p-3 bg-muted/30 rounded-lg">
+                    <p className="text-sm font-medium">{moment.moment}</p>
+                    <p className="text-sm text-muted-foreground mt-1">"{moment.script}"</p>
+                    <p className="text-xs text-primary mt-1">Timing: {moment.timing}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Next Steps */}
+          {script.suggested_next_steps && script.suggested_next_steps.length > 0 && (
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4" />
+                  Suggested Next Steps
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-3">
+                <ul className="space-y-2">
+                  {script.suggested_next_steps.map((step, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-medium text-primary">
+                        {i + 1}
+                      </div>
+                      {step}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

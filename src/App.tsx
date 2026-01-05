@@ -20,6 +20,7 @@ import SalesforceSettings from "./pages/SalesforceSettings";
 import Leads from "./pages/Leads";
 import CallHistory from "./pages/CallHistory";
 import Analytics from "./pages/Analytics";
+import WinWords from "./pages/WinWords";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
+            <Route path="/winwords" element={<ProtectedRoute><WinWords /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
