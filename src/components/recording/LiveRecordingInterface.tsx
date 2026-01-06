@@ -303,15 +303,12 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       
       console.log('Audio uploaded, public URL:', urlData.publicUrl);
 
-      setProcessingStatus('Finalizing...');
-      
-      // Update recording with audio URL and mark as analyzed
+      // Update recording with audio URL
       const { error: updateError } = await supabase
         .from('call_recordings')
         .update({
           audio_url: filePath,
-          status: 'analyzed',
-          analyzed_at: new Date().toISOString()
+          status: 'transcribing'
         })
         .eq('id', recording.id);
 
@@ -319,9 +316,79 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         console.error('Update error:', updateError);
       }
 
+      setProcessingStatus('Transcribing with AI...');
+      
+      // Transcribe the full audio using Whisper API
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(finalBlob);
+        
+        await new Promise<void>((resolve, reject) => {
+          reader.onloadend = async () => {
+            try {
+              const base64Audio = (reader.result as string).split(',')[1];
+              
+              const { data: transcribeData, error: transcribeError } = await supabase.functions.invoke('transcribe-audio', {
+                body: { audio: base64Audio, useAssemblyAI: true }
+              });
+              
+              if (transcribeError) {
+                console.error('Transcription error:', transcribeError);
+              } else if (transcribeData?.text) {
+                console.log('Full transcription received:', transcribeData.text.length, 'characters');
+                
+                // Update recording with full transcription
+                await supabase
+                  .from('call_recordings')
+                  .update({
+                    live_transcription: transcribeData.text,
+                    status: 'generating_summary'
+                  })
+                  .eq('id', recording.id);
+                
+                setProcessingStatus('Generating call summary...');
+                
+                // Generate call summary using the transcription
+                const { data: summaryData, error: summaryError } = await supabase.functions.invoke('generate-call-summary', {
+                  body: { 
+                    recordingId: recording.id,
+                    transcription: transcribeData.text 
+                  }
+                });
+                
+                if (summaryError) {
+                  console.error('Summary generation error:', summaryError);
+                } else {
+                  console.log('Call summary generated:', summaryData);
+                }
+              }
+              resolve();
+            } catch (innerError) {
+              console.error('Inner transcription error:', innerError);
+              resolve(); // Continue even if transcription fails
+            }
+          };
+          reader.onerror = () => {
+            console.error('File reader error');
+            resolve(); // Continue even if reading fails
+          };
+        });
+      } catch (transcriptionError) {
+        console.error('Transcription process error:', transcriptionError);
+      }
+
+      // Mark as analyzed
+      await supabase
+        .from('call_recordings')
+        .update({
+          status: 'analyzed',
+          analyzed_at: new Date().toISOString()
+        })
+        .eq('id', recording.id);
+
       toast({
         title: 'Recording Saved',
-        description: 'Your call has been recorded and converted to MP3 successfully.'
+        description: 'Your call has been recorded, transcribed, and analyzed successfully.'
       });
 
       // Navigate to analysis page

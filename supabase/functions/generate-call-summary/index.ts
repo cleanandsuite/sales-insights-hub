@@ -12,7 +12,11 @@ serve(async (req) => {
   }
 
   try {
-    const { recording_id, transcript, contact_info } = await req.json();
+    const body = await req.json();
+    // Support both naming conventions
+    const recording_id = body.recording_id || body.recordingId;
+    const transcript = body.transcript || body.transcription;
+    const contact_info = body.contact_info;
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
