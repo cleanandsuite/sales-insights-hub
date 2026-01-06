@@ -2164,6 +2164,14 @@ export type Database = {
       check_crm_rate_limit: { Args: { p_user_id: string }; Returns: boolean }
       check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
       check_password_strength: { Args: { password: string }; Returns: boolean }
+      is_team_admin: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
