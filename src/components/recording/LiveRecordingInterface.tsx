@@ -39,9 +39,12 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [transcriptionStatus, setTranscriptionStatus] = useState<'idle' | 'processing' | 'rate-limited' | 'error'>('idle');
+  const [retryCountdown, setRetryCountdown] = useState(0);
   
   const transcriptionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedChunkRef = useRef<number>(0);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Start recording immediately when component mounts
   useEffect(() => {
@@ -58,12 +61,27 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       if (transcriptionIntervalRef.current) {
         clearInterval(transcriptionIntervalRef.current);
       }
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
     };
   }, []);
 
-  // Process audio chunks for transcription
-  const processAudioChunk = useCallback(async () => {
-    if (!isRecording || isPaused) return;
+  // Countdown timer for rate limiting
+  useEffect(() => {
+    if (retryCountdown > 0) {
+      const timer = setTimeout(() => {
+        setRetryCountdown(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (retryCountdown === 0 && transcriptionStatus === 'rate-limited') {
+      setTranscriptionStatus('idle');
+    }
+  }, [retryCountdown, transcriptionStatus]);
+
+  // Process audio chunks for transcription with retry logic
+  const processAudioChunk = useCallback(async (retryAttempt = 0) => {
+    if (!isRecording || isPaused || transcriptionStatus === 'rate-limited') return;
 
     try {
       const audioBlob = await getAudioChunk();
@@ -71,6 +89,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       
       lastProcessedChunkRef.current = audioBlob.size;
       setIsProcessing(true);
+      setTranscriptionStatus('processing');
 
       // Convert blob to base64
       const reader = new FileReader();
@@ -78,21 +97,56 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
 
-        // Send to transcription API
-        const { data, error } = await supabase.functions.invoke('transcribe-audio', {
-          body: { audio: base64Audio }
-        });
+        try {
+          // Send to transcription API
+          const { data, error } = await supabase.functions.invoke('transcribe-audio', {
+            body: { audio: base64Audio }
+          });
 
-        if (error) {
-          console.error('Transcription error:', error);
-          return;
-        }
+          if (error) {
+            console.error('Transcription error:', error);
+            
+            // Check if it's a rate limit error
+            if (error.message?.includes('429') || error.message?.includes('rate limit')) {
+              setTranscriptionStatus('rate-limited');
+              const waitTime = 30; // Default 30 seconds
+              setRetryCountdown(waitTime);
+              
+              toast({
+                title: 'Transcription Paused',
+                description: `Rate limit reached. Resuming in ${waitTime} seconds...`,
+              });
+            } else {
+              setTranscriptionStatus('error');
+            }
+            setIsProcessing(false);
+            return;
+          }
 
-        if (data?.text) {
-          setTranscription(data.text);
-          
-          // Analyze the conversation
-          analyzeConversation(data.text);
+          // Check for rate limit in response data
+          if (data?.isRateLimit) {
+            setTranscriptionStatus('rate-limited');
+            const waitTime = data.retryAfter || 30;
+            setRetryCountdown(waitTime);
+            
+            toast({
+              title: 'Transcription Paused',
+              description: `Rate limit reached. Resuming in ${waitTime} seconds...`,
+            });
+            setIsProcessing(false);
+            return;
+          }
+
+          if (data?.text) {
+            setTranscription(data.text);
+            setTranscriptionStatus('idle');
+            
+            // Analyze the conversation
+            analyzeConversation(data.text);
+          }
+        } catch (invokeError) {
+          console.error('Invoke error:', invokeError);
+          setTranscriptionStatus('error');
         }
         
         setIsProcessing(false);
@@ -100,8 +154,9 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     } catch (error) {
       console.error('Error processing audio:', error);
       setIsProcessing(false);
+      setTranscriptionStatus('error');
     }
-  }, [isRecording, isPaused, getAudioChunk]);
+  }, [isRecording, isPaused, getAudioChunk, transcriptionStatus, toast]);
 
   // Set up interval for transcription
   useEffect(() => {
@@ -335,6 +390,8 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
             <TranscriptionPanel 
               transcription={transcription}
               isProcessing={isProcessing}
+              status={transcriptionStatus}
+              retryCountdown={retryCountdown}
             />
             <AISuggestionsPanel 
               suggestions={suggestions}

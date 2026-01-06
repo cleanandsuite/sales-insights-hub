@@ -6,7 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper to wait with exponential backoff
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 serve(async (req) => {
@@ -28,7 +27,7 @@ serve(async (req) => {
 
     console.log('Received audio chunk for transcription, length:', audio.length);
 
-    // Decode base64 audio
+    // Decode base64 audio in chunks to prevent memory issues
     const binaryString = atob(audio);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
@@ -52,7 +51,7 @@ serve(async (req) => {
         console.log(`Transcription attempt ${attempt}/${maxRetries}`);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
 
         const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
           method: 'POST',
@@ -75,7 +74,20 @@ serve(async (req) => {
             await wait(waitTime);
             continue;
           }
-          throw new Error('Rate limit exceeded. Please try again later.');
+          
+          // Return rate limit info so client can handle it
+          return new Response(
+            JSON.stringify({ 
+              error: 'Rate limit exceeded',
+              isRateLimit: true,
+              retryAfter: Math.ceil(waitTime / 1000),
+              suggestion: 'Too many requests. Please wait a moment and try again.'
+            }),
+            { 
+              status: 429, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
         }
 
         if (!response.ok) {
@@ -96,7 +108,6 @@ serve(async (req) => {
         lastError = attemptError instanceof Error ? attemptError : new Error(String(attemptError));
         console.error(`Attempt ${attempt} failed:`, lastError.message);
 
-        // Check if it's a network/DNS error and retry
         const isNetworkError = lastError.message.includes('dns') || 
                                lastError.message.includes('network') ||
                                lastError.message.includes('fetch') ||
@@ -109,14 +120,12 @@ serve(async (req) => {
           continue;
         }
 
-        // For non-network errors, don't retry
         if (!isNetworkError) {
           break;
         }
       }
     }
 
-    // All retries failed
     throw lastError || new Error('Transcription failed after all retries');
 
   } catch (error) {
