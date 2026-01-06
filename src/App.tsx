@@ -21,6 +21,7 @@ import Leads from "./pages/Leads";
 import CallHistory from "./pages/CallHistory";
 import Analytics from "./pages/Analytics";
 import WinWords from "./pages/WinWords";
+import AudioTest from "./pages/AudioTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/winwords" element={<ProtectedRoute><WinWords /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
+            <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
