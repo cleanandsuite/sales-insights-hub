@@ -1163,6 +1163,7 @@ export type Database = {
           ai_assisted: boolean | null
           ai_coaching_log: Json | null
           ai_confidence: number | null
+          assigned_to_user_id: string | null
           bant_authority: number | null
           bant_budget: number | null
           bant_need: number | null
@@ -1219,6 +1220,7 @@ export type Database = {
           ai_assisted?: boolean | null
           ai_coaching_log?: Json | null
           ai_confidence?: number | null
+          assigned_to_user_id?: string | null
           bant_authority?: number | null
           bant_budget?: number | null
           bant_need?: number | null
@@ -1275,6 +1277,7 @@ export type Database = {
           ai_assisted?: boolean | null
           ai_coaching_log?: Json | null
           ai_confidence?: number | null
+          assigned_to_user_id?: string | null
           bant_authority?: number | null
           bant_budget?: number | null
           bant_need?: number | null
@@ -1334,6 +1337,39 @@ export type Database = {
           },
         ]
       }
+      plans: {
+        Row: {
+          created_at: string
+          features_json: Json
+          id: string
+          is_active: boolean
+          max_users: number
+          name: string
+          price_monthly: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          features_json?: Json
+          id?: string
+          is_active?: boolean
+          max_users?: number
+          name: string
+          price_monthly?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          features_json?: Json
+          id?: string
+          is_active?: boolean
+          max_users?: number
+          name?: string
+          price_monthly?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1344,6 +1380,7 @@ export type Database = {
           role: string | null
           updated_at: string
           user_id: string
+          user_role: string
         }
         Insert: {
           avatar_url?: string | null
@@ -1354,6 +1391,7 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id: string
+          user_role?: string
         }
         Update: {
           avatar_url?: string | null
@@ -1364,6 +1402,7 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id?: string
+          user_role?: string
         }
         Relationships: []
       }
@@ -2080,6 +2119,56 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_ends_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       winwords_scripts: {
         Row: {
           call_duration_seconds: number | null
@@ -2184,7 +2273,34 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      manager_team_stats: {
+        Row: {
+          avatar_url: string | null
+          avg_closing_score: number | null
+          avg_deal_velocity: number | null
+          avg_discovery_score: number | null
+          avg_objection_handling_score: number | null
+          avg_overall_score: number | null
+          avg_presentation_score: number | null
+          avg_rapport_score: number | null
+          deals_lost: number | null
+          deals_won: number | null
+          full_name: string | null
+          team_id: string | null
+          total_calls: number | null
+          user_id: string | null
+          win_rate: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_contact_rate_limit: {
@@ -2203,6 +2319,7 @@ export type Database = {
       }
       check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
       check_password_strength: { Args: { password: string }; Returns: boolean }
+      get_user_strengths: { Args: { p_user_id: string }; Returns: Json }
       is_team_admin: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
@@ -2210,6 +2327,15 @@ export type Database = {
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      suggest_lead_assignment: {
+        Args: { p_lead_id: string; p_team_id: string }
+        Returns: {
+          full_name: string
+          reason: string
+          score: number
+          user_id: string
+        }[]
       }
     }
     Enums: {
