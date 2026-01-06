@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { getToastErrorMessage } from '@/lib/errorSanitizer';
+import { transcodeToMp3 } from '@/lib/audioTranscoder';
 
 interface UploadedFile {
   file: File;
@@ -69,11 +70,31 @@ export default function Upload() {
       );
 
       const file = files[i].file;
-      const filePath = `${user.id}/${Date.now()}-${file.name}`;
+      
+      // Transcode to MP3 for better playback compatibility
+      let finalBlob: Blob;
+      let fileName: string;
+      
+      try {
+        const transcodeResult = await transcodeToMp3(file);
+        finalBlob = transcodeResult.blob;
+        // Replace original extension with .mp3
+        const baseName = file.name.replace(/\.[^/.]+$/, '');
+        fileName = `${baseName}.mp3`;
+        console.log('Transcoded to MP3:', finalBlob.size, 'bytes');
+      } catch (transcodeError) {
+        console.error('Transcode failed, using original:', transcodeError);
+        finalBlob = file;
+        fileName = file.name;
+      }
+      
+      const filePath = `${user.id}/${Date.now()}-${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('call-recordings')
-        .upload(filePath, file);
+        .upload(filePath, finalBlob, {
+          contentType: fileName.endsWith('.mp3') ? 'audio/mpeg' : file.type
+        });
 
       if (uploadError) {
         setFiles((prev) =>
@@ -93,9 +114,10 @@ export default function Upload() {
 
       const { error: dbError } = await supabase.from('call_recordings').insert({
         user_id: user.id,
-        file_name: file.name,
+        file_name: fileName,
         file_url: urlData.publicUrl,
-        file_size: file.size,
+        audio_url: filePath,
+        file_size: finalBlob.size,
         status: 'pending',
       });
 
@@ -118,7 +140,7 @@ export default function Upload() {
 
     toast({
       title: 'Upload complete',
-      description: 'Your files have been uploaded successfully.',
+      description: 'Your files have been uploaded and converted to MP3.',
     });
   };
 
