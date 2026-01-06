@@ -62,13 +62,14 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
 
   const startRecording = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100,
+          // Disable aggressive processing that can produce near-silent captures on some devices
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: true,
           channelCount: 1,
-        } 
+        }
       });
       
       streamRef.current = stream;
@@ -196,49 +197,79 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
 
   const stopRecording = useCallback(async (): Promise<Blob | null> => {
     return new Promise((resolve) => {
-      resolveStopRef.current = resolve;
-      
-      // Stop native recorder
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
+      let resolved = false;
+      let nativeFallbackBlob: Blob | null = null;
+
+      const cleanup = () => {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+        }
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+        }
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+        setIsPaused(false);
+        setAudioLevel(0);
+      };
+
+      const resolveOnce = (blob: Blob | null) => {
+        if (resolved) return;
+        resolved = true;
+        cleanup();
+        resolve(blob);
+      };
+
+      resolveStopRef.current = resolveOnce;
+
+      const nativeRecorder = mediaRecorderRef.current;
+      if (nativeRecorder && nativeRecorder.state !== 'inactive') {
+        // Always capture a native fallback blob
+        nativeRecorder.onstop = () => {
+          try {
+            nativeFallbackBlob = new Blob(chunksRef.current, {
+              type: nativeRecorder.mimeType || 'audio/webm',
+            });
+
+            // If we're not expecting an MP3 blob, resolve immediately
+            if (recordingMethod !== 'mp3-direct') {
+              resolveOnce(nativeFallbackBlob);
+              resolveStopRef.current = null;
+            }
+          } catch (e) {
+            console.error('Failed to build native fallback blob:', e);
+          }
+        };
       }
-      
-      // Stop MP3 recorder if active
+
+      // Stop recorders
+      if (nativeRecorder && nativeRecorder.state !== 'inactive') {
+        nativeRecorder.stop();
+      }
+
       if (mp3RecorderRef.current && recordingMethod === 'mp3-direct') {
         try {
           mp3RecorderRef.current.stop();
         } catch (e) {
           console.error('Error stopping MP3 recorder:', e);
-          // Fallback to native
-          const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-          resolve(blob);
         }
       }
-      
-      // Cleanup
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      
+
+      // Update UI state immediately
       setIsRecording(false);
       setIsPaused(false);
-      setAudioLevel(0);
-      
-      // Timeout fallback
+
+      // Timeout fallback: if MP3 path doesn't resolve, use native blob
       setTimeout(() => {
-        if (resolveStopRef.current) {
-          console.warn('Stop timeout, returning native blob');
-          const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-          resolveStopRef.current(blob);
-          resolveStopRef.current = null;
-        }
-      }, 3000);
+        if (resolved) return;
+        console.warn('Stop timeout, falling back to native recording');
+        resolveStopRef.current = null;
+        resolveOnce(
+          nativeFallbackBlob ||
+            new Blob(chunksRef.current, { type: nativeRecorder?.mimeType || 'audio/webm' })
+        );
+      }, 8000);
     });
   }, [recordingMethod]);
 
