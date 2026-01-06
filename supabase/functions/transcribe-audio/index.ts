@@ -6,20 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const openAIKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIKey) {
-      throw new Error('OPENAI_API_KEY not configured');
-    }
-
-    const { audio } = await req.json();
+    const { audio, useAssemblyAI = true } = await req.json();
     
     if (!audio) {
       throw new Error('No audio data provided');
@@ -27,106 +20,40 @@ serve(async (req) => {
 
     console.log('Received audio chunk for transcription, length:', audio.length);
 
-    // Decode base64 audio in chunks to prevent memory issues
+    // Decode base64 audio
     const binaryString = atob(audio);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
       bytes[i] = binaryString.charCodeAt(i);
     }
 
-    // Create form data for Whisper API
-    const formData = new FormData();
-    const blob = new Blob([bytes], { type: 'audio/webm' });
-    formData.append('file', blob, 'audio.webm');
-    formData.append('model', 'whisper-1');
-    formData.append('language', 'en');
-    formData.append('response_format', 'json');
-
-    // Retry logic with exponential backoff
-    const maxRetries = 3;
-    let lastError: Error | null = null;
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        console.log(`Transcription attempt ${attempt}/${maxRetries}`);
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIKey}`,
-          },
-          body: formData,
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        // Handle rate limiting (429)
-        if (response.status === 429) {
-          const retryAfter = response.headers.get('Retry-After');
-          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(1000 * Math.pow(2, attempt), 30000);
-          console.log(`Rate limited (429). Waiting ${waitTime / 1000} seconds before retry...`);
-          
-          if (attempt < maxRetries) {
-            await wait(waitTime);
-            continue;
-          }
-          
-          // Return rate limit info so client can handle it
+    // Try AssemblyAI first if enabled
+    if (useAssemblyAI) {
+      const assemblyAIKey = Deno.env.get('ASSEMBLYAI_API_KEY');
+      if (assemblyAIKey) {
+        try {
+          const result = await transcribeWithAssemblyAI(bytes, assemblyAIKey);
           return new Response(
-            JSON.stringify({ 
-              error: 'Rate limit exceeded',
-              isRateLimit: true,
-              retryAfter: Math.ceil(waitTime / 1000),
-              suggestion: 'Too many requests. Please wait a moment and try again.'
-            }),
-            { 
-              status: 429, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
+            JSON.stringify({ text: result.text, service: 'assemblyai' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
-        }
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`Whisper API error (${response.status}):`, errorText);
-          throw new Error(`Whisper API error: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('Transcription successful:', result.text?.substring(0, 100));
-
-        return new Response(
-          JSON.stringify({ text: result.text || '' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-
-      } catch (attemptError) {
-        lastError = attemptError instanceof Error ? attemptError : new Error(String(attemptError));
-        console.error(`Attempt ${attempt} failed:`, lastError.message);
-
-        const isNetworkError = lastError.message.includes('dns') || 
-                               lastError.message.includes('network') ||
-                               lastError.message.includes('fetch') ||
-                               lastError.message.includes('abort');
-
-        if (attempt < maxRetries && isNetworkError) {
-          const backoffTime = Math.min(1000 * Math.pow(2, attempt), 10000);
-          console.log(`Network error detected. Retrying in ${backoffTime / 1000} seconds...`);
-          await wait(backoffTime);
-          continue;
-        }
-
-        if (!isNetworkError) {
-          break;
+        } catch (assemblyError) {
+          console.error('AssemblyAI failed, falling back to OpenAI:', assemblyError);
         }
       }
     }
 
-    throw lastError || new Error('Transcription failed after all retries');
+    // Fallback to OpenAI Whisper
+    const openAIKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIKey) {
+      throw new Error('No transcription API keys configured');
+    }
+
+    const result = await transcribeWithOpenAI(bytes, openAIKey);
+    return new Response(
+      JSON.stringify({ text: result.text, service: 'openai' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
     console.error('Transcription error:', error);
@@ -149,3 +76,102 @@ serve(async (req) => {
     );
   }
 });
+
+async function transcribeWithAssemblyAI(audioBytes: Uint8Array, apiKey: string): Promise<{ text: string }> {
+  console.log('Starting AssemblyAI transcription...');
+  
+  // Step 1: Upload audio to AssemblyAI
+  const audioBlob = new Blob([audioBytes.buffer as ArrayBuffer], { type: 'audio/webm' });
+  
+  const uploadResponse = await fetch('https://api.assemblyai.com/v2/upload', {
+    method: 'POST',
+    headers: {
+      'Authorization': apiKey,
+      'Content-Type': 'application/octet-stream',
+    },
+    body: audioBlob,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`AssemblyAI upload failed: ${uploadResponse.status}`);
+  }
+
+  const { upload_url } = await uploadResponse.json();
+  console.log('Audio uploaded to AssemblyAI');
+
+  // Step 2: Request transcription
+  const transcriptResponse = await fetch('https://api.assemblyai.com/v2/transcript', {
+    method: 'POST',
+    headers: {
+      'Authorization': apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      audio_url: upload_url,
+      language_detection: true,
+      punctuate: true,
+      format_text: true,
+    }),
+  });
+
+  if (!transcriptResponse.ok) {
+    throw new Error(`AssemblyAI transcription request failed: ${transcriptResponse.status}`);
+  }
+
+  const { id } = await transcriptResponse.json();
+  console.log('AssemblyAI transcription started:', id);
+
+  // Step 3: Poll for results (max 60 seconds)
+  for (let i = 0; i < 20; i++) {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    const statusResponse = await fetch(`https://api.assemblyai.com/v2/transcript/${id}`, {
+      headers: { 'Authorization': apiKey },
+    });
+    
+    const result = await statusResponse.json();
+    
+    if (result.status === 'completed') {
+      console.log('AssemblyAI transcription completed');
+      return { text: result.text || '' };
+    } else if (result.status === 'error') {
+      throw new Error(`AssemblyAI error: ${result.error}`);
+    }
+    
+    console.log('AssemblyAI status:', result.status);
+  }
+  
+  throw new Error('AssemblyAI transcription timeout');
+}
+
+async function transcribeWithOpenAI(audioBytes: Uint8Array, apiKey: string): Promise<{ text: string }> {
+  console.log('Starting OpenAI Whisper transcription...');
+  
+  const formData = new FormData();
+  const blob = new Blob([audioBytes.buffer as ArrayBuffer], { type: 'audio/webm' });
+  formData.append('file', blob, 'audio.webm');
+  formData.append('model', 'whisper-1');
+  formData.append('language', 'en');
+  formData.append('response_format', 'json');
+
+  const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: formData,
+  });
+
+  if (response.status === 429) {
+    throw new Error('Rate limit exceeded (429)');
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+  }
+
+  const result = await response.json();
+  console.log('OpenAI transcription completed');
+  return { text: result.text || '' };
+}
