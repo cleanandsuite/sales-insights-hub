@@ -2,31 +2,52 @@
 import { supabase } from '@/integrations/supabase/client';
 
 const BUCKET_NAME = 'call-recordings';
+const SIGNED_URL_EXPIRY = 3600; // 1 hour in seconds
 
 export class SecureStorage {
-  // Get public URL for playback (bucket is now public)
-  getPublicUrl(filePath: string): string {
-    const { data } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
-    
-    // Log access for audit (fire and forget)
-    this.logStorageAccess(filePath, 'public_url_access');
-    
-    return data.publicUrl;
+  // Get signed URL for playback (bucket is now private)
+  async getSignedUrl(filePath: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(filePath, SIGNED_URL_EXPIRY);
+      
+      if (error) {
+        console.error('Failed to create signed URL:', error);
+        return null;
+      }
+      
+      // Log access for audit (fire and forget)
+      this.logStorageAccess(filePath, 'signed_url_access');
+      
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error creating signed URL:', error);
+      return null;
+    }
   }
   
-  // Get download URL using public URL
-  getDownloadUrl(filePath: string): string {
-    const { data } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath, {
-        download: true
-      });
-    
-    this.logStorageAccess(filePath, 'download');
-    
-    return data.publicUrl;
+  // Get signed download URL
+  async getSignedDownloadUrl(filePath: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(filePath, SIGNED_URL_EXPIRY, {
+          download: true
+        });
+      
+      if (error) {
+        console.error('Failed to create signed download URL:', error);
+        return null;
+      }
+      
+      this.logStorageAccess(filePath, 'signed_download');
+      
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error creating signed download URL:', error);
+      return null;
+    }
   }
   
   // Upload with automatic security

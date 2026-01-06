@@ -6,6 +6,7 @@ import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic } from 'lucide-rea
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { createPlayableObjectUrl } from '@/lib/audioPlayback';
+import { useToast } from '@/hooks/use-toast';
 
 interface CallRecording {
   id: string;
@@ -22,6 +23,7 @@ interface CallRecording {
 export default function Recordings() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -73,13 +75,23 @@ export default function Recordings() {
       }
     }
 
-    // Get public URL for the recording (bucket is now public)
-    const { data: urlData } = supabase.storage
+    // Get signed URL for the recording (bucket is private)
+    const { data: signedData, error: signedError } = await supabase.storage
       .from('call-recordings')
-      .getPublicUrl(recording.audio_url);
+      .createSignedUrl(recording.audio_url, 3600); // 1 hour expiry
 
-    if (urlData?.publicUrl) {
-      const primaryAudio = new Audio(urlData.publicUrl);
+    if (signedError) {
+      console.error('Failed to get signed URL:', signedError);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to play recording',
+        description: 'Unable to access audio file'
+      });
+      return;
+    }
+
+    if (signedData?.signedUrl) {
+      const primaryAudio = new Audio(signedData.signedUrl);
 
       primaryAudio.onended = () => {
         if (primaryAudio.src.startsWith('blob:')) {
@@ -92,7 +104,7 @@ export default function Recordings() {
         // If the file was recorded as mp4/ogg but stored as webm, browsers may refuse to play.
         // In that case, we fetch and re-wrap the bytes with the correct MIME type.
         try {
-          const { objectUrl, mime } = await createPlayableObjectUrl(urlData.publicUrl);
+          const { objectUrl, mime } = await createPlayableObjectUrl(signedData.signedUrl);
           console.warn('Recovered playable audio as', mime);
 
           const recoveredAudio = new Audio(objectUrl);
