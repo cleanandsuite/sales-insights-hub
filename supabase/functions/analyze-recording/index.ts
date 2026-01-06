@@ -102,19 +102,40 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate request
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', success: false }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !userData.user) {
+      console.error('Auth error:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', success: false }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', userData.user.id);
+
     const openAIKey = Deno.env.get('OPENAI_API_KEY');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!openAIKey) {
       console.error('OPENAI_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ error: 'Service not configured', success: false }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Supabase credentials not configured');
       return new Response(
         JSON.stringify({ error: 'Service not configured', success: false }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -145,7 +166,22 @@ serve(async (req) => {
 
     console.log(`Processing recording ${recordingId}`);
 
+    // Use service key for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify user owns this recording
+    const { data: recording, error: recordingError } = await supabase
+      .from('call_recordings')
+      .select('user_id')
+      .eq('id', recordingId)
+      .single();
+
+    if (recordingError || !recording || recording.user_id !== userData.user.id) {
+      return new Response(
+        JSON.stringify({ error: 'Recording not found or access denied', success: false }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     let finalTranscription = transcription;
     

@@ -116,6 +116,36 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate request
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !userData.user) {
+      console.error('Auth error:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', userData.user.id);
+
     // Parse and validate request
     let body;
     try {
@@ -137,6 +167,14 @@ serve(async (req) => {
     }
 
     const { recordingId, transcript, userId } = parseResult.data;
+
+    // Verify the userId matches authenticated user
+    if (userId !== userData.user.id) {
+      return new Response(
+        JSON.stringify({ error: 'User ID mismatch' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log('Starting Deal Coach analysis for recording:', recordingId);
 
@@ -218,10 +256,8 @@ serve(async (req) => {
 
     console.log('Deal Coach analysis complete. Score:', coaching.overall_score);
 
-    // Store coaching session in database
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Store coaching session in database using service key
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data: session, error: sessionError } = await supabase
       .from('coaching_sessions')

@@ -233,6 +233,36 @@ export type Database = {
         }
         Relationships: []
       }
+      api_rate_limits: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          ip_address: string | null
+          request_count: number | null
+          user_id: string | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          request_count?: number | null
+          user_id?: string | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       call_recordings: {
         Row: {
           ai_markers: Json | null
@@ -2162,6 +2192,15 @@ export type Database = {
         Returns: boolean
       }
       check_crm_rate_limit: { Args: { p_user_id: string }; Returns: boolean }
+      check_edge_function_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_identifier: string
+          p_max_requests?: number
+          p_window_minutes?: number
+        }
+        Returns: boolean
+      }
       check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
       check_password_strength: { Args: { password: string }; Returns: boolean }
       is_team_admin: {

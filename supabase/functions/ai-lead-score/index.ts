@@ -67,6 +67,36 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate request
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !userData.user) {
+      console.error('Auth error:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', userData.user.id);
+
     const { lead_id, conversation_data, deal_context, user_id } = await req.json();
 
     if (!lead_id || !user_id) {
@@ -76,21 +106,28 @@ serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Verify the user_id matches authenticated user
+    if (user_id !== userData.user.id) {
+      return new Response(
+        JSON.stringify({ error: 'User ID mismatch' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // Fetch current lead data
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch current lead data and verify ownership
     const { data: lead, error: leadError } = await supabase
       .from('leads')
       .select('*')
       .eq('id', lead_id)
+      .eq('user_id', user_id)
       .single();
 
     if (leadError || !lead) {
-      console.error('Lead not found:', leadError);
+      console.error('Lead not found or access denied:', leadError);
       return new Response(
-        JSON.stringify({ error: 'Lead not found' }),
+        JSON.stringify({ error: 'Lead not found or access denied' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -224,7 +261,7 @@ serve(async (req) => {
 
     // Log coaching metric for tracking
     if (analysis.next_best_actions?.length > 0) {
-      const coachingMetrics = analysis.next_best_actions.map((action: any) => ({
+      const coachingMetrics = analysis.next_best_actions.map((action: { action: string }) => ({
         user_id,
         lead_id,
         suggestion_type: 'next_best_action',

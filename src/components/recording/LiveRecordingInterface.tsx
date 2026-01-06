@@ -309,12 +309,8 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         throw new Error('Failed to upload audio file');
       }
 
-      // Get the public URL for the audio
-      const { data: urlData } = supabase.storage
-        .from('call-recordings')
-        .getPublicUrl(filePath);
-      
-      console.log('Audio uploaded, public URL:', urlData.publicUrl);
+      // Store the file path - signed URLs will be generated when needed
+      console.log('Audio uploaded, file path:', filePath);
 
       // Update recording with audio URL
       const { error: updateError } = await supabase

@@ -35,12 +35,35 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Service configuration error');
+    // Authenticate request
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', success: false }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await authClient.auth.getUser(token);
+    
+    if (authError || !userData.user) {
+      console.error('Auth error:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', success: false }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', userData.user.id);
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
@@ -65,6 +88,14 @@ serve(async (req) => {
     }
 
     const { action, userId, connectionId, recordingId, data } = parseResult.data;
+
+    // Verify userId matches authenticated user for actions that require it
+    if (userId && userId !== userData.user.id) {
+      return new Response(
+        JSON.stringify({ error: 'User ID mismatch', success: false }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     console.log(`Salesforce sync action: ${action}`);
 
@@ -103,16 +134,17 @@ serve(async (req) => {
           );
         }
         
-        // Get connection details
+        // Get connection details and verify ownership
         const { data: connection, error: connError } = await supabase
           .from('crm_connections')
           .select('*')
           .eq('id', connectionId)
+          .eq('user_id', userData.user.id)
           .single();
           
         if (connError || !connection) {
           return new Response(
-            JSON.stringify({ error: 'Connection not found', success: false }),
+            JSON.stringify({ error: 'Connection not found or access denied', success: false }),
             { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
@@ -134,7 +166,7 @@ serve(async (req) => {
           await supabase
             .from('crm_contacts')
             .upsert({
-              user_id: userId,
+              user_id: userData.user.id,
               crm_connection_id: connectionId,
               external_id: `sf_${Date.now()}_${Math.random().toString(36).slice(2)}`,
               name: contact.name,
@@ -165,6 +197,20 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({ error: 'Recording ID and connection ID required', success: false }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Verify user owns the recording
+        const { data: recording, error: recError } = await supabase
+          .from('call_recordings')
+          .select('user_id')
+          .eq('id', recordingId)
+          .single();
+
+        if (recError || !recording || recording.user_id !== userData.user.id) {
+          return new Response(
+            JSON.stringify({ error: 'Recording not found or access denied', success: false }),
+            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
         

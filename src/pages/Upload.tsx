@@ -108,14 +108,11 @@ export default function Upload() {
         continue;
       }
 
-      const { data: urlData } = supabase.storage
-        .from('call-recordings')
-        .getPublicUrl(filePath);
-
+      // Store the file path - signed URLs will be generated when needed
       const { error: dbError } = await supabase.from('call_recordings').insert({
         user_id: user.id,
         file_name: fileName,
-        file_url: urlData.publicUrl,
+        file_url: null, // No public URL - use signed URLs for access
         audio_url: filePath,
         file_size: finalBlob.size,
         status: 'pending',
