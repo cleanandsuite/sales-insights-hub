@@ -4,43 +4,29 @@ import { supabase } from '@/integrations/supabase/client';
 const BUCKET_NAME = 'call-recordings';
 
 export class SecureStorage {
-  // Get secure signed URL with expiration
-  async getSecureUrl(filePath: string, expiresIn: number = 3600): Promise<string> {
-    try {
-      const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .createSignedUrl(filePath, expiresIn);
-      
-      if (error) throw error;
-      
-      // Log access for audit
-      await this.logStorageAccess(filePath, 'signed_url_access');
-      
-      return data.signedUrl;
-    } catch (error) {
-      console.error('Error creating signed URL:', error);
-      throw error;
-    }
+  // Get public URL for playback (bucket is now public)
+  getPublicUrl(filePath: string): string {
+    const { data } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+    
+    // Log access for audit (fire and forget)
+    this.logStorageAccess(filePath, 'public_url_access');
+    
+    return data.publicUrl;
   }
   
-  // Get secure download URL that forces download
-  async getDownloadUrl(filePath: string, fileName?: string): Promise<string> {
-    try {
-      const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .createSignedUrl(filePath, 3600, {
-          download: fileName || 'recording.webm'
-        });
-      
-      if (error) throw error;
-      
-      await this.logStorageAccess(filePath, 'download');
-      
-      return data.signedUrl;
-    } catch (error) {
-      console.error('Error creating download URL:', error);
-      throw error;
-    }
+  // Get download URL using public URL
+  getDownloadUrl(filePath: string): string {
+    const { data } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath, {
+        download: true
+      });
+    
+    this.logStorageAccess(filePath, 'download');
+    
+    return data.publicUrl;
   }
   
   // Upload with automatic security
