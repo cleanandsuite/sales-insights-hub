@@ -117,9 +117,28 @@ export function WaveformPlayer({
 
     console.log('WaveformPlayer: Loading audio from URL:', audioUrl.substring(0, 100) + '...');
 
-    const audio = new Audio(audioUrl);
+    const audio = new Audio();
+    audio.src = audioUrl;
     audio.preload = 'auto';
+    // Helps in some browsers when fetching remote media and when we later fetch() for recovery/download.
+    audio.crossOrigin = 'anonymous';
+
     audioRef.current = audio;
+
+    // Best-effort header sniff (useful to confirm Content-Type / Accept-Ranges)
+    (async () => {
+      try {
+        const head = await fetch(audioUrl, { method: 'HEAD' });
+        console.log('WaveformPlayer: Audio response headers', {
+          status: head.status,
+          contentType: head.headers.get('content-type'),
+          acceptRanges: head.headers.get('accept-ranges'),
+          contentLength: head.headers.get('content-length'),
+        });
+      } catch (e) {
+        console.warn('WaveformPlayer: HEAD request failed (likely CORS); continuing', e);
+      }
+    })();
 
     const handleLoadedMetadata = () => {
       console.log('WaveformPlayer: Audio metadata loaded, duration:', audio.duration);
@@ -132,6 +151,30 @@ export function WaveformPlayer({
     };
 
     const handleEnded = () => setIsPlaying(false);
+
+    const handlePlayEvent = () => {
+      console.log('WaveformPlayer: play event', {
+        muted: audio.muted,
+        volume: audio.volume,
+        readyState: audio.readyState,
+      });
+    };
+
+    const handlePlaying = () => {
+      console.log('WaveformPlayer: playing', {
+        currentTime: audio.currentTime,
+        muted: audio.muted,
+        volume: audio.volume,
+        duration: audio.duration,
+      });
+    };
+
+    const handlePause = () => {
+      console.log('WaveformPlayer: pause', { currentTime: audio.currentTime });
+    };
+
+    const handleWaiting = () => console.warn('WaveformPlayer: waiting/buffering');
+    const handleStalled = () => console.warn('WaveformPlayer: stalled');
 
     const handleError = async () => {
       console.error('WaveformPlayer: Audio error', audio.error);
@@ -164,12 +207,27 @@ export function WaveformPlayer({
     audio.addEventListener('error', handleError);
     audio.addEventListener('canplaythrough', handleCanPlayThrough);
 
+    audio.addEventListener('play', handlePlayEvent);
+    audio.addEventListener('playing', handlePlaying);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('stalled', handleStalled);
+
+    // Kick off loading immediately
+    audio.load();
+
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+
+      audio.removeEventListener('play', handlePlayEvent);
+      audio.removeEventListener('playing', handlePlaying);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('stalled', handleStalled);
 
       audio.pause();
       audio.src = '';
@@ -240,13 +298,16 @@ export function WaveformPlayer({
 
   const handleDownload = async () => {
     if (!audioUrl) return;
-    
+
     const response = await fetch(audioUrl);
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
+
+    const ext = audioUrl.toLowerCase().includes('.mp3') || blob.type === 'audio/mpeg' ? 'mp3' : 'webm';
+
     const a = document.createElement('a');
     a.href = url;
-    a.download = `recording-${Date.now()}.webm`;
+    a.download = `recording-${Date.now()}.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
