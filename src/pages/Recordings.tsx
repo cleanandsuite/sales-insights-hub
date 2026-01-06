@@ -67,15 +67,29 @@ export default function Recordings() {
     }
 
     // Get signed URL for private bucket
-    const { data: signedUrl } = await supabase.storage
+    const { data: signedUrlData, error } = await supabase.storage
       .from('call-recordings')
       .createSignedUrl(recording.audio_url, 3600);
 
-    if (signedUrl?.signedUrl) {
-      audioRef.current = new Audio(signedUrl.signedUrl);
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      return;
+    }
+
+    if (signedUrlData?.signedUrl) {
+      audioRef.current = new Audio(signedUrlData.signedUrl);
       audioRef.current.onended = () => setPlayingId(null);
-      audioRef.current.play();
-      setPlayingId(recording.id);
+      audioRef.current.onerror = (e) => {
+        console.error('Audio playback error:', e);
+        setPlayingId(null);
+      };
+      try {
+        await audioRef.current.play();
+        setPlayingId(recording.id);
+      } catch (playError) {
+        console.error('Failed to play audio:', playError);
+        setPlayingId(null);
+      }
     }
   };
 

@@ -144,12 +144,14 @@ export default function RecordingAnalysis() {
 
       // Get signed URL for audio
       if (data.audio_url) {
-        const { data: signedUrl } = await supabase.storage
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
           .from('call-recordings')
           .createSignedUrl(data.audio_url, 3600);
         
-        if (signedUrl?.signedUrl) {
-          setAudioUrl(signedUrl.signedUrl);
+        if (signedUrlError) {
+          console.error('Error creating signed URL:', signedUrlError);
+        } else if (signedUrlData?.signedUrl) {
+          setAudioUrl(signedUrlData.signedUrl);
         }
       }
     } catch (error) {
