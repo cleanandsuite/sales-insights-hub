@@ -1060,6 +1060,30 @@ export type Database = {
           },
         ]
       }
+      invitation_check_logs: {
+        Row: {
+          checked_at: string | null
+          id: string
+          invitation_token: string | null
+          ip_address: string | null
+          was_valid: boolean | null
+        }
+        Insert: {
+          checked_at?: string | null
+          id?: string
+          invitation_token?: string | null
+          ip_address?: string | null
+          was_valid?: boolean | null
+        }
+        Update: {
+          checked_at?: string | null
+          id?: string
+          invitation_token?: string | null
+          ip_address?: string | null
+          was_valid?: boolean | null
+        }
+        Relationships: []
+      }
       lead_activities: {
         Row: {
           activity_type: string
@@ -1664,6 +1688,36 @@ export type Database = {
           },
         ]
       }
+      security_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       skill_progress: {
         Row: {
           id: string
@@ -1773,30 +1827,36 @@ export type Database = {
           email: string
           expires_at: string
           id: string
+          invitation_token: string | null
           invited_by: string
           role: string
           status: string
           team_id: string
+          token_expires_at: string | null
         }
         Insert: {
           created_at?: string
           email: string
           expires_at?: string
           id?: string
+          invitation_token?: string | null
           invited_by: string
           role?: string
           status?: string
           team_id: string
+          token_expires_at?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           expires_at?: string
           id?: string
+          invitation_token?: string | null
           invited_by?: string
           role?: string
           status?: string
           team_id?: string
+          token_expires_at?: string | null
         }
         Relationships: [
           {
@@ -1905,6 +1965,30 @@ export type Database = {
           resource_type?: string | null
           resource_url?: string | null
           skill_area?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transcription_logs: {
+        Row: {
+          created_at: string | null
+          duration: number | null
+          id: string
+          service_used: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          duration?: number | null
+          id?: string
+          service_used?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          duration?: number | null
+          id?: string
+          service_used?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2078,6 +2162,8 @@ export type Database = {
         Returns: boolean
       }
       check_crm_rate_limit: { Args: { p_user_id: string }; Returns: boolean }
+      check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
+      check_password_strength: { Args: { password: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
