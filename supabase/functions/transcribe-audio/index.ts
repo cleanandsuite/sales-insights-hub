@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper to wait with exponential backoff
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -40,36 +43,98 @@ serve(async (req) => {
     formData.append('language', 'en');
     formData.append('response_format', 'json');
 
-    console.log('Sending to Whisper API...');
+    // Retry logic with exponential backoff
+    const maxRetries = 3;
+    let lastError: Error | null = null;
 
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIKey}`,
-      },
-      body: formData,
-    });
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Transcription attempt ${attempt}/${maxRetries}`);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Whisper API error:', errorText);
-      throw new Error(`Whisper API error: ${response.status}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIKey}`,
+          },
+          body: formData,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        // Handle rate limiting (429)
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After');
+          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(1000 * Math.pow(2, attempt), 30000);
+          console.log(`Rate limited (429). Waiting ${waitTime / 1000} seconds before retry...`);
+          
+          if (attempt < maxRetries) {
+            await wait(waitTime);
+            continue;
+          }
+          throw new Error('Rate limit exceeded. Please try again later.');
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Whisper API error (${response.status}):`, errorText);
+          throw new Error(`Whisper API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Transcription successful:', result.text?.substring(0, 100));
+
+        return new Response(
+          JSON.stringify({ text: result.text || '' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+
+      } catch (attemptError) {
+        lastError = attemptError instanceof Error ? attemptError : new Error(String(attemptError));
+        console.error(`Attempt ${attempt} failed:`, lastError.message);
+
+        // Check if it's a network/DNS error and retry
+        const isNetworkError = lastError.message.includes('dns') || 
+                               lastError.message.includes('network') ||
+                               lastError.message.includes('fetch') ||
+                               lastError.message.includes('abort');
+
+        if (attempt < maxRetries && isNetworkError) {
+          const backoffTime = Math.min(1000 * Math.pow(2, attempt), 10000);
+          console.log(`Network error detected. Retrying in ${backoffTime / 1000} seconds...`);
+          await wait(backoffTime);
+          continue;
+        }
+
+        // For non-network errors, don't retry
+        if (!isNetworkError) {
+          break;
+        }
+      }
     }
 
-    const result = await response.json();
-    console.log('Transcription result:', result.text?.substring(0, 100));
-
-    return new Response(
-      JSON.stringify({ text: result.text || '' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    // All retries failed
+    throw lastError || new Error('Transcription failed after all retries');
 
   } catch (error) {
     console.error('Transcription error:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const isRateLimit = errorMessage.includes('429') || errorMessage.includes('Rate limit');
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ 
+        error: errorMessage,
+        isRateLimit,
+        suggestion: isRateLimit 
+          ? 'Too many requests. Please wait a moment and try again.'
+          : 'Transcription failed. Please check your connection and try again.'
+      }),
       { 
-        status: 500, 
+        status: isRateLimit ? 429 : 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
