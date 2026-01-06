@@ -78,7 +78,22 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
+      console.error('OpenAI API error:', response.status, errorText);
+      
+      // Handle rate limits gracefully - return empty analysis instead of error
+      if (response.status === 429) {
+        console.log('Rate limited by OpenAI, returning empty analysis');
+        return new Response(
+          JSON.stringify({ 
+            suggestions: [],
+            sentiment: 'neutral',
+            keyTopics: [],
+            rateLimited: true
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
