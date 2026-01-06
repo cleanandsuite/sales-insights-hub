@@ -3,7 +3,7 @@
 
 import { initMp3MediaEncoder } from 'mp3-mediarecorder/worker';
 
-// Initialize the MP3 encoder with the WASM file from CDN
+// Use a stable URL that serves the correct application/wasm mime type
 initMp3MediaEncoder({
-  vmsgWasmUrl: 'https://unpkg.com/vmsg@0.4.0/vmsg.wasm'
+  vmsgWasmUrl: 'https://app.unpkg.com/vmsg@0.4.0/files/vmsg.wasm',
 });
