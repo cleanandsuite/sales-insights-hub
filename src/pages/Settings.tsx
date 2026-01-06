@@ -19,8 +19,10 @@ import {
   Save,
   RefreshCw,
   Check,
-  AlertCircle
+  AlertCircle,
+  Database
 } from 'lucide-react';
+import { DataExportTab } from '@/components/settings/DataExportTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -230,6 +232,10 @@ export default function Settings() {
             <TabsTrigger value="privacy" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Privacy</span>
+            </TabsTrigger>
+            <TabsTrigger value="data" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Database className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Data</span>
             </TabsTrigger>
           </TabsList>
 
@@ -537,6 +543,11 @@ export default function Settings() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Data Export */}
+          <TabsContent value="data">
+            <DataExportTab />
           </TabsContent>
         </Tabs>
       </div>
