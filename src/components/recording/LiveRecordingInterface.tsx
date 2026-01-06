@@ -390,12 +390,16 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         console.error('Transcription process error:', transcriptionError);
       }
 
-      // Mark as analyzed
+      // Final update: ensure transcription is persisted and mark as analyzed
+      const finalTranscription = transcription || null;
+      console.log('Persisting final transcription:', finalTranscription?.length || 0, 'characters');
+      
       await supabase
         .from('call_recordings')
         .update({
           status: 'analyzed',
-          analyzed_at: new Date().toISOString()
+          analyzed_at: new Date().toISOString(),
+          live_transcription: finalTranscription
         })
         .eq('id', recording.id);
 
