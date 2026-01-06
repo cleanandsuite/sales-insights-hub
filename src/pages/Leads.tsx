@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
 import { Search, Filter, Plus, Download, Users } from 'lucide-react';
 
@@ -55,6 +56,7 @@ interface Lead {
 
 export default function Leads() {
   const { user } = useAuth();
+  const { isManager, teamId } = useUserRole();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -280,6 +282,8 @@ export default function Leads() {
                     onLeadUpdated={(updatedLead: any) => {
                       setLeads(prev => prev.map(l => l.id === updatedLead.id ? { ...l, ...updatedLead } : l));
                     }}
+                    isManager={isManager}
+                    teamId={teamId}
                   />
                 ))}
               </div>

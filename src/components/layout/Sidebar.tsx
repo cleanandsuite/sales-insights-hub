@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, Headphones, FileAudio, Users, Calendar, Trophy, Settings, Target, Phone, BarChart3, Sparkles, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, Headphones, FileAudio, Users, Calendar, Trophy, Settings, Target, Phone, BarChart3, Sparkles, Menu, Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
-const navItems = [
+const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leads', icon: Target, label: 'Leads' },
@@ -21,8 +21,15 @@ const navItems = [
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
+const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
+
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { signOut } = useAuth();
+  const { isManager } = useUserRole();
+  
+  const navItems = isManager 
+    ? [...baseNavItems.slice(0, -1), managerNavItem, baseNavItems[baseNavItems.length - 1]]
+    : baseNavItems;
 
   return (
     <div className="flex h-full flex-col">

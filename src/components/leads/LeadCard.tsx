@@ -1,4 +1,4 @@
-import { Phone, Mail, Calendar, MapPin, Building, Briefcase, TrendingUp, Clock, ChevronDown, ChevronUp, FileText, Brain, RefreshCw } from 'lucide-react';
+import { Phone, Mail, Calendar, MapPin, Building, Briefcase, TrendingUp, Clock, ChevronDown, ChevronUp, FileText, Brain, RefreshCw, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { BANTScoreVisualization } from './BANTScoreVisualization';
 import { AIActionSuggestion } from './AIActionSuggestion';
 import { AIRiskTimeline } from './AIRiskTimeline';
 import { SmartCRMActions } from './SmartCRMActions';
+import { LeadAssignmentDialog } from './LeadAssignmentDialog';
 
 interface Lead {
   id: string;
@@ -47,6 +48,7 @@ interface Lead {
   predicted_close_date?: string | null;
   predicted_deal_value?: number | null;
   ai_assisted?: boolean;
+  assigned_to_user_id?: string | null;
 }
 
 interface LeadCardProps {
@@ -56,13 +58,16 @@ interface LeadCardProps {
   onViewSummary: (lead: Lead) => void;
   onSchedule: (lead: Lead) => void;
   onLeadUpdated?: (lead: Lead) => void;
+  isManager?: boolean;
+  teamId?: string | null;
 }
 
-export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onLeadUpdated }: LeadCardProps) {
+export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onLeadUpdated, isManager = false, teamId }: LeadCardProps) {
   const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isScoring, setIsScoring] = useState(false);
   const [appliedActions, setAppliedActions] = useState<number[]>([]);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
   const getConfidenceColor = (confidence: number | null) => {
     if (!confidence) return 'text-muted-foreground';
@@ -150,6 +155,7 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onL
   const hasAIData = lead.ai_assisted || (lead.bant_budget !== undefined && lead.bant_budget > 0);
 
   return (
+    <>
     <div className="card-gradient rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-all">
       {/* Header */}
       <div className="p-4 sm:p-5 border-b border-border/30">
@@ -168,6 +174,12 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onL
                   <Badge variant="outline" className="gap-1 text-primary border-primary/30 text-xs">
                     <Brain className="h-3 w-3" />
                     AI
+                  </Badge>
+                )}
+                {lead.assigned_to_user_id && (
+                  <Badge variant="secondary" className="gap-1 text-xs">
+                    <UserPlus className="h-3 w-3" />
+                    Assigned
                   </Badge>
                 )}
               </div>
@@ -192,19 +204,56 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onL
               </div>
               <p className="text-xs text-muted-foreground">AI Confidence</p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleRunAIScore}
-              disabled={isScoring}
-              className="text-xs px-2"
-            >
-              <RefreshCw className={`h-3 w-3 mr-1 ${isScoring ? 'animate-spin' : ''}`} />
-              {isScoring ? 'Scoring...' : 'Re-score'}
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRunAIScore}
+                disabled={isScoring}
+                className="text-xs px-2"
+              >
+                <RefreshCw className={`h-3 w-3 mr-1 ${isScoring ? 'animate-spin' : ''}`} />
+                {isScoring ? 'Scoring...' : 'Re-score'}
+              </Button>
+              {isManager && teamId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAssignDialogOpen(true)}
+                  className="text-xs px-2"
+                >
+                  <UserPlus className="h-3 w-3 mr-1" />
+                  Assign
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Assignment Dialog */}
+      {isManager && teamId && (
+        <LeadAssignmentDialog
+          open={assignDialogOpen}
+          onOpenChange={setAssignDialogOpen}
+          leadId={lead.id}
+          leadName={lead.contact_name}
+          currentAssignee={lead.assigned_to_user_id}
+          teamId={teamId}
+          onAssigned={() => {
+            if (onLeadUpdated) {
+              supabase
+                .from('leads')
+                .select('*')
+                .eq('id', lead.id)
+                .single()
+                .then(({ data }) => {
+                  if (data) onLeadUpdated(data);
+                });
+            }
+          }}
+        />
+      )}
 
       {/* AI Intelligence Section */}
       {hasAIData && (
@@ -375,5 +424,6 @@ export function LeadCard({ lead, onCall, onEmail, onViewSummary, onSchedule, onL
         />
       </div>
     </div>
+    </>
   );
 }

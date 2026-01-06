@@ -20,9 +20,11 @@ import {
   RefreshCw,
   Check,
   AlertCircle,
-  Database
+  Database,
+  CreditCard
 } from 'lucide-react';
 import { DataExportTab } from '@/components/settings/DataExportTab';
+import { BillingTab } from '@/components/settings/BillingTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -224,6 +226,10 @@ export default function Settings() {
             <TabsTrigger value="crm" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">CRM</span>
+            </TabsTrigger>
+            <TabsTrigger value="billing" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Billing</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -548,6 +554,13 @@ export default function Settings() {
           {/* Data Export */}
           <TabsContent value="data">
             <DataExportTab />
+          </TabsContent>
+
+          {/* Billing */}
+          <TabsContent value="billing">
+            <div className="card-gradient rounded-xl border border-border/50 p-6">
+              <BillingTab />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
