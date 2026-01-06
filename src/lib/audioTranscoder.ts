@@ -103,13 +103,11 @@ export async function transcodeToMp3(audioBlob: Blob): Promise<TranscodeResult> 
  */
 function convertFloat32ToInt16(float32Array: Float32Array): Int16Array {
   const int16Array = new Int16Array(float32Array.length);
-  
+
   for (let i = 0; i < float32Array.length; i++) {
-    // Clamp the value between -1 and 1
     const s = Math.max(-1, Math.min(1, float32Array[i]));
-    // Convert to 16-bit signed integer
-    int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    int16Array[i] = Math.round(s * 32767);
   }
-  
+
   return int16Array;
 }
