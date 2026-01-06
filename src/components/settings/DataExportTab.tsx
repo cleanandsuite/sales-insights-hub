@@ -2,20 +2,24 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, FileJson, FileSpreadsheet, Loader2, CheckCircle2 } from 'lucide-react';
+import { Download, Loader2, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import JSZip from 'jszip';
 
 const EXPORTABLE_TABLES = [
+  { id: 'profiles', label: 'Profiles', description: 'Your profile information' },
   { id: 'call_recordings', label: 'Call Recordings', description: 'Your recorded calls and transcripts' },
   { id: 'leads', label: 'Leads', description: 'Lead information and AI insights' },
   { id: 'coaching_sessions', label: 'Coaching Sessions', description: 'AI coaching analysis results' },
   { id: 'call_summaries', label: 'Call Summaries', description: 'Generated call summaries' },
   { id: 'scheduled_calls', label: 'Scheduled Calls', description: 'Your scheduled meetings' },
-  { id: 'profiles', label: 'Profile', description: 'Your profile information' },
+  { id: 'teams', label: 'Teams', description: 'Your teams' },
+  { id: 'team_members', label: 'Team Members', description: 'Team membership data' },
   { id: 'user_settings', label: 'Settings', description: 'Your app settings' },
+  { id: 'crm_connections', label: 'CRM Connections', description: 'Your CRM integrations' },
+  { id: 'crm_contacts', label: 'CRM Contacts', description: 'Synced CRM contacts' },
 ] as const;
 
 type TableId = typeof EXPORTABLE_TABLES[number]['id'];
@@ -24,7 +28,6 @@ export function DataExportTab() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedTables, setSelectedTables] = useState<TableId[]>([]);
-  const [format, setFormat] = useState<'json' | 'csv'>('json');
   const [exporting, setExporting] = useState(false);
   const [exportedTables, setExportedTables] = useState<TableId[]>([]);
 
@@ -44,11 +47,12 @@ export function DataExportTab() {
     }
   };
 
-  const fetchTableData = async (tableId: TableId) => {
+  const fetchTableData = async (tableId: string) => {
     if (!user) return null;
 
+    // Use type assertion to handle dynamic table names
     const { data, error } = await supabase
-      .from(tableId)
+      .from(tableId as 'profiles')
       .select('*')
       .eq('user_id', user.id);
 
@@ -57,22 +61,78 @@ export function DataExportTab() {
       return null;
     }
 
-    return data;
+    return data as Record<string, unknown>[] | null;
   };
 
+  // Format date/timestamp columns as YYYY-MM-DD HH:MM:SS
+  const formatDateValue = (value: string): string => {
+    try {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return value;
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    } catch {
+      return value;
+    }
+  };
+
+  // Check if value looks like a date/timestamp
+  const isDateValue = (value: unknown): boolean => {
+    if (typeof value !== 'string') return false;
+    // ISO date pattern or common timestamp patterns
+    return /^\d{4}-\d{2}-\d{2}(T|\s)\d{2}:\d{2}/.test(value);
+  };
+
+  // Format a single cell value for CSV
+  const formatCellValue = (value: unknown): string => {
+    if (value === null || value === undefined) return '';
+    
+    // Handle dates/timestamps - format as YYYY-MM-DD HH:MM:SS
+    if (isDateValue(value)) {
+      return formatDateValue(value as string);
+    }
+    
+    // Handle objects/arrays - stringify without formatting
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    
+    // UUIDs and other strings - return as plain text
+    return String(value);
+  };
+
+  // Escape CSV value properly
+  const escapeCSVValue = (value: string): string => {
+    // If contains comma, newline, or double quote, wrap in quotes
+    if (value.includes(',') || value.includes('\n') || value.includes('"') || value.includes('\r')) {
+      return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+  };
+
+  // Convert data array to CSV string with UTF-8 encoding
   const convertToCSV = (data: Record<string, unknown>[]): string => {
     if (!data || data.length === 0) return '';
 
     const headers = Object.keys(data[0]);
-    const csvRows = [headers.join(',')];
+    const csvRows: string[] = [];
 
+    // Add header row
+    csvRows.push(headers.map(h => escapeCSVValue(h)).join(','));
+
+    // Add data rows
     for (const row of data) {
       const values = headers.map(header => {
-        const value = row[header];
-        if (value === null || value === undefined) return '';
-        if (typeof value === 'object') return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
-        if (typeof value === 'string') return `"${value.replace(/"/g, '""')}"`;
-        return String(value);
+        const rawValue = row[header];
+        const formattedValue = formatCellValue(rawValue);
+        return escapeCSVValue(formattedValue);
       });
       csvRows.push(values.join(','));
     }
@@ -80,9 +140,15 @@ export function DataExportTab() {
     return csvRows.join('\n');
   };
 
-  const downloadFile = (content: string, filename: string, mimeType: string) => {
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
+  // Download ZIP file
+  const downloadZip = async (zip: JSZip, filename: string) => {
+    const content = await zip.generateAsync({ 
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: { level: 6 }
+    });
+    
+    const url = URL.createObjectURL(content);
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
@@ -99,38 +165,42 @@ export function DataExportTab() {
     setExportedTables([]);
 
     try {
-      const exportData: Record<string, unknown[]> = {};
+      const zip = new JSZip();
+      let filesAdded = 0;
       
       for (const tableId of selectedTables) {
         const data = await fetchTableData(tableId);
-        if (data) {
-          exportData[tableId] = data;
-          setExportedTables(prev => [...prev, tableId]);
+        
+        if (data && data.length > 0) {
+          // Add UTF-8 BOM for proper encoding in Excel
+          const bom = '\uFEFF';
+          const csvContent = bom + convertToCSV(data);
+          zip.file(`${tableId}.csv`, csvContent);
+          filesAdded++;
+        } else {
+          // Create empty CSV with just headers if no data
+          // For empty tables, we'll skip or add an empty file
+          zip.file(`${tableId}.csv`, '\uFEFF');
         }
+        
+        setExportedTables(prev => [...prev, tableId]);
+      }
+
+      if (filesAdded === 0) {
+        toast({
+          variant: 'destructive',
+          title: 'No data to export',
+          description: 'The selected tables have no data'
+        });
+        return;
       }
 
       const timestamp = new Date().toISOString().split('T')[0];
-
-      if (format === 'json') {
-        const content = JSON.stringify(exportData, null, 2);
-        downloadFile(content, `backup-${timestamp}.json`, 'application/json');
-      } else {
-        // For CSV, create a zip-like approach by downloading each table separately
-        // or combine into one file with table markers
-        let combinedCSV = '';
-        for (const [tableId, data] of Object.entries(exportData)) {
-          if (data.length > 0) {
-            combinedCSV += `\n--- ${tableId.toUpperCase()} ---\n`;
-            combinedCSV += convertToCSV(data as Record<string, unknown>[]);
-            combinedCSV += '\n';
-          }
-        }
-        downloadFile(combinedCSV, `backup-${timestamp}.csv`, 'text/csv');
-      }
+      await downloadZip(zip, `data-backup-${timestamp}.zip`);
 
       toast({
         title: 'Export complete',
-        description: `${selectedTables.length} table(s) exported as ${format.toUpperCase()}`
+        description: `${filesAdded} CSV file(s) exported in ZIP archive`
       });
     } catch (error) {
       console.error('Export error:', error);
@@ -149,32 +219,16 @@ export function DataExportTab() {
       <div>
         <h2 className="text-lg font-semibold text-foreground">Data Export</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Download your data as JSON or CSV files for manual backups
+          Download your data as CSV files in a ZIP archive for manual backups
         </p>
       </div>
 
-      {/* Format Selection */}
-      <div className="space-y-2">
-        <Label>Export Format</Label>
-        <Select value={format} onValueChange={(v) => setFormat(v as 'json' | 'csv')}>
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="json">
-              <div className="flex items-center gap-2">
-                <FileJson className="h-4 w-4" />
-                JSON
-              </div>
-            </SelectItem>
-            <SelectItem value="csv">
-              <div className="flex items-center gap-2">
-                <FileSpreadsheet className="h-4 w-4" />
-                CSV
-              </div>
-            </SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Export Format Info */}
+      <div className="p-3 rounded-lg bg-muted/50 border border-border/50">
+        <p className="text-xs text-muted-foreground">
+          <strong>Export format:</strong> One CSV file per table • UTF-8 encoded • 
+          Dates formatted as YYYY-MM-DD HH:MM:SS • Pure data only
+        </p>
       </div>
 
       {/* Table Selection */}
@@ -231,12 +285,12 @@ export function DataExportTab() {
           ) : (
             <>
               <Download className="h-4 w-4" />
-              Export {selectedTables.length > 0 ? `${selectedTables.length} Table(s)` : 'Data'}
+              Export {selectedTables.length > 0 ? `${selectedTables.length} Table(s) as ZIP` : 'Data'}
             </>
           )}
         </Button>
         <p className="text-xs text-muted-foreground mt-2">
-          Your data will be downloaded to your device. Store backups securely.
+          Your data will be downloaded as a ZIP file containing individual CSV files.
         </p>
       </div>
     </div>
