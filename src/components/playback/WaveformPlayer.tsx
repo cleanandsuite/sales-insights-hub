@@ -108,17 +108,32 @@ export function WaveformPlayer({
 
   // Load audio
   useEffect(() => {
-    if (!audioUrl) return;
+    if (!audioUrl) {
+      console.log('WaveformPlayer: No audio URL provided');
+      return;
+    }
+    
+    console.log('WaveformPlayer: Loading audio from URL:', audioUrl.substring(0, 100) + '...');
     
     const audio = new Audio(audioUrl);
     audioRef.current = audio;
     
-    audio.addEventListener('loadedmetadata', () => setIsLoading(false));
+    audio.addEventListener('loadedmetadata', () => {
+      console.log('WaveformPlayer: Audio metadata loaded, duration:', audio.duration);
+      setIsLoading(false);
+    });
     audio.addEventListener('timeupdate', () => {
       setCurrentTime(audio.currentTime);
       onTimeUpdate?.(audio.currentTime);
     });
     audio.addEventListener('ended', () => setIsPlaying(false));
+    audio.addEventListener('error', (e) => {
+      console.error('WaveformPlayer: Audio error', audio.error);
+      setIsLoading(false);
+    });
+    audio.addEventListener('canplaythrough', () => {
+      console.log('WaveformPlayer: Audio can play through');
+    });
     
     return () => {
       audio.pause();
