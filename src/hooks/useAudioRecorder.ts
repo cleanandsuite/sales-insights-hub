@@ -11,6 +11,26 @@ interface UseAudioRecorderReturn {
   getAudioChunk: () => Promise<Blob | null>;
 }
 
+// Get the best supported MIME type
+function getSupportedMimeType(): string {
+  const types = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4',
+    'audio/ogg;codecs=opus'
+  ];
+  
+  for (const type of types) {
+    if (MediaRecorder.isTypeSupported(type)) {
+      console.log('Using MIME type:', type);
+      return type;
+    }
+  }
+  
+  console.log('Using fallback MIME type: audio/webm');
+  return 'audio/webm';
+}
+
 export function useAudioRecorder(): UseAudioRecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -38,11 +58,13 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
 
   const startRecording = useCallback(async () => {
     try {
+      // Get audio stream with better quality settings for speech
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          sampleRate: 16000
+          sampleRate: 44100, // Higher sample rate for better quality
+          channelCount: 1,   // Mono is better for speech recognition
         } 
       });
       
@@ -56,9 +78,11 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
       
-      // Set up MediaRecorder
+      // Set up MediaRecorder with best supported MIME type
+      const mimeType = getSupportedMimeType();
       const mediaRecorder = new MediaRecorder(stream, { 
-        mimeType: 'audio/webm;codecs=opus' 
+        mimeType,
+        audioBitsPerSecond: 128000 // 128 kbps - good quality for speech
       });
       
       mediaRecorderRef.current = mediaRecorder;
@@ -70,7 +94,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         }
       };
       
-      mediaRecorder.start(3000); // Collect chunks every 3 seconds for transcription
+      mediaRecorder.start(100); // Collect data every 100ms for smoother visualization
       setIsRecording(true);
       setIsPaused(false);
       
