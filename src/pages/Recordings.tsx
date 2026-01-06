@@ -73,18 +73,13 @@ export default function Recordings() {
       }
     }
 
-    // Get signed URL for private bucket
-    const { data: signedUrlData, error } = await supabase.storage
+    // Get public URL for the recording (bucket is now public)
+    const { data: urlData } = supabase.storage
       .from('call-recordings')
-      .createSignedUrl(recording.audio_url, 3600);
+      .getPublicUrl(recording.audio_url);
 
-    if (error) {
-      console.error('Error creating signed URL:', error);
-      return;
-    }
-
-    if (signedUrlData?.signedUrl) {
-      const primaryAudio = new Audio(signedUrlData.signedUrl);
+    if (urlData?.publicUrl) {
+      const primaryAudio = new Audio(urlData.publicUrl);
 
       primaryAudio.onended = () => {
         if (primaryAudio.src.startsWith('blob:')) {
@@ -97,7 +92,7 @@ export default function Recordings() {
         // If the file was recorded as mp4/ogg but stored as webm, browsers may refuse to play.
         // In that case, we fetch and re-wrap the bytes with the correct MIME type.
         try {
-          const { objectUrl, mime } = await createPlayableObjectUrl(signedUrlData.signedUrl);
+          const { objectUrl, mime } = await createPlayableObjectUrl(urlData.publicUrl);
           console.warn('Recovered playable audio as', mime);
 
           const recoveredAudio = new Audio(objectUrl);

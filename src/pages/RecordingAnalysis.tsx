@@ -142,16 +142,14 @@ export default function RecordingAnalysis() {
         }
       }
 
-      // Get signed URL for audio
+      // Get public URL for audio (bucket is now public)
       if (data.audio_url) {
-        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        const { data: urlData } = supabase.storage
           .from('call-recordings')
-          .createSignedUrl(data.audio_url, 3600);
+          .getPublicUrl(data.audio_url);
         
-        if (signedUrlError) {
-          console.error('Error creating signed URL:', signedUrlError);
-        } else if (signedUrlData?.signedUrl) {
-          setAudioUrl(signedUrlData.signedUrl);
+        if (urlData?.publicUrl) {
+          setAudioUrl(urlData.publicUrl);
         }
       }
     } catch (error) {
