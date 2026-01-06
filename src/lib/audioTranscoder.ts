@@ -1,5 +1,5 @@
 // Audio transcoding utility - converts webm/audio to MP3 for better browser compatibility
-import lamejs from 'lamejs';
+import lamejs from '@breezystack/lamejs';
 
 interface TranscodeResult {
   blob: Blob;
