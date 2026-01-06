@@ -10,6 +10,7 @@ import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { transcodeToMp3 } from '@/lib/audioTranscoder';
 
 interface LiveRecordingInterfaceProps {
   onClose: () => void;
@@ -225,15 +226,34 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         throw new Error('No recording data or user');
       }
 
-       setProcessingStatus('Saving to database...');
+      setProcessingStatus('Converting to MP3...');
+      
+      // Transcode to MP3 for better browser compatibility
+      let finalBlob: Blob;
+      let audioDuration: number;
+      let fileName: string;
+      
+      try {
+        const transcodeResult = await transcodeToMp3(audioBlob);
+        finalBlob = transcodeResult.blob;
+        audioDuration = Math.round(transcodeResult.duration);
+        const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+        fileName = `${baseName}.mp3`;
+        console.log('Successfully transcoded to MP3:', finalBlob.size, 'bytes');
+      } catch (transcodeError) {
+        console.error('Transcode failed, using original format:', transcodeError);
+        // Fallback to original format if transcoding fails
+        finalBlob = audioBlob;
+        audioDuration = recordingDuration;
+        const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+        const mimeType = audioBlob.type || 'audio/webm';
+        const extension = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+        fileName = `${baseName}.${extension}`;
+      }
+
+      setProcessingStatus('Saving to database...');
        
-       // Save recording metadata to database first with pending status
-       const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-       const mimeType = audioBlob.type || 'audio/webm';
-       const extension = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
-       const fileName = `${baseName}.${extension}`;
-       
-       const aiSuggestionsData = suggestions.length > 0
+      const aiSuggestionsData = suggestions.length > 0
         ? JSON.parse(JSON.stringify({ suggestions, sentiment, keyTopics }))
         : null;
 
@@ -242,9 +262,9 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         .insert([{
           user_id: user.id,
           file_name: fileName,
-          file_size: audioBlob.size,
+          file_size: finalBlob.size,
           status: 'processing',
-          duration_seconds: recordingDuration,
+          duration_seconds: audioDuration || recordingDuration,
           live_transcription: transcription || null,
           ai_suggestions: aiSuggestionsData,
           sentiment_score: sentiment === 'positive' ? 0.8 : sentiment === 'negative' ? 0.3 : 0.5,
@@ -260,14 +280,16 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
       setProcessingStatus('Uploading audio file...');
       
-      // Upload audio to storage
+      // Upload MP3 audio to storage
       const filePath = `${user.id}/${recording.id}/${fileName}`;
-       const { error: uploadError } = await supabase.storage
-         .from('call-recordings')
-         .upload(filePath, audioBlob, {
-           contentType: mimeType,
-           upsert: false
-         });
+      const contentType = fileName.endsWith('.mp3') ? 'audio/mpeg' : (finalBlob.type || 'audio/webm');
+      
+      const { error: uploadError } = await supabase.storage
+        .from('call-recordings')
+        .upload(filePath, finalBlob, {
+          contentType: contentType,
+          upsert: false
+        });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
@@ -278,6 +300,8 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       const { data: urlData } = supabase.storage
         .from('call-recordings')
         .getPublicUrl(filePath);
+      
+      console.log('Audio uploaded, public URL:', urlData.publicUrl);
 
       setProcessingStatus('Finalizing...');
       
@@ -297,7 +321,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
       toast({
         title: 'Recording Saved',
-        description: 'Your call has been recorded and analyzed successfully.'
+        description: 'Your call has been recorded and converted to MP3 successfully.'
       });
 
       // Navigate to analysis page
