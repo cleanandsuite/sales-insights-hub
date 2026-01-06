@@ -71,6 +71,18 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       
       streamRef.current = stream;
       
+      // Log microphone track details for debugging
+      const audioTrack = stream.getAudioTracks()[0];
+      if (audioTrack) {
+        console.log('MICROPHONE DEBUG:', {
+          label: audioTrack.label,
+          enabled: audioTrack.enabled,
+          muted: audioTrack.muted,
+          readyState: audioTrack.readyState,
+          settings: audioTrack.getSettings()
+        });
+      }
+      
       // Set up audio analysis for visualization
       audioContextRef.current = new AudioContext();
       analyserRef.current = audioContextRef.current.createAnalyser();

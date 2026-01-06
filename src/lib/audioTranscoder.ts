@@ -23,10 +23,35 @@ export async function transcodeToMp3(audioBlob: Blob): Promise<TranscodeResult> 
     // Decode the audio data
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     
+    // Get channel data for analysis
+    const leftChannel = audioBuffer.getChannelData(0);
+    
+    // Calculate input audio statistics for debugging
+    let inputMin = Infinity;
+    let inputMax = -Infinity;
+    let sumSquares = 0;
+    for (let i = 0; i < leftChannel.length; i++) {
+      const sample = leftChannel[i];
+      if (sample < inputMin) inputMin = sample;
+      if (sample > inputMax) inputMax = sample;
+      sumSquares += sample * sample;
+    }
+    const inputPeak = Math.max(Math.abs(inputMin), Math.abs(inputMax));
+    const inputRms = Math.sqrt(sumSquares / leftChannel.length);
+    
     console.log('Audio decoded:', {
       duration: audioBuffer.duration,
       sampleRate: audioBuffer.sampleRate,
       numberOfChannels: audioBuffer.numberOfChannels
+    });
+    
+    console.log('INPUT AUDIO STATS:', {
+      inputPeak: inputPeak.toFixed(6),
+      inputRms: inputRms.toFixed(6),
+      inputMin: inputMin.toFixed(6),
+      inputMax: inputMax.toFixed(6),
+      sampleCount: leftChannel.length,
+      isSilent: inputPeak < 0.001
     });
     
     // Get audio data (convert to mono if stereo)
@@ -34,13 +59,24 @@ export async function transcodeToMp3(audioBlob: Blob): Promise<TranscodeResult> 
     const sampleRate = audioBuffer.sampleRate;
     const samples = audioBuffer.length;
     
-    // Get channel data
-    const leftChannel = audioBuffer.getChannelData(0);
+    // Channel data already obtained above
     const rightChannel = channels > 1 ? audioBuffer.getChannelData(1) : leftChannel;
     
     // Convert to 16-bit PCM
     const leftSamples = convertFloat32ToInt16(leftChannel);
     const rightSamples = convertFloat32ToInt16(rightChannel);
+    
+    // Log int16 conversion stats
+    let int16Peak = 0;
+    for (let i = 0; i < leftSamples.length; i++) {
+      const abs = Math.abs(leftSamples[i]);
+      if (abs > int16Peak) int16Peak = abs;
+    }
+    console.log('INT16 CONVERSION:', {
+      int16Peak,
+      int16PeakNormalized: (int16Peak / 32767).toFixed(6),
+      expectedPeak: Math.round(inputPeak * 32767)
+    });
     
     // Initialize MP3 encoder
     // Use 128kbps for good quality/size balance

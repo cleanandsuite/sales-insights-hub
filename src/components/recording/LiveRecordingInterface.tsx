@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Pause, Play, Square, X } from 'lucide-react';
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useMp3Recorder } from '@/hooks/useMp3Recorder';
 import { AudioWaveform } from './AudioWaveform';
 import { RecordingTimer } from './RecordingTimer';
 import { TranscriptionPanel } from './TranscriptionPanel';
@@ -29,8 +29,9 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     stopRecording,
     pauseRecording,
     resumeRecording,
-    getAudioChunk
-  } = useAudioRecorder();
+    getAudioChunk,
+    recordingMethod
+  } = useMp3Recorder();
 
   const [transcription, setTranscription] = useState('');
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
@@ -226,29 +227,41 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         throw new Error('No recording data or user');
       }
 
-      setProcessingStatus('Converting to MP3...');
+      setProcessingStatus('Processing audio...');
       
-      // Transcode to MP3 for better browser compatibility
+      // Check if we already have MP3 (from direct recording) or need to transcode
       let finalBlob: Blob;
       let audioDuration: number;
       let fileName: string;
       
-      try {
-        const transcodeResult = await transcodeToMp3(audioBlob);
-        finalBlob = transcodeResult.blob;
-        audioDuration = Math.round(transcodeResult.duration);
-        const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-        fileName = `${baseName}.mp3`;
-        console.log('Successfully transcoded to MP3:', finalBlob.size, 'bytes');
-      } catch (transcodeError) {
-        console.error('Transcode failed, using original format:', transcodeError);
-        // Fallback to original format if transcoding fails
+      const isAlreadyMp3 = audioBlob.type === 'audio/mpeg' || recordingMethod === 'mp3-direct';
+      
+      if (isAlreadyMp3) {
+        console.log('Audio is already MP3, skipping transcode');
         finalBlob = audioBlob;
         audioDuration = recordingDuration;
         const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-        const mimeType = audioBlob.type || 'audio/webm';
-        const extension = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
-        fileName = `${baseName}.${extension}`;
+        fileName = `${baseName}.mp3`;
+        console.log('Using direct MP3:', finalBlob.size, 'bytes');
+      } else {
+        setProcessingStatus('Converting to MP3...');
+        try {
+          const transcodeResult = await transcodeToMp3(audioBlob);
+          finalBlob = transcodeResult.blob;
+          audioDuration = Math.round(transcodeResult.duration);
+          const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+          fileName = `${baseName}.mp3`;
+          console.log('Successfully transcoded to MP3:', finalBlob.size, 'bytes');
+        } catch (transcodeError) {
+          console.error('Transcode failed, using original format:', transcodeError);
+          // Fallback to original format if transcoding fails
+          finalBlob = audioBlob;
+          audioDuration = recordingDuration;
+          const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+          const mimeType = audioBlob.type || 'audio/webm';
+          const extension = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+          fileName = `${baseName}.${extension}`;
+        }
       }
 
       setProcessingStatus('Saving to database...');
