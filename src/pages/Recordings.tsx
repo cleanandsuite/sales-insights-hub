@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { createPlayableObjectUrl } from '@/lib/audioPlayback';
 
 interface CallRecording {
   id: string;
@@ -57,6 +58,9 @@ export default function Recordings() {
     if (playingId === recording.id) {
       // Pause current
       audioRef.current?.pause();
+      if (audioRef.current?.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(audioRef.current.src);
+      }
       setPlayingId(null);
       return;
     }
@@ -64,6 +68,9 @@ export default function Recordings() {
     // Stop any current playback
     if (audioRef.current) {
       audioRef.current.pause();
+      if (audioRef.current.src?.startsWith('blob:')) {
+        URL.revokeObjectURL(audioRef.current.src);
+      }
     }
 
     // Get signed URL for private bucket
@@ -77,14 +84,41 @@ export default function Recordings() {
     }
 
     if (signedUrlData?.signedUrl) {
-      audioRef.current = new Audio(signedUrlData.signedUrl);
-      audioRef.current.onended = () => setPlayingId(null);
-      audioRef.current.onerror = (e) => {
-        console.error('Audio playback error:', e);
+      const primaryAudio = new Audio(signedUrlData.signedUrl);
+
+      primaryAudio.onended = () => {
+        if (primaryAudio.src.startsWith('blob:')) {
+          URL.revokeObjectURL(primaryAudio.src);
+        }
         setPlayingId(null);
       };
+
+      primaryAudio.onerror = async () => {
+        // If the file was recorded as mp4/ogg but stored as webm, browsers may refuse to play.
+        // In that case, we fetch and re-wrap the bytes with the correct MIME type.
+        try {
+          const { objectUrl, mime } = await createPlayableObjectUrl(signedUrlData.signedUrl);
+          console.warn('Recovered playable audio as', mime);
+
+          const recoveredAudio = new Audio(objectUrl);
+          recoveredAudio.onended = () => {
+            URL.revokeObjectURL(objectUrl);
+            setPlayingId(null);
+          };
+
+          audioRef.current = recoveredAudio;
+          await recoveredAudio.play();
+          setPlayingId(recording.id);
+        } catch (e) {
+          console.error('Audio playback error (and recovery failed):', e);
+          setPlayingId(null);
+        }
+      };
+
+      audioRef.current = primaryAudio;
+
       try {
-        await audioRef.current.play();
+        await primaryAudio.play();
         setPlayingId(recording.id);
       } catch (playError) {
         console.error('Failed to play audio:', playError);

@@ -37,6 +37,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [audioLevel, setAudioLevel] = useState(0);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mimeTypeRef = useRef<string>('audio/webm');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -80,6 +81,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       
       // Set up MediaRecorder with best supported MIME type
       const mimeType = getSupportedMimeType();
+      mimeTypeRef.current = mimeType;
       const mediaRecorder = new MediaRecorder(stream, { 
         mimeType,
         audioBitsPerSecond: 128000 // 128 kbps - good quality for speech
@@ -115,7 +117,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       }
       
       mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+         const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current || 'audio/webm' });
         
         // Clean up
         if (streamRef.current) {
@@ -162,7 +164,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     
     const latestChunks = [...chunksRef.current];
     // Keep the chunks for full recording but return latest for transcription
-    return new Blob(latestChunks, { type: 'audio/webm' });
+    return new Blob(latestChunks, { type: mimeTypeRef.current || 'audio/webm' });
   }, []);
 
   return {

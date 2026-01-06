@@ -225,12 +225,15 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         throw new Error('No recording data or user');
       }
 
-      setProcessingStatus('Saving to database...');
-      
-      // Save recording metadata to database first with pending status
-      const fileName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
-      
-      const aiSuggestionsData = suggestions.length > 0 
+       setProcessingStatus('Saving to database...');
+       
+       // Save recording metadata to database first with pending status
+       const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+       const mimeType = audioBlob.type || 'audio/webm';
+       const extension = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+       const fileName = `${baseName}.${extension}`;
+       
+       const aiSuggestionsData = suggestions.length > 0
         ? JSON.parse(JSON.stringify({ suggestions, sentiment, keyTopics }))
         : null;
 
@@ -259,12 +262,12 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       
       // Upload audio to storage
       const filePath = `${user.id}/${recording.id}/${fileName}`;
-      const { error: uploadError } = await supabase.storage
-        .from('call-recordings')
-        .upload(filePath, audioBlob, {
-          contentType: 'audio/webm',
-          upsert: false
-        });
+       const { error: uploadError } = await supabase.storage
+         .from('call-recordings')
+         .upload(filePath, audioBlob, {
+           contentType: mimeType,
+           upsert: false
+         });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
