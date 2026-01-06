@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Download } from 'lucide-react';
+import { createPlayableObjectUrl } from '@/lib/audioPlayback';
 
 interface Marker {
   id: string;
@@ -39,6 +40,7 @@ export function WaveformPlayer({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
+  const recoveredObjectUrlRef = useRef<string | null>(null);
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -112,44 +114,90 @@ export function WaveformPlayer({
       console.log('WaveformPlayer: No audio URL provided');
       return;
     }
-    
+
     console.log('WaveformPlayer: Loading audio from URL:', audioUrl.substring(0, 100) + '...');
-    
+
     const audio = new Audio(audioUrl);
+    audio.preload = 'auto';
     audioRef.current = audio;
-    
-    audio.addEventListener('loadedmetadata', () => {
+
+    const handleLoadedMetadata = () => {
       console.log('WaveformPlayer: Audio metadata loaded, duration:', audio.duration);
       setIsLoading(false);
-    });
-    audio.addEventListener('timeupdate', () => {
+    };
+
+    const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
       onTimeUpdate?.(audio.currentTime);
-    });
-    audio.addEventListener('ended', () => setIsPlaying(false));
-    audio.addEventListener('error', (e) => {
+    };
+
+    const handleEnded = () => setIsPlaying(false);
+
+    const handleError = async () => {
       console.error('WaveformPlayer: Audio error', audio.error);
+      setIsPlaying(false);
+
+      // Attempt a one-time recovery by sniffing the file container and re-wrapping bytes.
+      if (!recoveredObjectUrlRef.current) {
+        try {
+          const { objectUrl, mime } = await createPlayableObjectUrl(audioUrl);
+          recoveredObjectUrlRef.current = objectUrl;
+          console.warn('WaveformPlayer: recovered playable audio as', mime);
+
+          audio.src = objectUrl;
+          audio.load();
+        } catch (e) {
+          console.error('WaveformPlayer: recovery failed', e);
+        }
+      }
+
       setIsLoading(false);
-    });
-    audio.addEventListener('canplaythrough', () => {
+    };
+
+    const handleCanPlayThrough = () => {
       console.log('WaveformPlayer: Audio can play through');
-    });
-    
+    };
+
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
+
     return () => {
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+
       audio.pause();
       audio.src = '';
+
+      if (recoveredObjectUrlRef.current) {
+        URL.revokeObjectURL(recoveredObjectUrlRef.current);
+        recoveredObjectUrlRef.current = null;
+      }
     };
   }, [audioUrl, onTimeUpdate]);
 
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    
+  const togglePlay = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+      audio.pause();
+      setIsPlaying(false);
+      return;
     }
-    setIsPlaying(!isPlaying);
+
+    try {
+      await audio.play();
+      setIsPlaying(true);
+    } catch (e) {
+      console.error('WaveformPlayer: play() failed', e);
+      setIsPlaying(false);
+    }
   };
 
   const toggleMute = () => {
