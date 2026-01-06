@@ -735,6 +735,82 @@ export type Database = {
           },
         ]
       }
+      contact_access_audit: {
+        Row: {
+          accessed_at: string | null
+          action: string
+          contact_id: string | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string | null
+          action: string
+          contact_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string | null
+          action?: string
+          contact_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_access_audit_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_access_audit: {
+        Row: {
+          accessed_at: string | null
+          action: string
+          connection_id: string | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string | null
+          action: string
+          connection_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string | null
+          action?: string
+          connection_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_access_audit_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "crm_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_connections: {
         Row: {
           access_token_encrypted: string | null
@@ -1544,6 +1620,50 @@ export type Database = {
           },
         ]
       }
+      secure_recording_metadata: {
+        Row: {
+          expires_at: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          is_public: boolean | null
+          mime_type: string | null
+          recording_id: string | null
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_public?: boolean | null
+          mime_type?: string | null
+          recording_id?: string | null
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_public?: boolean | null
+          mime_type?: string | null
+          recording_id?: string | null
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "secure_recording_metadata_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skill_progress: {
         Row: {
           id: string
@@ -1578,6 +1698,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      storage_access_logs: {
+        Row: {
+          accessed_at: string | null
+          action: string
+          file_path: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string | null
+          action: string
+          file_path: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string | null
+          action?: string
+          file_path?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       team_benchmarks: {
         Row: {
@@ -1923,7 +2073,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_contact_rate_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      check_crm_rate_limit: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
