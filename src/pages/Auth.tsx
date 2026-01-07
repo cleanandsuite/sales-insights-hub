@@ -1,34 +1,84 @@
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Headphones, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSafeErrorMessage } from '@/lib/errorSanitizer';
+import { supabase } from '@/integrations/supabase/client';
+import { PRICING_TIERS } from '@/hooks/useSubscription';
+import gritcallIcon from '@/assets/gritcall-icon.png';
 
 export default function Auth() {
   const { user, loading: authLoading } = useAuth();
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [redirectingToCheckout, setRedirectingToCheckout] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     fullName: '',
   });
 
-  if (authLoading) {
+  const startTrial = searchParams.get('trial') === 'true';
+  const planKey = (searchParams.get('plan') as 'single_user' | 'team') || 'single_user';
+
+  // Handle post-signup redirect to Stripe checkout with trial
+  useEffect(() => {
+    const handleTrialRedirect = async () => {
+      if (user && startTrial && !redirectingToCheckout) {
+        setRedirectingToCheckout(true);
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          if (!session.session) return;
+
+          const priceId = PRICING_TIERS[planKey].priceId;
+          
+          const { data, error } = await supabase.functions.invoke('create-checkout', {
+            body: { priceId, quantity: 1, trial: true },
+            headers: {
+              Authorization: `Bearer ${session.session.access_token}`,
+            },
+          });
+
+          if (error) throw error;
+          if (data.url) {
+            window.location.href = data.url;
+          }
+        } catch (error) {
+          console.error('Trial checkout error:', error);
+          toast({
+            title: 'Checkout error',
+            description: 'Could not start trial. Please try again from settings.',
+            variant: 'destructive',
+          });
+          setRedirectingToCheckout(false);
+        }
+      }
+    };
+
+    handleTrialRedirect();
+  }, [user, startTrial, planKey, redirectingToCheckout, toast]);
+
+  if (authLoading || redirectingToCheckout) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          {redirectingToCheckout && (
+            <p className="text-muted-foreground">Setting up your 14-day trial...</p>
+          )}
+        </div>
       </div>
     );
   }
 
-  if (user) {
+  if (user && !startTrial) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -66,9 +116,13 @@ export default function Auth() {
         } else {
           toast({
             title: 'Account created!',
-            description: 'You can now sign in with your credentials.',
+            description: startTrial 
+              ? 'Redirecting to start your 14-day trial...'
+              : 'You can now sign in with your credentials.',
           });
-          setIsLogin(true);
+          if (!startTrial) {
+            setIsLogin(true);
+          }
         }
       }
     } finally {
@@ -83,14 +137,22 @@ export default function Auth() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
         <div className="relative z-10 text-center px-12 animate-fade-in">
           <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 glow-effect">
-              <Headphones className="h-8 w-8 text-primary" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 glow-effect overflow-hidden">
+              <img src={gritcallIcon} alt="GritCall" className="h-10 w-10 object-contain" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4 gradient-text">CallScope</h1>
+          <h1 className="text-4xl font-bold mb-4 gradient-text">GritCall</h1>
           <p className="text-xl text-muted-foreground max-w-md">
-            AI-powered sales call analytics to transform your conversations into insights.
+            AI-powered sales coaching to transform your calls into closed deals.
           </p>
+          {startTrial && (
+            <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="text-primary font-medium">🎉 14-Day Free Trial</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                No charge until day 15. Cancel anytime.
+              </p>
+            </div>
+          )}
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       </div>
@@ -100,26 +162,32 @@ export default function Auth() {
         <div className="w-full max-w-md space-y-8 animate-slide-up">
           <div className="text-center lg:hidden mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
-                <Headphones className="h-6 w-6 text-primary" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 overflow-hidden">
+                <img src={gritcallIcon} alt="GritCall" className="h-8 w-8 object-contain" />
               </div>
-              <span className="text-2xl font-bold">CallScope</span>
+              <span className="text-2xl font-bold">GritCall</span>
             </div>
           </div>
 
           <div className="space-y-2 text-center">
             <h2 className="text-2xl font-bold text-foreground">
-              {isLogin ? 'Welcome back' : 'Create an account'}
+              {startTrial 
+                ? 'Start Your 14-Day Trial' 
+                : isLogin 
+                  ? 'Welcome back' 
+                  : 'Create an account'}
             </h2>
             <p className="text-muted-foreground">
-              {isLogin
-                ? 'Enter your credentials to access your dashboard'
-                : 'Start analyzing your sales calls today'}
+              {startTrial
+                ? 'No charge until value proven—cancel anytime'
+                : isLogin
+                  ? 'Enter your credentials to access your dashboard'
+                  : 'Start analyzing your sales calls today'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
+            {(!isLogin || startTrial) && !isLogin && (
               <div className="space-y-2">
                 <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
                 <div className="relative">
@@ -175,7 +243,9 @@ export default function Auth() {
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLogin ? 'Sign In' : 'Create Account'}
+              {startTrial 
+                ? (isLogin ? 'Sign In & Start Trial' : 'Create Account & Start Trial')
+                : (isLogin ? 'Sign In' : 'Create Account')}
             </Button>
           </form>
 
@@ -190,6 +260,13 @@ export default function Auth() {
                 : 'Already have an account? Sign in'}
             </button>
           </div>
+
+          {startTrial && (
+            <p className="text-xs text-center text-muted-foreground">
+              By starting a trial, you agree to provide payment details. 
+              You won't be charged until day 15.
+            </p>
+          )}
         </div>
       </div>
     </div>
