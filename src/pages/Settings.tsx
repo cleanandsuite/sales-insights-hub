@@ -21,10 +21,12 @@ import {
   Check,
   AlertCircle,
   Database,
-  CreditCard
+  CreditCard,
+  Mail
 } from 'lucide-react';
 import { DataExportTab } from '@/components/settings/DataExportTab';
 import { BillingTab } from '@/components/settings/BillingTab';
+import { InvitesTab } from '@/components/settings/InvitesTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -242,6 +244,10 @@ export default function Settings() {
             <TabsTrigger value="data" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Database className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Data</span>
+            </TabsTrigger>
+            <TabsTrigger value="invites" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Invites</span>
             </TabsTrigger>
           </TabsList>
 
@@ -561,6 +567,11 @@ export default function Settings() {
             <div className="card-gradient rounded-xl border border-border/50 p-6">
               <BillingTab />
             </div>
+          </TabsContent>
+
+          {/* Invites */}
+          <TabsContent value="invites">
+            <InvitesTab />
           </TabsContent>
         </Tabs>
       </div>

@@ -13,7 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
-import { Search, Filter, Plus, Download, Users } from 'lucide-react';
+import { Search, Filter, Download, Users } from 'lucide-react';
+import { AddLeadDialog } from '@/components/leads/AddLeadDialog';
 
 interface Lead {
   id: string;
@@ -188,10 +189,7 @@ export default function Leads() {
               <Download className="h-4 w-4" />
               <span className="hidden xs:inline">Export</span>
             </Button>
-            <Button className="gap-2 flex-1 sm:flex-none" size="sm">
-              <Plus className="h-4 w-4" />
-              <span className="hidden xs:inline">Add Lead</span>
-            </Button>
+            <AddLeadDialog onLeadAdded={fetchLeads} />
           </div>
         </div>
 
