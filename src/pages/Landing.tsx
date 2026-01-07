@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Mic, Brain, TrendingUp, Users, Zap, Play, Star, Globe, Shield, ArrowRight } from 'lucide-react';
+import { Check, Mic, Brain, TrendingUp, Users, Zap, Play, Star, Globe, Shield, ArrowRight, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import gritcallIcon from '@/assets/gritcall-icon.png';
 
 const PRICING_TIERS = [
@@ -70,9 +73,24 @@ const TRUSTED_BY = [
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const handleStartTrial = (planKey: string = 'single_user') => {
-    navigate(`/auth?trial=true&plan=${planKey}`);
+  const handleStartTrial = async (planKey: string = 'single_user') => {
+    setLoadingPlan(planKey);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-trial-checkout', {
+        body: { plan: planKey },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to start checkout. Please try again.');
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -115,9 +133,18 @@ export default function Landing() {
               Record, analyze, and close more deals—all from your browser.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" onClick={() => handleStartTrial()} className="gap-2">
-                Start 14-Day Free Trial
-                <ArrowRight className="h-5 w-5" />
+              <Button size="lg" onClick={() => handleStartTrial()} className="gap-2" disabled={loadingPlan !== null}>
+                {loadingPlan === 'single_user' ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    Start 14-Day Free Trial
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
               </Button>
               <Button size="lg" variant="outline" className="gap-2">
                 <Play className="h-5 w-5" />
@@ -304,8 +331,16 @@ export default function Landing() {
                     className="w-full" 
                     variant={tier.popular ? 'default' : 'outline'}
                     onClick={() => handleStartTrial(tier.planKey)}
+                    disabled={loadingPlan !== null}
                   >
-                    Start 14-Day Free Trial
+                    {loadingPlan === tier.planKey ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Starting...
+                      </>
+                    ) : (
+                      'Start 14-Day Free Trial'
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
@@ -326,9 +361,18 @@ export default function Landing() {
               Join hundreds of sales teams already using AI to improve their close rates.
               Start your 14-day trial today—no charge until you're convinced.
             </p>
-            <Button size="lg" onClick={() => handleStartTrial()} className="gap-2">
-              Start Your Free Trial
-              <ArrowRight className="h-5 w-5" />
+            <Button size="lg" onClick={() => handleStartTrial()} className="gap-2" disabled={loadingPlan !== null}>
+              {loadingPlan ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  Start Your Free Trial
+                  <ArrowRight className="h-5 w-5" />
+                </>
+              )}
             </Button>
           </div>
         </div>

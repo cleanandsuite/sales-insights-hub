@@ -24,6 +24,7 @@ import WinWords from "./pages/WinWords";
 import AudioTest from "./pages/AudioTest";
 import Manager from "./pages/Manager";
 import Landing from "./pages/Landing";
+import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/landing" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
             <Route path="/recording/:id" element={<ProtectedRoute><RecordingAnalysis /></ProtectedRoute>} />
