@@ -9,11 +9,13 @@ import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
-import { Search, Filter, Download, Users } from 'lucide-react';
+import { Search, Filter, Download, Users, Sparkles } from 'lucide-react';
 import { AddLeadDialog } from '@/components/leads/AddLeadDialog';
 
 interface Lead {
@@ -55,6 +57,208 @@ interface Lead {
   ai_assisted?: boolean;
 }
 
+// Demo data for showcasing AI capabilities
+const DEMO_LEADS: Lead[] = [
+  {
+    id: 'demo-1',
+    contact_name: 'Sarah Mitchell',
+    company: 'TechFlow Solutions',
+    title: 'VP of Sales',
+    email: 'sarah@techflow.io',
+    phone: '+1 (555) 234-5678',
+    location: 'San Francisco, CA',
+    ai_confidence: 94,
+    priority_score: 9.2,
+    lead_status: 'qualified',
+    primary_pain_point: 'Current tool requires 3 weeks of onboarding per rep',
+    budget_info: '$50k-100k annual',
+    timeline: '1-3 months',
+    next_action: 'Schedule demo with procurement team',
+    next_action_due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    is_hot_lead: true,
+    urgency_level: 'high',
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    call_duration_seconds: 1847,
+    recording_id: null,
+    engagement_score: 92,
+    key_quotes: ['"We need something our reps can use on day one"', '"Budget is approved, just need to finalize vendor"'],
+    agreed_next_steps: ['Send ROI calculator', 'Schedule procurement call Thursday'],
+    bant_budget: 85,
+    bant_authority: 95,
+    bant_need: 90,
+    bant_timeline: 80,
+    sentiment_trend: [{ score: 0.7 }, { score: 0.8 }, { score: 0.9 }],
+    objection_patterns: ['Integration complexity'],
+    next_best_actions: [
+      { action: 'Send case study from similar company', priority: 'high', reason: 'Address integration concerns' },
+      { action: 'Prepare ROI comparison vs current tool', priority: 'medium', reason: 'Budget justification' }
+    ],
+    risk_level: 'low',
+    deal_velocity_days: 14,
+    predicted_close_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+    predicted_deal_value: 75000,
+    ai_assisted: true
+  },
+  {
+    id: 'demo-2',
+    contact_name: 'Marcus Chen',
+    company: 'CloudScale Inc',
+    title: 'Director of Revenue Operations',
+    email: 'mchen@cloudscale.com',
+    phone: '+1 (555) 345-6789',
+    location: 'Austin, TX',
+    ai_confidence: 78,
+    priority_score: 7.8,
+    lead_status: 'contacted',
+    primary_pain_point: 'Spending 4 hours/week on call reviews manually',
+    budget_info: 'Evaluating options',
+    timeline: '3-6 months',
+    next_action: 'Follow up on feature requirements',
+    next_action_due: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    is_hot_lead: false,
+    urgency_level: 'medium',
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    call_duration_seconds: 1234,
+    recording_id: null,
+    engagement_score: 74,
+    key_quotes: ['"Manual review is killing our productivity"'],
+    agreed_next_steps: ['Send feature comparison doc'],
+    bant_budget: 60,
+    bant_authority: 70,
+    bant_need: 85,
+    bant_timeline: 50,
+    sentiment_trend: [{ score: 0.6 }, { score: 0.7 }],
+    objection_patterns: ['Timeline uncertainty', 'Need stakeholder buy-in'],
+    next_best_actions: [
+      { action: 'Identify additional stakeholders', priority: 'high', reason: 'Need multi-threading' },
+      { action: 'Create urgency with competitor mention', priority: 'medium', reason: 'Accelerate timeline' }
+    ],
+    risk_level: 'medium',
+    deal_velocity_days: 45,
+    predicted_close_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+    predicted_deal_value: 45000,
+    ai_assisted: true
+  },
+  {
+    id: 'demo-3',
+    contact_name: 'Emily Rodriguez',
+    company: 'DataSync Pro',
+    title: 'Head of Sales Enablement',
+    email: 'emily.r@datasyncpro.com',
+    phone: '+1 (555) 456-7890',
+    location: 'New York, NY',
+    ai_confidence: 88,
+    priority_score: 8.5,
+    lead_status: 'proposal',
+    primary_pain_point: 'Junior reps taking 6 months to ramp',
+    budget_info: '$30k-50k',
+    timeline: 'immediate',
+    next_action: 'Send customized proposal',
+    next_action_due: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+    is_hot_lead: true,
+    urgency_level: 'high',
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    call_duration_seconds: 2156,
+    recording_id: null,
+    engagement_score: 88,
+    key_quotes: ['"We need to cut ramp time in half"', '"The CFO is asking for ROI numbers"'],
+    agreed_next_steps: ['Finalize pricing', 'Set up pilot program'],
+    bant_budget: 75,
+    bant_authority: 80,
+    bant_need: 95,
+    bant_timeline: 90,
+    sentiment_trend: [{ score: 0.75 }, { score: 0.85 }, { score: 0.88 }],
+    objection_patterns: ['Needs CFO approval'],
+    next_best_actions: [
+      { action: 'Prepare CFO-ready ROI deck', priority: 'high', reason: 'CFO is key decision maker' },
+      { action: 'Offer extended pilot', priority: 'medium', reason: 'Reduce perceived risk' }
+    ],
+    risk_level: 'low',
+    deal_velocity_days: 21,
+    predicted_close_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    predicted_deal_value: 42000,
+    ai_assisted: true
+  },
+  {
+    id: 'demo-4',
+    contact_name: 'James Wilson',
+    company: 'Velocity Partners',
+    title: 'Sales Manager',
+    email: 'jwilson@velocitypartners.com',
+    phone: '+1 (555) 567-8901',
+    location: 'Chicago, IL',
+    ai_confidence: 65,
+    priority_score: 6.2,
+    lead_status: 'new',
+    primary_pain_point: 'No visibility into rep call quality',
+    budget_info: 'TBD',
+    timeline: '6+ months',
+    next_action: 'Discovery call to understand full needs',
+    next_action_due: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    is_hot_lead: false,
+    urgency_level: 'low',
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    call_duration_seconds: 678,
+    recording_id: null,
+    engagement_score: 55,
+    key_quotes: ['"Just exploring options for now"'],
+    agreed_next_steps: ['Schedule deeper discovery'],
+    bant_budget: 40,
+    bant_authority: 55,
+    bant_need: 70,
+    bant_timeline: 30,
+    sentiment_trend: [{ score: 0.5 }],
+    objection_patterns: ['Early stage', 'No budget allocated'],
+    next_best_actions: [
+      { action: 'Nurture with educational content', priority: 'low', reason: 'Long sales cycle expected' }
+    ],
+    risk_level: 'high',
+    deal_velocity_days: null,
+    predicted_close_date: null,
+    predicted_deal_value: 25000,
+    ai_assisted: true
+  }
+];
+
+const DEMO_ACTIVITIES = [
+  {
+    id: 'demo-act-1',
+    type: 'ai_scored' as const,
+    title: 'AI detected buying signal',
+    description: 'Sarah Mitchell mentioned "budget is approved" - high intent detected',
+    timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    leadId: 'demo-1',
+    confidence: 94
+  },
+  {
+    id: 'demo-act-2',
+    type: 'new_lead' as const,
+    title: 'New hot lead: Sarah Mitchell (TechFlow)',
+    description: 'VP of Sales looking for Gong alternative',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    leadId: 'demo-1',
+    confidence: 94
+  },
+  {
+    id: 'demo-act-3',
+    type: 'ai_scored' as const,
+    title: 'Lead score increased: Emily Rodriguez',
+    description: 'Moved to Proposal stage, confidence up 12%',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    leadId: 'demo-3',
+    confidence: 88
+  },
+  {
+    id: 'demo-act-4',
+    type: 'new_lead' as const,
+    title: 'New lead: James Wilson (Velocity)',
+    description: 'Sales Manager exploring call quality tools',
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    leadId: 'demo-4',
+    confidence: 65
+  }
+];
+
 export default function Leads() {
   const { user } = useAuth();
   const { isManager, teamId } = useUserRole();
@@ -64,6 +268,7 @@ export default function Leads() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [aiActive, setAiActive] = useState(true);
+  const [demoMode, setDemoMode] = useState(false);
   const [stats, setStats] = useState({
     todaysLeads: 0,
     weeklyLeads: 0,
@@ -72,8 +277,19 @@ export default function Leads() {
   });
 
   useEffect(() => {
-    fetchLeads();
-  }, [user]);
+    if (demoMode) {
+      setLeads(DEMO_LEADS);
+      setStats({
+        todaysLeads: 2,
+        weeklyLeads: 4,
+        conversionRate: 34,
+        avgResponseTime: '0.8 hrs'
+      });
+      setLoading(false);
+    } else {
+      fetchLeads();
+    }
+  }, [user, demoMode]);
 
   const fetchLeads = async () => {
     if (!user) return;
@@ -120,15 +336,17 @@ export default function Leads() {
   const hotLeads = leads.filter(l => l.is_hot_lead).length;
   const pendingFollowups = leads.filter(l => l.next_action_due && new Date(l.next_action_due) <= new Date()).length;
   
-  const recentActivities = leads.slice(0, 5).map(lead => ({
-    id: lead.id,
-    type: 'new_lead' as const,
-    title: `New lead: ${lead.contact_name}${lead.company ? ` (${lead.company})` : ''}`,
-    description: lead.primary_pain_point || 'Contact captured from call',
-    timestamp: lead.created_at,
-    leadId: lead.id,
-    confidence: lead.ai_confidence || undefined
-  }));
+  const recentActivities = demoMode 
+    ? DEMO_ACTIVITIES 
+    : leads.slice(0, 5).map(lead => ({
+        id: lead.id,
+        type: 'new_lead' as const,
+        title: `New lead: ${lead.contact_name}${lead.company ? ` (${lead.company})` : ''}`,
+        description: lead.primary_pain_point || 'Contact captured from call',
+        timestamp: lead.created_at,
+        leadId: lead.id,
+        confidence: lead.ai_confidence || undefined
+      }));
 
   const alerts = [
     ...(pendingFollowups > 0 ? [{
@@ -148,6 +366,10 @@ export default function Leads() {
   ];
 
   const handleCall = (lead: Lead) => {
+    if (demoMode) {
+      toast.info('Demo mode: Call action simulated');
+      return;
+    }
     if (lead.phone) {
       window.location.href = `tel:${lead.phone}`;
     } else {
@@ -156,6 +378,10 @@ export default function Leads() {
   };
 
   const handleEmail = (lead: Lead) => {
+    if (demoMode) {
+      toast.info('Demo mode: Email action simulated');
+      return;
+    }
     if (lead.email) {
       window.location.href = `mailto:${lead.email}`;
     } else {
@@ -164,6 +390,10 @@ export default function Leads() {
   };
 
   const handleViewSummary = (lead: Lead) => {
+    if (demoMode) {
+      toast.info('Demo mode: This would show the AI call summary');
+      return;
+    }
     if (lead.recording_id) {
       navigate(`/recording/${lead.recording_id}`);
     } else {
@@ -172,7 +402,20 @@ export default function Leads() {
   };
 
   const handleSchedule = (lead: Lead) => {
+    if (demoMode) {
+      toast.info('Demo mode: Schedule action simulated');
+      return;
+    }
     navigate('/schedule');
+  };
+
+  const handleToggleDemo = () => {
+    setDemoMode(!demoMode);
+    if (!demoMode) {
+      toast.success('Demo mode enabled - showing sample AI-generated leads');
+    } else {
+      toast('Demo mode disabled', { description: 'Showing your actual leads' });
+    }
   };
 
   return (
@@ -184,7 +427,19 @@ export default function Leads() {
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Leads</h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">AI-powered lead generation and management</p>
           </div>
-          <div className="flex gap-2 sm:gap-3">
+          <div className="flex gap-2 sm:gap-3 items-center">
+            {/* Demo Mode Toggle */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50 border border-border">
+              <Sparkles className={`h-4 w-4 ${demoMode ? 'text-primary' : 'text-muted-foreground'}`} />
+              <Label htmlFor="demo-mode" className="text-sm font-medium cursor-pointer">
+                Demo
+              </Label>
+              <Switch
+                id="demo-mode"
+                checked={demoMode}
+                onCheckedChange={handleToggleDemo}
+              />
+            </div>
             <Button variant="outline" className="gap-2 flex-1 sm:flex-none" size="sm">
               <Download className="h-4 w-4" />
               <span className="hidden xs:inline">Export</span>
@@ -192,6 +447,19 @@ export default function Leads() {
             <AddLeadDialog onLeadAdded={fetchLeads} />
           </div>
         </div>
+
+        {/* Demo Mode Banner */}
+        {demoMode && (
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center gap-3">
+            <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
+            <div>
+              <p className="font-medium text-sm">Demo Mode Active</p>
+              <p className="text-xs text-muted-foreground">
+                Showing sample AI-generated leads to demonstrate capabilities. Toggle off to see your real data.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* AI Status */}
         <AILeadStatus
@@ -201,7 +469,7 @@ export default function Leads() {
           conversionRate={stats.conversionRate}
           avgResponseTime={stats.avgResponseTime}
           onToggleAI={() => setAiActive(!aiActive)}
-          onTestMode={() => toast.info('Test mode coming soon')}
+          onTestMode={() => handleToggleDemo()}
           onViewLogs={() => toast.info('Logs coming soon')}
         />
 
@@ -261,11 +529,21 @@ export default function Leads() {
                 <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-foreground mb-2">No leads yet</h3>
                 <p className="text-muted-foreground mb-4">
-                  Leads will appear here as the AI captures them from your calls
+                  {demoMode 
+                    ? 'No demo leads match your filters'
+                    : 'Leads will appear here as the AI captures them from your calls'}
                 </p>
-                <Button onClick={() => navigate('/dashboard')}>
-                  Start Recording
-                </Button>
+                {!demoMode && (
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button onClick={() => navigate('/dashboard')}>
+                      Start Recording
+                    </Button>
+                    <Button variant="outline" onClick={handleToggleDemo} className="gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      Try Demo Mode
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -278,7 +556,9 @@ export default function Leads() {
                     onViewSummary={handleViewSummary}
                     onSchedule={handleSchedule}
                     onLeadUpdated={(updatedLead: any) => {
-                      setLeads(prev => prev.map(l => l.id === updatedLead.id ? { ...l, ...updatedLead } : l));
+                      if (!demoMode) {
+                        setLeads(prev => prev.map(l => l.id === updatedLead.id ? { ...l, ...updatedLead } : l));
+                      }
                     }}
                     isManager={isManager}
                     teamId={teamId}
@@ -294,6 +574,10 @@ export default function Leads() {
               activities={recentActivities}
               onViewLead={(id) => toast.info(`Viewing lead ${id}`)}
               onViewSummary={(id) => {
+                if (demoMode) {
+                  toast.info('Demo mode: This would show the call summary');
+                  return;
+                }
                 const lead = leads.find(l => l.id === id);
                 if (lead?.recording_id) navigate(`/recording/${lead.recording_id}`);
               }}
@@ -301,7 +585,13 @@ export default function Leads() {
                 const lead = leads.find(l => l.id === id);
                 if (lead) handleCall(lead);
               }}
-              onSchedule={() => navigate('/schedule')}
+              onSchedule={() => {
+                if (demoMode) {
+                  toast.info('Demo mode: Schedule action simulated');
+                  return;
+                }
+                navigate('/schedule');
+              }}
               onEmail={(id) => {
                 const lead = leads.find(l => l.id === id);
                 if (lead) handleEmail(lead);
