@@ -2,16 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Mic, Brain, TrendingUp, Users, Zap, Play, Star, Globe, Shield } from 'lucide-react';
+import { Check, Mic, Brain, TrendingUp, Users, Zap, Play, Star, Globe, Shield, ArrowRight } from 'lucide-react';
+import gritcallIcon from '@/assets/gritcall-icon.png';
 
 const PRICING_TIERS = [
   {
     name: 'Single User',
     description: 'Perfect for individual sales reps',
     price: 19,
-    originalPrice: 39,
-    promo: 'First 3 months',
-    grandfathered: true,
+    afterTrialPrice: 39,
     features: [
       'Unlimited call recordings',
       'AI transcription & analysis',
@@ -20,14 +19,13 @@ const PRICING_TIERS = [
       'Email support',
     ],
     popular: false,
+    planKey: 'single_user',
   },
   {
     name: 'Team',
     description: 'For growing sales teams',
     price: 79,
-    originalPrice: 99,
-    promo: 'First 3 months',
-    grandfathered: true,
+    afterTrialPrice: 99,
     perUser: true,
     features: [
       'Everything in Single User',
@@ -38,12 +36,13 @@ const PRICING_TIERS = [
       'Priority support',
     ],
     popular: true,
+    planKey: 'team',
   },
 ];
 
 const TESTIMONIALS = [
   {
-    quote: "We closed 40% more deals within 2 months of using SalesCoach AI. The instant feedback is game-changing.",
+    quote: "We closed 40% more deals within 2 months of using GritCall. The instant feedback is game-changing.",
     author: "Sarah Chen",
     role: "VP of Sales",
     company: "TechFlow Inc.",
@@ -72,6 +71,10 @@ const TRUSTED_BY = [
 export default function Landing() {
   const navigate = useNavigate();
 
+  const handleStartTrial = (planKey: string = 'single_user') => {
+    navigate(`/auth?trial=true&plan=${planKey}`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -79,15 +82,20 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
         <div className="container mx-auto px-4 py-6">
           <nav className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <Mic className="h-5 w-5 text-primary-foreground" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+                <img src={gritcallIcon} alt="GritCall" className="h-6 w-6 object-contain" />
               </div>
-              <span className="font-bold text-xl">SalesCoach AI</span>
+              <span className="font-bold text-xl">GritCall</span>
             </div>
-            <Button onClick={() => navigate('/auth')} variant="outline">
-              Sign In
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => navigate('/auth')} variant="ghost">
+                Sign In
+              </Button>
+              <Button onClick={() => handleStartTrial()}>
+                Start Free Trial
+              </Button>
+            </div>
           </nav>
         </div>
 
@@ -98,26 +106,29 @@ export default function Landing() {
               Zero Setup—Browser Only
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Sales Coaching in 60 Seconds
+              Sales Coaching That
               <br />
-              <span className="text-primary">No Setup, No Fees</span>
+              <span className="text-primary">Closes More Deals</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Turn cold calls hot with AI insights. Easier than Gong, half the cost.
               Record, analyze, and close more deals—all from your browser.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" onClick={() => navigate('/auth')} className="gap-2">
-                <Mic className="h-5 w-5" />
-                Get Started Now
+              <Button size="lg" onClick={() => handleStartTrial()} className="gap-2">
+                Start 14-Day Free Trial
+                <ArrowRight className="h-5 w-5" />
               </Button>
               <Button size="lg" variant="outline" className="gap-2">
                 <Play className="h-5 w-5" />
                 Watch Demo
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground">
+              14-day trial—no charge until value proven. Cancel anytime.
+            </p>
             {/* Trust badges */}
-            <div className="flex items-center justify-center gap-6 pt-8 text-muted-foreground">
+            <div className="flex items-center justify-center gap-6 pt-4 text-muted-foreground">
               <div className="flex items-center gap-2 text-sm">
                 <Shield className="h-4 w-4" />
                 <span>SOC 2 Compliant</span>
@@ -158,7 +169,6 @@ export default function Landing() {
               <p className="text-muted-foreground">Get started in under 2 minutes—no RevOps required</p>
             </div>
             <div className="aspect-video bg-card rounded-xl border border-border overflow-hidden shadow-lg">
-              {/* Video placeholder - replace with actual embed */}
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
                 <div className="text-center space-y-4">
                   <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -176,7 +186,7 @@ export default function Landing() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Why Sales Teams Choose Us</h2>
+            <h2 className="text-3xl font-bold mb-4">Why Sales Teams Choose GritCall</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Everything you need to coach your team and close more deals
             </p>
@@ -253,7 +263,7 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-muted-foreground">Lock in early-adopter rates—grandfathered forever</p>
+            <p className="text-muted-foreground">Start with a 14-day free trial. No charge until you see the value.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {PRICING_TIERS.map((tier) => (
@@ -277,13 +287,8 @@ export default function Landing() {
                       <span className="text-muted-foreground">{tier.perUser ? '/user/mo' : '/mo'}</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {tier.promo} • Then ${tier.originalPrice}{tier.perUser ? '/user' : ''}/mo
+                      then ${tier.afterTrialPrice}{tier.perUser ? '/user' : ''}/mo (grandfathered)
                     </p>
-                    {tier.grandfathered && (
-                      <Badge variant="secondary" className="mt-2 text-xs">
-                        Early adopters grandfathered at launch price
-                      </Badge>
-                    )}
                   </div>
                   <ul className="space-y-3">
                     {tier.features.map((feature) => (
@@ -298,16 +303,16 @@ export default function Landing() {
                   <Button 
                     className="w-full" 
                     variant={tier.popular ? 'default' : 'outline'}
-                    onClick={() => navigate('/auth')}
+                    onClick={() => handleStartTrial(tier.planKey)}
                   >
-                    Get Started
+                    Start 14-Day Free Trial
                   </Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
           <p className="text-center text-sm text-muted-foreground mt-8">
-            No credit card required • Cancel anytime
+            Card required upfront—no charge until day 15. Cancel anytime.
           </p>
         </div>
       </section>
@@ -319,10 +324,11 @@ export default function Landing() {
             <h2 className="text-3xl font-bold">Ready to Close More Deals?</h2>
             <p className="text-lg text-muted-foreground">
               Join hundreds of sales teams already using AI to improve their close rates.
+              Start your 14-day trial today—no charge until you're convinced.
             </p>
-            <Button size="lg" onClick={() => navigate('/auth')} className="gap-2">
-              <Users className="h-5 w-5" />
-              Get Started Now
+            <Button size="lg" onClick={() => handleStartTrial()} className="gap-2">
+              Start Your Free Trial
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -332,14 +338,14 @@ export default function Landing() {
       <footer className="border-t py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
-                <Mic className="h-4 w-4 text-primary-foreground" />
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+                <img src={gritcallIcon} alt="GritCall" className="h-5 w-5 object-contain" />
               </div>
-              <span className="font-semibold">SalesCoach AI</span>
+              <span className="font-semibold">GritCall</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} SalesCoach AI. All rights reserved.
+              © {new Date().getFullYear()} GritCall. All rights reserved.
             </p>
           </div>
         </div>

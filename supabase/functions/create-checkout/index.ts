@@ -39,9 +39,9 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { priceId, quantity = 1 } = await req.json();
+    const { priceId, quantity = 1, trial = false } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
-    logStep("Request params", { priceId, quantity });
+    logStep("Request params", { priceId, quantity, trial });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -55,7 +55,8 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "http://localhost:5173";
 
-    const session = await stripe.checkout.sessions.create({
+    // Build session config
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
@@ -65,14 +66,24 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/settings?subscription=success`,
+      success_url: `${origin}/dashboard?subscription=success`,
       cancel_url: `${origin}/settings?subscription=canceled`,
       metadata: {
         user_id: user.id,
       },
-    });
+    };
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+    // Add 14-day trial if requested
+    if (trial) {
+      sessionConfig.subscription_data = {
+        trial_period_days: 14,
+      };
+      logStep("Adding 14-day trial");
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    logStep("Checkout session created", { sessionId: session.id, url: session.url, trial });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

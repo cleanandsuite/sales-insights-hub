@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, Headphones, FileAudio, Users, Calendar, Trophy, Settings, Target, Phone, BarChart3, Sparkles, Menu, Crown } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, Phone, BarChart3, Sparkles, Menu, Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import gritcallIcon from '@/assets/gritcall-icon.png';
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -35,10 +36,10 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-          <Headphones className="h-5 w-5 text-primary" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
+          <img src={gritcallIcon} alt="GritCall" className="h-6 w-6 object-contain" />
         </div>
-        <span className="text-lg font-semibold text-sidebar-foreground">CallScope</span>
+        <span className="text-lg font-semibold text-sidebar-foreground">GritCall</span>
       </div>
 
       {/* Navigation */}
@@ -83,10 +84,10 @@ export function MobileHeader() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 lg:hidden">
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-          <Headphones className="h-4 w-4 text-primary" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
+          <img src={gritcallIcon} alt="GritCall" className="h-5 w-5 object-contain" />
         </div>
-        <span className="text-base font-semibold text-sidebar-foreground">CallScope</span>
+        <span className="text-base font-semibold text-sidebar-foreground">GritCall</span>
       </div>
       
       <Sheet open={open} onOpenChange={setOpen}>
