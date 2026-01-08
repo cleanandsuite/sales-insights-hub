@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Mic, Brain, TrendingUp, Users, Zap, Play, Star, Globe, Shield, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, Mic, Brain, TrendingUp, Zap, Play, Star, Globe, Shield, ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import gritcallIcon from '@/assets/gritcall-icon.png';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { DemoVideoModal } from '@/components/landing/DemoVideoModal';
 
 const PRICING_TIERS = [
   {
@@ -72,8 +74,9 @@ const TRUSTED_BY = [
 ];
 
 export default function Landing() {
-  const navigate = useNavigate();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
 
   const handleStartTrial = async (planKey: string = 'single_user') => {
     setLoadingPlan(planKey);
@@ -95,22 +98,25 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
+      <DemoVideoModal open={demoModalOpen} onOpenChange={setDemoModalOpen} />
+      
       {/* Hero Section */}
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
         <div className="container mx-auto px-4 py-6">
           <nav className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
                 <img src={gritcallIcon} alt="GritCall" className="h-6 w-6 object-contain" />
               </div>
               <span className="font-bold text-xl">GritCall</span>
-            </div>
+            </Link>
             <div className="flex items-center gap-3">
-              <Button onClick={() => navigate('/auth')} variant="ghost">
+              <Button onClick={() => setAuthModalOpen(true)} variant="ghost" className="hover:bg-primary/10">
                 Sign In
               </Button>
-              <Button onClick={() => handleStartTrial()}>
+              <Button onClick={() => handleStartTrial()} className="hover:scale-105 transition-transform">
                 Start Free Trial
               </Button>
             </div>
@@ -146,7 +152,12 @@ export default function Landing() {
                   </>
                 )}
               </Button>
-              <Button size="lg" variant="outline" className="gap-2">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="gap-2 hover:scale-105 transition-transform"
+                onClick={() => setDemoModalOpen(true)}
+              >
                 <Play className="h-5 w-5" />
                 Watch Demo
               </Button>
@@ -195,13 +206,16 @@ export default function Landing() {
               <h2 className="text-2xl md:text-3xl font-bold mb-2">See It In Action</h2>
               <p className="text-muted-foreground">Get started in under 2 minutes—no RevOps required</p>
             </div>
-            <div className="aspect-video bg-card rounded-xl border border-border overflow-hidden shadow-lg">
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+            <div 
+              className="aspect-video bg-card rounded-xl border border-border overflow-hidden shadow-lg cursor-pointer group hover:shadow-xl transition-shadow"
+              onClick={() => setDemoModalOpen(true)}
+            >
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50 relative">
                 <div className="text-center space-y-4">
-                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto group-hover:bg-primary/20 group-hover:scale-110 transition-all">
                     <Play className="h-8 w-8 text-primary" />
                   </div>
-                  <p className="text-muted-foreground">Demo video coming soon</p>
+                  <p className="text-muted-foreground group-hover:text-foreground transition-colors">Click to watch demo</p>
                 </div>
               </div>
             </div>
