@@ -11,6 +11,21 @@ interface UseAudioRecorderReturn {
   getAudioChunk: () => Promise<Blob | null>;
 }
 
+// Optimal settings for speech: mono 16kHz WebM Opus at 64kbps
+// Whisper accepts WebM directly - no transcoding needed
+const AUDIO_CONSTRAINTS = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+  channelCount: 1,
+  sampleRate: 16000,
+};
+
+const RECORDER_OPTIONS = {
+  mimeType: 'audio/webm;codecs=opus',
+  audioBitsPerSecond: 64000,
+};
+
 // Get the best supported MIME type
 function getSupportedMimeType(): string {
   const types = [
@@ -37,7 +52,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [audioLevel, setAudioLevel] = useState(0);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const mimeTypeRef = useRef<string>('audio/webm');
+  const mimeTypeRef = useRef<string>('audio/webm;codecs=opus');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -50,7 +65,6 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
     analyserRef.current.getByteFrequencyData(dataArray);
     
-    // Calculate average volume
     const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
     setAudioLevel(average / 255);
     
@@ -59,44 +73,41 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
 
   const startRecording = useCallback(async () => {
     try {
-      // Get audio stream with better quality settings for speech
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100, // Higher sample rate for better quality
-          channelCount: 1,   // Mono is better for speech recognition
-        } 
+        audio: AUDIO_CONSTRAINTS
       });
       
       streamRef.current = stream;
       
-      // Log microphone track details for debugging
+      // Log microphone track details
       const audioTrack = stream.getAudioTracks()[0];
       if (audioTrack) {
+        const settings = audioTrack.getSettings();
         console.log('MICROPHONE DEBUG:', {
           label: audioTrack.label,
-          enabled: audioTrack.enabled,
-          muted: audioTrack.muted,
-          readyState: audioTrack.readyState,
-          settings: audioTrack.getSettings()
+          channelCount: settings.channelCount,
+          sampleRate: settings.sampleRate,
         });
       }
       
-      // Set up audio analysis for visualization
-      audioContextRef.current = new AudioContext();
+      // Set up audio analysis with 16kHz context
+      audioContextRef.current = new AudioContext({ sampleRate: 16000 });
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
       
       const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
       
-      // Set up MediaRecorder with best supported MIME type
-      const mimeType = getSupportedMimeType();
+      // Use optimized settings - prefer WebM Opus at 64kbps
+      let mimeType = RECORDER_OPTIONS.mimeType;
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = getSupportedMimeType();
+      }
       mimeTypeRef.current = mimeType;
+      
       const mediaRecorder = new MediaRecorder(stream, { 
         mimeType,
-        audioBitsPerSecond: 128000 // 128 kbps - good quality for speech
+        audioBitsPerSecond: RECORDER_OPTIONS.audioBitsPerSecond
       });
       
       mediaRecorderRef.current = mediaRecorder;
@@ -108,12 +119,12 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         }
       };
       
-      mediaRecorder.start(100); // Collect data every 100ms for smoother visualization
+      mediaRecorder.start(100);
       setIsRecording(true);
       setIsPaused(false);
-      
-      // Start audio level monitoring
       updateAudioLevel();
+      
+      console.log('Recording started:', mimeType, '@ 64kbps mono 16kHz');
       
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -129,7 +140,8 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       }
       
       mediaRecorderRef.current.onstop = () => {
-         const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current || 'audio/webm' });
+        const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
+        console.log('Recording stopped:', blob.size, 'bytes');
         
         // Clean up
         if (streamRef.current) {
@@ -173,10 +185,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
 
   const getAudioChunk = useCallback(async (): Promise<Blob | null> => {
     if (chunksRef.current.length === 0) return null;
-    
-    const latestChunks = [...chunksRef.current];
-    // Keep the chunks for full recording but return latest for transcription
-    return new Blob(latestChunks, { type: mimeTypeRef.current || 'audio/webm' });
+    return new Blob([...chunksRef.current], { type: mimeTypeRef.current });
   }, []);
 
   return {
