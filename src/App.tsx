@@ -18,7 +18,7 @@ import Coaching from "./pages/Coaching";
 import Settings from "./pages/Settings";
 import SalesforceSettings from "./pages/SalesforceSettings";
 import Leads from "./pages/Leads";
-import CallHistory from "./pages/CallHistory";
+import { Navigate } from "react-router-dom";
 import Analytics from "./pages/Analytics";
 import WinWords from "./pages/WinWords";
 import AudioTest from "./pages/AudioTest";
@@ -45,7 +45,7 @@ const App = () => (
             <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
             <Route path="/recording/:id" element={<ProtectedRoute><RecordingAnalysis /></ProtectedRoute>} />
             <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
-            <Route path="/call-history" element={<ProtectedRoute><CallHistory /></ProtectedRoute>} />
+            <Route path="/call-history" element={<Navigate to="/recordings" replace />} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
