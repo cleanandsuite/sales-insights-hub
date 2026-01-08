@@ -10,7 +10,7 @@ import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { transcodeToMp3 } from '@/lib/audioTranscoder';
+
 
 interface LiveRecordingInterfaceProps {
   onClose: () => void;
@@ -229,40 +229,24 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
       setProcessingStatus('Processing audio...');
       
-      // Check if we already have MP3 (from direct recording) or need to transcode
-      let finalBlob: Blob;
-      let audioDuration: number;
-      let fileName: string;
+      // WebM Opus is sent directly to Whisper - no transcoding needed
+      const finalBlob = audioBlob;
+      const audioDuration = recordingDuration;
+      const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
       
-      const isAlreadyMp3 = audioBlob.type === 'audio/mpeg' || recordingMethod === 'mp3-direct';
-      
-      if (isAlreadyMp3) {
-        console.log('Audio is already MP3, skipping transcode');
-        finalBlob = audioBlob;
-        audioDuration = recordingDuration;
-        const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-        fileName = `${baseName}.mp3`;
-        console.log('Using direct MP3:', finalBlob.size, 'bytes');
-      } else {
-        setProcessingStatus('Converting to MP3...');
-        try {
-          const transcodeResult = await transcodeToMp3(audioBlob);
-          finalBlob = transcodeResult.blob;
-          audioDuration = Math.round(transcodeResult.duration);
-          const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-          fileName = `${baseName}.mp3`;
-          console.log('Successfully transcoded to MP3:', finalBlob.size, 'bytes');
-        } catch (transcodeError) {
-          console.error('Transcode failed, using original format:', transcodeError);
-          // Fallback to original format if transcoding fails
-          finalBlob = audioBlob;
-          audioDuration = recordingDuration;
-          const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-          const mimeType = audioBlob.type || 'audio/webm';
-          const extension = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
-          fileName = `${baseName}.${extension}`;
-        }
+      // Determine file extension from MIME type
+      const mimeType = audioBlob.type || 'audio/webm';
+      let extension = 'webm';
+      if (mimeType.includes('mp4') || mimeType.includes('m4a')) {
+        extension = 'm4a';
+      } else if (mimeType.includes('ogg')) {
+        extension = 'ogg';
+      } else if (mimeType.includes('mpeg') || mimeType.includes('mp3')) {
+        extension = 'mp3';
       }
+      
+      const fileName = `${baseName}.${extension}`;
+      console.log('Recording saved as:', fileName, finalBlob.size, 'bytes', 'method:', recordingMethod);
 
       setProcessingStatus('Saving to database...');
        
@@ -293,9 +277,9 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
       setProcessingStatus('Uploading audio file...');
       
-      // Upload MP3 audio to storage
+      // Upload audio to storage
       const filePath = `${user.id}/${recording.id}/${fileName}`;
-      const contentType = fileName.endsWith('.mp3') ? 'audio/mpeg' : (finalBlob.type || 'audio/webm');
+      const contentType = finalBlob.type || 'audio/webm';
       
       const { error: uploadError } = await supabase.storage
         .from('call-recordings')
