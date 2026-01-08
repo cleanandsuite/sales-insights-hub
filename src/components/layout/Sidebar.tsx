@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, Phone, BarChart3, Sparkles, Menu, Crown } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,6 @@ const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leads', icon: Target, label: 'Leads' },
-  { to: '/call-history', icon: Phone, label: 'Call History' },
   { to: '/recordings', icon: FileAudio, label: 'Recordings' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
