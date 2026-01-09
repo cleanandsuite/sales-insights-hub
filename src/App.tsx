@@ -23,7 +23,7 @@ import Analytics from "./pages/Analytics";
 import WinWords from "./pages/WinWords";
 import AudioTest from "./pages/AudioTest";
 import Manager from "./pages/Manager";
-import Landing from "./pages/Landing";
+
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/TermsOfService";
@@ -41,7 +41,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/landing" element={<Landing />} />
+            
             <Route path="/auth" element={<Auth />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/account-blocked" element={<AccountBlocked />} />
