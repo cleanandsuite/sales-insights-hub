@@ -150,6 +150,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ai_coaching_metrics_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "team_leads_secure"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ai_lead_settings: {
@@ -1159,6 +1166,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "team_leads_secure"
+            referencedColumns: ["id"]
+          },
         ]
       }
       leads: {
@@ -1377,6 +1391,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_access_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "team_leads_secure"
             referencedColumns: ["id"]
           },
         ]
@@ -2388,6 +2409,188 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_leads_secure: {
+        Row: {
+          actual_close_date: string | null
+          actual_deal_value: number | null
+          agreed_next_steps: string[] | null
+          ai_assisted: boolean | null
+          ai_coaching_log: Json | null
+          ai_confidence: number | null
+          assigned_to_user_id: string | null
+          bant_authority: number | null
+          bant_budget: number | null
+          bant_need: number | null
+          bant_timeline: number | null
+          budget_info: string | null
+          call_duration_seconds: number | null
+          company: string | null
+          competitor_status: string | null
+          contact_name: string | null
+          created_at: string | null
+          deal_velocity_days: number | null
+          decision_timeline_days: number | null
+          email: string | null
+          engagement_score: number | null
+          evaluation_stage: string | null
+          follow_up_count: number | null
+          id: string | null
+          is_hot_lead: boolean | null
+          key_moments: Json | null
+          key_quotes: Json | null
+          last_contacted_at: string | null
+          lead_status: string | null
+          location: string | null
+          materials_needed: string[] | null
+          next_action: string | null
+          next_action_due: string | null
+          next_best_actions: Json | null
+          objection_patterns: string[] | null
+          outcome: string | null
+          outcome_reason: string | null
+          phone: string | null
+          predicted_close_date: string | null
+          predicted_deal_value: number | null
+          prep_questions: string[] | null
+          primary_pain_point: string | null
+          priority_score: number | null
+          recording_id: string | null
+          risk_level: string | null
+          secondary_issues: string[] | null
+          sentiment_trend: Json | null
+          source: string | null
+          talk_ratio: number | null
+          team_size: number | null
+          timeline: string | null
+          title: string | null
+          updated_at: string | null
+          urgency_level: string | null
+          user_id: string | null
+        }
+        Insert: {
+          actual_close_date?: string | null
+          actual_deal_value?: number | null
+          agreed_next_steps?: string[] | null
+          ai_assisted?: boolean | null
+          ai_coaching_log?: Json | null
+          ai_confidence?: number | null
+          assigned_to_user_id?: string | null
+          bant_authority?: number | null
+          bant_budget?: number | null
+          bant_need?: number | null
+          bant_timeline?: number | null
+          budget_info?: string | null
+          call_duration_seconds?: number | null
+          company?: string | null
+          competitor_status?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          deal_velocity_days?: number | null
+          decision_timeline_days?: number | null
+          email?: never
+          engagement_score?: number | null
+          evaluation_stage?: string | null
+          follow_up_count?: number | null
+          id?: string | null
+          is_hot_lead?: boolean | null
+          key_moments?: Json | null
+          key_quotes?: Json | null
+          last_contacted_at?: string | null
+          lead_status?: string | null
+          location?: never
+          materials_needed?: string[] | null
+          next_action?: string | null
+          next_action_due?: string | null
+          next_best_actions?: Json | null
+          objection_patterns?: string[] | null
+          outcome?: string | null
+          outcome_reason?: string | null
+          phone?: never
+          predicted_close_date?: string | null
+          predicted_deal_value?: number | null
+          prep_questions?: string[] | null
+          primary_pain_point?: string | null
+          priority_score?: number | null
+          recording_id?: string | null
+          risk_level?: string | null
+          secondary_issues?: string[] | null
+          sentiment_trend?: Json | null
+          source?: string | null
+          talk_ratio?: number | null
+          team_size?: number | null
+          timeline?: string | null
+          title?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          actual_close_date?: string | null
+          actual_deal_value?: number | null
+          agreed_next_steps?: string[] | null
+          ai_assisted?: boolean | null
+          ai_coaching_log?: Json | null
+          ai_confidence?: number | null
+          assigned_to_user_id?: string | null
+          bant_authority?: number | null
+          bant_budget?: number | null
+          bant_need?: number | null
+          bant_timeline?: number | null
+          budget_info?: string | null
+          call_duration_seconds?: number | null
+          company?: string | null
+          competitor_status?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          deal_velocity_days?: number | null
+          decision_timeline_days?: number | null
+          email?: never
+          engagement_score?: number | null
+          evaluation_stage?: string | null
+          follow_up_count?: number | null
+          id?: string | null
+          is_hot_lead?: boolean | null
+          key_moments?: Json | null
+          key_quotes?: Json | null
+          last_contacted_at?: string | null
+          lead_status?: string | null
+          location?: never
+          materials_needed?: string[] | null
+          next_action?: string | null
+          next_action_due?: string | null
+          next_best_actions?: Json | null
+          objection_patterns?: string[] | null
+          outcome?: string | null
+          outcome_reason?: string | null
+          phone?: never
+          predicted_close_date?: string | null
+          predicted_deal_value?: number | null
+          prep_questions?: string[] | null
+          primary_pain_point?: string | null
+          priority_score?: number | null
+          recording_id?: string | null
+          risk_level?: string | null
+          secondary_issues?: string[] | null
+          sentiment_trend?: Json | null
+          source?: string | null
+          talk_ratio?: number | null
+          team_size?: number | null
+          timeline?: string | null
+          title?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
             referencedColumns: ["id"]
           },
         ]
