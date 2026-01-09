@@ -23,6 +23,7 @@ import { TranscriptSync } from '@/components/playback/TranscriptSync';
 import { AIInsightsSidebar } from '@/components/playback/AIInsightsSidebar';
 import { SalesforceRecordingView } from '@/components/recording/SalesforceRecordingView';
 import { DealCoachPanel } from '@/components/coaching/DealCoachPanel';
+import { PainDetectorPanel } from '@/components/analysis/PainDetectorPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -460,6 +461,17 @@ export default function RecordingAnalysis() {
               recordingId={recording.id}
               transcript={recording.live_transcription}
               userId={user.id}
+            />
+          </div>
+        )}
+
+        {/* AI Pain Detector */}
+        {user && recording.live_transcription && (
+          <div className="mt-6">
+            <PainDetectorPanel 
+              recordingId={recording.id}
+              transcript={recording.live_transcription}
+              existingAnalysis={(recording.ai_suggestions as any)?.painAnalysis}
             />
           </div>
         )}
