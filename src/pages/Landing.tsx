@@ -9,82 +9,59 @@ import { toast } from 'sonner';
 import sellsigLogo from '@/assets/sellsig-logo.png';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { DemoVideoModal } from '@/components/landing/DemoVideoModal';
-
-const PRICING_TIERS = [
-  {
-    name: 'Single User',
-    description: 'Perfect for individual sales reps',
-    price: 19,
-    afterTrialPrice: 39,
-    features: [
-      'Unlimited call recordings',
-      'AI transcription & analysis',
-      'Lead intelligence',
-      'Deal coaching insights',
-      'Email support',
-    ],
-    popular: false,
-    planKey: 'single_user',
-  },
-  {
-    name: 'Team',
-    description: 'For growing sales teams',
-    price: 79,
-    afterTrialPrice: 99,
-    perUser: true,
-    features: [
-      'Everything in Single User',
-      'Team performance analytics',
-      'Manager dashboard',
-      'Lead assignment & routing',
-      'Custom playbooks',
-      'Priority support',
-    ],
-    popular: true,
-    planKey: 'team',
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    quote: "We closed 40% more deals within 2 months of using SellSig. The instant feedback is game-changing.",
-    author: "Sarah Chen",
-    role: "VP of Sales",
-    company: "TechFlow Inc.",
-    avatar: "SC"
-  },
-  {
-    quote: "Finally, a Gong alternative that doesn't require a PhD to set up. My team was productive in minutes.",
-    author: "Marcus Johnson",
-    role: "Sales Director",
-    company: "CloudScale",
-    avatar: "MJ"
-  },
-  {
-    quote: "The AI coaching suggestions helped our junior reps perform like veterans. ROI was immediate.",
-    author: "Emily Rodriguez",
-    role: "Head of Revenue",
-    company: "DataSync Pro",
-    avatar: "ER"
-  }
-];
-
-const TRUSTED_BY = [
-  'TechFlow', 'CloudScale', 'DataSync', 'Velocity', 'Nexus'
-];
-
+const PRICING_TIERS = [{
+  name: 'Single User',
+  description: 'Perfect for individual sales reps',
+  price: 19,
+  afterTrialPrice: 39,
+  features: ['Unlimited call recordings', 'AI transcription & analysis', 'Lead intelligence', 'Deal coaching insights', 'Email support'],
+  popular: false,
+  planKey: 'single_user'
+}, {
+  name: 'Team',
+  description: 'For growing sales teams',
+  price: 79,
+  afterTrialPrice: 99,
+  perUser: true,
+  features: ['Everything in Single User', 'Team performance analytics', 'Manager dashboard', 'Lead assignment & routing', 'Custom playbooks', 'Priority support'],
+  popular: true,
+  planKey: 'team'
+}];
+const TESTIMONIALS = [{
+  quote: "We closed 40% more deals within 2 months of using SellSig. The instant feedback is game-changing.",
+  author: "Sarah Chen",
+  role: "VP of Sales",
+  company: "TechFlow Inc.",
+  avatar: "SC"
+}, {
+  quote: "Finally, a Gong alternative that doesn't require a PhD to set up. My team was productive in minutes.",
+  author: "Marcus Johnson",
+  role: "Sales Director",
+  company: "CloudScale",
+  avatar: "MJ"
+}, {
+  quote: "The AI coaching suggestions helped our junior reps perform like veterans. ROI was immediate.",
+  author: "Emily Rodriguez",
+  role: "Head of Revenue",
+  company: "DataSync Pro",
+  avatar: "ER"
+}];
+const TRUSTED_BY = ['TechFlow', 'CloudScale', 'DataSync', 'Velocity', 'Nexus'];
 export default function Landing() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [demoModalOpen, setDemoModalOpen] = useState(false);
-
   const handleStartTrial = async (planKey: string = 'single_user') => {
     setLoadingPlan(planKey);
     try {
-      const { data, error } = await supabase.functions.invoke('create-trial-checkout', {
-        body: { plan: planKey },
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('create-trial-checkout', {
+        body: {
+          plan: planKey
+        }
       });
-
       if (error) throw error;
       if (data?.url) {
         window.location.href = data.url;
@@ -95,9 +72,7 @@ export default function Landing() {
       setLoadingPlan(null);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       <DemoVideoModal open={demoModalOpen} onOpenChange={setDemoModalOpen} />
       
@@ -134,30 +109,18 @@ export default function Landing() {
               <br />
               <span className="text-primary">Closes More Deals</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Turn cold calls hot with AI insights. Easier than Gong, half the cost.
-              Record, analyze, and close more deals—all from your browser.
-            </p>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Turn cold calls hot with AI insights. Easier than competitors, half the cost. Record, analyze, and close more deals—all from your browser.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Button size="lg" onClick={() => handleStartTrial()} className="gap-2" disabled={loadingPlan !== null}>
-                {loadingPlan === 'single_user' ? (
-                  <>
+                {loadingPlan === 'single_user' ? <>
                     <Loader2 className="h-5 w-5 animate-spin" />
                     Starting...
-                  </>
-                ) : (
-                  <>
+                  </> : <>
                     Start 14-Day Free Trial
                     <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
+                  </>}
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="gap-2 hover:scale-105 transition-transform"
-                onClick={() => setDemoModalOpen(true)}
-              >
+              <Button size="lg" variant="outline" className="gap-2 hover:scale-105 transition-transform" onClick={() => setDemoModalOpen(true)}>
                 <Play className="h-5 w-5" />
                 Watch Demo
               </Button>
@@ -189,11 +152,9 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <p className="text-center text-sm text-muted-foreground mb-6">Trusted by sales teams at</p>
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-            {TRUSTED_BY.map((company) => (
-              <div key={company} className="text-lg font-semibold text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+            {TRUSTED_BY.map(company => <div key={company} className="text-lg font-semibold text-muted-foreground/60 hover:text-muted-foreground transition-colors">
                 {company}
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -206,10 +167,7 @@ export default function Landing() {
               <h2 className="text-2xl md:text-3xl font-bold mb-2">See It In Action</h2>
               <p className="text-muted-foreground">Get started in under 2 minutes—no RevOps required</p>
             </div>
-            <div 
-              className="aspect-video bg-card rounded-xl border border-border overflow-hidden shadow-lg cursor-pointer group hover:shadow-xl transition-shadow"
-              onClick={() => setDemoModalOpen(true)}
-            >
+            <div className="aspect-video bg-card rounded-xl border border-border overflow-hidden shadow-lg cursor-pointer group hover:shadow-xl transition-shadow" onClick={() => setDemoModalOpen(true)}>
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50 relative">
                 <div className="text-center space-y-4">
                   <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto group-hover:bg-primary/20 group-hover:scale-110 transition-all">
@@ -274,13 +232,10 @@ export default function Landing() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {TESTIMONIALS.map((testimonial, idx) => (
-              <Card key={idx} className="bg-card/50 backdrop-blur">
+            {TESTIMONIALS.map((testimonial, idx) => <Card key={idx} className="bg-card/50 backdrop-blur">
                 <CardContent className="pt-6">
                   <div className="flex gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
+                    {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-primary text-primary" />)}
                   </div>
                   <p className="text-foreground mb-4 text-sm">"{testimonial.quote}"</p>
                   <div className="flex items-center gap-3">
@@ -293,8 +248,7 @@ export default function Landing() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -307,16 +261,10 @@ export default function Landing() {
             <p className="text-muted-foreground">Start with a 14-day free trial. No charge until you see the value.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {PRICING_TIERS.map((tier) => (
-              <Card 
-                key={tier.name} 
-                className={`relative ${tier.popular ? 'border-primary shadow-lg' : ''}`}
-              >
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+            {PRICING_TIERS.map(tier => <Card key={tier.name} className={`relative ${tier.popular ? 'border-primary shadow-lg' : ''}`}>
+                {tier.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
-                  </div>
-                )}
+                  </div>}
                 <CardHeader>
                   <CardTitle className="text-xl">{tier.name}</CardTitle>
                   <CardDescription>{tier.description}</CardDescription>
@@ -332,33 +280,21 @@ export default function Landing() {
                     </p>
                   </div>
                   <ul className="space-y-3">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm">
+                    {tier.features.map(feature => <li key={feature} className="flex items-center gap-2 text-sm">
                         <Check className="h-4 w-4 text-primary flex-shrink-0" />
                         {feature}
-                      </li>
-                    ))}
+                      </li>)}
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    className="w-full" 
-                    variant={tier.popular ? 'default' : 'outline'}
-                    onClick={() => handleStartTrial(tier.planKey)}
-                    disabled={loadingPlan !== null}
-                  >
-                    {loadingPlan === tier.planKey ? (
-                      <>
+                  <Button className="w-full" variant={tier.popular ? 'default' : 'outline'} onClick={() => handleStartTrial(tier.planKey)} disabled={loadingPlan !== null}>
+                    {loadingPlan === tier.planKey ? <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Starting...
-                      </>
-                    ) : (
-                      'Start 14-Day Free Trial'
-                    )}
+                      </> : 'Start 14-Day Free Trial'}
                   </Button>
                 </CardFooter>
-              </Card>
-            ))}
+              </Card>)}
           </div>
           <p className="text-center text-sm text-muted-foreground mt-8">
             Card required upfront—no charge until day 15. Cancel anytime.
@@ -376,17 +312,13 @@ export default function Landing() {
               Start your 14-day trial today—no charge until you're convinced.
             </p>
             <Button size="lg" onClick={() => handleStartTrial()} className="gap-2" disabled={loadingPlan !== null}>
-              {loadingPlan ? (
-                <>
+              {loadingPlan ? <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   Starting...
-                </>
-              ) : (
-                <>
+                </> : <>
                   Start Your Free Trial
                   <ArrowRight className="h-5 w-5" />
-                </>
-              )}
+                </>}
             </Button>
           </div>
         </div>
@@ -408,6 +340,5 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 }
