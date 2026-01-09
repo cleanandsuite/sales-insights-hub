@@ -11,11 +11,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { TeamPainSummary } from '@/components/manager/TeamPainSummary';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend
 } from 'recharts';
-import { Users, TrendingUp, Award, Target, Shield, Crown } from 'lucide-react';
+import { Users, TrendingUp, Award, Target, Shield, Crown, Brain } from 'lucide-react';
 
 interface TeamMemberStats {
   user_id: string;
@@ -188,6 +189,10 @@ export default function Manager() {
         <Tabs defaultValue="performance" className="space-y-4">
           <TabsList>
             <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="pains" className="gap-1">
+              <Brain className="h-3 w-3" />
+              Pain Analysis
+            </TabsTrigger>
             <TabsTrigger value="members">Team Members</TabsTrigger>
           </TabsList>
 
@@ -219,6 +224,10 @@ export default function Manager() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="pains" className="space-y-4">
+            {teamId && <TeamPainSummary teamId={teamId} />}
           </TabsContent>
 
           <TabsContent value="members" className="space-y-4">

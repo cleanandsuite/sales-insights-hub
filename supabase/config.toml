@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.ai-lead-score]
 verify_jwt = false
+
+[functions.pain-detector]
+verify_jwt = false
