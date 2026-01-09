@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Mic, Brain, TrendingUp, Zap, Play, Star, Globe, Shield, ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import gritcallIcon from '@/assets/gritcall-icon.png';
+import sellsigLogo from '@/assets/sellsig-logo.png';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { DemoVideoModal } from '@/components/landing/DemoVideoModal';
 
@@ -47,7 +47,7 @@ const PRICING_TIERS = [
 
 const TESTIMONIALS = [
   {
-    quote: "We closed 40% more deals within 2 months of using GritCall. The instant feedback is game-changing.",
+    quote: "We closed 40% more deals within 2 months of using SellSig. The instant feedback is game-changing.",
     author: "Sarah Chen",
     role: "VP of Sales",
     company: "TechFlow Inc.",
@@ -108,9 +108,9 @@ export default function Landing() {
           <nav className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-                <img src={gritcallIcon} alt="GritCall" className="h-6 w-6 object-contain" />
+                <img src={sellsigLogo} alt="SellSig" className="h-6 w-6 object-contain" />
               </div>
-              <span className="font-bold text-xl">GritCall</span>
+              <span className="font-bold text-xl">SellSig</span>
             </Link>
             <div className="flex items-center gap-3">
               <Button onClick={() => setAuthModalOpen(true)} variant="ghost" className="hover:bg-primary/10">
@@ -227,7 +227,7 @@ export default function Landing() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Why Sales Teams Choose GritCall</h2>
+            <h2 className="text-3xl font-bold mb-4">Why Sales Teams Choose SellSig</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Everything you need to coach your team and close more deals
             </p>
@@ -398,12 +398,12 @@ export default function Landing() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-                <img src={gritcallIcon} alt="GritCall" className="h-5 w-5 object-contain" />
+                <img src={sellsigLogo} alt="SellSig" className="h-5 w-5 object-contain" />
               </div>
-              <span className="font-semibold">GritCall</span>
+              <span className="font-semibold">SellSig</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} GritCall. All rights reserved.
+              © {new Date().getFullYear()} SellSig. All rights reserved.
             </p>
           </div>
         </div>
