@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle } from 'lucide-react';
-import gritcallIcon from '@/assets/gritcall-icon.png';
+import sellsigLogo from '@/assets/sellsig-logo.png';
 
 export default function Signup() {
   const [searchParams] = useSearchParams();
@@ -85,7 +85,7 @@ export default function Signup() {
 
       if (error) throw error;
 
-      toast.success('Account created! Welcome to GritCall.');
+      toast.success('Account created! Welcome to SellSig.');
       navigate('/dashboard');
     } catch (error) {
       console.error('Signup error:', error);
@@ -112,7 +112,7 @@ export default function Signup() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-              <img src={gritcallIcon} alt="GritCall" className="h-8 w-8 object-contain" />
+              <img src={sellsigLogo} alt="SellSig" className="h-8 w-8 object-contain" />
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 text-green-600 mb-2">
@@ -121,7 +121,7 @@ export default function Signup() {
           </div>
           <CardTitle className="text-2xl">Create Your Account</CardTitle>
           <CardDescription>
-            Your 14-day trial has started. Set up your password to access GritCall.
+            Your 14-day trial has started. Set up your password to access SellSig.
           </CardDescription>
         </CardHeader>
         <CardContent>

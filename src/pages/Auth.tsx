@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSafeErrorMessage } from '@/lib/errorSanitizer';
 import { supabase } from '@/integrations/supabase/client';
 import { PRICING_TIERS } from '@/hooks/useSubscription';
-import gritcallIcon from '@/assets/gritcall-icon.png';
+import sellsigLogo from '@/assets/sellsig-logo.png';
 
 export default function Auth() {
   const { user, loading: authLoading } = useAuth();
@@ -138,10 +138,10 @@ export default function Auth() {
         <div className="relative z-10 text-center px-12 animate-fade-in">
           <div className="flex items-center justify-center gap-4 mb-8">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 glow-effect overflow-hidden">
-              <img src={gritcallIcon} alt="GritCall" className="h-10 w-10 object-contain" />
+              <img src={sellsigLogo} alt="SellSig" className="h-10 w-10 object-contain" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4 gradient-text">GritCall</h1>
+          <h1 className="text-4xl font-bold mb-4 gradient-text">SellSig</h1>
           <p className="text-xl text-muted-foreground max-w-md">
             AI-powered sales coaching to transform your calls into closed deals.
           </p>
@@ -163,9 +163,9 @@ export default function Auth() {
           <div className="text-center lg:hidden mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 overflow-hidden">
-                <img src={gritcallIcon} alt="GritCall" className="h-8 w-8 object-contain" />
+                <img src={sellsigLogo} alt="SellSig" className="h-8 w-8 object-contain" />
               </div>
-              <span className="text-2xl font-bold">GritCall</span>
+              <span className="text-2xl font-bold">SellSig</span>
             </div>
           </div>
 
