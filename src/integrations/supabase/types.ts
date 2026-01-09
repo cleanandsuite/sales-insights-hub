@@ -168,6 +168,8 @@ export type Database = {
           identify_decision_makers: boolean | null
           is_ai_active: boolean | null
           is_test_mode: boolean | null
+          live_coach_style: string | null
+          live_coaching_enabled: boolean | null
           note_competitive_mentions: boolean | null
           note_emotional_tone: boolean | null
           record_questions: boolean | null
@@ -194,6 +196,8 @@ export type Database = {
           identify_decision_makers?: boolean | null
           is_ai_active?: boolean | null
           is_test_mode?: boolean | null
+          live_coach_style?: string | null
+          live_coaching_enabled?: boolean | null
           note_competitive_mentions?: boolean | null
           note_emotional_tone?: boolean | null
           record_questions?: boolean | null
@@ -220,6 +224,8 @@ export type Database = {
           identify_decision_makers?: boolean | null
           is_ai_active?: boolean | null
           is_test_mode?: boolean | null
+          live_coach_style?: string | null
+          live_coaching_enabled?: boolean | null
           note_competitive_mentions?: boolean | null
           note_emotional_tone?: boolean | null
           record_questions?: boolean | null
@@ -1371,6 +1377,53 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_coaching_suggestions: {
+        Row: {
+          coach_style: string
+          created_at: string
+          id: string
+          recording_id: string | null
+          suggestion_text: string
+          suggestion_type: string
+          timestamp_seconds: number | null
+          transcript_context: string | null
+          user_id: string
+          was_helpful: boolean | null
+        }
+        Insert: {
+          coach_style?: string
+          created_at?: string
+          id?: string
+          recording_id?: string | null
+          suggestion_text: string
+          suggestion_type: string
+          timestamp_seconds?: number | null
+          transcript_context?: string | null
+          user_id: string
+          was_helpful?: boolean | null
+        }
+        Update: {
+          coach_style?: string
+          created_at?: string
+          id?: string
+          recording_id?: string | null
+          suggestion_text?: string
+          suggestion_type?: string
+          timestamp_seconds?: number | null
+          transcript_context?: string | null
+          user_id?: string
+          was_helpful?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_coaching_suggestions_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "call_recordings"
             referencedColumns: ["id"]
           },
         ]

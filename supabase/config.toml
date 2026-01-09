@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.pain-detector]
 verify_jwt = false
+
+[functions.live-coach]
+verify_jwt = false

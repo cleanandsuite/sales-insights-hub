@@ -27,6 +27,7 @@ import {
 import { DataExportTab } from '@/components/settings/DataExportTab';
 import { BillingTab } from '@/components/settings/BillingTab';
 import { InvitesTab } from '@/components/settings/InvitesTab';
+import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -330,56 +331,65 @@ export default function Settings() {
 
           {/* AI Settings */}
           <TabsContent value="ai">
-            <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
-              <h2 className="text-lg font-semibold text-foreground">AI Preferences</h2>
+            <div className="space-y-6">
+              {/* Live AI Coaching Section */}
+              <div className="card-gradient rounded-xl border border-border/50 p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Live AI Coaching</h2>
+                <CoachStyleSelector />
+              </div>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Suggestion Frequency</Label>
-                  <Select
-                    value={settings.suggestion_frequency}
-                    onValueChange={(value) => setSettings({ ...settings, suggestion_frequency: value })}
-                  >
-                    <SelectTrigger className="w-64">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="aggressive">Aggressive (many suggestions)</SelectItem>
-                      <SelectItem value="normal">Normal (balanced)</SelectItem>
-                      <SelectItem value="minimal">Minimal (only important)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* General AI Preferences */}
+              <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
+                <h2 className="text-lg font-semibold text-foreground">AI Preferences</h2>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Auto-Analyze Recordings</Label>
-                    <p className="text-sm text-muted-foreground">Automatically analyze calls after recording</p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Suggestion Frequency</Label>
+                    <Select
+                      value={settings.suggestion_frequency}
+                      onValueChange={(value) => setSettings({ ...settings, suggestion_frequency: value })}
+                    >
+                      <SelectTrigger className="w-64">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="aggressive">Aggressive (many suggestions)</SelectItem>
+                        <SelectItem value="normal">Normal (balanced)</SelectItem>
+                        <SelectItem value="minimal">Minimal (only important)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Switch
-                    checked={settings.auto_analyze}
-                    onCheckedChange={(checked) => setSettings({ ...settings, auto_analyze: checked })}
-                  />
-                </div>
 
-                <div className="space-y-3">
-                  <Label>Focus Areas</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {['rapport', 'discovery', 'presentation', 'objection_handling', 'closing'].map((area) => (
-                      <Button
-                        key={area}
-                        variant={settings.focus_areas.includes(area) ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => {
-                          const newAreas = settings.focus_areas.includes(area)
-                            ? settings.focus_areas.filter(a => a !== area)
-                            : [...settings.focus_areas, area];
-                          setSettings({ ...settings, focus_areas: newAreas });
-                        }}
-                      >
-                        {area.replace('_', ' ')}
-                      </Button>
-                    ))}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Auto-Analyze Recordings</Label>
+                      <p className="text-sm text-muted-foreground">Automatically analyze calls after recording</p>
+                    </div>
+                    <Switch
+                      checked={settings.auto_analyze}
+                      onCheckedChange={(checked) => setSettings({ ...settings, auto_analyze: checked })}
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Focus Areas</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['rapport', 'discovery', 'presentation', 'objection_handling', 'closing'].map((area) => (
+                        <Button
+                          key={area}
+                          variant={settings.focus_areas.includes(area) ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => {
+                            const newAreas = settings.focus_areas.includes(area)
+                              ? settings.focus_areas.filter(a => a !== area)
+                              : [...settings.focus_areas, area];
+                            setSettings({ ...settings, focus_areas: newAreas });
+                          }}
+                        >
+                          {area.replace('_', ' ')}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
