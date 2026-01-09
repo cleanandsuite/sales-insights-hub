@@ -7,9 +7,11 @@ import { AudioWaveform } from './AudioWaveform';
 import { RecordingTimer } from './RecordingTimer';
 import { TranscriptionPanel } from './TranscriptionPanel';
 import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
+import { LiveCoachingSidebar } from './LiveCoachingSidebar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useLiveCoaching } from '@/hooks/useLiveCoaching';
 
 
 interface LiveRecordingInterfaceProps {
@@ -20,6 +22,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isEnabled: liveCoachingEnabled, coachStyle } = useLiveCoaching();
   
   const {
     isRecording,
@@ -484,12 +487,26 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
               status={transcriptionStatus}
               retryCountdown={retryCountdown}
             />
-            <AISuggestionsPanel 
-              suggestions={suggestions}
-              sentiment={sentiment}
-              keyTopics={keyTopics}
-              isAnalyzing={isAnalyzing}
-            />
+            
+            {/* Show Live Coaching sidebar if enabled (premium), otherwise standard suggestions */}
+            {liveCoachingEnabled ? (
+              <LiveCoachingSidebar
+                transcript={transcription}
+                coachStyle={coachStyle}
+                isRecording={isRecording}
+                isPaused={isPaused}
+                onSuggestionFeedback={(id, helpful) => {
+                  console.log('Feedback:', id, helpful);
+                }}
+              />
+            ) : (
+              <AISuggestionsPanel 
+                suggestions={suggestions}
+                sentiment={sentiment}
+                keyTopics={keyTopics}
+                isAnalyzing={isAnalyzing}
+              />
+            )}
           </div>
         </div>
       </div>
