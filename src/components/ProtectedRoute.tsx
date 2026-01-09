@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useAccountStatus } from '@/hooks/useAccountStatus';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -7,7 +8,10 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { isActive, loading: statusLoading } = useAccountStatus();
+
+  const loading = authLoading || statusLoading;
 
   if (loading) {
     return (
@@ -19,6 +23,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Check if account is blocked due to subscription issues
+  if (!isActive) {
+    return <Navigate to="/account-blocked" replace />;
   }
 
   return <>{children}</>;

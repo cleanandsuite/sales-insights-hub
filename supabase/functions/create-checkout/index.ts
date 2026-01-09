@@ -55,7 +55,7 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "http://localhost:5173";
 
-    // Build session config
+    // Build session config with subscription_data to pass user_id to subscription
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -71,11 +71,17 @@ serve(async (req) => {
       metadata: {
         user_id: user.id,
       },
+      subscription_data: {
+        metadata: {
+          user_id: user.id,
+        },
+      },
     };
 
     // Add 14-day trial if requested
     if (trial) {
       sessionConfig.subscription_data = {
+        ...sessionConfig.subscription_data,
         trial_period_days: 14,
       };
       logStep("Adding 14-day trial");
