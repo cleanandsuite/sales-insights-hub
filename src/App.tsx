@@ -27,6 +27,7 @@ import Landing from "./pages/Landing";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
             <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
             <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
