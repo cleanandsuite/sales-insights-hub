@@ -69,7 +69,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${redirectBase}/success`,
+      success_url: `${redirectBase}/payment-complete?email=${encodeURIComponent(user.email)}`,
       cancel_url: `${redirectBase}/settings?subscription=canceled`,
       metadata: {
         user_id: user.id,
