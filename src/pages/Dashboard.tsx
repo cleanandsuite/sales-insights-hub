@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface CallRecording {
@@ -37,11 +37,32 @@ interface Lead {
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [aiActive, setAiActive] = useState(true);
+
+  // Handle subscription success message
+  useEffect(() => {
+    const subscription = searchParams.get('subscription');
+    if (subscription === 'success') {
+      toast.success('Subscription activated! Welcome to SellSig.', {
+        duration: 5000,
+        description: 'Your premium features are now available.',
+      });
+      // Remove the query param from URL
+      searchParams.delete('subscription');
+      setSearchParams(searchParams, { replace: true });
+    } else if (subscription === 'canceled') {
+      toast.info('Subscription checkout was canceled.', {
+        duration: 4000,
+      });
+      searchParams.delete('subscription');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     async function fetchData() {

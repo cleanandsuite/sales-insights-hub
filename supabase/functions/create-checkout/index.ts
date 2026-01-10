@@ -53,7 +53,10 @@ serve(async (req) => {
       logStep("Found existing customer", { customerId });
     }
 
-    const origin = req.headers.get("origin") || "http://localhost:5173";
+    // Use production domain for success/cancel URLs
+    const productionDomain = "https://sellsig.com";
+    const origin = req.headers.get("origin") || productionDomain;
+    const redirectBase = origin.includes("localhost") ? origin : productionDomain;
 
     // Build session config with subscription_data to pass user_id to subscription
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
@@ -66,8 +69,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/dashboard?subscription=success`,
-      cancel_url: `${origin}/settings?subscription=canceled`,
+      success_url: `${redirectBase}/dashboard?subscription=success`,
+      cancel_url: `${redirectBase}/settings?subscription=canceled`,
       metadata: {
         user_id: user.id,
       },
