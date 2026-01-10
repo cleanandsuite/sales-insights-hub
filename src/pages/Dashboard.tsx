@@ -5,7 +5,7 @@ import { AILeadStatus } from '@/components/leads/AILeadStatus';
 import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
 import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
 import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
-import { Phone, TrendingUp, Clock, ThumbsUp, Mic, Users, Target } from 'lucide-react';
+import { Phone, Clock, ThumbsUp, Mic, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -72,7 +72,6 @@ export default function Dashboard() {
     fetchData();
   }, [user]);
 
-  // Calculate stats
   const totalCalls = recordings.length;
   const analyzedCalls = recordings.filter(r => r.status === 'analyzed').length;
   const avgSentiment = recordings
@@ -80,7 +79,6 @@ export default function Dashboard() {
     .reduce((acc, r) => acc + (r.sentiment_score || 0), 0) / (analyzedCalls || 1);
   const totalDuration = recordings.reduce((acc, r) => acc + (r.duration_seconds || 0), 0);
 
-  // Lead stats
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todaysLeads = leads.filter(l => new Date(l.created_at) >= today).length;
@@ -99,7 +97,6 @@ export default function Dashboard() {
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
 
-  // Create activity feed from leads
   const recentActivities = leads.slice(0, 5).map(lead => ({
     id: lead.id,
     type: lead.is_hot_lead ? 'ai_scored' as const : 'new_lead' as const,
@@ -110,7 +107,6 @@ export default function Dashboard() {
     confidence: lead.ai_confidence || undefined
   }));
 
-  // Priority alerts
   const alerts = [
     ...(pendingFollowups > 0 ? [{
       id: '1',
@@ -142,19 +138,19 @@ export default function Dashboard() {
       )}
       
       <DashboardLayout>
-        <div className="space-y-4 sm:space-y-6 animate-fade-in">
-          {/* Header with Start Recording CTA */}
+        <div className="space-y-6 animate-fade-in">
+          {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">AI-powered sales call analytics and lead generation</p>
+              <p className="text-muted-foreground mt-1">AI-powered sales call analytics and lead generation</p>
             </div>
             <Button
               onClick={() => setIsRecording(true)}
               size="lg"
-              className="gap-2 sm:gap-3 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 glow-effect animate-pulse-glow w-full sm:w-auto"
+              className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow"
             >
-              <Mic className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Mic className="h-5 w-5" />
               Start Recording
             </Button>
           </div>
@@ -221,8 +217,8 @@ export default function Dashboard() {
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Recent Calls */}
-            <div className="lg:col-span-2 card-gradient rounded-xl border border-border/50 overflow-hidden">
-              <div className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
+            <div className="lg:col-span-2 card-enterprise overflow-hidden">
+              <div className="border-b border-border px-6 py-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-foreground">Recent Calls</h2>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/call-history')}>
                   View All
@@ -236,8 +232,8 @@ export default function Dashboard() {
                 ) : recordings.length === 0 ? (
                   <div className="text-center py-12">
                     <Phone className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">No calls recorded yet</p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">
+                    <p className="text-muted-foreground font-medium">No calls recorded yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Start recording to see your calls here
                     </p>
                   </div>
@@ -247,7 +243,7 @@ export default function Dashboard() {
                       <div
                         key={recording.id}
                         onClick={() => navigate(`/recording/${recording.id}`)}
-                        className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/30 transition-colors cursor-pointer"
+                        className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors cursor-pointer"
                       >
                         <div className="flex items-center gap-4">
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
