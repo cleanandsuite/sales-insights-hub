@@ -28,7 +28,6 @@ export default function Auth() {
   const startTrial = searchParams.get('trial') === 'true';
   const planKey = (searchParams.get('plan') as 'single_user' | 'team') || 'single_user';
 
-  // Handle post-login redirect to Stripe checkout with trial
   useEffect(() => {
     const handleTrialRedirect = async () => {
       if (user && startTrial && !redirectingToCheckout) {
@@ -108,11 +107,10 @@ export default function Auth() {
       />
 
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden bg-muted/30">
         <div className="relative z-10 text-center px-12 animate-fade-in">
           <Link to="/" className="flex items-center justify-center gap-4 mb-8 hover:opacity-80 transition-opacity">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 glow-effect overflow-hidden">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 overflow-hidden shadow-md">
               <img src={sellsigLogo} alt="SellSig" className="h-10 w-10 object-contain" />
             </div>
           </Link>
@@ -129,7 +127,6 @@ export default function Auth() {
             </div>
           )}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       </div>
 
       {/* Right side - Form */}
@@ -137,10 +134,10 @@ export default function Auth() {
         <div className="w-full max-w-md space-y-8 animate-slide-up">
           <div className="text-center lg:hidden mb-8">
             <Link to="/" className="inline-flex items-center justify-center gap-3 mb-4 hover:opacity-80 transition-opacity">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 overflow-hidden">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 overflow-hidden">
                 <img src={sellsigLogo} alt="SellSig" className="h-8 w-8 object-contain" />
               </div>
-              <span className="text-2xl font-bold">SellSig</span>
+              <span className="text-2xl font-bold text-foreground">SellSig</span>
             </Link>
           </div>
 
@@ -157,7 +154,7 @@ export default function Auth() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">Email</Label>
+              <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -167,18 +164,18 @@ export default function Auth() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
-                  className="pl-10 bg-input border-border focus:border-primary"
+                  className="pl-10 bg-background border-border focus:border-primary"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-foreground">Password</Label>
+                <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
                 <button
                   type="button"
                   onClick={() => setForgotPasswordOpen(true)}
-                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
                 >
                   Forgot Password?
                 </button>
@@ -193,7 +190,7 @@ export default function Auth() {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
                   minLength={6}
-                  className="pl-10 bg-input border-border focus:border-primary"
+                  className="pl-10 bg-background border-border focus:border-primary"
                 />
               </div>
             </div>
@@ -201,7 +198,7 @@ export default function Auth() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+              className="w-full font-semibold shadow-md"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {startTrial ? 'Sign In & Start Trial' : 'Sign In'}
@@ -210,7 +207,7 @@ export default function Auth() {
 
           <div className="text-center text-sm text-muted-foreground">
             Don't have an account?{' '}
-            <Link to="/" className="text-primary hover:text-primary/80 transition-colors">
+            <Link to="/" className="text-primary hover:text-primary/80 transition-colors font-medium">
               Start your free trial
             </Link>
           </div>
