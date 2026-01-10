@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { TeamProtectedRoute } from "@/components/TeamProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -18,17 +19,16 @@ import Coaching from "./pages/Coaching";
 import Settings from "./pages/Settings";
 import SalesforceSettings from "./pages/SalesforceSettings";
 import Leads from "./pages/Leads";
-import { Navigate } from "react-router-dom";
 import Analytics from "./pages/Analytics";
 import WinWords from "./pages/WinWords";
 import AudioTest from "./pages/AudioTest";
 import Manager from "./pages/Manager";
-
-import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AccountBlocked from "./pages/AccountBlocked";
+import ResetPassword from "./pages/ResetPassword";
+import UpgradePlan from "./pages/UpgradePlan";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +43,10 @@ const App = () => (
             <Route path="/" element={<Index />} />
             
             <Route path="/auth" element={<Auth />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Navigate to="/auth" replace />} />
+            <Route path="/signup" element={<Navigate to="/auth" replace />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/upgrade" element={<ProtectedRoute><UpgradePlan /></ProtectedRoute>} />
             <Route path="/account-blocked" element={<AccountBlocked />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
@@ -53,7 +56,7 @@ const App = () => (
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
+            <Route path="/team" element={<TeamProtectedRoute><Team /></TeamProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
             <Route path="/winwords" element={<ProtectedRoute><WinWords /></ProtectedRoute>} />

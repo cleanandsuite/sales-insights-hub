@@ -1,34 +1,34 @@
 import { useState, useEffect } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getSafeErrorMessage } from '@/lib/errorSanitizer';
 import { supabase } from '@/integrations/supabase/client';
 import { PRICING_TIERS } from '@/hooks/useSubscription';
 import sellsigLogo from '@/assets/sellsig-logo.png';
+import { ForgotPasswordModal } from '@/components/auth/ForgotPasswordModal';
 
 export default function Auth() {
   const { user, loading: authLoading } = useAuth();
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [redirectingToCheckout, setRedirectingToCheckout] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    fullName: '',
   });
 
   const startTrial = searchParams.get('trial') === 'true';
   const planKey = (searchParams.get('plan') as 'single_user' | 'team') || 'single_user';
 
-  // Handle post-signup redirect to Stripe checkout with trial
+  // Handle post-login redirect to Stripe checkout with trial
   useEffect(() => {
     const handleTrialRedirect = async () => {
       if (user && startTrial && !redirectingToCheckout) {
@@ -87,43 +87,13 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
-        if (error) {
-          toast({
-            title: 'Sign in failed',
-            description: getSafeErrorMessage(error, 'Invalid email or password'),
-            variant: 'destructive',
-          });
-        }
-      } else {
-        if (!formData.fullName.trim()) {
-          toast({
-            title: 'Name required',
-            description: 'Please enter your full name',
-            variant: 'destructive',
-          });
-          setLoading(false);
-          return;
-        }
-        const { error } = await signUp(formData.email, formData.password, formData.fullName);
-        if (error) {
-          toast({
-            title: 'Sign up failed',
-            description: getSafeErrorMessage(error, 'Unable to create account'),
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: 'Account created!',
-            description: startTrial 
-              ? 'Redirecting to start your 14-day trial...'
-              : 'You can now sign in with your credentials.',
-          });
-          if (!startTrial) {
-            setIsLogin(true);
-          }
-        }
+      const { error } = await signIn(formData.email, formData.password);
+      if (error) {
+        toast({
+          title: 'Sign in failed',
+          description: getSafeErrorMessage(error, 'Invalid email or password'),
+          variant: 'destructive',
+        });
       }
     } finally {
       setLoading(false);
@@ -132,15 +102,20 @@ export default function Auth() {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <ForgotPasswordModal 
+        open={forgotPasswordOpen} 
+        onOpenChange={setForgotPasswordOpen} 
+      />
+
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
         <div className="relative z-10 text-center px-12 animate-fade-in">
-          <div className="flex items-center justify-center gap-4 mb-8">
+          <Link to="/" className="flex items-center justify-center gap-4 mb-8 hover:opacity-80 transition-opacity">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/20 glow-effect overflow-hidden">
               <img src={sellsigLogo} alt="SellSig" className="h-10 w-10 object-contain" />
             </div>
-          </div>
+          </Link>
           <h1 className="text-4xl font-bold mb-4 gradient-text">SellSig</h1>
           <p className="text-xl text-muted-foreground max-w-md">
             AI-powered sales coaching to transform your calls into closed deals.
@@ -161,49 +136,26 @@ export default function Auth() {
       <div className="flex w-full lg:w-1/2 items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8 animate-slide-up">
           <div className="text-center lg:hidden mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
+            <Link to="/" className="inline-flex items-center justify-center gap-3 mb-4 hover:opacity-80 transition-opacity">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 overflow-hidden">
                 <img src={sellsigLogo} alt="SellSig" className="h-8 w-8 object-contain" />
               </div>
               <span className="text-2xl font-bold">SellSig</span>
-            </div>
+            </Link>
           </div>
 
           <div className="space-y-2 text-center">
             <h2 className="text-2xl font-bold text-foreground">
-              {startTrial 
-                ? 'Start Your 14-Day Trial' 
-                : isLogin 
-                  ? 'Welcome back' 
-                  : 'Create an account'}
+              {startTrial ? 'Sign In to Start Your Trial' : 'Welcome back'}
             </h2>
             <p className="text-muted-foreground">
               {startTrial
-                ? 'No charge until value proven—cancel anytime'
-                : isLogin
-                  ? 'Enter your credentials to access your dashboard'
-                  : 'Start analyzing your sales calls today'}
+                ? 'Sign in to activate your 14-day free trial'
+                : 'Enter your credentials to access your dashboard'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {(!isLogin || startTrial) && !isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="pl-10 bg-input border-border focus:border-primary"
-                  />
-                </div>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email" className="text-foreground">Email</Label>
               <div className="relative">
@@ -221,7 +173,16 @@ export default function Auth() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-foreground">Password</Label>
+                <button
+                  type="button"
+                  onClick={() => setForgotPasswordOpen(true)}
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -243,22 +204,15 @@ export default function Auth() {
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {startTrial 
-                ? (isLogin ? 'Sign In & Start Trial' : 'Create Account & Start Trial')
-                : (isLogin ? 'Sign In' : 'Create Account')}
+              {startTrial ? 'Sign In & Start Trial' : 'Sign In'}
             </Button>
           </form>
 
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : 'Already have an account? Sign in'}
-            </button>
+          <div className="text-center text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link to="/" className="text-primary hover:text-primary/80 transition-colors">
+              Start your free trial
+            </Link>
           </div>
 
           {startTrial && (
