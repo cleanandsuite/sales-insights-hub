@@ -88,9 +88,11 @@ export default function Landing() {
               <span className="font-bold text-xl">SellSig</span>
             </Link>
             <div className="flex items-center gap-3">
-              <Button onClick={() => setAuthModalOpen(true)} variant="ghost" className="hover:bg-primary/10">
-                Sign In
-              </Button>
+              <Link to="/auth">
+                <Button variant="ghost" className="hover:bg-primary/10">
+                  Sign In
+                </Button>
+              </Link>
               <Button onClick={() => handleStartTrial()} className="hover:scale-105 transition-transform">
                 Start Free Trial
               </Button>
