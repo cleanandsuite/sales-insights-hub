@@ -28,6 +28,7 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AccountBlocked from "./pages/AccountBlocked";
 import ResetPassword from "./pages/ResetPassword";
+import PaymentComplete from "./pages/PaymentComplete";
 import UpgradePlan from "./pages/UpgradePlan";
 import Success from "./pages/Success";
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/upgrade" element={<ProtectedRoute><UpgradePlan /></ProtectedRoute>} />
             <Route path="/account-blocked" element={<AccountBlocked />} />
             <Route path="/success" element={<Success />} />
+            <Route path="/payment-complete" element={<PaymentComplete />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
             <Route path="/recording/:id" element={<ProtectedRoute><RecordingAnalysis /></ProtectedRoute>} />
