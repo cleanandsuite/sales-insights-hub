@@ -1,20 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { StaticPageHeader } from "@/components/layout/StaticPageHeader";
 
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <StaticPageHeader />
+      
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-
         <article className="prose prose-neutral dark:prose-invert max-w-none">
           <h1 className="text-3xl font-bold text-foreground mb-2">SellSig Privacy Policy</h1>
           <p className="text-muted-foreground mb-8">Last Updated: January 9, 2026</p>

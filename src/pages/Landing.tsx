@@ -328,11 +328,15 @@ export default function Landing() {
       <footer className="border-t py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
                 <img src={sellsigLogo} alt="SellSig" className="h-5 w-5 object-contain" />
               </div>
               <span className="font-semibold">SellSig</span>
+            </Link>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
             </div>
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} SellSig. All rights reserved.
