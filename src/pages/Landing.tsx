@@ -106,10 +106,9 @@ export default function Landing() {
               <Zap className="h-3 w-3 mr-1" />
               Zero Setup—Browser Only
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Sales Coaching That
-              <br />
-              <span className="text-primary">Closes More Deals</span>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">Ai Sales Coaching
+Closes More Deals<br />
+              <span className="text-primary">Close More Deals</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Turn cold calls hot with AI insights. Easier than competitors, half the cost. Record, analyze, and close more deals—all from your browser.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
