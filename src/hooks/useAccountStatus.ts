@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -11,6 +11,7 @@ export interface AccountStatus {
 
 export function useAccountStatus() {
   const { user } = useAuth();
+  const hasResolvedOnceRef = useRef(false);
   const [status, setStatus] = useState<AccountStatus>({
     isActive: true,
     subscriptionStatus: null,
@@ -20,12 +21,19 @@ export function useAccountStatus() {
 
   const checkAccountStatus = useCallback(async () => {
     if (!user) {
+      hasResolvedOnceRef.current = false;
       setStatus(prev => ({ ...prev, loading: false, isActive: true }));
       return;
     }
 
     try {
-      setStatus(prev => ({ ...prev, loading: true, error: null }));
+      // Only block route rendering on the very first check.
+      // Subsequent background checks should not unmount/remount the dashboard.
+      setStatus(prev => ({
+        ...prev,
+        loading: !hasResolvedOnceRef.current,
+        error: null,
+      }));
 
       const { data, error } = await supabase
         .from('profiles')
@@ -36,6 +44,7 @@ export function useAccountStatus() {
       if (error) {
         // If no profile found, assume active (new user)
         if (error.code === 'PGRST116') {
+          hasResolvedOnceRef.current = true;
           setStatus({
             isActive: true,
             subscriptionStatus: 'none',
@@ -47,6 +56,7 @@ export function useAccountStatus() {
         throw error;
       }
 
+      hasResolvedOnceRef.current = true;
       setStatus({
         isActive: data?.is_active ?? true,
         subscriptionStatus: data?.subscription_status ?? 'none',
@@ -55,6 +65,7 @@ export function useAccountStatus() {
       });
     } catch (error) {
       console.error('Account status check error:', error);
+      hasResolvedOnceRef.current = true;
       // Default to active on error to prevent blocking legitimate users
       setStatus({
         isActive: true,

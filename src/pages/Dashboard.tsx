@@ -43,16 +43,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [aiActive, setAiActive] = useState(true);
-
-  // Refresh session on mount and handle subscription success
-  useEffect(() => {
-    const refreshSession = async () => {
-      // Force session refresh
-      await supabase.auth.refreshSession();
-    };
-    refreshSession();
-  }, []);
-
   // Handle subscription success message with polling
   useEffect(() => {
     const subscription = searchParams.get('subscription');
