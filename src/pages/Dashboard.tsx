@@ -44,7 +44,16 @@ export default function Dashboard() {
   const [isRecording, setIsRecording] = useState(false);
   const [aiActive, setAiActive] = useState(true);
 
-  // Handle subscription success message
+  // Refresh session on mount and handle subscription success
+  useEffect(() => {
+    const refreshSession = async () => {
+      // Force session refresh
+      await supabase.auth.refreshSession();
+    };
+    refreshSession();
+  }, []);
+
+  // Handle subscription success message with polling
   useEffect(() => {
     const subscription = searchParams.get('subscription');
     if (subscription === 'success') {
@@ -52,9 +61,37 @@ export default function Dashboard() {
         duration: 5000,
         description: 'Your premium features are now available.',
       });
+      
+      // Force session refresh after successful payment
+      supabase.auth.refreshSession();
+      
+      // Poll for subscription status update (webhook might be slow)
+      let pollCount = 0;
+      const maxPolls = 6; // 30 seconds total (5s * 6)
+      const pollInterval = setInterval(async () => {
+        pollCount++;
+        if (pollCount >= maxPolls) {
+          clearInterval(pollInterval);
+          return;
+        }
+        
+        try {
+          const { data } = await supabase.functions.invoke('check-subscription');
+          if (data?.subscribed) {
+            clearInterval(pollInterval);
+            // Refresh session to get updated claims
+            await supabase.auth.refreshSession();
+          }
+        } catch (error) {
+          console.log('Subscription check poll:', error);
+        }
+      }, 5000);
+
       // Remove the query param from URL
       searchParams.delete('subscription');
       setSearchParams(searchParams, { replace: true });
+      
+      return () => clearInterval(pollInterval);
     } else if (subscription === 'canceled') {
       toast.info('Subscription checkout was canceled.', {
         duration: 4000,

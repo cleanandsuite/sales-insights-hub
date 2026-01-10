@@ -69,7 +69,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${redirectBase}/dashboard?subscription=success`,
+      success_url: `${redirectBase}/success`,
       cancel_url: `${redirectBase}/settings?subscription=canceled`,
       metadata: {
         user_id: user.id,
