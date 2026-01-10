@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { authenticateRequest, checkRateLimit, corsHeaders } from "../_shared/auth.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -25,8 +21,24 @@ serve(async (req) => {
 
     console.log(`Salesforce OAuth action: ${action}`);
 
-    // Handle OAuth initiation
+    // Handle OAuth initiation - REQUIRES AUTHENTICATION
     if (action === 'auth' || url.searchParams.get('action') === 'auth') {
+      // CRITICAL: Authenticate the request first - never trust user-supplied userId
+      const authResult = await authenticateRequest(req);
+      if (authResult instanceof Response) {
+        return authResult;
+      }
+      
+      // Rate limit OAuth initiation attempts
+      const ipAddress = req.headers.get('x-forwarded-for') || 'unknown';
+      const canProceed = await checkRateLimit(ipAddress, 'salesforce-oauth-init', 10, 60);
+      if (!canProceed) {
+        return new Response(
+          JSON.stringify({ error: 'Too many OAuth attempts. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       if (!SALESFORCE_CLIENT_ID) {
         return new Response(
           JSON.stringify({ 
@@ -40,7 +52,8 @@ serve(async (req) => {
         );
       }
 
-      const userId = url.searchParams.get('state') || url.searchParams.get('userId');
+      // Use authenticated user's ID - NEVER trust user-supplied userId
+      const userId = authResult.userId;
       const redirectUri = `${SUPABASE_URL}/functions/v1/salesforce-oauth?action=callback`;
       
       const authUrl = new URL('https://login.salesforce.com/services/oauth2/authorize');
@@ -48,9 +61,9 @@ serve(async (req) => {
       authUrl.searchParams.set('client_id', SALESFORCE_CLIENT_ID);
       authUrl.searchParams.set('redirect_uri', redirectUri);
       authUrl.searchParams.set('scope', 'api refresh_token offline_access');
-      authUrl.searchParams.set('state', userId || '');
+      authUrl.searchParams.set('state', userId);
 
-      console.log(`Redirecting to Salesforce OAuth: ${authUrl.toString()}`);
+      console.log(`Redirecting to Salesforce OAuth for user: ${userId}`);
       
       return Response.redirect(authUrl.toString(), 302);
     }
@@ -126,9 +139,16 @@ serve(async (req) => {
       return Response.redirect(`${SITE_URL}/settings?tab=crm&success=true`, 302);
     }
 
-    // Handle token refresh
+    // Handle token refresh - REQUIRES AUTHENTICATION
     if (action === 'refresh') {
-      const { userId } = await req.json();
+      // Authenticate the request first
+      const authResult = await authenticateRequest(req);
+      if (authResult instanceof Response) {
+        return authResult;
+      }
+      
+      // Use authenticated user's ID
+      const userId = authResult.userId;
 
       const { data: connection, error: connError } = await supabase
         .from('crm_connections')
