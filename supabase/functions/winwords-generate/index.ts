@@ -17,10 +17,10 @@ const companyResearchSchema = z.object({
   state: z.string().max(100).optional(),
   country: z.string().max(100).optional(),
   website: z.string().max(200).optional(),
-  recentNews: z.array(z.string().max(300)).max(5).optional(),
-  painPoints: z.array(z.string().max(200)).max(10).optional(),
-  competitors: z.array(z.string().max(100)).max(5).optional(),
-  techStack: z.array(z.string().max(100)).max(10).optional(),
+  recentNews: z.array(z.string().max(500)).max(5).optional(),
+  painPoints: z.array(z.string().max(500)).max(10).optional(),
+  competitors: z.array(z.string().max(300)).max(5).optional(),
+  techStack: z.array(z.string().max(300)).max(10).optional(),
 }).optional();
 
 const personaSchema = z.object({
