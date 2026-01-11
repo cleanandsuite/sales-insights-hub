@@ -1,10 +1,25 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { useState } from 'react';
+import { CompanyLookupField } from './CompanyLookupField';
+
+interface CompanyResearchData {
+  name: string;
+  description?: string;
+  industry?: string;
+  size?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  website?: string;
+  recentNews?: string[];
+  painPoints?: string[];
+  competitors?: string[];
+  techStack?: string[];
+}
 
 interface Persona {
   role: string;
@@ -12,6 +27,8 @@ interface Persona {
   companySize: string;
   painPoints: string[];
   personalityStyle: string;
+  companyName?: string;
+  companyResearch?: CompanyResearchData | null;
 }
 
 interface PersonaFormProps {
@@ -58,8 +75,40 @@ export function PersonaForm({ persona, onChange }: PersonaFormProps) {
     });
   };
 
+  const handleCompanyResearchComplete = (research: CompanyResearchData | null) => {
+    onChange({
+      ...persona,
+      companyResearch: research,
+      // Auto-fill industry and company size if research provides them
+      ...(research?.industry && !persona.industry ? { industry: research.industry.toLowerCase() } : {}),
+      ...(research?.size ? { companySize: mapSizeToValue(research.size) } : {}),
+      // Add researched pain points
+      ...(research?.painPoints?.length ? { 
+        painPoints: [...new Set([...persona.painPoints, ...research.painPoints.slice(0, 3)])]
+      } : {}),
+    });
+  };
+
+  // Map company size string to select value
+  const mapSizeToValue = (size: string): string => {
+    const sizeLower = size.toLowerCase();
+    if (sizeLower.includes('startup') || sizeLower.includes('1-50')) return 'startup';
+    if (sizeLower.includes('smb') || sizeLower.includes('51-200')) return 'smb';
+    if (sizeLower.includes('mid') || sizeLower.includes('201-1000')) return 'mid-market';
+    if (sizeLower.includes('enterprise') || sizeLower.includes('1000+')) return 'enterprise';
+    return persona.companySize;
+  };
+
   return (
     <div className="space-y-4">
+      {/* Company Lookup Field */}
+      <CompanyLookupField
+        companyName={persona.companyName || ''}
+        onCompanyNameChange={(name) => onChange({ ...persona, companyName: name })}
+        onCompanyResearchComplete={handleCompanyResearchComplete}
+        companyResearch={persona.companyResearch || null}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="role">Buyer Role</Label>

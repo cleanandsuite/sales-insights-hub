@@ -20,12 +20,29 @@ import {
   FileText, BarChart3, History 
 } from 'lucide-react';
 
+interface CompanyResearchData {
+  name: string;
+  description?: string;
+  industry?: string;
+  size?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  website?: string;
+  recentNews?: string[];
+  painPoints?: string[];
+  competitors?: string[];
+  techStack?: string[];
+}
+
 interface Persona {
   role: string;
   industry: string;
   companySize: string;
   painPoints: string[];
   personalityStyle: string;
+  companyName?: string;
+  companyResearch?: CompanyResearchData | null;
 }
 
 interface DealContext {

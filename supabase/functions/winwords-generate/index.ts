@@ -8,12 +8,29 @@ const corsHeaders = {
 };
 
 // Input validation schemas
+const companyResearchSchema = z.object({
+  name: z.string().max(200).optional(),
+  description: z.string().max(500).optional(),
+  industry: z.string().max(100).optional(),
+  size: z.string().max(100).optional(),
+  city: z.string().max(100).optional(),
+  state: z.string().max(100).optional(),
+  country: z.string().max(100).optional(),
+  website: z.string().max(200).optional(),
+  recentNews: z.array(z.string().max(300)).max(5).optional(),
+  painPoints: z.array(z.string().max(200)).max(10).optional(),
+  competitors: z.array(z.string().max(100)).max(5).optional(),
+  techStack: z.array(z.string().max(100)).max(10).optional(),
+}).optional();
+
 const personaSchema = z.object({
   role: z.string().max(100).optional(),
   industry: z.string().max(100).optional(),
   companySize: z.string().max(100).optional(),
   painPoints: z.array(z.string().max(200)).max(10).optional(),
   personalityStyle: z.string().max(100).optional(),
+  companyName: z.string().max(200).optional(),
+  companyResearch: companyResearchSchema.nullable().optional(),
 }).optional();
 
 const dealContextSchema = z.object({
@@ -153,6 +170,32 @@ serve(async (req) => {
       .map(o => o.substring(0, 100))
       .join(", ") || "none yet";
     const safeStyle = style || "confident";
+    
+    // Company research data
+    const companyResearch = persona?.companyResearch;
+    const safeCompanyName = (persona?.companyName || companyResearch?.name || "").substring(0, 200);
+    const safeCompanyDescription = (companyResearch?.description || "").substring(0, 500);
+    const safeCompanyWebsite = (companyResearch?.website || "").substring(0, 200);
+    const safeCompanyCity = (companyResearch?.city || "").substring(0, 100);
+    const safeCompanyState = (companyResearch?.state || "").substring(0, 100);
+    const safeRecentNews = (companyResearch?.recentNews || [])
+      .slice(0, 3)
+      .map(n => n.substring(0, 200))
+      .join("; ") || "";
+    const safeCompanyPainPoints = (companyResearch?.painPoints || [])
+      .slice(0, 5)
+      .map(p => p.substring(0, 100))
+      .join(", ") || "";
+    const safeCompetitors = (companyResearch?.competitors || [])
+      .slice(0, 3)
+      .map(c => c.substring(0, 100))
+      .join(", ") || "";
+    const safeTechStack = (companyResearch?.techStack || [])
+      .slice(0, 5)
+      .map(t => t.substring(0, 50))
+      .join(", ") || "";
+    
+    const hasCompanyResearch = !!companyResearch && !!safeCompanyName;
 
     const systemPrompt = `You are WINWORDS, an elite AI sales coach that generates winning sales scripts. 
 You have analyzed millions of successful sales conversations and know exactly what works.
@@ -214,12 +257,31 @@ Format your response as a valid JSON object with this structure:
   "suggested_next_steps": ["If successful: do X", "If needs more time: do Y"]
 }`;
 
+    // Build company research section if available
+    const companyResearchSection = hasCompanyResearch ? `
+COMPANY RESEARCH (USE THIS TO PERSONALIZE THE SCRIPT):
+- Company Name: ${safeCompanyName}
+- Description: ${safeCompanyDescription}
+- Location: ${safeCompanyCity}${safeCompanyState ? `, ${safeCompanyState}` : ''}
+- Website: ${safeCompanyWebsite}
+- Recent News/Developments: ${safeRecentNews || 'No recent news available'}
+- Company-Specific Pain Points: ${safeCompanyPainPoints || 'Not identified'}
+- Known Competitors: ${safeCompetitors || 'Not identified'}
+- Technology Stack: ${safeTechStack || 'Not identified'}
+
+IMPORTANT: Use the company research above to:
+1. Reference the company by name and show you've done your homework
+2. Connect pain points to their specific industry and situation
+3. Mention relevant news or developments to build credibility
+4. Position against their known competitors if applicable
+5. Speak to their tech stack challenges if relevant` : '';
+
     const userPrompt = `Generate a winning ${template.name} script with this context:
 
 SCENARIO: ${template.name}
 FOCUS: ${template.focus}
 SECTIONS TO INCLUDE: ${template.sections.join(", ")}
-
+${companyResearchSection}
 BUYER PERSONA:
 - Role: ${safeRole}
 - Industry: ${safeIndustry}
