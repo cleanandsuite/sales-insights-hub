@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { authenticateRequest, corsHeaders } from "../_shared/auth.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,28 +8,40 @@ serve(async (req) => {
   }
 
   try {
+    // Require authentication
+    const authResult = await authenticateRequest(req);
+    if (authResult instanceof Response) {
+      return authResult;
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase environment variables');
+      return new Response(
+        JSON.stringify({ error: 'Service not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('Testing database connection...');
+    console.log('Testing database connection for user:', authResult.userId);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Test query - get count of profiles
-    const { data, error, count } = await supabase
+    // Test query - get count of profiles (authenticated users only)
+    const { error, count } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true });
 
     if (error) {
-      console.error('Database query error:', error);
-      throw new Error(`Database error: ${error.message}`);
+      console.error('Database query error:', error.message);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Database query failed' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('Database connection successful! Profile count:', count);
+    console.log('Database connection successful!');
 
     return new Response(
       JSON.stringify({ 
@@ -48,14 +56,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Test DB error:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ success: false, error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
