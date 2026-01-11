@@ -43,8 +43,7 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
 
           {/* SEO-rich body text */}
           <p className="text-lg text-muted-foreground/80 max-w-xl mx-auto">
-            The ultimate <strong className="text-foreground">AI Sales Coach</strong> for rejection-proof cold calls and higher close rates. 
-            Get real-time <strong className="text-foreground">AI Coaching</strong> that transforms every call into a learning opportunity.
+            The ultimate <strong className="text-foreground">AI Sales Coach</strong> for rejection-proof cold calls and higher close rates—transforming every call into a learning opportunity.
           </p>
 
           {/* CTA Buttons */}
