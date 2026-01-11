@@ -75,28 +75,78 @@ export function PersonaForm({ persona, onChange }: PersonaFormProps) {
     });
   };
 
-  const handleCompanyResearchComplete = (research: CompanyResearchData | null) => {
-    onChange({
-      ...persona,
-      companyResearch: research,
-      // Auto-fill industry and company size if research provides them
-      ...(research?.industry && !persona.industry ? { industry: research.industry.toLowerCase() } : {}),
-      ...(research?.size ? { companySize: mapSizeToValue(research.size) } : {}),
-      // Add researched pain points
-      ...(research?.painPoints?.length ? { 
-        painPoints: [...new Set([...persona.painPoints, ...research.painPoints.slice(0, 3)])]
-      } : {}),
-    });
+  // Map research industry to our predefined industry list
+  const mapIndustryToValue = (researchIndustry: string): string => {
+    const industryLower = researchIndustry.toLowerCase();
+    
+    // Direct matches
+    const directMatch = industries.find(i => i.toLowerCase() === industryLower);
+    if (directMatch) return directMatch.toLowerCase();
+    
+    // Fuzzy matches
+    if (industryLower.includes('tech') || industryLower.includes('software') || industryLower.includes('saas') || industryLower.includes('it ')) return 'technology';
+    if (industryLower.includes('health') || industryLower.includes('medical') || industryLower.includes('pharma') || industryLower.includes('biotech')) return 'healthcare';
+    if (industryLower.includes('financ') || industryLower.includes('bank') || industryLower.includes('insurance') || industryLower.includes('invest')) return 'finance';
+    if (industryLower.includes('manufactur') || industryLower.includes('industrial')) return 'manufacturing';
+    if (industryLower.includes('retail') || industryLower.includes('ecommerce') || industryLower.includes('e-commerce') || industryLower.includes('consumer')) return 'retail';
+    if (industryLower.includes('educat') || industryLower.includes('school') || industryLower.includes('university') || industryLower.includes('learning')) return 'education';
+    if (industryLower.includes('real estate') || industryLower.includes('property') || industryLower.includes('construction')) return 'real estate';
+    if (industryLower.includes('consult') || industryLower.includes('legal') || industryLower.includes('accounting') || industryLower.includes('professional')) return 'professional services';
+    if (industryLower.includes('media') || industryLower.includes('entertainment') || industryLower.includes('advertis') || industryLower.includes('marketing')) return 'media';
+    if (industryLower.includes('auto') || industryLower.includes('car') || industryLower.includes('vehicle') || industryLower.includes('dealer')) return 'automotive';
+    
+    return 'other';
   };
 
   // Map company size string to select value
   const mapSizeToValue = (size: string): string => {
     const sizeLower = size.toLowerCase();
-    if (sizeLower.includes('startup') || sizeLower.includes('1-50')) return 'startup';
-    if (sizeLower.includes('smb') || sizeLower.includes('51-200')) return 'smb';
-    if (sizeLower.includes('mid') || sizeLower.includes('201-1000')) return 'mid-market';
-    if (sizeLower.includes('enterprise') || sizeLower.includes('1000+')) return 'enterprise';
+    
+    // Check for employee count patterns
+    const numberMatch = sizeLower.match(/(\d+)/g);
+    if (numberMatch) {
+      const employeeCount = parseInt(numberMatch[0], 10);
+      if (employeeCount <= 50) return 'startup';
+      if (employeeCount <= 200) return 'smb';
+      if (employeeCount <= 1000) return 'mid-market';
+      return 'enterprise';
+    }
+    
+    // Keyword matching
+    if (sizeLower.includes('startup') || sizeLower.includes('small') || sizeLower.includes('micro')) return 'startup';
+    if (sizeLower.includes('smb') || sizeLower.includes('medium')) return 'smb';
+    if (sizeLower.includes('mid-market') || sizeLower.includes('mid market') || sizeLower.includes('midsize')) return 'mid-market';
+    if (sizeLower.includes('enterprise') || sizeLower.includes('large') || sizeLower.includes('fortune')) return 'enterprise';
+    
     return persona.companySize;
+  };
+
+  const handleCompanyResearchComplete = (research: CompanyResearchData | null) => {
+    const updates: Partial<Persona> = {
+      companyResearch: research,
+    };
+    
+    if (research) {
+      // Auto-fill industry from research
+      if (research.industry) {
+        updates.industry = mapIndustryToValue(research.industry);
+      }
+      
+      // Auto-fill company size from research
+      if (research.size) {
+        updates.companySize = mapSizeToValue(research.size);
+      }
+      
+      // Add researched pain points (merge with existing)
+      if (research.painPoints?.length) {
+        updates.painPoints = [...new Set([...persona.painPoints, ...research.painPoints.slice(0, 3)])];
+      }
+    }
+    
+    onChange({
+      ...persona,
+      ...updates,
+    });
   };
 
   return (
