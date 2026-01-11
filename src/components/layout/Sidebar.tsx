@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ const baseNavItems = [
   { to: '/coaching', icon: Trophy, label: 'Coaching' },
   { to: '/team', icon: Users, label: 'Team' },
   { to: '/upload', icon: Upload, label: 'Upload' },
+  { to: '/profile', icon: UserCircle, label: 'Your Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
