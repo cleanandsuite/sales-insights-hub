@@ -80,6 +80,18 @@ export default function WinWords() {
   const [generatedScript, setGeneratedScript] = useState<any>(null);
   const [showOutcomeTracker, setShowOutcomeTracker] = useState(false);
 
+  // Auto-fill competition when company research has competitors
+  const handleStepChange = (newStep: number) => {
+    // When moving to step 3 (Deal Context), auto-fill competition from company research
+    if (newStep === 3 && persona.companyResearch?.competitors?.length) {
+      const competitors = persona.companyResearch.competitors.slice(0, 3).join(', ');
+      if (!dealContext.competition) {
+        setDealContext(prev => ({ ...prev, competition: competitors }));
+      }
+    }
+    setStep(newStep);
+  };
+
   // Fetch user's scripts for history
   const { data: scripts } = useQuery({
     queryKey: ['winwords-scripts', user?.id],
@@ -280,7 +292,7 @@ export default function WinWords() {
                   </div>
 
                   <div className="flex justify-end">
-                    <Button onClick={() => setStep(2)} className="gap-2">
+                    <Button onClick={() => handleStepChange(2)} className="gap-2">
                       Continue <ArrowRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -299,10 +311,10 @@ export default function WinWords() {
                   <PersonaForm persona={persona} onChange={setPersona} />
 
                   <div className="flex justify-between">
-                    <Button variant="outline" onClick={() => setStep(1)}>
+                    <Button variant="outline" onClick={() => handleStepChange(1)}>
                       Back
                     </Button>
-                    <Button onClick={() => setStep(3)} className="gap-2">
+                    <Button onClick={() => handleStepChange(3)} className="gap-2">
                       Continue <ArrowRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -321,7 +333,7 @@ export default function WinWords() {
                   <DealContextForm context={dealContext} onChange={setDealContext} />
 
                   <div className="flex justify-between">
-                    <Button variant="outline" onClick={() => setStep(2)}>
+                    <Button variant="outline" onClick={() => handleStepChange(2)}>
                       Back
                     </Button>
                     <Button 

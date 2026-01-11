@@ -38,7 +38,7 @@ interface PersonaFormProps {
 
 const industries = [
   'Technology', 'Healthcare', 'Finance', 'Manufacturing', 'Retail',
-  'Education', 'Real Estate', 'Professional Services', 'Media', 'Other'
+  'Education', 'Real Estate', 'Professional Services', 'Media', 'Automotive', 'Other'
 ];
 
 const companySizes = [
