@@ -5,7 +5,8 @@ import { CallSummaryCard } from '@/components/leads/CallSummaryCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic, Download, Search, FileText } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic, Download, Search, FileText, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { createPlayableObjectUrl } from '@/lib/audioPlayback';
@@ -24,6 +25,7 @@ interface CallRecording {
   key_topics: string[] | null;
   live_transcription: string | null;
   summary: string | null;
+  deleted_at: string | null;
 }
 
 interface CallSummary {
@@ -73,6 +75,7 @@ export default function Recordings() {
         supabase
           .from('call_recordings')
           .select('*')
+          .is('deleted_at', null)
           .order('created_at', { ascending: false }),
         supabase
           .from('call_summaries')
@@ -222,6 +225,32 @@ export default function Recordings() {
 
   const handleExportAll = () => {
     sonnerToast.info('Export feature coming soon');
+  };
+
+  const handleDeleteRecording = async (recordingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('call_recordings')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', recordingId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setRecordings(prev => prev.filter(r => r.id !== recordingId));
+      
+      toast({
+        title: 'Recording deleted',
+        description: 'The recording has been removed. Your analytics remain unchanged.'
+      });
+    } catch (error) {
+      console.error('Failed to delete recording:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Delete failed',
+        description: 'Could not delete the recording. Please try again.'
+      });
+    }
   };
 
   return (
@@ -413,6 +442,30 @@ export default function Recordings() {
                         >
                           View Analysis
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Recording</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will remove the recording from your list. Your analytics and call history statistics will remain unchanged.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteRecording(recording.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   </div>
