@@ -8,6 +8,7 @@ import { RecordingTimer } from './RecordingTimer';
 import { TranscriptionPanel } from './TranscriptionPanel';
 import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
 import { LiveCoachingSidebar } from './LiveCoachingSidebar';
+import { RecordingNameDialog } from './RecordingNameDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -46,6 +47,12 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [transcriptionStatus, setTranscriptionStatus] = useState<'idle' | 'processing' | 'rate-limited' | 'error'>('idle');
   const [retryCountdown, setRetryCountdown] = useState(0);
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [pendingRecordingData, setPendingRecordingData] = useState<{
+    audioBlob: Blob;
+    fileName: string;
+    defaultName: string;
+  } | null>(null);
   
   const transcriptionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedChunkRef = useRef<number>(0);
@@ -216,12 +223,9 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
   const [processingStatus, setProcessingStatus] = useState('');
 
-  // Handle stop recording and save
+  // Handle stop recording - show naming dialog first
   const handleStopRecording = async () => {
     if (isSaving) return;
-    
-    setIsSaving(true);
-    setProcessingStatus('Stopping recording...');
     
     try {
       const audioBlob = await stopRecording();
@@ -230,13 +234,6 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         throw new Error('No recording data or user');
       }
 
-      setProcessingStatus('Processing audio...');
-      
-      // WebM Opus is sent directly to Whisper - no transcoding needed
-      const finalBlob = audioBlob;
-      const audioDuration = recordingDuration;
-      const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
-      
       // Determine file extension from MIME type
       const mimeType = audioBlob.type || 'audio/webm';
       let extension = 'webm';
@@ -248,7 +245,41 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         extension = 'mp3';
       }
       
+      const baseName = `call_${new Date().toISOString().replace(/[:.]/g, '-')}`;
       const fileName = `${baseName}.${extension}`;
+      const defaultName = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      setPendingRecordingData({ audioBlob, fileName, defaultName });
+      setShowNameDialog(true);
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to stop recording.'
+      });
+    }
+  };
+
+  // Save recording with custom name
+  const saveRecordingWithName = async (customName: string) => {
+    if (!pendingRecordingData || !user) return;
+    
+    setShowNameDialog(false);
+    setIsSaving(true);
+    setProcessingStatus('Processing audio...');
+    
+    try {
+      const { audioBlob, fileName } = pendingRecordingData;
+      const finalBlob = audioBlob;
+      const audioDuration = recordingDuration;
+      
       console.log('Recording saved as:', fileName, finalBlob.size, 'bytes', 'method:', recordingMethod);
 
       setProcessingStatus('Saving to database...');
@@ -262,6 +293,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         .insert([{
           user_id: user.id,
           file_name: fileName,
+          name: customName,
           file_size: finalBlob.size,
           status: 'processing',
           duration_seconds: audioDuration || recordingDuration,
@@ -277,7 +309,6 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         console.error('Database error:', dbError);
         throw new Error('Failed to save recording metadata');
       }
-
       setProcessingStatus('Uploading audio file...');
       
       // Upload audio to storage
@@ -510,6 +541,18 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
           </div>
         </div>
       </div>
+
+      {/* Recording Name Dialog */}
+      <RecordingNameDialog
+        open={showNameDialog}
+        onClose={() => {
+          setShowNameDialog(false);
+          setPendingRecordingData(null);
+        }}
+        onSave={saveRecordingWithName}
+        defaultName={pendingRecordingData?.defaultName || ''}
+        isLoading={isSaving}
+      />
     </div>
   );
 }

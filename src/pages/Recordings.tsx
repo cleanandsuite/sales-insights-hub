@@ -15,6 +15,7 @@ import { toast as sonnerToast } from 'sonner';
 interface CallRecording {
   id: string;
   file_name: string;
+  name: string | null;
   status: string;
   sentiment_score: number | null;
   duration_seconds: number | null;
@@ -207,7 +208,9 @@ export default function Recordings() {
   };
 
   const filteredRecordings = recordings.filter(r => {
-    const matchesSearch = r.file_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const displayName = r.name || r.file_name;
+    const matchesSearch = displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          r.file_name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDate = filterByDate(r);
     return matchesSearch && matchesDate;
   });
@@ -287,7 +290,7 @@ export default function Recordings() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search recordings..."
+              placeholder="Search by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -355,7 +358,7 @@ export default function Recordings() {
                             className="font-semibold text-foreground truncate cursor-pointer hover:text-primary transition-colors"
                             onClick={() => setExpandedId(expandedId === recording.id ? null : recording.id)}
                           >
-                            {recording.file_name}
+                            {recording.name || recording.file_name}
                           </h3>
                           
                           <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">

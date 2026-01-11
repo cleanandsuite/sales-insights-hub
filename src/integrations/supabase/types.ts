@@ -293,6 +293,7 @@ export type Database = {
           id: string
           key_topics: string[] | null
           live_transcription: string | null
+          name: string | null
           salesforce_account_id: string | null
           salesforce_contact_id: string | null
           salesforce_lead_id: string | null
@@ -320,6 +321,7 @@ export type Database = {
           id?: string
           key_topics?: string[] | null
           live_transcription?: string | null
+          name?: string | null
           salesforce_account_id?: string | null
           salesforce_contact_id?: string | null
           salesforce_lead_id?: string | null
@@ -347,6 +349,7 @@ export type Database = {
           id?: string
           key_topics?: string[] | null
           live_transcription?: string | null
+          name?: string | null
           salesforce_account_id?: string | null
           salesforce_contact_id?: string | null
           salesforce_lead_id?: string | null
