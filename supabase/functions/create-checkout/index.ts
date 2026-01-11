@@ -23,10 +23,12 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
@@ -69,7 +71,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${redirectBase}/payment-complete?email=${encodeURIComponent(user.email)}`,
+      success_url: `${redirectBase}/payment-complete?email=${encodeURIComponent(user.email)}&magic_link_sent=true`,
       cancel_url: `${redirectBase}/settings?subscription=canceled`,
       metadata: {
         user_id: user.id,
@@ -91,8 +93,25 @@ serve(async (req) => {
     }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
-
     logStep("Checkout session created", { sessionId: session.id, url: session.url, trial });
+
+    // Send magic link for seamless post-payment authentication
+    try {
+      const { error: otpError } = await supabaseAdmin.auth.signInWithOtp({
+        email: user.email,
+        options: {
+          emailRedirectTo: `${redirectBase}/dashboard?subscription=success`,
+        },
+      });
+
+      if (otpError) {
+        logStep("Magic link send failed (non-blocking)", { error: otpError.message });
+      } else {
+        logStep("Magic link sent successfully", { email: user.email });
+      }
+    } catch (otpErr) {
+      logStep("Magic link error (non-blocking)", { error: String(otpErr) });
+    }
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
