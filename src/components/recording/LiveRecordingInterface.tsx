@@ -228,10 +228,34 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     if (isSaving) return;
     
     try {
+      // Check if we have an active recording first
+      if (!isRecording && !isPaused) {
+        toast({
+          variant: 'destructive',
+          title: 'No Active Recording',
+          description: 'Please start a recording first before saving.'
+        });
+        return;
+      }
+
       const audioBlob = await stopRecording();
       
-      if (!audioBlob || !user) {
-        throw new Error('No recording data or user');
+      if (!audioBlob) {
+        toast({
+          variant: 'destructive',
+          title: 'No Recording Data',
+          description: 'The recording contains no audio data. Please try again.'
+        });
+        return;
+      }
+      
+      if (!user) {
+        toast({
+          variant: 'destructive',
+          title: 'Authentication Required',
+          description: 'Please log in to save recordings.'
+        });
+        return;
       }
 
       // Determine file extension from MIME type
@@ -262,7 +286,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to stop recording.'
+        description: error instanceof Error ? error.message : 'Failed to stop recording.'
       });
     }
   };
