@@ -118,6 +118,15 @@ serve(async (req) => {
 
     console.log('Authenticated user:', userData.user.id);
 
+    // Fetch user profile for WinWords personalization
+    const { data: userProfile } = await authClient
+      .from('profiles')
+      .select('company, company_strengths, unique_differentiators, personal_tone')
+      .eq('user_id', userData.user.id)
+      .single();
+
+    console.log('User profile for personalization:', userProfile ? 'found' : 'not found');
+
     // Parse and validate request
     let body;
     try {
@@ -170,6 +179,28 @@ serve(async (req) => {
       .map(o => o.substring(0, 100))
       .join(", ") || "none yet";
     const safeStyle = style || "confident";
+    
+    // Build user profile personalization section
+    const hasUserProfile = userProfile && (
+      (userProfile.company_strengths && userProfile.company_strengths.length > 0) ||
+      (userProfile.unique_differentiators && userProfile.unique_differentiators.length > 0) ||
+      (userProfile.personal_tone && userProfile.personal_tone !== 'Neutral')
+    );
+    
+    const userProfileSection = hasUserProfile ? `
+YOUR COMPANY PROFILE (INCORPORATE THESE INTO THE SCRIPT):
+- Your Company: ${userProfile.company || 'Not specified'}
+- Your Strengths: ${(userProfile.company_strengths || []).join(', ') || 'Not specified'}
+- Unique Differentiators: ${(userProfile.unique_differentiators || []).join(', ') || 'Not specified'}
+- Communication Style: ${userProfile.personal_tone || 'Neutral'}
+
+IMPORTANT: Naturally weave your company strengths and differentiators into the script. ${
+  userProfile.personal_tone === 'High-Energy (Cardone)' 
+    ? 'Use a high-energy, aggressive, action-oriented tone. Be bold and confident.' 
+    : userProfile.personal_tone === 'Smooth Persuasion (Belfort)' 
+    ? 'Use a charismatic, smooth, relationship-focused tone. Build rapport and create urgency naturally.' 
+    : 'Use a balanced, professional tone.'
+}` : '';
     
     // Company research data
     const companyResearch = persona?.companyResearch;
@@ -281,6 +312,7 @@ IMPORTANT: Use the company research above to:
 SCENARIO: ${template.name}
 FOCUS: ${template.focus}
 SECTIONS TO INCLUDE: ${template.sections.join(", ")}
+${userProfileSection}
 ${companyResearchSection}
 BUYER PERSONA:
 - Role: ${safeRole}

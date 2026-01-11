@@ -1486,14 +1486,17 @@ export type Database = {
         Row: {
           avatar_url: string | null
           company: string | null
+          company_strengths: string[] | null
           created_at: string
           full_name: string | null
           id: string
           is_active: boolean | null
+          personal_tone: string | null
           role: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_status: string | null
+          unique_differentiators: string[] | null
           updated_at: string
           user_id: string
           user_role: string
@@ -1501,14 +1504,17 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           company?: string | null
+          company_strengths?: string[] | null
           created_at?: string
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          personal_tone?: string | null
           role?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
+          unique_differentiators?: string[] | null
           updated_at?: string
           user_id: string
           user_role?: string
@@ -1516,14 +1522,17 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           company?: string | null
+          company_strengths?: string[] | null
           created_at?: string
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          personal_tone?: string | null
           role?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
+          unique_differentiators?: string[] | null
           updated_at?: string
           user_id?: string
           user_role?: string
