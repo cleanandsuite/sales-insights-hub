@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { CheckCircle, Loader2, Eye, EyeOff, Mail, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,8 +14,13 @@ export default function PaymentComplete() {
   const [showPassword, setShowPassword] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [countdown, setCountdown] = useState(5);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const magicLinkCheckedRef = useRef(false);
   
   const emailFromParams = searchParams.get('email') || '';
+  const magicLinkSentParam = searchParams.get('magic_link_sent') === 'true';
+  
   const [formData, setFormData] = useState({
     email: emailFromParams,
     password: '',
@@ -31,7 +36,24 @@ export default function PaymentComplete() {
       }
     };
     checkAuth();
+
+    // Listen for auth state changes (magic link clicked)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setIsAuthenticated(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  // Set magic link sent state from URL param
+  useEffect(() => {
+    if (magicLinkSentParam && !magicLinkCheckedRef.current) {
+      magicLinkCheckedRef.current = true;
+      setMagicLinkSent(true);
+    }
+  }, [magicLinkSentParam]);
 
   // Countdown for authenticated users
   useEffect(() => {
@@ -50,6 +72,43 @@ export default function PaymentComplete() {
 
     return () => clearInterval(timer);
   }, [isAuthenticated, navigate]);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendMagicLink = async () => {
+    if (resendCooldown > 0 || !emailFromParams) return;
+    
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: emailFromParams,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success`,
+        },
+      });
+
+      if (error) {
+        toast.error('Failed to resend magic link. Please try again.');
+      } else {
+        toast.success('Magic link sent! Check your email.');
+        setMagicLinkSent(true);
+        setResendCooldown(60); // 60 second cooldown
+      }
+    } catch (err) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,6 +193,15 @@ export default function PaymentComplete() {
             <Loader2 className="w-5 h-5 animate-spin text-primary" />
             <span>Redirecting in {countdown} seconds...</span>
           </div>
+
+          <Button 
+            onClick={() => navigate('/dashboard?subscription=success')} 
+            className="mt-6"
+            variant="outline"
+          >
+            Go to Dashboard Now
+            <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
         </div>
       </div>
     );
@@ -153,12 +221,62 @@ export default function PaymentComplete() {
             Payment Successful!
           </h1>
           
-          <p className="text-muted-foreground">
-            Create your account to access your subscription
-          </p>
+          {magicLinkSent ? (
+            <p className="text-muted-foreground">
+              Check your email for an instant login link
+            </p>
+          ) : (
+            <p className="text-muted-foreground">
+              Create your account to access your subscription
+            </p>
+          )}
         </div>
 
+        {/* Magic Link Section */}
+        {emailFromParams && (
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Magic Link Sent!</h3>
+                <p className="text-sm text-muted-foreground">{emailFromParams}</p>
+              </div>
+            </div>
+            
+            <p className="text-sm text-muted-foreground mb-4">
+              We've sent a magic link to your email. Click it to log in instantly and access your premium features.
+            </p>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResendMagicLink}
+              disabled={isLoading || resendCooldown > 0}
+              className="w-full"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : resendCooldown > 0 ? (
+                `Resend in ${resendCooldown}s`
+              ) : (
+                'Resend Magic Link'
+              )}
+            </Button>
+          </div>
+        )}
+
         <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+          <div className="text-center mb-4">
+            <p className="text-sm text-muted-foreground">
+              {emailFromParams ? "Or create a password to sign in anytime:" : "Create your account:"}
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
