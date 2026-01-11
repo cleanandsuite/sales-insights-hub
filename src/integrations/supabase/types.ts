@@ -286,6 +286,7 @@ export type Database = {
           created_at: string
           crm_sync_status: string | null
           deal_analysis_id: string | null
+          deleted_at: string | null
           duration_seconds: number | null
           file_name: string
           file_size: number | null
@@ -314,6 +315,7 @@ export type Database = {
           created_at?: string
           crm_sync_status?: string | null
           deal_analysis_id?: string | null
+          deleted_at?: string | null
           duration_seconds?: number | null
           file_name: string
           file_size?: number | null
@@ -342,6 +344,7 @@ export type Database = {
           created_at?: string
           crm_sync_status?: string | null
           deal_analysis_id?: string | null
+          deleted_at?: string | null
           duration_seconds?: number | null
           file_name?: string
           file_size?: number | null
