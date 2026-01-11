@@ -91,8 +91,8 @@ export function MobileHeader() {
       
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden">
-            <Menu className="h-5 w-5" />
+          <Button variant="outline" size="icon" className="lg:hidden border-sidebar-border bg-sidebar-accent/50">
+            <Menu className="h-5 w-5 text-sidebar-foreground" />
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>
