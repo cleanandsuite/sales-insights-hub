@@ -10,7 +10,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-screen bg-background">
       <Sidebar />
       <MobileHeader />
-      <main className="min-h-screen p-4 pt-18 lg:ml-64 lg:p-8 lg:pt-8">
+      <main className="min-h-screen p-4 pt-20 lg:ml-64 lg:p-8 lg:pt-8">
         {children}
       </main>
     </div>
