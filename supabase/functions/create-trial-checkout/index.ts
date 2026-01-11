@@ -48,7 +48,9 @@ serve(async (req) => {
       subscription_data: {
         trial_period_days: 14,
       },
-      success_url: `${origin}/dashboard`,
+      // Post-payment goes to a public page (no auth guard) to avoid /auth bounce.
+      // We pass the Checkout Session ID so the client can fetch the payer email and send a magic link.
+      success_url: `${origin}/payment-complete?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/`,
       payment_method_collection: 'always',
     });

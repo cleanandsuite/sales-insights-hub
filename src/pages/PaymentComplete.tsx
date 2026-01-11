@@ -10,19 +10,22 @@ import { toast } from 'sonner';
 export default function PaymentComplete() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const sessionId = searchParams.get('session_id') || '';
+  const magicLinkSentParam = searchParams.get('magic_link_sent') === 'true';
+
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(10);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const magicLinkCheckedRef = useRef(false);
-  
-  const emailFromParams = searchParams.get('email') || '';
-  const magicLinkSentParam = searchParams.get('magic_link_sent') === 'true';
-  
+
+  const [emailFromParams, setEmailFromParams] = useState(() => searchParams.get('email') || '');
+
   const [formData, setFormData] = useState({
-    email: emailFromParams,
+    email: searchParams.get('email') || '',
     password: '',
     confirmPassword: '',
   });
@@ -47,13 +50,99 @@ export default function PaymentComplete() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Set magic link sent state from URL param
+  // Resolve email from Stripe Checkout Session (guest checkout + privacy-safe URLs)
   useEffect(() => {
-    if (magicLinkSentParam && !magicLinkCheckedRef.current) {
+    if (!sessionId || emailFromParams) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-checkout-session', {
+          body: { session_id: sessionId },
+        });
+
+        if (cancelled) return;
+        if (error) throw error;
+
+        const email = (data as any)?.email as string | undefined;
+        if (email) {
+          setEmailFromParams(email);
+          setFormData(prev => ({ ...prev, email }));
+        }
+      } catch (err) {
+        // Non-blocking: user can still create an account manually
+        console.error('Failed to load checkout session:', err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, emailFromParams]);
+
+  // Keep form email in sync when it’s prefilled from purchase
+  useEffect(() => {
+    if (!emailFromParams) return;
+    setFormData(prev => ({ ...prev, email: emailFromParams }));
+  }, [emailFromParams]);
+
+  // Track whether a magic link was already sent (server-side or client-side idempotency)
+  useEffect(() => {
+    if (magicLinkCheckedRef.current) return;
+
+    const sentKey = sessionId ? `sellsig:magic_link_sent:${sessionId}` : null;
+    const sentAlready = sentKey ? localStorage.getItem(sentKey) : null;
+
+    if (magicLinkSentParam || sentAlready) {
       magicLinkCheckedRef.current = true;
       setMagicLinkSent(true);
     }
-  }, [magicLinkSentParam]);
+  }, [magicLinkSentParam, sessionId]);
+
+  // Auto-send magic link for session-based flows (guest checkout)
+  useEffect(() => {
+    if (!sessionId) return;
+    if (!emailFromParams) return;
+    if (magicLinkSentParam || magicLinkSent) return;
+
+    const sentKey = `sellsig:magic_link_sent:${sessionId}`;
+    if (localStorage.getItem(sentKey)) {
+      setMagicLinkSent(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      setIsLoading(true);
+      try {
+        const { error } = await supabase.auth.signInWithOtp({
+          email: emailFromParams,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard?subscription=success&from_checkout=true`,
+          },
+        });
+
+        if (cancelled) return;
+
+        if (error) {
+          console.error('Auto magic link send failed:', error);
+          toast.error('Could not send login link automatically. Use "Resend Magic Link".');
+          return;
+        }
+
+        localStorage.setItem(sentKey, new Date().toISOString());
+        setMagicLinkSent(true);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, emailFromParams, magicLinkSentParam, magicLinkSent]);
 
   // Countdown for authenticated users
   useEffect(() => {
@@ -63,7 +152,7 @@ export default function PaymentComplete() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/dashboard?subscription=success');
+          navigate('/dashboard?subscription=success&from_checkout=true');
           return 0;
         }
         return prev - 1;
@@ -86,13 +175,13 @@ export default function PaymentComplete() {
 
   const handleResendMagicLink = async () => {
     if (resendCooldown > 0 || !emailFromParams) return;
-    
+
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: emailFromParams,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success`,
+          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success&from_checkout=true`,
         },
       });
 
@@ -101,6 +190,9 @@ export default function PaymentComplete() {
       } else {
         toast.success('Magic link sent! Check your email.');
         setMagicLinkSent(true);
+        if (sessionId) {
+          localStorage.setItem(`sellsig:magic_link_sent:${sessionId}`, new Date().toISOString());
+        }
         setResendCooldown(60); // 60 second cooldown
       }
     } catch (err) {
@@ -112,7 +204,7 @@ export default function PaymentComplete() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -130,7 +222,7 @@ export default function PaymentComplete() {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success`,
+          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success&from_checkout=true`,
         },
       });
 
@@ -141,18 +233,18 @@ export default function PaymentComplete() {
             email: formData.email,
             password: formData.password,
           });
-          
+
           if (signInError) {
             toast.error('Account exists. Please use correct password or reset it.');
             setIsLoading(false);
             return;
           }
-          
+
           toast.success('Signed in successfully!');
-          navigate('/dashboard?subscription=success');
+          navigate('/dashboard?subscription=success&from_checkout=true');
           return;
         }
-        
+
         toast.error(error.message);
         setIsLoading(false);
         return;
@@ -160,7 +252,7 @@ export default function PaymentComplete() {
 
       if (data.user) {
         toast.success('Account created! Redirecting to dashboard...');
-        navigate('/dashboard?subscription=success');
+        navigate('/dashboard?subscription=success&from_checkout=true');
       }
     } catch (err) {
       console.error('Registration error:', err);
@@ -176,8 +268,8 @@ export default function PaymentComplete() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle className="w-12 h-12 text-green-600" />
+            <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center">
+              <CheckCircle className="w-12 h-12 text-success" />
             </div>
           </div>
           
@@ -195,7 +287,7 @@ export default function PaymentComplete() {
           </div>
 
           <Button 
-            onClick={() => navigate('/dashboard?subscription=success')} 
+            onClick={() => navigate('/dashboard?subscription=success&from_checkout=true')} 
             className="mt-6"
             variant="outline"
           >
@@ -212,8 +304,8 @@ export default function PaymentComplete() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle className="w-12 h-12 text-green-600" />
+            <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center">
+              <CheckCircle className="w-12 h-12 text-success" />
             </div>
           </div>
           
