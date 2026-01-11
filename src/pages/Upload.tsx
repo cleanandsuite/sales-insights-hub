@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Upload as UploadIcon, File, X, CheckCircle, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Upload as UploadIcon, File, X, CheckCircle, Loader2, Pencil } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +14,7 @@ interface UploadedFile {
   file: File;
   status: 'pending' | 'uploading' | 'success' | 'error';
   progress: number;
+  customName: string;
 }
 
 export default function Upload() {
@@ -47,12 +50,29 @@ export default function Upload() {
   };
 
   const addFiles = (newFiles: File[]) => {
-    const uploadFiles: UploadedFile[] = newFiles.map((file) => ({
-      file,
-      status: 'pending',
-      progress: 0,
-    }));
+    const uploadFiles: UploadedFile[] = newFiles.map((file) => {
+      const baseName = file.name.replace(/\.[^/.]+$/, '');
+      const defaultName = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }) + ' - ' + baseName;
+      return {
+        file,
+        status: 'pending',
+        progress: 0,
+        customName: defaultName,
+      };
+    });
     setFiles((prev) => [...prev, ...uploadFiles]);
+  };
+
+  const updateFileName = (index: number, newName: string) => {
+    setFiles((prev) =>
+      prev.map((f, idx) => (idx === index ? { ...f, customName: newName } : f))
+    );
   };
 
   const removeFile = (index: number) => {
@@ -112,6 +132,7 @@ export default function Upload() {
       const { error: dbError } = await supabase.from('call_recordings').insert({
         user_id: user.id,
         file_name: fileName,
+        name: files[i].customName || fileName,
         file_url: null, // No public URL - use signed URLs for access
         audio_url: filePath,
         file_size: finalBlob.size,
@@ -215,18 +236,29 @@ export default function Upload() {
               {files.map((uploadFile, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 hover:bg-secondary/20 transition-colors"
+                  className="flex items-center justify-between p-4 hover:bg-secondary/20 transition-colors gap-4"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
                       <File className="h-5 w-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {uploadFile.file.name}
-                      </p>
+                    <div className="flex-1 min-w-0">
+                      {uploadFile.status === 'pending' ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={uploadFile.customName}
+                            onChange={(e) => updateFileName(index, e.target.value)}
+                            className="h-8 text-sm"
+                            placeholder="Enter recording name..."
+                          />
+                        </div>
+                      ) : (
+                        <p className="font-medium text-foreground truncate">
+                          {uploadFile.customName}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground">
-                        {formatFileSize(uploadFile.file.size)}
+                        {uploadFile.file.name} • {formatFileSize(uploadFile.file.size)}
                       </p>
                     </div>
                   </div>
