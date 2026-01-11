@@ -9,18 +9,18 @@ const corsHeaders = {
 
 // Input validation schemas
 const companyResearchSchema = z.object({
-  name: z.string().max(200).optional(),
-  description: z.string().max(500).optional(),
-  industry: z.string().max(100).optional(),
-  size: z.string().max(100).optional(),
-  city: z.string().max(100).optional(),
-  state: z.string().max(100).optional(),
-  country: z.string().max(100).optional(),
-  website: z.string().max(200).optional(),
-  recentNews: z.array(z.string().max(500)).max(5).optional(),
-  painPoints: z.array(z.string().max(500)).max(10).optional(),
-  competitors: z.array(z.string().max(300)).max(5).optional(),
-  techStack: z.array(z.string().max(300)).max(10).optional(),
+  name: z.string().max(500).optional(),
+  description: z.string().max(2000).optional(),
+  industry: z.string().max(500).optional(),
+  size: z.string().max(500).optional(),
+  city: z.string().max(200).optional(),
+  state: z.string().max(200).optional(),
+  country: z.string().max(200).optional(),
+  website: z.string().max(500).optional(),
+  recentNews: z.array(z.string().max(2000)).max(10).optional(),
+  painPoints: z.array(z.string().max(2000)).max(20).optional(),
+  competitors: z.array(z.string().max(1000)).max(10).optional(),
+  techStack: z.array(z.string().max(1000)).max(20).optional(),
 }).optional();
 
 const personaSchema = z.object({
