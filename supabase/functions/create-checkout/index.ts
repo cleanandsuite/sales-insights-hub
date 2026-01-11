@@ -71,7 +71,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${redirectBase}/payment-complete?email=${encodeURIComponent(user.email)}&magic_link_sent=true`,
+      success_url: `${redirectBase}/payment-complete?session_id={CHECKOUT_SESSION_ID}&magic_link_sent=true`,
       cancel_url: `${redirectBase}/settings?subscription=canceled`,
       metadata: {
         user_id: user.id,
@@ -100,7 +100,7 @@ serve(async (req) => {
       const { error: otpError } = await supabaseAdmin.auth.signInWithOtp({
         email: user.email,
         options: {
-          emailRedirectTo: `${redirectBase}/dashboard?subscription=success`,
+          emailRedirectTo: `${redirectBase}/dashboard?subscription=success&from_checkout=true`,
         },
       });
 

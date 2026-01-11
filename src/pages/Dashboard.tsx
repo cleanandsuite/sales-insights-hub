@@ -46,16 +46,18 @@ export default function Dashboard() {
   // Handle subscription success message with polling
   useEffect(() => {
     const subscription = searchParams.get('subscription');
-    if (subscription === 'success') {
+    const fromCheckout = searchParams.get('from_checkout') === 'true';
+
+    if (subscription === 'success' || fromCheckout) {
       toast.success('Subscription activated! Welcome to SellSig.', {
         duration: 5000,
         description: 'Your premium features are now available.',
       });
-      
-      // Force session refresh after successful payment
-      supabase.auth.refreshSession();
-      
-      // Poll for subscription status update (webhook might be slow)
+
+      // Ensure session is hydrated after magic-link login
+      supabase.auth.getSession().then(() => supabase.auth.refreshSession()).catch(() => {});
+
+      // Poll for profile activation (webhook can be delayed)
       let pollCount = 0;
       const maxPolls = 6; // 30 seconds total (5s * 6)
       const pollInterval = setInterval(async () => {
@@ -64,32 +66,51 @@ export default function Dashboard() {
           clearInterval(pollInterval);
           return;
         }
-        
+
         try {
+          if (user) {
+            const { data } = await supabase
+              .from('profiles')
+              .select('is_active, subscription_status')
+              .eq('user_id', user.id)
+              .maybeSingle();
+
+            if (data?.is_active) {
+              clearInterval(pollInterval);
+              return;
+            }
+          }
+
+          // Fallback to Stripe-based check if profile hasn’t updated yet
           const { data } = await supabase.functions.invoke('check-subscription');
-          if (data?.subscribed) {
+          if ((data as any)?.subscribed) {
             clearInterval(pollInterval);
-            // Refresh session to get updated claims
             await supabase.auth.refreshSession();
           }
         } catch (error) {
-          console.log('Subscription check poll:', error);
+          console.log('Subscription activation poll:', error);
         }
       }, 5000);
 
-      // Remove the query param from URL
-      searchParams.delete('subscription');
-      setSearchParams(searchParams, { replace: true });
-      
+      // Remove handled query params
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('subscription');
+      nextParams.delete('from_checkout');
+      setSearchParams(nextParams, { replace: true });
+
       return () => clearInterval(pollInterval);
-    } else if (subscription === 'canceled') {
+    }
+
+    if (subscription === 'canceled') {
       toast.info('Subscription checkout was canceled.', {
         duration: 4000,
       });
-      searchParams.delete('subscription');
-      setSearchParams(searchParams, { replace: true });
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('subscription');
+      nextParams.delete('from_checkout');
+      setSearchParams(nextParams, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, user]);
 
   useEffect(() => {
     async function fetchData() {
