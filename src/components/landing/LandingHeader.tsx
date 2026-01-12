@@ -33,6 +33,11 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
+            <Link to="/support">
+              <Button variant="ghost" className="font-medium">
+                Support
+              </Button>
+            </Link>
             <Link to="/auth">
               <Button variant="ghost" className="font-medium">
                 Sign In
@@ -63,6 +68,15 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-3">
+              <Link 
+                to="/support" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full"
+              >
+                <Button variant="ghost" className="w-full justify-center font-medium">
+                  Support
+                </Button>
+              </Link>
               <Link 
                 to="/auth" 
                 onClick={() => setMobileMenuOpen(false)}
