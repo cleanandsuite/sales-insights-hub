@@ -17,6 +17,12 @@ export function LandingFooter() {
           {/* Links */}
           <div className="flex items-center gap-6 text-sm">
             <Link 
+              to="/support" 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Support
+            </Link>
+            <Link 
               to="/privacy" 
               className="text-muted-foreground hover:text-foreground transition-colors"
             >

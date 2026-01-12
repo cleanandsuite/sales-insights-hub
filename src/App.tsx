@@ -32,6 +32,7 @@ const Manager = lazy(() => import("./pages/Manager"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const Support = lazy(() => import("./pages/Support"));
 const AccountBlocked = lazy(() => import("./pages/AccountBlocked"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PaymentComplete = lazy(() => import("./pages/PaymentComplete"));
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/support" element={<Support />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
