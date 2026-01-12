@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { authenticateRequest, checkRateLimit, corsHeaders } from "../_shared/auth.ts";
+import { encryptToken, decryptToken, isEncrypted } from "../_shared/crypto.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -117,12 +118,16 @@ serve(async (req) => {
 
       console.log('Token exchange successful, instance:', tokens.instance_url);
 
-      // Store connection in database
+      // Encrypt tokens before storing
+      const encryptedAccessToken = await encryptToken(tokens.access_token);
+      const encryptedRefreshToken = await encryptToken(tokens.refresh_token);
+
+      // Store connection in database with encrypted tokens
       const { error: upsertError } = await supabase.from('crm_connections').upsert({
         user_id: state,
         provider: 'salesforce',
-        access_token_encrypted: tokens.access_token,
-        refresh_token_encrypted: tokens.refresh_token,
+        access_token_encrypted: encryptedAccessToken,
+        refresh_token_encrypted: encryptedRefreshToken,
         instance_url: tokens.instance_url,
         token_expires_at: new Date(Date.now() + (tokens.expires_in || 7200) * 1000).toISOString(),
         is_active: true,
@@ -171,12 +176,18 @@ serve(async (req) => {
         );
       }
 
+      // Decrypt refresh token - handle both encrypted and legacy plaintext tokens
+      let refreshToken = connection.refresh_token_encrypted;
+      if (isEncrypted(refreshToken)) {
+        refreshToken = await decryptToken(refreshToken);
+      }
+
       const tokenResponse = await fetch('https://login.salesforce.com/services/oauth2/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           grant_type: 'refresh_token',
-          refresh_token: connection.refresh_token_encrypted,
+          refresh_token: refreshToken,
           client_id: SALESFORCE_CLIENT_ID,
           client_secret: SALESFORCE_CLIENT_SECRET
         })
@@ -197,9 +208,10 @@ serve(async (req) => {
         );
       }
 
-      // Update tokens
+      // Encrypt and update tokens
+      const encryptedAccessToken = await encryptToken(tokens.access_token);
       await supabase.from('crm_connections').update({
-        access_token_encrypted: tokens.access_token,
+        access_token_encrypted: encryptedAccessToken,
         token_expires_at: new Date(Date.now() + (tokens.expires_in || 7200) * 1000).toISOString(),
         updated_at: new Date().toISOString()
       }).eq('id', connection.id);
