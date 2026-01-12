@@ -170,6 +170,7 @@ export default function Support() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showTicketForm, setShowTicketForm] = useState(false);
+  const [ticketName, setTicketName] = useState('');
   const [ticketEmail, setTicketEmail] = useState('');
   const [ticketMessage, setTicketMessage] = useState('');
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
@@ -320,10 +321,10 @@ export default function Support() {
   };
 
   const handleSubmitTicket = async () => {
-    if (!ticketEmail.trim() || !ticketMessage.trim()) {
+    if (!ticketName.trim() || !ticketEmail.trim() || !ticketMessage.trim()) {
       toast({
         title: "Missing information",
-        description: "Please provide both email and message.",
+        description: "Please provide name, email, and message.",
         variant: "destructive"
       });
       return;
@@ -338,6 +339,7 @@ export default function Support() {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
+          name: ticketName,
           email: ticketEmail,
           message: ticketMessage,
           sessionId,
@@ -354,6 +356,7 @@ export default function Support() {
         description: "We'll get back to you within 24 hours.",
       });
 
+      setTicketName('');
       setTicketEmail('');
       setTicketMessage('');
       setShowTicketForm(false);
@@ -524,6 +527,13 @@ export default function Support() {
                   <span className="text-sm font-medium">Still need help?</span>
                 </div>
                 <div className="space-y-2">
+                  <Input
+                    type="text"
+                    value={ticketName}
+                    onChange={(e) => setTicketName(e.target.value)}
+                    placeholder="Your name"
+                    className="text-sm"
+                  />
                   <Input
                     type="email"
                     value={ticketEmail}
