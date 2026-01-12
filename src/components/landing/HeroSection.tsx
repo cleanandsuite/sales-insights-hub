@@ -69,10 +69,10 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
           <div className="flex flex-col gap-4 md:flex-row md:gap-6 justify-center pt-6 md:pt-8 px-4">
             <Button 
               size="lg" 
-              onClick={scrollToPricing}
+              onClick={() => window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank')}
               className="group gap-2 md:gap-3 font-black text-xl md:text-2xl lg:text-3xl px-8 py-8 md:px-14 md:py-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_80px_-15px_rgba(0,0,0,0.6)] transition-all duration-300 hover:scale-105 bg-white text-[#0052CC] hover:bg-cyan-50 rounded-xl md:rounded-2xl border-4 border-white/50 animate-cta-pulse w-full md:w-auto"
             >
-              Start Free 14-Day Trial
+              Start Free 14-Day Trial Now
               <ArrowRight className="h-6 w-6 md:h-8 md:w-8 group-hover:translate-x-2 transition-transform" />
             </Button>
             <Button 
