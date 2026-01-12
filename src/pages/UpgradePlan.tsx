@@ -26,7 +26,7 @@ export default function UpgradePlan() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-4">
             <p className="text-center text-muted-foreground">
-              <strong className="text-foreground">Team features</strong> require a Team plan subscription.
+              <strong className="text-foreground">Enterprise features</strong> require an Enterprise subscription.
               Upgrade now to access:
             </p>
           </div>
