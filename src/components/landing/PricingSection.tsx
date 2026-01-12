@@ -110,8 +110,8 @@ export function PricingSection() {
   }
 
   return (
-    <section className="py-20 bg-background" id="pricing">
-      <div className="container mx-auto px-4">
+    <section className="relative py-20 bg-pricing-gradient overflow-hidden" id="pricing">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-foreground mb-4">Simple, Transparent Pricing</h2>
           <p className="text-muted-foreground text-lg">

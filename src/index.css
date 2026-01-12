@@ -165,6 +165,186 @@
   .stat-badge {
     @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary;
   }
+
+  /* ============================================
+     TEXTURED GRADIENT BACKGROUNDS - 2026 STYLE
+     ============================================ */
+
+  /* Hero Section: Deep blue to light blue gradient with noise texture */
+  .bg-hero-gradient {
+    position: relative;
+    background: 
+      linear-gradient(180deg, 
+        #005f9e 0%, 
+        #0077b6 15%,
+        #48a9d4 40%, 
+        #a1d4ff 70%, 
+        #ffffff 100%
+      );
+  }
+
+  .bg-hero-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
+  }
+
+  .bg-hero-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 25%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 20%),
+      radial-gradient(circle at 60% 70%, rgba(255,255,255,0.08) 0%, transparent 30%);
+    pointer-events: none;
+  }
+
+  /* AI Neural Network Pattern Overlay for Hero */
+  .bg-hero-ai-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(255,255,255,0.12) 2px, transparent 2px),
+      radial-gradient(circle at 75% 45%, rgba(255,255,255,0.1) 2px, transparent 2px),
+      radial-gradient(circle at 45% 75%, rgba(255,255,255,0.08) 2px, transparent 2px),
+      radial-gradient(circle at 85% 85%, rgba(255,255,255,0.06) 1.5px, transparent 1.5px),
+      radial-gradient(circle at 15% 65%, rgba(255,255,255,0.1) 1.5px, transparent 1.5px);
+    background-size: 120px 120px, 150px 150px, 100px 100px, 80px 80px, 90px 90px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* Features Section: Light with green accents and dotted texture */
+  .bg-features-gradient {
+    position: relative;
+    background: 
+      linear-gradient(180deg, 
+        rgba(255,255,255,1) 0%,
+        rgba(240,253,244,0.6) 30%,
+        rgba(220,252,231,0.3) 60%,
+        rgba(255,255,255,1) 100%
+      );
+  }
+
+  .bg-features-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle, rgba(0,166,118,0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .bg-features-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 30% 20%, rgba(0,166,118,0.06) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 80%, rgba(0,166,118,0.04) 0%, transparent 35%);
+    pointer-events: none;
+  }
+
+  /* Testimonials Section: Soft purple gradient with abstract shapes */
+  .bg-testimonials-gradient {
+    position: relative;
+    background: 
+      linear-gradient(135deg, 
+        rgba(106,76,147,0.08) 0%,
+        rgba(138,110,176,0.05) 30%,
+        rgba(255,255,255,0.95) 70%,
+        rgba(255,255,255,1) 100%
+      );
+  }
+
+  .bg-testimonials-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+  }
+
+  .bg-testimonials-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 10% 20%, rgba(106,76,147,0.08) 0%, transparent 30%),
+      radial-gradient(circle at 90% 80%, rgba(106,76,147,0.06) 0%, transparent 25%),
+      radial-gradient(circle at 50% 50%, rgba(138,110,176,0.03) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Pricing Section: Soft purple with futuristic AI vibe */
+  .bg-pricing-gradient {
+    position: relative;
+    background: 
+      linear-gradient(180deg, 
+        rgba(255,255,255,1) 0%,
+        rgba(243,240,248,0.5) 30%,
+        rgba(230,224,240,0.3) 60%,
+        rgba(255,255,255,1) 100%
+      );
+  }
+
+  .bg-pricing-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle, rgba(106,76,147,0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .bg-pricing-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 30%, rgba(106,76,147,0.05) 0%, transparent 35%),
+      radial-gradient(ellipse at 80% 70%, rgba(138,110,176,0.04) 0%, transparent 30%);
+    pointer-events: none;
+  }
+
+  /* CTA Section: Deep blue accent */
+  .bg-cta-gradient {
+    position: relative;
+    background: 
+      linear-gradient(135deg, 
+        #005f9e 0%, 
+        #0077b6 50%,
+        #48a9d4 100%
+      );
+  }
+
+  .bg-cta-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    pointer-events: none;
+  }
+
+  .bg-cta-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1) 0%, transparent 30%),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,0.08) 0%, transparent 25%);
+    pointer-events: none;
+  }
 }
 
 @layer utilities {

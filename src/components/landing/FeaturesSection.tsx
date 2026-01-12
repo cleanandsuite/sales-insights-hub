@@ -20,8 +20,8 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-20 bg-background">
-      <div className="container mx-auto px-4">
+    <section className="relative py-20 bg-features-gradient overflow-hidden">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-foreground mb-4">Why Sales Teams Choose SellSig</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
