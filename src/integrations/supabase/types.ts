@@ -2278,6 +2278,45 @@ export type Database = {
         }
         Relationships: []
       }
+      support_logs: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          query_text: string | null
+          response_text: string | null
+          session_id: string
+          user_id: string | null
+          was_resolved: boolean | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          query_text?: string | null
+          response_text?: string | null
+          session_id: string
+          user_id?: string | null
+          was_resolved?: boolean | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          query_text?: string | null
+          response_text?: string | null
+          session_id?: string
+          user_id?: string | null
+          was_resolved?: boolean | null
+        }
+        Relationships: []
+      }
       team_benchmarks: {
         Row: {
           created_at: string
