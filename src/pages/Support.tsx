@@ -1,16 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { StaticPageHeader } from '@/components/layout/StaticPageHeader';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { MessageCircle, X, Send, Mic, Play, FileText, CreditCard, Shield, Loader2, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Mic, Play, FileText, CreditCard, Shield, Loader2, Bot, User, Mail, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  isLowConfidence?: boolean;
 }
 
 const faqData = {
@@ -34,6 +39,10 @@ const faqData = {
     {
       question: "Are my recordings stored securely?",
       answer: "Yes, all recordings are encrypted at rest and in transit. Only you and authorized team members can access your recordings."
+    },
+    {
+      question: "How do I export recordings?",
+      answer: "Go to the Recordings page, select the recording you want to export, and click the download button. You can export the audio file, transcript, or both as a ZIP file."
     }
   ],
   playback: [
@@ -51,7 +60,7 @@ const faqData = {
     },
     {
       question: "Can I share recordings with my team?",
-      answer: "Yes, with a Team or Enterprise plan, you can share recordings with team members and add comments at specific timestamps."
+      answer: "Yes, with an Enterprise plan, you can share recordings with team members and add comments at specific timestamps."
     }
   ],
   transcription: [
@@ -150,12 +159,25 @@ const categoryTitles = {
   security: "Security"
 };
 
+// Generate unique session ID
+const generateSessionId = () => {
+  return `support_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
 export default function Support() {
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTicketForm, setShowTicketForm] = useState(false);
+  const [ticketEmail, setTicketEmail] = useState('');
+  const [ticketMessage, setTicketMessage] = useState('');
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
+  const [sessionId] = useState(() => generateSessionId());
+  const [unresolvedCount, setUnresolvedCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -164,6 +186,31 @@ export default function Support() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Log chat open event
+  const logEvent = useCallback(async (eventType: string, queryText?: string, responseText?: string, wasResolved?: boolean, confidenceScore?: number) => {
+    try {
+      await supabase.from('support_logs').insert({
+        user_id: user?.id || null,
+        session_id: sessionId,
+        event_type: eventType,
+        query_text: queryText,
+        response_text: responseText,
+        was_resolved: wasResolved,
+        confidence_score: confidenceScore,
+        metadata: { user_agent: navigator.userAgent }
+      });
+    } catch (error) {
+      console.error('Failed to log support event:', error);
+    }
+  }, [user?.id, sessionId]);
+
+  // Log chat open when widget opens
+  useEffect(() => {
+    if (chatOpen) {
+      logEvent('chat_open');
+    }
+  }, [chatOpen, logEvent]);
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -194,10 +241,11 @@ export default function Support() {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantContent = '';
+      let isLowConfidence = false;
 
       if (reader) {
         // Add empty assistant message that we'll update
-        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: '', isLowConfidence: false }]);
 
         while (true) {
           const { done, value } = await reader.read();
@@ -213,10 +261,18 @@ export default function Support() {
                 const content = data.choices?.[0]?.delta?.content;
                 if (content) {
                   assistantContent += content;
+                  
+                  // Check for low confidence marker
+                  if (assistantContent.includes('[LOW_CONFIDENCE]')) {
+                    isLowConfidence = true;
+                    assistantContent = assistantContent.replace('[LOW_CONFIDENCE]', '').trim();
+                  }
+                  
                   setMessages(prev => {
                     const newMessages = [...prev];
                     if (newMessages[newMessages.length - 1]?.role === 'assistant') {
-                      newMessages[newMessages.length - 1].content = assistantContent;
+                      newMessages[newMessages.length - 1].content = assistantContent.replace('[LOW_CONFIDENCE]', '').trim();
+                      newMessages[newMessages.length - 1].isLowConfidence = isLowConfidence;
                     }
                     return newMessages;
                   });
@@ -228,12 +284,29 @@ export default function Support() {
           }
         }
       }
+
+      // Log the message and track unresolved
+      const confidenceScore = isLowConfidence ? 0.3 : 0.9;
+      await logEvent('message_sent', userMessage, assistantContent, !isLowConfidence, confidenceScore);
+      
+      if (isLowConfidence) {
+        setUnresolvedCount(prev => prev + 1);
+        await logEvent('unresolved', userMessage, assistantContent, false, confidenceScore);
+        
+        // Show ticket form prompt after 2 unresolved queries
+        if (unresolvedCount >= 1) {
+          setShowTicketForm(true);
+        }
+      }
+
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "I'm sorry, I'm having trouble responding right now. Please try again or browse the FAQ sections above for help." 
+        content: "I'm sorry, I'm having trouble responding right now. Please try again or submit a support ticket below.",
+        isLowConfidence: true
       }]);
+      setShowTicketForm(true);
     } finally {
       setIsLoading(false);
     }
@@ -243,6 +316,57 @@ export default function Support() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleSubmitTicket = async () => {
+    if (!ticketEmail.trim() || !ticketMessage.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both email and message.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmittingTicket(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-support-ticket`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          email: ticketEmail,
+          message: ticketMessage,
+          sessionId,
+          conversationHistory: messages
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit ticket');
+      }
+
+      toast({
+        title: "Ticket submitted!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      setTicketEmail('');
+      setTicketMessage('');
+      setShowTicketForm(false);
+      
+    } catch (error) {
+      console.error('Ticket submission error:', error);
+      toast({
+        title: "Submission failed",
+        description: "Please try again or email support@sellsig.com directly.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmittingTicket(false);
     }
   };
 
@@ -319,7 +443,7 @@ export default function Support() {
             <MessageCircle className="h-6 w-6" />
           </Button>
         ) : (
-          <Card className="w-[350px] md:w-[400px] h-[500px] flex flex-col shadow-2xl border-border">
+          <Card className="w-[350px] md:w-[400px] h-[550px] flex flex-col shadow-2xl border-border">
             {/* Chat Header */}
             <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b border-border">
               <div className="flex items-center gap-2">
@@ -343,39 +467,101 @@ export default function Support() {
                 </div>
               )}
               {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "flex gap-2",
-                    msg.role === 'user' ? "justify-end" : "justify-start"
-                  )}
-                >
-                  {msg.role === 'assistant' && (
-                    <div className="p-1.5 rounded-full bg-primary/10 h-fit">
-                      <Bot className="h-3 w-3 text-primary" />
-                    </div>
-                  )}
+                <div key={index}>
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-                      msg.role === 'user'
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
+                      "flex gap-2",
+                      msg.role === 'user' ? "justify-end" : "justify-start"
                     )}
                   >
-                    {msg.content || (isLoading && index === messages.length - 1 ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : null)}
+                    {msg.role === 'assistant' && (
+                      <div className="p-1.5 rounded-full bg-primary/10 h-fit">
+                        <Bot className="h-3 w-3 text-primary" />
+                      </div>
+                    )}
+                    <div
+                      className={cn(
+                        "max-w-[80%] rounded-lg px-3 py-2 text-sm",
+                        msg.role === 'user'
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground"
+                      )}
+                    >
+                      {msg.content || (isLoading && index === messages.length - 1 ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : null)}
+                    </div>
+                    {msg.role === 'user' && (
+                      <div className="p-1.5 rounded-full bg-muted h-fit">
+                        <User className="h-3 w-3 text-muted-foreground" />
+                      </div>
+                    )}
                   </div>
-                  {msg.role === 'user' && (
-                    <div className="p-1.5 rounded-full bg-muted h-fit">
-                      <User className="h-3 w-3 text-muted-foreground" />
+                  {/* Low confidence suggestion */}
+                  {msg.role === 'assistant' && msg.isLowConfidence && msg.content && (
+                    <div className="ml-8 mt-2 p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-600 dark:text-amber-400">
+                        Need more help? <button 
+                          onClick={() => setShowTicketForm(true)} 
+                          className="underline font-medium hover:text-amber-700"
+                        >
+                          Submit a support ticket
+                        </button>
+                      </p>
                     </div>
                   )}
                 </div>
               ))}
               <div ref={messagesEndRef} />
             </CardContent>
+
+            {/* Ticket Form */}
+            {showTicketForm && (
+              <div className="p-3 border-t border-border bg-muted/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <Mail className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Still need help?</span>
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    type="email"
+                    value={ticketEmail}
+                    onChange={(e) => setTicketEmail(e.target.value)}
+                    placeholder="Your email"
+                    className="text-sm"
+                  />
+                  <Textarea
+                    value={ticketMessage}
+                    onChange={(e) => setTicketMessage(e.target.value)}
+                    placeholder="Describe your issue..."
+                    className="text-sm min-h-[60px]"
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleSubmitTicket} 
+                      disabled={isSubmittingTicket}
+                      size="sm"
+                      className="flex-1"
+                    >
+                      {isSubmittingTicket ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                      ) : (
+                        <Send className="h-4 w-4 mr-1" />
+                      )}
+                      Submit Ticket
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowTicketForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Chat Input */}
             <div className="p-3 border-t border-border">
