@@ -913,6 +913,8 @@ export type Database = {
           created_at: string
           crm_connection_id: string
           email: string | null
+          encrypted_email: string | null
+          encrypted_phone: string | null
           external_id: string
           id: string
           last_synced_at: string
@@ -931,6 +933,8 @@ export type Database = {
           created_at?: string
           crm_connection_id: string
           email?: string | null
+          encrypted_email?: string | null
+          encrypted_phone?: string | null
           external_id: string
           id?: string
           last_synced_at?: string
@@ -949,6 +953,8 @@ export type Database = {
           created_at?: string
           crm_connection_id?: string
           email?: string | null
+          encrypted_email?: string | null
+          encrypted_phone?: string | null
           external_id?: string
           id?: string
           last_synced_at?: string
@@ -966,6 +972,41 @@ export type Database = {
             columns: ["crm_connection_id"]
             isOneToOne: false
             referencedRelation: "crm_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_contacts_access_logs: {
+        Row: {
+          accessed_at: string
+          action: string | null
+          contact_id: string | null
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          action?: string | null
+          contact_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          action?: string | null
+          contact_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contacts_access_logs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
             referencedColumns: ["id"]
           },
         ]
@@ -1108,6 +1149,189 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      experiment_assignments: {
+        Row: {
+          assigned_at: string
+          experiment_id: string
+          id: string
+          user_id: string | null
+          variant_id: string
+          visitor_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          experiment_id: string
+          id?: string
+          user_id?: string | null
+          variant_id: string
+          visitor_id: string
+        }
+        Update: {
+          assigned_at?: string
+          experiment_id?: string
+          id?: string
+          user_id?: string | null
+          variant_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_assignments_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_assignments_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_events: {
+        Row: {
+          assignment_id: string | null
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          experiment_id: string
+          id: string
+          plan_type: string | null
+          revenue_cents: number | null
+          user_id: string | null
+          variant_id: string
+          visitor_id: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          experiment_id: string
+          id?: string
+          plan_type?: string | null
+          revenue_cents?: number | null
+          user_id?: string | null
+          variant_id: string
+          visitor_id: string
+        }
+        Update: {
+          assignment_id?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          experiment_id?: string
+          id?: string
+          plan_type?: string | null
+          revenue_cents?: number | null
+          user_id?: string | null
+          variant_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_events_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_events_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_events_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "experiment_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiment_variants: {
+        Row: {
+          config: Json | null
+          created_at: string
+          experiment_id: string
+          id: string
+          is_control: boolean | null
+          name: string
+          weight: number | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          experiment_id: string
+          id?: string
+          is_control?: boolean | null
+          name: string
+          weight?: number | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          is_control?: boolean | null
+          name?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_variants_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ended_at: string | null
+          id: string
+          name: string
+          started_at: string | null
+          status: string | null
+          traffic_percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          name: string
+          started_at?: string | null
+          status?: string | null
+          traffic_percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          name?: string
+          started_at?: string | null
+          status?: string | null
+          traffic_percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       invitation_check_logs: {
         Row: {
@@ -1485,6 +1709,33 @@ export type Database = {
           name?: string
           price_monthly?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      profile_access_logs: {
+        Row: {
+          accessed_at: string
+          accessed_user_id: string
+          action: string | null
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string
+          accessed_user_id: string
+          action?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string
+          accessed_user_id?: string
+          action?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -1991,6 +2242,42 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_counter: {
+        Row: {
+          count: number
+          created_at: string
+          deadline: string
+          grandfathered_price_cents: number
+          id: string
+          max_spots: number
+          plan_type: string
+          regular_price_cents: number
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          deadline?: string
+          grandfathered_price_cents: number
+          id?: string
+          max_spots?: number
+          plan_type: string
+          regular_price_cents: number
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          deadline?: string
+          grandfathered_price_cents?: number
+          id?: string
+          max_spots?: number
+          plan_type?: string
+          regular_price_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_benchmarks: {
         Row: {
           created_at: string
@@ -2197,6 +2484,57 @@ export type Database = {
           duration?: number | null
           id?: string
           service_used?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_billing: {
+        Row: {
+          created_at: string
+          id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -2641,6 +2979,13 @@ export type Database = {
       check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
       check_password_strength: { Args: { password: string }; Returns: boolean }
       get_user_strengths: { Args: { p_user_id: string }; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_manager_of_user: {
         Args: { _current_user_id: string; _target_user_id: string }
         Returns: boolean
@@ -2664,7 +3009,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2791,6 +3136,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "user"],
+    },
   },
 } as const
