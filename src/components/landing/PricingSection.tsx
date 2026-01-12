@@ -12,8 +12,13 @@ import { useExperimentTracking } from '@/hooks/useExperimentTracking';
 export function PricingSection() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { availability, loading: availabilityLoading } = usePricingAvailability();
-  const { assignment } = useExperiment('pricing_cta_test');
+  const { assignment, config, isControl } = useExperiment('pricing_cta_test');
   const { trackClick } = useExperimentTracking();
+
+  // Get variant-specific content from experiment config
+  const ctaButtonText = (config?.buttonText as string) || 'Start Free 14-Day Trial Now';
+  const ctaUrgencyText = (config?.urgencyText as string) || 'Limited: First 100 Spots at This Price';
+  const isAnimatedStyle = (config?.buttonStyle as string) === 'animated';
 
   const handleStartTrial = async (planKey: string) => {
     // Track A/B test click if in experiment
@@ -58,7 +63,7 @@ export function PricingSection() {
         ? `Then $29/mo Grandfathered`
         : `Then $${availability?.singleUser.regularPrice ?? 49}/mo`,
       regularPriceNote: singleUserAvailable ? '(Reg. $49/mo)' : null,
-      urgencyBadge: singleUserAvailable ? `Limited: First 100 Spots—Ends ${formatDate(availability?.deadline ?? new Date('2026-01-31'))}!` : 'Waitlist Open',
+      urgencyBadge: singleUserAvailable ? ctaUrgencyText : 'Waitlist Open',
       spotsRemaining: availability?.singleUser.spotsRemaining ?? 100,
       features: [
         'No Setup Fees—Ever',
@@ -179,7 +184,11 @@ export function PricingSection() {
 
               <CardFooter className="pb-8">
                 <Button
-                  className={`w-full font-bold text-lg py-7 rounded-xl ${tier.available ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg hover:shadow-xl' : ''}`}
+                  className={`w-full font-bold text-lg py-7 rounded-xl ${
+                    tier.available 
+                      ? `bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg hover:shadow-xl ${isAnimatedStyle ? 'animate-cta-pulse' : ''}` 
+                      : ''
+                  }`}
                   variant={tier.available ? 'default' : 'outline'}
                   onClick={() => tier.available ? handleStartTrial(tier.planKey) : handleJoinWaitlist(tier.planKey)}
                   disabled={loadingPlan !== null || tier.comingSoon}
@@ -192,7 +201,7 @@ export function PricingSection() {
                   ) : tier.comingSoon ? (
                     'Coming Soon'
                   ) : tier.available ? (
-                    'Start Free 14-Day Trial Now'
+                    ctaButtonText
                   ) : (
                     'Join Waitlist'
                   )}
