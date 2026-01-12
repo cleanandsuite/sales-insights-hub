@@ -56,8 +56,9 @@ export function PricingSection() {
       headline: 'Perfect for individual sales reps',
       priceDisplay: '$0 for 14 Days',
       afterTrialText: singleUserAvailable 
-        ? `Then Lock in $${availability?.singleUser.grandfatheredPrice ?? 29}/mo Forever`
+        ? `Then $29/mo Grandfathered`
         : `Then $${availability?.singleUser.regularPrice ?? 49}/mo`,
+      regularPriceNote: singleUserAvailable ? '(Reg. $49/mo)' : null,
       urgencyBadge: singleUserAvailable ? `Limited: First 100 Spots—Ends ${formatDate(availability?.deadline ?? new Date('2026-01-31'))}!` : 'Waitlist Open',
       spotsRemaining: availability?.singleUser.spotsRemaining ?? 100,
       features: [
@@ -71,16 +72,16 @@ export function PricingSection() {
       popular: false,
       planKey: 'single_user',
       available: singleUserAvailable,
+      comingSoon: false,
     },
     {
       name: 'Enterprise',
       headline: 'For scaling sales organizations',
-      priceDisplay: '$0 for 14 Days',
-      afterTrialText: enterpriseAvailable 
-        ? `Then Lock in $${availability?.enterprise.grandfatheredPrice ?? 79}/user/mo Forever`
-        : `Then $${availability?.enterprise.regularPrice ?? 99}/user/mo`,
-      urgencyBadge: enterpriseAvailable ? 'Spots Filling Fast!' : 'Waitlist Open',
-      spotsRemaining: availability?.enterprise.spotsRemaining ?? 100,
+      priceDisplay: '$99/mo',
+      afterTrialText: 'Per user',
+      regularPriceNote: null,
+      urgencyBadge: 'Coming Soon',
+      spotsRemaining: 0,
       features: [
         'Everything in Single User',
         'Team performance analytics',
@@ -91,7 +92,8 @@ export function PricingSection() {
       ],
       popular: true,
       planKey: 'enterprise',
-      available: enterpriseAvailable,
+      available: false,
+      comingSoon: true,
     },
   ];
 
@@ -147,6 +149,9 @@ export function PricingSection() {
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold text-foreground">{tier.priceDisplay}</span>
+                    {tier.regularPriceNote && (
+                      <span className="text-sm text-muted-foreground line-through">{tier.regularPriceNote}</span>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
                     {tier.afterTrialText}
@@ -174,13 +179,15 @@ export function PricingSection() {
                   className={`w-full font-semibold ${tier.available ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' : ''}`}
                   variant={tier.available ? 'default' : 'outline'}
                   onClick={() => tier.available ? handleStartTrial(tier.planKey) : handleJoinWaitlist(tier.planKey)}
-                  disabled={loadingPlan !== null}
+                  disabled={loadingPlan !== null || tier.comingSoon}
                 >
                   {loadingPlan === tier.planKey ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Starting...
                     </>
+                  ) : tier.comingSoon ? (
+                    'Coming Soon'
                   ) : tier.available ? (
                     'Start Free 14-Day Trial Now'
                   ) : (
