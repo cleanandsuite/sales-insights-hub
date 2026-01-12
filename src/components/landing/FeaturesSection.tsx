@@ -20,26 +20,28 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="relative py-20 bg-features-gradient overflow-hidden">
+    <section className="relative py-24 bg-features-gradient overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-foreground mb-4">Why Sales Teams Choose SellSig</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
+            Why Sales Teams Choose <span className="text-primary">SellSig</span>
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg md:text-xl">
             Everything you need to coach your team and close more deals
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {features.map((feature) => (
             <div 
               key={feature.title}
-              className="card-enterprise p-8 text-center hover:shadow-lg transition-shadow"
+              className="card-enterprise p-10 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                <feature.icon className="h-7 w-7 text-primary" />
+              <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-8">
+                <feature.icon className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-foreground mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-4">{feature.title}</h3>
+              <p className="text-muted-foreground text-lg">{feature.description}</p>
             </div>
           ))}
         </div>

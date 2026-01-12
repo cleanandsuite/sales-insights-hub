@@ -38,43 +38,43 @@ const benefits = [
 
 export function BenefitsSection() {
   return (
-    <section className="py-20 bg-muted/30" id="benefits">
+    <section className="py-24 bg-muted/40" id="benefits">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
             Why Sales Teams Choose Our{' '}
             <span className="text-primary">AI Sales Coaching</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Real problems. Real solutions. Real results with AI Coaching that works.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {benefits.map((benefit, index) => (
             <Card 
               key={index} 
-              className="group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-card rounded-lg"
+              className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-card rounded-xl hover:-translate-y-1"
             >
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
+              <CardContent className="p-8">
+                <div className="flex items-start gap-6">
                   <div className="flex-shrink-0">
-                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <benefit.icon className="h-6 w-6 text-primary" />
+                    <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <benefit.icon className="h-7 w-7 text-primary" />
                     </div>
                   </div>
-                  <div className="flex-1 space-y-3">
+                  <div className="flex-1 space-y-4">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold text-destructive">{benefit.stat}</span>
-                      <span className="text-sm text-muted-foreground">{benefit.statLabel}</span>
+                      <span className="text-4xl font-black text-destructive">{benefit.stat}</span>
+                      <span className="text-base text-muted-foreground font-medium">{benefit.statLabel}</span>
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground">
+                    <h3 className="text-2xl font-bold text-foreground">
                       {benefit.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground text-lg leading-relaxed">
                       {benefit.description}
                     </p>
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-success/10 text-success text-sm font-medium">
+                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-success/15 text-success text-base font-semibold">
                       ✓ {benefit.highlight}
                     </div>
                   </div>
