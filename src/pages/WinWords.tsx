@@ -60,7 +60,7 @@ export default function WinWords() {
   
   const [activeTab, setActiveTab] = useState('generate');
   const [step, setStep] = useState(1);
-  const [scenario, setScenario] = useState('discovery');
+  const [scenario, setScenario] = useState('cold_call');
   const [style, setStyle] = useState('confident');
   const [persona, setPersona] = useState<Persona>({
     role: '',
