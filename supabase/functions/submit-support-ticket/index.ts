@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 interface SupportTicketRequest {
+  name: string;
   email: string;
   message: string;
   sessionId: string;
@@ -21,11 +22,11 @@ serve(async (req) => {
   }
 
   try {
-    const { email, message, sessionId, conversationHistory }: SupportTicketRequest = await req.json();
+    const { name, email, message, sessionId, conversationHistory }: SupportTicketRequest = await req.json();
 
-    if (!email || !message) {
+    if (!name || !email || !message) {
       return new Response(
-        JSON.stringify({ error: "Email and message are required" }),
+        JSON.stringify({ error: "Name, email, and message are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -50,10 +51,11 @@ serve(async (req) => {
         from: "SellSig Support <onboarding@resend.dev>",
         to: ["support@sellsig.com"],
         reply_to: email,
-        subject: `Support Ticket from ${email}`,
+        subject: `Support Ticket from ${name} (${email})`,
         html: `
           <h2>New Support Ticket</h2>
-          <p><strong>From:</strong> ${email}</p>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
           <p><strong>Session ID:</strong> ${sessionId}</p>
           <h3>Message:</h3>
           <p>${message.replace(/\n/g, '<br>')}</p>
@@ -82,7 +84,7 @@ serve(async (req) => {
       session_id: sessionId,
       event_type: "ticket_submitted",
       query_text: message,
-      metadata: { email, conversation_length: conversationHistory?.length || 0 }
+      metadata: { name, email, conversation_length: conversationHistory?.length || 0 }
     });
 
     console.log("Support ticket sent:", emailResponse);
