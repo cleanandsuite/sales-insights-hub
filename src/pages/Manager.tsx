@@ -75,16 +75,19 @@ export default function Manager() {
 
   const promoteUser = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ user_role: 'manager' })
-        .eq('user_id', userId);
+      // Use the secure SECURITY DEFINER function instead of direct profile update
+      // Using type assertion since types may not be regenerated yet
+      const { error } = await (supabase.rpc as any)(
+        'promote_user_to_manager', 
+        { target_user_id: userId }
+      );
 
       if (error) throw error;
       toast.success('User promoted to manager');
       fetchTeamStats();
     } catch (error) {
-      toast.error('Failed to promote user');
+      console.error('Promotion error:', error);
+      toast.error('Failed to promote user. You must have manager or admin privileges.');
     }
   };
 

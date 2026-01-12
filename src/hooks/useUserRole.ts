@@ -25,15 +25,15 @@ export function useUserRole() {
     }
 
     try {
-      // Get user's profile role
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_role')
-        .eq('user_id', user.id)
-        .single();
+      // Check if user has manager role in the secure user_roles table
+      // Using type assertion since types may not be regenerated yet
+      const { data: isManager, error: roleError } = await (supabase.rpc as any)(
+        'is_manager', 
+        { _user_id: user.id }
+      );
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', profileError);
+      if (roleError) {
+        console.error('Error checking manager role:', roleError);
       }
 
       // Get user's team
@@ -44,7 +44,7 @@ export function useUserRole() {
         .limit(1)
         .single();
 
-      const role = (profile?.user_role as UserRole) || 'user';
+      const role: UserRole = isManager ? 'manager' : 'user';
       const teamId = teamMember?.team_id || null;
 
       setState({
@@ -67,10 +67,12 @@ export function useUserRole() {
       throw new Error('Only managers can promote users');
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ user_role: 'manager' })
-      .eq('user_id', targetUserId);
+    // Use the secure SECURITY DEFINER function
+    // Using type assertion since types may not be regenerated yet
+    const { error } = await (supabase.rpc as any)(
+      'promote_user_to_manager', 
+      { target_user_id: targetUserId }
+    );
 
     if (error) throw error;
   };
@@ -80,10 +82,12 @@ export function useUserRole() {
       throw new Error('Only managers can demote users');
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ user_role: 'user' })
-      .eq('user_id', targetUserId);
+    // Use the secure SECURITY DEFINER function
+    // Using type assertion since types may not be regenerated yet
+    const { error } = await (supabase.rpc as any)(
+      'demote_user_from_manager', 
+      { target_user_id: targetUserId }
+    );
 
     if (error) throw error;
   };
