@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -23,14 +24,20 @@ const baseNavItems = [
 ];
 
 const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
+const adminNavItem = { to: '/experiments', icon: FlaskConical, label: 'Experiments' };
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { signOut } = useAuth();
   const { isManager } = useUserRole();
+  const { isAdmin } = useAdminRole();
   
-  const navItems = isManager 
+  let navItems = isManager 
     ? [...baseNavItems.slice(0, -1), managerNavItem, baseNavItems[baseNavItems.length - 1]]
     : baseNavItems;
+  
+  if (isAdmin) {
+    navItems = [...navItems.slice(0, -1), adminNavItem, navItems[navItems.length - 1]];
+  }
 
   return (
     <div className="flex h-full flex-col">
