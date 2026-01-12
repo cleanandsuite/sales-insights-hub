@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader2, AlertTriangle, Clock } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Check, AlertTriangle, Clock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePricingAvailability } from '@/hooks/usePricingAvailability';
 import { useExperiment } from '@/hooks/useExperiment';
@@ -48,7 +47,6 @@ function CountdownTimer({ deadline }: { deadline: Date }) {
 }
 
 export function PricingSection() {
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { availability, loading: availabilityLoading } = usePricingAvailability();
   const { assignment, config, isControl } = useExperiment('pricing_cta_test');
   const { trackClick } = useExperimentTracking();
@@ -58,28 +56,14 @@ export function PricingSection() {
   const ctaUrgencyText = (config?.urgencyText as string) || 'Limited: First 100 Spots at This Price';
   const isAnimatedStyle = (config?.buttonStyle as string) === 'animated';
 
-  const handleStartTrial = async (planKey: string) => {
+  const handleStartTrial = (planKey: string) => {
     // Track A/B test click if in experiment
     if (assignment) {
       trackClick(assignment.experimentId, assignment.variantId, `pricing_cta_${planKey}`);
     }
 
-    setLoadingPlan(planKey);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-trial-checkout', {
-        body: { plan: planKey },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Failed to start checkout. Please try again.');
-    } finally {
-      setLoadingPlan(null);
-    }
+    // Use direct Stripe checkout link
+    window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank');
   };
 
   const handleJoinWaitlist = async (planKey: string) => {
@@ -254,14 +238,9 @@ export function PricingSection() {
                   }`}
                   variant={tier.available ? 'default' : 'outline'}
                   onClick={() => tier.available ? handleStartTrial(tier.planKey) : handleJoinWaitlist(tier.planKey)}
-                  disabled={loadingPlan !== null || tier.comingSoon}
+                  disabled={tier.comingSoon}
                 >
-                  {loadingPlan === tier.planKey ? (
-                    <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      Starting...
-                    </>
-                  ) : tier.comingSoon ? (
+                  {tier.comingSoon ? (
                     'Coming Soon'
                   ) : tier.available ? (
                     ctaButtonText
