@@ -3017,6 +3017,20 @@ export type Database = {
       }
       check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
       check_password_strength: { Args: { password: string }; Returns: boolean }
+      get_manager_team_stats: {
+        Args: { p_team_id: string }
+        Returns: {
+          avg_score: number
+          full_name: string
+          hot_leads: number
+          joined_at: string
+          role: string
+          team_id: string
+          total_calls: number
+          total_leads: number
+          user_id: string
+        }[]
+      }
       get_public_pricing_availability: { Args: never; Returns: Json }
       get_user_strengths: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
