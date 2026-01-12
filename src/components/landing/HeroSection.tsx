@@ -70,7 +70,7 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
             <Button 
               size="lg" 
               onClick={scrollToPricing}
-              className="group gap-3 font-black text-2xl md:text-3xl px-14 py-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_80px_-15px_rgba(0,0,0,0.6)] transition-all duration-300 hover:scale-105 bg-white text-[#0052CC] hover:bg-cyan-50 rounded-2xl border-4 border-white/50"
+              className="group gap-3 font-black text-2xl md:text-3xl px-14 py-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_80px_-15px_rgba(0,0,0,0.6)] transition-all duration-300 hover:scale-105 bg-white text-[#0052CC] hover:bg-cyan-50 rounded-2xl border-4 border-white/50 animate-cta-pulse"
             >
               Start Free 14-Day Trial
               <ArrowRight className="h-8 w-8 group-hover:translate-x-2 transition-transform" />
@@ -79,9 +79,9 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
               size="lg" 
               variant="outline" 
               onClick={onWatchDemoClick}
-              className="group gap-3 font-bold text-xl md:text-2xl px-12 py-10 border-4 border-white text-white hover:bg-white hover:text-[#0052CC] backdrop-blur-md rounded-2xl transition-all duration-300 hover:scale-105"
+              className="group gap-3 font-bold text-xl md:text-2xl px-12 py-10 bg-white/20 border-4 border-white text-white hover:bg-white hover:text-[#0052CC] backdrop-blur-md rounded-2xl transition-all duration-300 hover:scale-105 shadow-[0_10px_40px_-10px_rgba(255,255,255,0.3)]"
             >
-              <Play className="h-7 w-7 group-hover:scale-110 transition-transform" />
+              <Play className="h-7 w-7 group-hover:scale-110 transition-transform fill-white group-hover:fill-[#0052CC]" />
               Watch 60s Demo
             </Button>
           </div>
