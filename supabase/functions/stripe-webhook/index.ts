@@ -43,8 +43,26 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Helper to validate user_id exists in database (defense in depth)
+    const validateUserId = async (userId: string | null): Promise<boolean> => {
+      if (!userId) return true; // null is allowed for fallback flows
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+      return !!data;
+    };
+
     // Helper to update user_billing table
     const updateUserBilling = async (userId: string | null, customerId: string, data: Record<string, unknown>) => {
+      // Validate user_id exists before processing (defense in depth)
+      if (userId && !(await validateUserId(userId))) {
+        logStep("WARNING: user_id from metadata does not exist in database", { userId, customerId });
+        // Continue without user_id - will fallback to customer_id matching
+        userId = null;
+      }
+
       if (userId) {
         // Try user_billing first
         const { error: billingError } = await supabase
