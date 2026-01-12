@@ -93,8 +93,8 @@ export default function Landing() {
               Ready to Become Rejection Proof?
             </h2>
             <p className="text-lg text-muted-foreground">
-              Join <strong className="text-foreground">2,400+ sales reps</strong> already crushing quotas with our AI Sales Coaching.
-              Start your 14-day trial today — no charge until you're convinced.
+              Be one of the first 100 to lock in grandfathered pricing with our AI Sales Coaching.
+              Start your 14-day free trial today.
             </p>
             <div className="pt-2">
               <Button 
@@ -116,7 +116,7 @@ export default function Landing() {
                 )}
               </Button>
               <p className="text-sm text-muted-foreground mt-4">
-                No credit card required • Cancel anytime
+                Card required • 14 days free • Cancel anytime
               </p>
             </div>
           </div>
