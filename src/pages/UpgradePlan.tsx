@@ -2,35 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, ArrowLeft, Sparkles, Check } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import sellsigLogo from '@/assets/sellsig-logo.png';
 
 export default function UpgradePlan() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-trial-checkout', {
-        body: { plan: 'team' },
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Upgrade error:', error);
-      toast.error('Failed to start upgrade. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Team plan is coming soon - checkout disabled
+  const isComingSoon = true;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -74,22 +51,12 @@ export default function UpgradePlan() {
 
           <div className="flex flex-col gap-3 pt-4">
             <Button 
-              onClick={handleUpgrade} 
-              disabled={loading}
+              disabled={isComingSoon}
               className="gap-2"
               size="lg"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Upgrade to Team - $79/user/mo
-                </>
-              )}
+              <Sparkles className="h-4 w-4" />
+              Coming Soon - $99/user/mo
             </Button>
             <Button 
               variant="ghost" 
