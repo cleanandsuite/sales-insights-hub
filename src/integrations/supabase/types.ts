@@ -3017,6 +3017,7 @@ export type Database = {
       }
       check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
       check_password_strength: { Args: { password: string }; Returns: boolean }
+      get_public_pricing_availability: { Args: never; Returns: Json }
       get_user_strengths: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {

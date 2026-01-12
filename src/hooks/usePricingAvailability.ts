@@ -25,37 +25,57 @@ export function usePricingAvailability() {
   useEffect(() => {
     async function fetchAvailability() {
       try {
-        const { data, error } = await supabase
-          .from('subscription_counter')
-          .select('*');
+        // Use RPC function for secure public access
+        const { data, error } = await supabase.rpc('get_public_pricing_availability');
 
         if (error) throw error;
 
-        const singleUserData = data?.find(d => d.plan_type === 'single_user');
-        const enterpriseData = data?.find(d => d.plan_type === 'enterprise');
-        
-        const deadline = new Date(singleUserData?.deadline || '2026-01-31T23:59:59Z');
-        const now = new Date();
-        const isDeadlinePassed = now > deadline;
+        const pricingData = data as {
+          singleUser: {
+            available: boolean;
+            spotsRemaining: number;
+            grandfatheredPrice: number;
+            regularPrice: number;
+          };
+          deadline: string;
+          isDeadlinePassed: boolean;
+        };
 
         setAvailability({
           singleUser: {
-            available: !isDeadlinePassed && (singleUserData?.count || 0) < (singleUserData?.max_spots || 100),
-            spotsRemaining: Math.max(0, (singleUserData?.max_spots || 100) - (singleUserData?.count || 0)),
-            grandfatheredPrice: (singleUserData?.grandfathered_price_cents || 2900) / 100,
-            regularPrice: (singleUserData?.regular_price_cents || 4900) / 100,
+            available: pricingData.singleUser.available,
+            spotsRemaining: pricingData.singleUser.spotsRemaining,
+            grandfatheredPrice: pricingData.singleUser.grandfatheredPrice,
+            regularPrice: pricingData.singleUser.regularPrice,
           },
           enterprise: {
-            available: !isDeadlinePassed && (enterpriseData?.count || 0) < (enterpriseData?.max_spots || 100),
-            spotsRemaining: Math.max(0, (enterpriseData?.max_spots || 100) - (enterpriseData?.count || 0)),
-            grandfatheredPrice: (enterpriseData?.grandfathered_price_cents || 7900) / 100,
-            regularPrice: (enterpriseData?.regular_price_cents || 9900) / 100,
+            available: false, // Enterprise is coming soon
+            spotsRemaining: 0,
+            grandfatheredPrice: 79,
+            regularPrice: 99,
           },
-          deadline,
-          isDeadlinePassed,
+          deadline: new Date(pricingData.deadline),
+          isDeadlinePassed: pricingData.isDeadlinePassed,
         });
       } catch (err) {
         console.error('Failed to fetch pricing availability:', err);
+        // Fallback defaults
+        setAvailability({
+          singleUser: {
+            available: true,
+            spotsRemaining: 100,
+            grandfatheredPrice: 29,
+            regularPrice: 49,
+          },
+          enterprise: {
+            available: false,
+            spotsRemaining: 0,
+            grandfatheredPrice: 79,
+            regularPrice: 99,
+          },
+          deadline: new Date('2026-01-31T23:59:59Z'),
+          isDeadlinePassed: false,
+        });
       } finally {
         setLoading(false);
       }
