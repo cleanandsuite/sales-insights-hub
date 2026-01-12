@@ -37,6 +37,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PaymentComplete = lazy(() => import("./pages/PaymentComplete"));
 const UpgradePlan = lazy(() => import("./pages/UpgradePlan"));
 const Success = lazy(() => import("./pages/Success"));
+const Experiments = lazy(() => import("./pages/Experiments"));
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
               <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
+              <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="*" element={<NotFound />} />

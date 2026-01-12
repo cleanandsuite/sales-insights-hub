@@ -43,88 +43,183 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // Helper to update user_billing table
+    const updateUserBilling = async (userId: string | null, customerId: string, data: Record<string, unknown>) => {
+      if (userId) {
+        // Try user_billing first
+        const { error: billingError } = await supabase
+          .from("user_billing")
+          .upsert({
+            user_id: userId,
+            stripe_customer_id: customerId,
+            ...data,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' });
+
+        if (billingError) {
+          logStep("Error updating user_billing", { error: billingError.message });
+        }
+
+        // Also update profiles for backwards compatibility
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            ...data,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId);
+
+        if (profileError) {
+          logStep("Error updating profile", { error: profileError.message });
+        }
+      } else {
+        // Fallback: update by stripe_customer_id
+        const { error: billingError } = await supabase
+          .from("user_billing")
+          .update({
+            ...data,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_customer_id", customerId);
+
+        if (billingError) {
+          logStep("Error updating user_billing by customer_id", { error: billingError.message });
+        }
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            ...data,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_customer_id", customerId);
+
+        if (profileError) {
+          logStep("Error updating profile by customer_id", { error: profileError.message });
+        }
+      }
+    };
+
+    // Helper to track A/B experiment conversions
+    const trackExperimentConversion = async (
+      visitorId: string | null,
+      userId: string | null,
+      amountCents: number,
+      planType: string
+    ) => {
+      if (!visitorId && !userId) return;
+
+      try {
+        // Find assignments for this visitor/user
+        let query = supabase
+          .from('experiment_assignments')
+          .select('id, experiment_id, variant_id');
+        
+        if (visitorId) {
+          query = query.eq('visitor_id', visitorId);
+        } else if (userId) {
+          query = query.eq('user_id', userId);
+        }
+
+        const { data: assignments } = await query;
+
+        if (assignments && assignments.length > 0) {
+          // Record conversion events for each experiment assignment
+          const events = assignments.map(a => ({
+            experiment_id: a.experiment_id,
+            variant_id: a.variant_id,
+            assignment_id: a.id,
+            visitor_id: visitorId || '',
+            user_id: userId,
+            event_type: 'conversion',
+            event_data: { source: 'stripe_webhook' },
+            revenue_cents: amountCents,
+            plan_type: planType,
+          }));
+
+          const { error } = await supabase
+            .from('experiment_events')
+            .insert(events);
+
+          if (error) {
+            logStep("Error tracking experiment conversion", { error: error.message });
+          } else {
+            logStep("Experiment conversions tracked", { count: events.length });
+          }
+        }
+      } catch (err) {
+        logStep("Error in experiment tracking", { error: err });
+      }
+    };
+
+    // Helper to update subscription counter
+    const updateSubscriptionCounter = async (planType: string) => {
+      try {
+        const { data: counter } = await supabase
+          .from('subscription_counter')
+          .select('count, max_spots')
+          .eq('plan_type', planType)
+          .single();
+
+        if (counter && counter.count < counter.max_spots) {
+          await supabase
+            .from('subscription_counter')
+            .update({ 
+              count: counter.count + 1,
+              updated_at: new Date().toISOString()
+            })
+            .eq('plan_type', planType);
+          
+          logStep("Subscription counter updated", { planType, newCount: counter.count + 1 });
+        }
+      } catch (err) {
+        logStep("Error updating subscription counter", { error: err });
+      }
+    };
+
     switch (event.type) {
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
+        const userId = subscription.metadata?.user_id;
         logStep("Subscription deleted", { subscriptionId: subscription.id, customerId });
 
-        // Find user by stripe_customer_id or metadata
-        const userId = subscription.metadata?.user_id;
-        
-        if (userId) {
-          const { error } = await supabase
-            .from("profiles")
-            .update({
-              is_active: false,
-              subscription_status: "canceled",
-              updated_at: new Date().toISOString(),
-            })
-            .eq("user_id", userId);
-
-          if (error) {
-            logStep("Error updating profile by user_id", { error: error.message });
-          } else {
-            logStep("Profile deactivated by user_id", { userId });
-          }
-        } else {
-          // Fallback: update by stripe_customer_id
-          const { error } = await supabase
-            .from("profiles")
-            .update({
-              is_active: false,
-              subscription_status: "canceled",
-              updated_at: new Date().toISOString(),
-            })
-            .eq("stripe_customer_id", customerId);
-
-          if (error) {
-            logStep("Error updating profile by customer_id", { error: error.message });
-          } else {
-            logStep("Profile deactivated by customer_id", { customerId });
-          }
-        }
+        await updateUserBilling(userId || null, customerId, {
+          is_active: false,
+          subscription_status: "canceled",
+        });
         break;
       }
 
+      case "customer.subscription.created":
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
         const status = subscription.status;
-        logStep("Subscription updated", { subscriptionId: subscription.id, status, customerId });
+        const userId = subscription.metadata?.user_id;
+        const visitorId = subscription.metadata?.visitor_id;
+        logStep("Subscription updated/created", { subscriptionId: subscription.id, status, customerId });
 
         const isActive = status === "active" || status === "trialing";
-        const userId = subscription.metadata?.user_id;
+        
+        // Determine plan type from price
+        const priceId = subscription.items.data[0]?.price?.id;
+        let planType = 'single_user';
+        if (priceId === 'price_1SmY6YAbfbNoHWTTnHLW4w07') {
+          planType = 'enterprise';
+        }
 
-        const updateData = {
+        await updateUserBilling(userId || null, customerId, {
           is_active: isActive,
           subscription_status: status,
           stripe_subscription_id: subscription.id,
-          updated_at: new Date().toISOString(),
-        };
+        });
 
-        if (userId) {
-          const { error } = await supabase
-            .from("profiles")
-            .update(updateData)
-            .eq("user_id", userId);
-
-          if (error) {
-            logStep("Error updating profile", { error: error.message });
-          } else {
-            logStep("Profile updated", { userId, isActive, status });
-          }
-        } else {
-          const { error } = await supabase
-            .from("profiles")
-            .update(updateData)
-            .eq("stripe_customer_id", customerId);
-
-          if (error) {
-            logStep("Error updating profile by customer_id", { error: error.message });
-          } else {
-            logStep("Profile updated by customer_id", { customerId, isActive, status });
-          }
+        // Track A/B conversion for new subscriptions
+        if (event.type === "customer.subscription.created" && isActive) {
+          const amountCents = subscription.items.data[0]?.price?.unit_amount || 0;
+          await trackExperimentConversion(visitorId || null, userId || null, amountCents, planType);
+          await updateSubscriptionCounter(planType);
         }
         break;
       }
@@ -139,37 +234,12 @@ serve(async (req) => {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
           const userId = subscription.metadata?.user_id;
 
-          const updateData = {
+          await updateUserBilling(userId || null, customerId, {
             is_active: true,
             subscription_status: subscription.status,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
-            updated_at: new Date().toISOString(),
-          };
-
-          if (userId) {
-            const { error } = await supabase
-              .from("profiles")
-              .update(updateData)
-              .eq("user_id", userId);
-
-            if (error) {
-              logStep("Error activating profile", { error: error.message });
-            } else {
-              logStep("Profile activated", { userId });
-            }
-          } else {
-            const { error } = await supabase
-              .from("profiles")
-              .update(updateData)
-              .eq("stripe_customer_id", customerId);
-
-            if (error) {
-              logStep("Error activating profile by customer_id", { error: error.message });
-            } else {
-              logStep("Profile activated by customer_id", { customerId });
-            }
-          }
+          });
         }
         break;
       }
@@ -179,20 +249,10 @@ serve(async (req) => {
         const customerId = invoice.customer as string;
         logStep("Payment failed", { invoiceId: invoice.id, customerId });
 
-        const { error } = await supabase
-          .from("profiles")
-          .update({
-            is_active: false,
-            subscription_status: "past_due",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("stripe_customer_id", customerId);
-
-        if (error) {
-          logStep("Error marking profile past_due", { error: error.message });
-        } else {
-          logStep("Profile marked past_due", { customerId });
-        }
+        await updateUserBilling(null, customerId, {
+          is_active: false,
+          subscription_status: "past_due",
+        });
         break;
       }
 
@@ -200,39 +260,35 @@ serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session;
         const customerId = session.customer as string;
         const userId = session.metadata?.user_id;
+        const visitorId = session.metadata?.visitor_id;
         const subscriptionId = session.subscription as string;
+        const planType = session.metadata?.plan_type || 'single_user';
         logStep("Checkout completed", { sessionId: session.id, customerId, userId, subscriptionId });
 
         if (userId && customerId) {
-          // Link customer to profile and activate
-          const { error } = await supabase
-            .from("profiles")
-            .update({
-              is_active: true,
-              subscription_status: "active",
-              stripe_customer_id: customerId,
-              stripe_subscription_id: subscriptionId,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("user_id", userId);
-
-          if (error) {
-            logStep("Error linking customer to profile", { error: error.message });
-          } else {
-            logStep("Customer linked and profile activated", { userId, customerId });
-          }
+          await updateUserBilling(userId, customerId, {
+            is_active: true,
+            subscription_status: "active",
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+          });
 
           // Also update subscription metadata with user_id for future events
           if (subscriptionId) {
             try {
               await stripe.subscriptions.update(subscriptionId, {
-                metadata: { user_id: userId },
+                metadata: { user_id: userId, visitor_id: visitorId || '' },
               });
               logStep("Subscription metadata updated", { subscriptionId, userId });
             } catch (err) {
               logStep("Error updating subscription metadata", { error: err });
             }
           }
+
+          // Track A/B conversion
+          const amountTotal = session.amount_total || 0;
+          await trackExperimentConversion(visitorId || null, userId, amountTotal, planType);
+          await updateSubscriptionCounter(planType);
         }
         break;
       }
