@@ -52,16 +52,16 @@ export default function Landing() {
       />
 
       {/* Trusted By Section */}
-      <section className="py-8 border-y border-border bg-background">
+      <section className="py-10 border-y border-border bg-background">
         <div className="container mx-auto px-4">
-          <p className="text-center text-xs uppercase tracking-wider text-muted-foreground mb-6">
+          <p className="text-center text-sm uppercase tracking-widest text-muted-foreground mb-8 font-semibold">
             Trusted by sales teams competing with
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-10 md:gap-16">
+          <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20">
             {TRUSTED_BY.map((company) => (
               <div 
                 key={company} 
-                className="text-xl font-bold text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors"
+                className="text-2xl font-bold text-muted-foreground/50 hover:text-muted-foreground/70 transition-colors"
               >
                 {company}
               </div>
@@ -86,21 +86,21 @@ export default function Landing() {
       <PricingSection />
 
       {/* CTA Section */}
-      <section className="relative py-20 bg-cta-gradient overflow-hidden">
+      <section className="relative py-24 bg-cta-gradient overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
               Ready to Become Rejection Proof?
             </h2>
-            <p className="text-lg text-white/90">
+            <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto">
               Be one of the first 100 to lock in grandfathered pricing with our AI Sales Coaching.
               Start your 14-day free trial today.
             </p>
-            <div className="pt-2">
+            <div className="pt-4">
               <Button 
                 size="lg" 
                 onClick={() => handleStartTrial()}
-                className="gap-2 font-semibold text-lg px-10 py-7 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all bg-white text-[#005f9e] hover:bg-white/90"
+                className="gap-2 font-bold text-lg px-12 py-8 shadow-2xl hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] hover:scale-[1.03] transition-all bg-white text-primary hover:bg-white/95 rounded-xl"
                 disabled={loadingPlan !== null}
               >
                 {loadingPlan ? (
@@ -115,7 +115,7 @@ export default function Landing() {
                   </>
                 )}
               </Button>
-              <p className="text-sm text-white/80 mt-4">
+              <p className="text-base text-white/85 mt-5 font-medium">
                 Card required • 14 days free • Cancel anytime
               </p>
             </div>

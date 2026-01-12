@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +48,6 @@ export function PricingSection() {
   };
 
   const singleUserAvailable = availability?.singleUser.available ?? true;
-  const enterpriseAvailable = availability?.enterprise.available ?? true;
 
   const pricingTiers = [
     {
@@ -99,10 +98,10 @@ export function PricingSection() {
 
   if (availabilityLoading) {
     return (
-      <section className="py-20 bg-background" id="pricing">
+      <section className="py-24 bg-background" id="pricing">
         <div className="container mx-auto px-4">
           <div className="flex justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         </div>
       </section>
@@ -110,80 +109,84 @@ export function PricingSection() {
   }
 
   return (
-    <section className="relative py-20 bg-pricing-gradient overflow-hidden" id="pricing">
+    <section className="relative py-24 bg-pricing-gradient overflow-hidden" id="pricing">
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-foreground mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-muted-foreground text-lg">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
+            Simple, <span className="text-primary">Transparent</span> Pricing
+          </h2>
+          <p className="text-muted-foreground text-lg md:text-xl">
             Start with a 14-day free trial. No charge until you see the value.
           </p>
           {!availability?.isDeadlinePassed && (
-            <p className="text-sm text-destructive font-medium mt-2">
+            <p className="text-base text-destructive font-bold mt-4">
               ⏰ Limited Time: First 100 Users or Until {formatDate(availability?.deadline ?? new Date('2026-01-31'))}, Whichever Comes First—Spots Filling Fast!
             </p>
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
           {pricingTiers.map((tier) => (
             <Card 
               key={tier.name} 
-              className={`card-enterprise relative ${tier.popular ? 'border-primary shadow-lg' : ''}`}
+              className={`card-enterprise relative rounded-2xl ${tier.popular ? 'border-2 border-primary shadow-xl' : 'shadow-lg'}`}
             >
               {/* Urgency Badge */}
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <Badge 
                   variant={tier.available ? "destructive" : "secondary"}
-                  className="font-semibold whitespace-nowrap"
+                  className="font-bold whitespace-nowrap px-4 py-1.5 text-sm"
                 >
                   {tier.urgencyBadge}
                 </Badge>
               </div>
 
-              <CardHeader className="pb-4 pt-6">
-                <CardTitle className="text-xl text-foreground">{tier.name}</CardTitle>
-                <CardDescription>{tier.headline}</CardDescription>
+              <CardHeader className="pb-4 pt-10">
+                <CardTitle className="text-2xl font-bold text-foreground">{tier.name}</CardTitle>
+                <CardDescription className="text-base">{tier.headline}</CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-8">
                 <div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-foreground">{tier.priceDisplay}</span>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-4xl md:text-5xl font-black text-foreground">{tier.priceDisplay}</span>
                     {tier.regularPriceNote && (
-                      <span className="text-sm text-muted-foreground line-through">{tier.regularPriceNote}</span>
+                      <span className="text-base text-muted-foreground line-through font-medium">{tier.regularPriceNote}</span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-base text-muted-foreground mt-2 font-medium">
                     {tier.afterTrialText}
                   </p>
                   {tier.available && tier.spotsRemaining <= 20 && (
-                    <p className="text-xs text-destructive font-medium mt-2 flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" />
+                    <p className="text-sm text-destructive font-bold mt-3 flex items-center gap-1.5">
+                      <AlertTriangle className="h-4 w-4" />
                       Only {tier.spotsRemaining} spots remaining!
                     </p>
                   )}
                 </div>
 
-                <ul className="space-y-3">
+                <ul className="space-y-4">
                   {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-sm text-foreground">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                    <li key={feature} className="flex items-center gap-3 text-base text-foreground font-medium">
+                      <div className="h-6 w-6 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
+                        <Check className="h-3.5 w-3.5 text-primary" />
+                      </div>
                       {feature}
                     </li>
                   ))}
                 </ul>
               </CardContent>
 
-              <CardFooter>
+              <CardFooter className="pb-8">
                 <Button
-                  className={`w-full font-semibold ${tier.available ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' : ''}`}
+                  className={`w-full font-bold text-lg py-7 rounded-xl ${tier.available ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg hover:shadow-xl' : ''}`}
                   variant={tier.available ? 'default' : 'outline'}
                   onClick={() => tier.available ? handleStartTrial(tier.planKey) : handleJoinWaitlist(tier.planKey)}
                   disabled={loadingPlan !== null || tier.comingSoon}
                 >
                   {loadingPlan === tier.planKey ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                       Starting...
                     </>
                   ) : tier.comingSoon ? (
@@ -199,7 +202,7 @@ export function PricingSection() {
           ))}
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-8">
+        <p className="text-center text-base text-muted-foreground mt-10 font-medium">
           Card required upfront — no charge until day 15. Cancel anytime.
         </p>
       </div>
