@@ -86,13 +86,13 @@ export default function Landing() {
       <PricingSection />
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="container mx-auto px-4">
+      <section className="relative py-20 bg-cta-gradient overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+            <h2 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
               Ready to Become Rejection Proof?
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-white/90">
               Be one of the first 100 to lock in grandfathered pricing with our AI Sales Coaching.
               Start your 14-day free trial today.
             </p>
@@ -100,7 +100,7 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 onClick={() => handleStartTrial()}
-                className="gap-2 font-semibold text-lg px-10 py-7 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+                className="gap-2 font-semibold text-lg px-10 py-7 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all bg-white text-[#005f9e] hover:bg-white/90"
                 disabled={loadingPlan !== null}
               >
                 {loadingPlan ? (
@@ -115,7 +115,7 @@ export default function Landing() {
                   </>
                 )}
               </Button>
-              <p className="text-sm text-muted-foreground mt-4">
+              <p className="text-sm text-white/80 mt-4">
                 Card required • 14 days free • Cancel anytime
               </p>
             </div>

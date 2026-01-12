@@ -27,8 +27,8 @@ const testimonials = [
 
 export function TestimonialsSection() {
   return (
-    <section className="py-20 bg-muted/30">
-      <div className="container mx-auto px-4">
+    <section className="relative py-20 bg-testimonials-gradient overflow-hidden">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-foreground mb-4">Loved by Sales Teams</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
