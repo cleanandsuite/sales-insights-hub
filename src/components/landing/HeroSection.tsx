@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play, Shield, Globe, Zap, Clock } from 'lucide-react';
+import { ArrowRight, Play, Shield, Globe, Zap, Sparkles } from 'lucide-react';
 
 interface HeroSectionProps {
   onStartTrialClick: () => void;
@@ -15,83 +15,108 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
   };
 
   return (
-    <section className="relative bg-hero-gradient pt-28 pb-20 md:pt-40 md:pb-32 overflow-hidden">
+    <section className="relative bg-hero-gradient pt-32 pb-24 md:pt-48 md:pb-40 overflow-hidden min-h-[90vh] flex items-center">
       {/* AI Neural Network Pattern Overlay */}
       <div className="bg-hero-ai-pattern" />
       
+      {/* Animated gradient orbs */}
+      <div className="absolute top-20 left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-cyan-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-5xl mx-auto text-center space-y-10">
-          {/* Urgency Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-semibold animate-fade-in shadow-lg">
-            <Clock className="h-4 w-4" />
-            <span>Limited Intro Pricing – Lock in $29/mo</span>
+        <div className="max-w-6xl mx-auto text-center space-y-8">
+          
+          {/* URGENCY BANNER - BAM! In your face */}
+          <div className="inline-block animate-fade-in">
+            <div className="relative">
+              {/* Glow effect behind */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-2xl blur-lg opacity-60 animate-pulse" />
+              <div className="relative bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 px-8 py-4 rounded-2xl shadow-2xl border-2 border-white/30">
+                <div className="flex items-center justify-center gap-3">
+                  <Sparkles className="h-7 w-7 text-white animate-bounce" />
+                  <span className="text-xl md:text-2xl lg:text-3xl font-black text-white tracking-tight drop-shadow-lg">
+                    🔥 First 100 Users Get Grandfathered Pricing Forever!
+                  </span>
+                  <Sparkles className="h-7 w-7 text-white animate-bounce" style={{ animationDelay: '0.5s' }} />
+                </div>
+                <p className="text-white/90 font-bold text-lg mt-1">Only $29/mo locked in — Regular price $49/mo</p>
+              </div>
+            </div>
           </div>
 
-          {/* H1 Headline */}
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-[0.95]">
+          {/* H1 Headline - MASSIVE */}
+          <h1 className="text-7xl md:text-8xl lg:text-[10rem] font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl">
             Become{' '}
-            <span className="bg-gradient-to-r from-white via-blue-100 to-cyan-300 bg-clip-text text-transparent">
-              Rejection Proof
+            <span className="relative inline-block">
+              <span className="bg-gradient-to-r from-cyan-300 via-blue-200 to-white bg-clip-text text-transparent">
+                Rejection
+              </span>
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-white via-cyan-200 to-cyan-400 bg-clip-text text-transparent">
+              Proof
             </span>
           </h1>
 
-          {/* Subheadline */}
-          <p className="text-2xl md:text-3xl text-white font-medium max-w-3xl mx-auto leading-snug">
-            AI Sales Coaching in 60 Seconds – No Setup, No Fees
+          {/* Subheadline - Bold and Clear */}
+          <p className="text-3xl md:text-4xl lg:text-5xl text-white font-bold max-w-4xl mx-auto leading-tight drop-shadow-lg">
+            AI Sales Coaching in <span className="text-cyan-300">60 Seconds</span>
+            <br />
+            <span className="text-white/90">No Setup. No Fees. Just Results.</span>
           </p>
 
-          {/* SEO-rich body text */}
-          <p className="text-lg md:text-xl text-white/85 max-w-2xl mx-auto">
-            The ultimate <strong className="text-white font-semibold">AI Sales Coach</strong> for rejection-proof cold calls and higher close rates—transforming every call into a learning opportunity.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          {/* CTA Buttons - HUGE and Prominent */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
             <Button 
               size="lg" 
               onClick={scrollToPricing}
-              className="gap-2 font-bold text-lg px-10 py-8 shadow-2xl hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] transition-all hover:scale-[1.03] bg-white text-primary hover:bg-white/95 rounded-xl"
+              className="group gap-3 font-black text-2xl md:text-3xl px-14 py-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] hover:shadow-[0_30px_80px_-15px_rgba(0,0,0,0.6)] transition-all duration-300 hover:scale-105 bg-white text-[#0052CC] hover:bg-cyan-50 rounded-2xl border-4 border-white/50"
             >
-              Start 14-Day Free Trial
-              <ArrowRight className="h-5 w-5" />
+              Start Free 14-Day Trial
+              <ArrowRight className="h-8 w-8 group-hover:translate-x-2 transition-transform" />
             </Button>
             <Button 
               size="lg" 
               variant="outline" 
               onClick={onWatchDemoClick}
-              className="gap-2 font-semibold text-lg px-10 py-8 border-2 border-white/60 text-white hover:bg-white/15 backdrop-blur-md rounded-xl"
+              className="group gap-3 font-bold text-xl md:text-2xl px-12 py-10 border-4 border-white text-white hover:bg-white hover:text-[#0052CC] backdrop-blur-md rounded-2xl transition-all duration-300 hover:scale-105"
             >
-              <Play className="h-5 w-5" />
+              <Play className="h-7 w-7 group-hover:scale-110 transition-transform" />
               Watch 60s Demo
             </Button>
           </div>
 
-          {/* Social Proof */}
-          <p className="text-base text-white/90 pt-2 font-medium">
-            Be one of the first 100 to lock in grandfathered pricing
+          {/* Credit card notice */}
+          <p className="text-lg text-white/80 font-medium">
+            Card required • 14 days free • Cancel anytime
           </p>
 
-          {/* Trust Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-10 pt-8">
-            <div className="flex items-center gap-3 text-base text-white font-medium">
-              <div className="h-10 w-10 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center">
-                <Shield className="h-5 w-5 text-white" />
+          {/* Trust Badges - ONE UNIFIED BUBBLE */}
+          <div className="pt-8">
+            <div className="inline-flex items-center justify-center gap-8 md:gap-12 px-10 py-6 rounded-full bg-white/20 backdrop-blur-xl border-2 border-white/40 shadow-2xl">
+              <div className="flex items-center gap-3">
+                <div className="h-14 w-14 rounded-full bg-white/30 flex items-center justify-center shadow-lg">
+                  <Shield className="h-7 w-7 text-white" />
+                </div>
+                <span className="text-xl md:text-2xl font-bold text-white">SOC 2 Compliant</span>
               </div>
-              <span>SOC 2 Compliant</span>
-            </div>
-            <div className="flex items-center gap-3 text-base text-white font-medium">
-              <div className="h-10 w-10 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center">
-                <Globe className="h-5 w-5 text-white" />
+              <div className="w-px h-10 bg-white/40" />
+              <div className="flex items-center gap-3">
+                <div className="h-14 w-14 rounded-full bg-white/30 flex items-center justify-center shadow-lg">
+                  <Globe className="h-7 w-7 text-white" />
+                </div>
+                <span className="text-xl md:text-2xl font-bold text-white">No Downloads</span>
               </div>
-              <span>No Downloads</span>
-            </div>
-            <div className="flex items-center gap-3 text-base text-white font-medium">
-              <div className="h-10 w-10 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center">
-                <Zap className="h-5 w-5 text-white" />
+              <div className="w-px h-10 bg-white/40" />
+              <div className="flex items-center gap-3">
+                <div className="h-14 w-14 rounded-full bg-white/30 flex items-center justify-center shadow-lg">
+                  <Zap className="h-7 w-7 text-white" />
+                </div>
+                <span className="text-xl md:text-2xl font-bold text-white">60s Setup</span>
               </div>
-              <span>60s Setup</span>
             </div>
           </div>
+
         </div>
       </div>
     </section>

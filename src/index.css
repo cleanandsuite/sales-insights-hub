@@ -174,16 +174,17 @@
      TEXTURED GRADIENT BACKGROUNDS - 2026 STYLE
      ============================================ */
 
-  /* Hero Section: Bold Salesforce-style gradient */
+  /* Hero Section: Premium Salesforce-inspired gradient - BOLD & POWERFUL */
   .bg-hero-gradient {
     position: relative;
     background: 
-      linear-gradient(165deg, 
-        #032D60 0%, 
-        #0a4d8c 20%,
-        #1570EF 50%, 
-        #5BA3F5 75%, 
-        #F0F7FF 100%
+      linear-gradient(135deg, 
+        #001E3C 0%,
+        #003366 15%,
+        #0052CC 40%, 
+        #0066FF 60%,
+        #4D94FF 80%,
+        #99C2FF 95%
       );
   }
 
@@ -191,8 +192,8 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.04;
     pointer-events: none;
   }
 
@@ -201,24 +202,25 @@
     position: absolute;
     inset: 0;
     background: 
-      radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255,255,255,0.2) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 40% at 80% 30%, rgba(255,255,255,0.15) 0%, transparent 40%),
-      radial-gradient(ellipse 70% 60% at 50% 90%, rgba(255,255,255,0.1) 0%, transparent 50%);
+      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,255,255,0.25) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 50% at 20% 30%, rgba(77,148,255,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 80% 40%, rgba(153,194,255,0.25) 0%, transparent 40%);
     pointer-events: none;
   }
 
-  /* AI Neural Network Pattern Overlay for Hero */
+  /* AI Neural Network Pattern Overlay for Hero - Enhanced */
   .bg-hero-ai-pattern {
     position: absolute;
     inset: 0;
     background-image: 
-      radial-gradient(circle at 25% 25%, rgba(255,255,255,0.15) 2.5px, transparent 2.5px),
-      radial-gradient(circle at 75% 45%, rgba(255,255,255,0.12) 2px, transparent 2px),
-      radial-gradient(circle at 45% 75%, rgba(255,255,255,0.1) 2px, transparent 2px),
-      radial-gradient(circle at 85% 85%, rgba(255,255,255,0.08) 1.5px, transparent 1.5px),
-      radial-gradient(circle at 15% 65%, rgba(255,255,255,0.12) 1.5px, transparent 1.5px);
-    background-size: 100px 100px, 130px 130px, 90px 90px, 70px 70px, 80px 80px;
-    opacity: 0.7;
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.2) 3px, transparent 3px),
+      radial-gradient(circle at 60% 35%, rgba(255,255,255,0.15) 2.5px, transparent 2.5px),
+      radial-gradient(circle at 40% 70%, rgba(255,255,255,0.12) 2.5px, transparent 2.5px),
+      radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 2px, transparent 2px),
+      radial-gradient(circle at 10% 55%, rgba(255,255,255,0.15) 2px, transparent 2px),
+      radial-gradient(circle at 90% 20%, rgba(255,255,255,0.12) 2px, transparent 2px);
+    background-size: 120px 120px, 150px 150px, 100px 100px, 80px 80px, 90px 90px, 110px 110px;
+    opacity: 0.8;
     pointer-events: none;
   }
 
