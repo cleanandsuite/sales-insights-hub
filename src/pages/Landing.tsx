@@ -1,17 +1,28 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+// Critical above-the-fold components loaded eagerly
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { HeroSection } from '@/components/landing/HeroSection';
-import { BenefitsSection } from '@/components/landing/BenefitsSection';
-import { DemoVideoSection } from '@/components/landing/DemoVideoSection';
-import { FeaturesSection } from '@/components/landing/FeaturesSection';
-import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
-import { PricingSection } from '@/components/landing/PricingSection';
-import { LandingFooter } from '@/components/landing/LandingFooter';
-import { DemoVideoModal } from '@/components/landing/DemoVideoModal';
+
+// Below-the-fold components lazy loaded for faster initial paint
+const BenefitsSection = lazy(() => import('@/components/landing/BenefitsSection').then(m => ({ default: m.BenefitsSection })));
+const DemoVideoSection = lazy(() => import('@/components/landing/DemoVideoSection').then(m => ({ default: m.DemoVideoSection })));
+const FeaturesSection = lazy(() => import('@/components/landing/FeaturesSection').then(m => ({ default: m.FeaturesSection })));
+const TestimonialsSection = lazy(() => import('@/components/landing/TestimonialsSection').then(m => ({ default: m.TestimonialsSection })));
+const PricingSection = lazy(() => import('@/components/landing/PricingSection').then(m => ({ default: m.PricingSection })));
+const LandingFooter = lazy(() => import('@/components/landing/LandingFooter').then(m => ({ default: m.LandingFooter })));
+const DemoVideoModal = lazy(() => import('@/components/landing/DemoVideoModal').then(m => ({ default: m.DemoVideoModal })));
+
+// Minimal section loading placeholder
+const SectionLoader = () => (
+  <div className="flex items-center justify-center py-16">
+    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  </div>
+);
 
 const TRUSTED_BY = ['Salesforce', 'HubSpot', 'Outreach', 'Gong', 'ZoomInfo'];
 
@@ -40,18 +51,20 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <DemoVideoModal open={demoModalOpen} onOpenChange={setDemoModalOpen} />
+      <Suspense fallback={null}>
+        {demoModalOpen && <DemoVideoModal open={demoModalOpen} onOpenChange={setDemoModalOpen} />}
+      </Suspense>
       
-      {/* Fixed Header */}
+      {/* Fixed Header - Critical */}
       <LandingHeader onStartTrialClick={() => handleStartTrial()} />
 
-      {/* Hero Section */}
+      {/* Hero Section - Critical above-the-fold */}
       <HeroSection 
         onStartTrialClick={() => handleStartTrial()} 
         onWatchDemoClick={() => setDemoModalOpen(true)} 
       />
 
-      {/* Trusted By Section */}
+      {/* Trusted By Section - Small, kept inline */}
       <section className="py-10 border-y border-border bg-background">
         <div className="container mx-auto px-4">
           <p className="text-center text-sm uppercase tracking-widest text-muted-foreground mb-8 font-semibold">
@@ -70,22 +83,28 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Demo Video Section */}
-      <DemoVideoSection onWatchDemoClick={() => setDemoModalOpen(true)} />
+      {/* Below-the-fold sections - Lazy loaded */}
+      <Suspense fallback={<SectionLoader />}>
+        <DemoVideoSection onWatchDemoClick={() => setDemoModalOpen(true)} />
+      </Suspense>
 
-      {/* Benefits Section */}
-      <BenefitsSection />
+      <Suspense fallback={<SectionLoader />}>
+        <BenefitsSection />
+      </Suspense>
 
-      {/* Features Section */}
-      <FeaturesSection />
+      <Suspense fallback={<SectionLoader />}>
+        <FeaturesSection />
+      </Suspense>
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
+      <Suspense fallback={<SectionLoader />}>
+        <TestimonialsSection />
+      </Suspense>
 
-      {/* Pricing Section */}
-      <PricingSection />
+      <Suspense fallback={<SectionLoader />}>
+        <PricingSection />
+      </Suspense>
 
-      {/* CTA Section */}
+      {/* CTA Section - Small, kept inline */}
       <section className="relative py-24 bg-cta-gradient overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8">
@@ -123,8 +142,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <LandingFooter />
+      {/* Footer - Lazy loaded */}
+      <Suspense fallback={<SectionLoader />}>
+        <LandingFooter />
+      </Suspense>
     </div>
   );
 }
