@@ -18,7 +18,7 @@ export default function UpgradePlan() {
               <Users className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Upgrade to Team Plan</CardTitle>
+          <CardTitle className="text-2xl">Upgrade to Enterprise</CardTitle>
           <CardDescription className="text-base">
             Unlock collaboration features and empower your sales team
           </CardDescription>
