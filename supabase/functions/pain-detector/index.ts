@@ -6,6 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// UUID validation regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const isValidUuid = (str: string): boolean => {
+  return typeof str === 'string' && UUID_REGEX.test(str);
+};
+
 interface PainPoint {
   type: 'follow_up' | 'closing' | 'prospecting' | 'objection_handling' | 'turnover' | 'talk_ratio' | 'pricing';
   severity: number; // 1-10
@@ -48,9 +55,52 @@ serve(async (req) => {
       });
     }
 
-    const { transcript, recordingId } = await req.json();
-    if (!transcript || !recordingId) {
-      return new Response(JSON.stringify({ error: 'Missing transcript or recordingId' }), {
+    // Parse and validate request body
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!body || typeof body !== 'object') {
+      return new Response(JSON.stringify({ error: 'Request body must be an object' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { transcript, recordingId } = body as { transcript?: unknown; recordingId?: unknown };
+
+    // Validate recordingId is a valid UUID
+    if (!recordingId || typeof recordingId !== 'string' || !isValidUuid(recordingId)) {
+      return new Response(JSON.stringify({ error: 'Invalid or missing recordingId. Must be a valid UUID.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate transcript
+    if (!transcript || typeof transcript !== 'string') {
+      return new Response(JSON.stringify({ error: 'Missing or invalid transcript. Must be a string.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const trimmedTranscript = transcript.trim();
+    if (trimmedTranscript.length < 50) {
+      return new Response(JSON.stringify({ error: 'Transcript must be at least 50 characters.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (trimmedTranscript.length > 100000) {
+      return new Response(JSON.stringify({ error: 'Transcript exceeds maximum length of 100,000 characters.' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -114,7 +164,7 @@ Only include pains that are clearly evident. Be specific and actionable.`;
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Analyze this sales call transcript:\n\n${transcript.slice(0, 15000)}` }
+          { role: 'user', content: `Analyze this sales call transcript:\n\n${trimmedTranscript.slice(0, 15000)}` }
         ],
         temperature: 0.3,
       }),
@@ -173,7 +223,7 @@ Only include pains that are clearly evident. Be specific and actionable.`;
 
   } catch (error) {
     console.error('Pain detector error:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+    return new Response(JSON.stringify({ error: 'An error occurred during analysis' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

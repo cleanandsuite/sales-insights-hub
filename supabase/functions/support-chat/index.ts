@@ -5,20 +5,80 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Input validation
+interface ChatMessage {
+  role: string;
+  content: string;
+}
+
+const sanitizeString = (str: string, maxLength: number): string => {
+  if (typeof str !== 'string') return '';
+  return str.replace(/<[^>]*>/g, '').trim().slice(0, maxLength);
+};
+
+const validateMessages = (messages: unknown): ChatMessage[] | null => {
+  if (!Array.isArray(messages)) return null;
+  if (messages.length === 0 || messages.length > 50) return null;
+  
+  const validated: ChatMessage[] = [];
+  for (const msg of messages) {
+    if (!msg || typeof msg !== 'object') return null;
+    const m = msg as Record<string, unknown>;
+    if (typeof m.role !== 'string' || typeof m.content !== 'string') return null;
+    if (!['user', 'assistant', 'system'].includes(m.role)) return null;
+    if (m.content.length > 10000) return null; // Max 10k chars per message
+    
+    validated.push({
+      role: m.role,
+      content: sanitizeString(m.content, 10000)
+    });
+  }
+  
+  // Total content length check (prevent abuse)
+  const totalLength = validated.reduce((sum, m) => sum + m.content.length, 0);
+  if (totalLength > 50000) return null; // Max 50k total chars
+  
+  return validated;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, faqContext } = await req.json();
+    const body = await req.json();
+    
+    if (!body || typeof body !== 'object') {
+      return new Response(
+        JSON.stringify({ error: "Invalid request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { messages: rawMessages, faqContext: rawFaqContext } = body;
+    
+    // Validate messages array
+    const messages = validateMessages(rawMessages);
+    if (!messages) {
+      return new Response(
+        JSON.stringify({ error: "Invalid messages format. Must be an array of 1-50 messages with role and content." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate and sanitize FAQ context
+    const faqContext = typeof rawFaqContext === 'string' 
+      ? sanitizeString(rawFaqContext, 20000) 
+      : '';
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-const systemPrompt = `You are a helpful customer support AI assistant for SellSig, a sales call recording and AI coaching platform.
+    const systemPrompt = `You are a helpful customer support AI assistant for SellSig, a sales call recording and AI coaching platform.
 
 Your role is to answer user questions based on the FAQ knowledge below. You should:
 1. Answer questions accurately based on the FAQ content
@@ -80,7 +140,7 @@ IMPORTANT:
   } catch (error) {
     console.error("Support chat error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "An error occurred processing your request" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
