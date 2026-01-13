@@ -25,6 +25,7 @@ import {
   Mail
 } from 'lucide-react';
 import { DataExportTab } from '@/components/settings/DataExportTab';
+import { PasswordChangeCard } from '@/components/settings/PasswordChangeCard';
 import { BillingTab } from '@/components/settings/BillingTab';
 import { InvitesTab } from '@/components/settings/InvitesTab';
 import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
@@ -518,47 +519,53 @@ export default function Settings() {
 
           {/* Privacy Settings */}
           <TabsContent value="privacy">
-            <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
-              <h2 className="text-lg font-semibold text-foreground">Privacy & Compliance</h2>
+            <div className="space-y-6">
+              {/* Password Change */}
+              <PasswordChangeCard />
 
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Auto-Redact PII</Label>
-                    <p className="text-sm text-muted-foreground">Automatically detect and redact SSN, credit card numbers, etc.</p>
-                  </div>
-                  <Switch
-                    checked={settings.auto_redact_pii}
-                    onCheckedChange={(checked) => setSettings({ ...settings, auto_redact_pii: checked })}
-                  />
-                </div>
+              {/* Privacy & Compliance */}
+              <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
+                <h2 className="text-lg font-semibold text-foreground">Privacy & Compliance</h2>
 
-                <div className="space-y-2">
-                  <Label>Recording Retention</Label>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Automatically delete recordings after {settings.retention_days} days
-                  </p>
-                  <Slider
-                    value={[settings.retention_days || 90]}
-                    min={30}
-                    max={365}
-                    step={30}
-                    onValueChange={(value) => setSettings({ ...settings, retention_days: value[0] })}
-                    className="w-64"
-                  />
-                </div>
-
-                <div className="pt-4 border-t border-border">
-                  <div className="flex items-start gap-3 p-4 rounded-lg bg-warning/10 border border-warning/20">
-                    <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-foreground">GDPR Data Request</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Request a copy of your data or deletion of your account
-                      </p>
-                      <div className="flex gap-2 mt-3">
-                        <Button size="sm" variant="outline">Download My Data</Button>
-                        <Button size="sm" variant="destructive">Delete Account</Button>
+                      <Label>Auto-Redact PII</Label>
+                      <p className="text-sm text-muted-foreground">Automatically detect and redact SSN, credit card numbers, etc.</p>
+                    </div>
+                    <Switch
+                      checked={settings.auto_redact_pii}
+                      onCheckedChange={(checked) => setSettings({ ...settings, auto_redact_pii: checked })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Recording Retention</Label>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Automatically delete recordings after {settings.retention_days} days
+                    </p>
+                    <Slider
+                      value={[settings.retention_days || 90]}
+                      min={30}
+                      max={365}
+                      step={30}
+                      onValueChange={(value) => setSettings({ ...settings, retention_days: value[0] })}
+                      className="w-64"
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-border">
+                    <div className="flex items-start gap-3 p-4 rounded-lg bg-warning/10 border border-warning/20">
+                      <AlertCircle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-foreground">GDPR Data Request</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Request a copy of your data or deletion of your account
+                        </p>
+                        <div className="flex gap-2 mt-3">
+                          <Button size="sm" variant="outline">Download My Data</Button>
+                          <Button size="sm" variant="destructive">Delete Account</Button>
+                        </div>
                       </div>
                     </div>
                   </div>

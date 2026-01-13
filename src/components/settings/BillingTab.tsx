@@ -5,9 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PricingCard } from '@/components/pricing/PricingCard';
+import { CancelSubscriptionDialog } from '@/components/settings/CancelSubscriptionDialog';
 import { useSubscription, PRICING_TIERS } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
-import { CreditCard, Calendar, Users, Loader2 } from 'lucide-react';
+import { CreditCard, Calendar, Users, Loader2, XCircle } from 'lucide-react';
 
 export function BillingTab() {
   const { 
@@ -24,6 +25,7 @@ export function BillingTab() {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [teamSize, setTeamSize] = useState(1);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const handleStartCheckout = async (planKey: 'single_user' | 'team') => {
     setCheckoutLoading(planKey);
@@ -47,6 +49,15 @@ export function BillingTab() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    try {
+      await openCustomerPortal();
+      toast.info('Redirecting to manage your subscription...');
+    } catch (error) {
+      toast.error('Failed to open subscription management');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -54,6 +65,9 @@ export function BillingTab() {
       </div>
     );
   }
+
+  // Check if Enterprise is coming soon
+  const isEnterprisePlanComingSoon = PRICING_TIERS.team.comingSoon === true;
 
   return (
     <div className="space-y-6">
@@ -92,20 +106,30 @@ export function BillingTab() {
               </div>
             )}
 
-            <Button 
-              variant="outline" 
-              onClick={handleOpenPortal}
-              disabled={portalLoading}
-            >
-              {portalLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Manage Subscription'
-              )}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleOpenPortal}
+                disabled={portalLoading}
+              >
+                {portalLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  'Manage Subscription'
+                )}
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => setCancelDialogOpen(true)}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Cancel Subscription
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -137,13 +161,13 @@ export function BillingTab() {
               features={PRICING_TIERS.team.features}
               isCurrentPlan={plan === 'team'}
               isPopular
-              onSelect={() => handleStartCheckout('team')}
-              loading={checkoutLoading === 'team'}
-              disabled={!!checkoutLoading}
-              ctaText={subscribed ? 'Switch to Team' : 'Start Free Trial'}
+              onSelect={() => {}}
+              loading={false}
+              disabled={isEnterprisePlanComingSoon}
+              ctaText={isEnterprisePlanComingSoon ? 'Coming Soon' : (subscribed ? 'Switch to Enterprise' : 'Start Free Trial')}
             />
 
-            {plan !== 'team' && (
+            {!isEnterprisePlanComingSoon && plan !== 'team' && (
               <div className="p-4 rounded-lg border bg-muted/30">
                 <Label htmlFor="teamSize" className="text-sm">Team Size</Label>
                 <div className="flex items-center gap-2 mt-2">
@@ -177,6 +201,13 @@ export function BillingTab() {
           Refresh subscription status
         </Button>
       </div>
+
+      {/* Cancel Subscription Dialog */}
+      <CancelSubscriptionDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onConfirm={handleCancelSubscription}
+      />
     </div>
   );
 }
