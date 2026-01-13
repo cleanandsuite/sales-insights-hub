@@ -190,17 +190,19 @@ export function BillingTab() {
         </div>
       </div>
 
-      {/* Refresh Status */}
-      <div className="flex justify-center">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => checkSubscription()}
-          className="text-muted-foreground"
-        >
-          Refresh subscription status
-        </Button>
-      </div>
+      {/* Cancel Membership */}
+      {subscribed && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCancelDialogOpen(true)}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            Cancel Membership
+          </Button>
+        </div>
+      )}
 
       {/* Cancel Subscription Dialog */}
       <CancelSubscriptionDialog
