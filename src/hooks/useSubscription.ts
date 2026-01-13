@@ -11,7 +11,14 @@ export interface SubscriptionState {
   error: string | null;
 }
 
-export const PRICING_TIERS = {
+export const PRICING_TIERS: Record<string, {
+  name: string;
+  priceId: string;
+  price: number;
+  features: string[];
+  maxUsers: number;
+  comingSoon?: boolean;
+}> = {
   single_user: {
     name: 'Single User',
     priceId: 'price_1SmY6SAbfbNoHWTTYuvR4kHQ',
@@ -25,7 +32,7 @@ export const PRICING_TIERS = {
     maxUsers: 1,
   },
   team: {
-    name: 'Team',
+    name: 'Enterprise',
     priceId: 'price_1SmY6YAbfbNoHWTTnHLW4w07',
     price: 99,
     features: [
@@ -37,6 +44,7 @@ export const PRICING_TIERS = {
       'Team performance benchmarks',
     ],
     maxUsers: 10,
+    comingSoon: true,
   },
 };
 
