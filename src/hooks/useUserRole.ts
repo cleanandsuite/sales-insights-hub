@@ -25,25 +25,20 @@ export function useUserRole() {
     }
 
     try {
-      // Check if user has manager role in the secure user_roles table
-      // Using type assertion since types may not be regenerated yet
-      const { data: isManager, error: roleError } = await (supabase.rpc as any)(
-        'is_manager', 
-        { _user_id: user.id }
-      );
-
-      if (roleError) {
-        console.error('Error checking manager role:', roleError);
-      }
-
-      // Get user's team
-      const { data: teamMember } = await supabase
+      // Get user's team membership to check role
+      const { data: teamMember, error: teamError } = await supabase
         .from('team_members')
         .select('team_id, role')
         .eq('user_id', user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
 
+      if (teamError) {
+        console.error('Error fetching team membership:', teamError);
+      }
+
+      // Check if the user has a manager role based on team membership
+      const isManager = teamMember?.role === 'manager' || teamMember?.role === 'owner';
       const role: UserRole = isManager ? 'manager' : 'user';
       const teamId = teamMember?.team_id || null;
 

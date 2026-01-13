@@ -233,7 +233,7 @@ export default function Settings() {
             </TabsTrigger>
             <TabsTrigger value="billing" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Billing</span>
+              <span className="hidden xs:inline">Choose a Plan</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
