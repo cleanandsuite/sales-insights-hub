@@ -19,7 +19,7 @@ export function HeroSection({
       <div className="absolute top-16 left-0 right-0 bg-promo-banner py-3 z-20">
         <div className="container mx-auto px-4 text-center">
           <p className="text-white font-semibold text-sm md:text-base">
-            🎉 New Year Deal: Start free and get 40% off your first 3 months with code <span className="font-bold">NEWYEAR40</span>
+            🔥 Limited Offer: 40% off for life – grandfathered pricing for the next 100 users!
             <ArrowRight className="inline h-4 w-4 ml-2" />
           </p>
         </div>
