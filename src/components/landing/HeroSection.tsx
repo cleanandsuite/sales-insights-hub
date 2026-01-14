@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Play, Shield, Globe, Zap } from 'lucide-react';
+import { ArrowRight, Play, CheckCircle } from 'lucide-react';
+import heroImage from '@/assets/hero-sales-team.jpg';
+import dashboardPreview from '@/assets/dashboard-preview.jpg';
 
 interface HeroSectionProps {
   onStartTrialClick: () => void;
@@ -9,88 +11,121 @@ interface HeroSectionProps {
 
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
-    <section className="relative bg-hero-gradient pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden min-h-[85vh] flex items-center">
-      {/* Subtle pattern overlay */}
+    <section className="relative bg-hero-gradient min-h-[100vh] flex items-center overflow-hidden">
+      {/* Pattern overlay */}
       <div className="bg-hero-ai-pattern" />
       
-      {/* Gradient orbs - hidden on mobile for performance */}
-      <div className="hidden md:block absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
-      <div className="hidden md:block absolute bottom-20 right-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
+      {/* Promo Banner */}
+      <div className="absolute top-16 left-0 right-0 bg-promo-banner py-3 z-20">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-white font-semibold text-sm md:text-base">
+            🎉 New Year Deal: Start free and get 40% off your first 3 months with code <span className="font-bold">NEWYEAR40</span>
+            <ArrowRight className="inline h-4 w-4 ml-2" />
+          </p>
+        </div>
+      </div>
       
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
+      <div className="container mx-auto px-4 pt-32 pb-20 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           
-          {/* Urgency Badge */}
-          <div className="inline-block animate-fade-in">
-            <Badge className="bg-destructive text-destructive-foreground px-4 py-2 text-sm font-bold shadow-lg">
-              🔥 Limited: First 100 Spots – Ends Jan 31!
-            </Badge>
+          {/* Left Content */}
+          <div className="space-y-8 text-center lg:text-left">
+            {/* Pre-headline badge */}
+            <div className="inline-block animate-fade-in">
+              <Badge className="bg-white/15 text-white border-white/30 px-4 py-2 text-sm font-medium backdrop-blur-sm">
+                ⚡ The #1 AI Sales Coach
+              </Badge>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-[1.1] animate-slide-up">
+              Sales Reps and AI
+              <br />
+              <span className="gradient-text">Close Deals Together.</span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              SellSig transforms every sales call with real-time AI coaching that helps you crush objections, boost closes by 15-25%, and never miss a deal insight again.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <Button 
+                size="lg" 
+                onClick={() => window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank')}
+                className="group gap-2 font-bold text-lg px-8 py-6 bg-white text-primary hover:bg-white/95 shadow-xl hover:shadow-2xl transition-all rounded-lg animate-cta-pulse"
+              >
+                Start Free Trial
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                onClick={onWatchDemoClick}
+                className="gap-2 font-semibold text-lg px-8 py-6 border-2 border-white/40 text-white hover:bg-white/10 rounded-lg backdrop-blur-sm"
+              >
+                <Play className="h-5 w-5" />
+                Watch Demo
+              </Button>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start text-white/80 text-sm animate-slide-up" style={{ animationDelay: '0.3s' }}>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-accent" />
+                <span>14-day free trial</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-accent" />
+                <span>No setup required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-accent" />
+                <span>Cancel anytime</span>
+              </div>
+            </div>
           </div>
 
-          {/* H1 Headline - 48px as specified */}
-          <h1 className="text-4xl sm:text-5xl md:text-[48px] font-bold text-white leading-tight">
-            Sales Coaching in 60 Seconds
-            <br />
-            <span className="text-white/90">– No Setup, No Fees</span>
-          </h1>
-
-          {/* Subheadline - 20px */}
-          <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
-            Record calls in-browser, get live AI coaching, crush objections, boost closes 15-25%.
-          </p>
-
-          {/* Demo Video Placeholder */}
-          <div className="max-w-2xl mx-auto my-8">
-            <div 
-              onClick={onWatchDemoClick}
-              className="relative aspect-video bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 shadow-xl cursor-pointer group hover:bg-white/15 transition-all overflow-hidden"
-            >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                  <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
+          {/* Right Side - Dashboard Preview */}
+          <div className="relative animate-slide-in-right hidden lg:block">
+            <div className="relative">
+              {/* Main dashboard image */}
+              <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/5 backdrop-blur-sm">
+                <img 
+                  src={dashboardPreview} 
+                  alt="SellSig AI Dashboard" 
+                  className="w-full h-auto"
+                />
+              </div>
+              
+              {/* Floating stat card */}
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-2xl p-4 animate-float">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-full bg-success/20 flex items-center justify-center">
+                    <span className="text-2xl">📈</span>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">+27%</p>
+                    <p className="text-sm text-muted-foreground">Close Rate</p>
+                  </div>
                 </div>
               </div>
-              <p className="absolute bottom-4 left-0 right-0 text-center text-white/80 text-sm font-medium">
-                Watch 60-Second Demo
-              </p>
-            </div>
-          </div>
 
-          {/* Primary CTA Button */}
-          <div className="flex flex-col items-center gap-4">
-            <Button 
-              size="lg" 
-              onClick={() => window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank')}
-              className="group gap-2 font-bold text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all rounded-lg"
-            >
-              Start Free 14-Day Trial
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <p className="text-sm text-white/70">
-              Card required • 14 days free • Cancel anytime
-            </p>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="pt-8">
-            <div className="inline-flex flex-wrap items-center justify-center gap-6 md:gap-10 px-6 py-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-white/90" />
-                <span className="text-sm font-medium text-white">GDPR Compliant</span>
-              </div>
-              <div className="hidden sm:block w-px h-6 bg-white/30" />
-              <div className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-white/90" />
-                <span className="text-sm font-medium text-white">256-bit Encrypted</span>
-              </div>
-              <div className="hidden sm:block w-px h-6 bg-white/30" />
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-white/90" />
-                <span className="text-sm font-medium text-white">60s Setup</span>
+              {/* Floating coaching card */}
+              <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-2xl p-4 animate-float" style={{ animationDelay: '1s' }}>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-xl">🎯</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Live Coaching</p>
+                    <p className="text-xs text-muted-foreground">Real-time suggestions</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>
