@@ -24,7 +24,7 @@ const SectionLoader = () => (
   </div>
 );
 
-const TRUSTED_BY = ['Salesforce', 'HubSpot', 'Outreach', 'Gong', 'ZoomInfo'];
+const TRUSTED_BY = ['TechFlow', 'CloudScale', 'DataSync', 'SalesForge', 'RevHub'];
 
 export default function Landing() {
   const [demoModalOpen, setDemoModalOpen] = useState(false);
@@ -64,17 +64,17 @@ export default function Landing() {
         onWatchDemoClick={() => setDemoModalOpen(true)} 
       />
 
-      {/* Trusted By Section - Small, kept inline */}
-      <section className="py-10 border-y border-border bg-background">
+      {/* Trusted By Section */}
+      <section className="py-8 border-y border-border bg-card">
         <div className="container mx-auto px-4">
-          <p className="text-center text-sm uppercase tracking-widest text-muted-foreground mb-8 font-semibold">
-            Trusted by sales teams competing with
+          <p className="text-center text-xs uppercase tracking-wider text-muted-foreground mb-6 font-medium">
+            Trusted by teams at
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-12 md:gap-20">
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
             {TRUSTED_BY.map((company) => (
               <div 
                 key={company} 
-                className="text-2xl font-bold text-muted-foreground/50 hover:text-muted-foreground/70 transition-colors"
+                className="text-lg md:text-xl font-semibold text-muted-foreground/60 hover:text-muted-foreground transition-colors"
               >
                 {company}
               </div>
@@ -104,22 +104,22 @@ export default function Landing() {
         <PricingSection />
       </Suspense>
 
-      {/* CTA Section - Small, kept inline */}
-      <section className="relative py-24 bg-cta-gradient overflow-hidden">
+      {/* CTA Section */}
+      <section className="relative py-16 md:py-20 bg-cta-gradient overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
-              Ready to Become Rejection Proof?
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-white">
+              Ready to Boost Your Close Rate?
             </h2>
-            <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto">
-              Be one of the first 100 to lock in grandfathered pricing with our AI Sales Coaching.
+            <p className="text-lg text-white/90 max-w-xl mx-auto">
+              Join the first 100 sales reps to lock in grandfathered pricing.
               Start your 14-day free trial today.
             </p>
-            <div className="pt-4">
+            <div className="pt-2">
               <Button 
                 size="lg" 
                 onClick={() => handleStartTrial()}
-                className="gap-2 font-bold text-lg px-12 py-8 shadow-2xl hover:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.4)] hover:scale-[1.03] transition-all bg-white text-primary hover:bg-white/95 rounded-xl"
+                className="gap-2 font-semibold text-base px-8 py-6 bg-white text-primary hover:bg-white/95 shadow-lg rounded-lg"
                 disabled={loadingPlan !== null}
               >
                 {loadingPlan ? (
@@ -134,7 +134,7 @@ export default function Landing() {
                   </>
                 )}
               </Button>
-              <p className="text-base text-white/85 mt-5 font-medium">
+              <p className="text-sm text-white/80 mt-4">
                 Card required • 14 days free • Cancel anytime
               </p>
             </div>

@@ -20,32 +20,41 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
   };
 
   return (
-    <header className="nav-enterprise">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo + Tagline */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-              <img src={sellsigLogo} alt="SellSig" className="h-6 w-6 object-contain" />
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
+              <img src={sellsigLogo} alt="SellSig" className="h-7 w-7 object-contain" />
             </div>
-            <span className="font-bold text-xl text-foreground">SellSig</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-xl text-foreground leading-tight">SellSig</span>
+              <span className="hidden md:block text-xs text-muted-foreground leading-tight">
+                Sales Coaching in 60 Seconds – No Setup, No Fees
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link to="/support">
-              <Button variant="ghost" className="font-medium">
-                Support
-              </Button>
+          <div className="hidden md:flex items-center gap-6">
+            <Link to="/support" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Support
+            </Link>
+            <Link to="/privacy-policy" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Privacy
+            </Link>
+            <Link to="/terms-of-service" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Terms
             </Link>
             <Link to="/auth">
-              <Button variant="ghost" className="font-medium">
+              <Button variant="ghost" size="sm" className="font-medium">
                 Sign In
               </Button>
             </Link>
             <Button 
               onClick={scrollToPricing}
-              className="font-semibold shadow-md hover:shadow-lg transition-shadow"
+              className="font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
             >
               Start Free Trial
             </Button>
@@ -55,6 +64,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
               <X className="h-6 w-6 text-foreground" />
@@ -67,16 +77,29 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               <Link 
                 to="/support" 
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full"
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
               >
-                <Button variant="ghost" className="w-full justify-center font-medium">
-                  Support
-                </Button>
+                Support
               </Link>
+              <Link 
+                to="/privacy-policy" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+              >
+                Privacy
+              </Link>
+              <Link 
+                to="/terms-of-service" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+              >
+                Terms
+              </Link>
+              <div className="border-t border-border my-2" />
               <Link 
                 to="/auth" 
                 onClick={() => setMobileMenuOpen(false)}
@@ -88,7 +111,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
               </Link>
               <Button 
                 onClick={scrollToPricing}
-                className="w-full font-semibold"
+                className="w-full font-semibold bg-primary"
               >
                 Start Free Trial
               </Button>

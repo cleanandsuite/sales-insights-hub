@@ -1,4 +1,5 @@
-/* Google Fonts loaded asynchronously in index.html to prevent render blocking */
+/* Google Fonts: Inter - Professional Salesforce-inspired typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,65 +7,65 @@
 
 @layer base {
   :root {
-    /* Bold Salesforce-inspired palette - Strong & Vibrant */
-    --background: 210 40% 98%; /* Clean white-blue */
-    --foreground: 222 47% 11%; /* Deep navy #0F172A */
+    /* Clean Enterprise Salesforce-inspired palette */
+    --background: 210 40% 98%; /* #F8FAFC - Light bg */
+    --foreground: 215 28% 17%; /* #1E293B - Dark text */
 
-    --card: 0 0% 100%; /* Pure white */
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%; /* Pure white cards */
+    --card-foreground: 215 28% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 215 28% 17%;
 
-    --primary: 217 91% 50%; /* Salesforce Blue #1570EF */
+    --primary: 212 100% 48%; /* #0070F3 - Primary blue */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary-foreground: 215 28% 17%;
 
     --muted: 214 32% 91%;
-    --muted-foreground: 215 20% 40%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 162 94% 38%; /* Vibrant Teal #0D9373 */
+    --accent: 168 76% 37%; /* #00BFA5 - Teal accent */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 55%; /* Bright Red */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 42%; /* Strong Green */
+    --success: 142 76% 42%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%; /* Vibrant Orange */
-    --warning-foreground: 222 47% 11%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 215 28% 17%;
 
-    --border: 214 32% 85%;
+    --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 217 91% 50%;
+    --ring: 212 100% 48%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
-    /* Sidebar - Bold dark */
-    --sidebar-background: 222 47% 11%;
+    /* Sidebar - Clean dark */
+    --sidebar-background: 215 28% 17%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 212 100% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 18%;
+    --sidebar-accent: 215 28% 24%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 47% 18%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-border: 215 28% 24%;
+    --sidebar-ring: 212 100% 55%;
 
-    /* Chart colors - Vibrant palette */
-    --chart-1: 217 91% 50%;
-    --chart-2: 162 94% 38%;
+    /* Chart colors */
+    --chart-1: 212 100% 48%;
+    --chart-2: 168 76% 37%;
     --chart-3: 280 73% 55%;
     --chart-4: 38 92% 50%;
-    --chart-5: 0 84% 55%;
+    --chart-5: 0 84% 60%;
 
-    /* Premium shadows */
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08);
-    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.12);
-    --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.18);
-    --shadow-xl: 0 24px 48px -12px rgb(0 0 0 / 0.25);
+    /* Enterprise shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
   .dark {
@@ -112,30 +113,32 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    line-height: 1.6;
+    font-size: 16px;
+    line-height: 1.5;
     letter-spacing: -0.01em;
   }
 
   h1 {
-    @apply text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight;
-    letter-spacing: -0.03em;
+    @apply text-4xl md:text-5xl lg:text-[48px] font-bold tracking-tight;
+    line-height: 1.1;
   }
 
   h2 {
-    @apply text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
-    letter-spacing: -0.02em;
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+    line-height: 1.2;
   }
 
   h3 {
-    @apply text-xl md:text-2xl font-bold tracking-tight;
+    @apply text-xl md:text-2xl font-semibold;
   }
 
   h4, h5, h6 {
-    @apply font-bold tracking-tight;
+    @apply font-semibold;
   }
 
   p {
-    @apply text-base md:text-lg leading-relaxed;
+    @apply text-base leading-relaxed;
+    line-height: 1.5;
   }
 }
 
