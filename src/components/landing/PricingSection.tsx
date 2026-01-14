@@ -93,7 +93,7 @@ export function PricingSection() {
       description: 'For scaling sales organizations',
       trialPrice: null,
       trialPeriod: null,
-      price: '$79',
+      price: '$99',
       pricePeriod: '/user/mo',
       priceNote: 'Contact for volume discounts',
       features: [
