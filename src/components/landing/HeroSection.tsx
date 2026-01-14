@@ -59,8 +59,8 @@ export function HeroSection({
                 Start Free Trial
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button size="lg" variant="outline" onClick={onWatchDemoClick} className="gap-2 font-semibold text-lg px-8 py-6 border-2 border-white/40 text-white hover:bg-white/10 rounded-lg backdrop-blur-sm">
-                <Play className="h-5 w-5" />
+              <Button size="lg" variant="outline" onClick={onWatchDemoClick} className="group gap-2 font-semibold text-lg px-8 py-6 border-2 border-white bg-white/20 text-white hover:bg-white hover:text-primary rounded-lg backdrop-blur-sm transition-all">
+                <Play className="h-5 w-5 fill-current" />
                 Watch Demo
               </Button>
             </div>
