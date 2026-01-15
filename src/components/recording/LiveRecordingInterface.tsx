@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, Square, X } from 'lucide-react';
+import { Pause, Play, Square, X, Headphones, Mic } from 'lucide-react';
 import { useMp3Recorder } from '@/hooks/useMp3Recorder';
 import { AudioWaveform } from './AudioWaveform';
 import { RecordingTimer } from './RecordingTimer';
@@ -34,7 +34,8 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     pauseRecording,
     resumeRecording,
     getAudioChunk,
-    recordingMethod
+    recordingMethod,
+    isSystemAudioCapture
   } = useMp3Recorder();
 
   const [transcription, setTranscription] = useState('');
@@ -60,11 +61,13 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
   // Start recording immediately when component mounts
   useEffect(() => {
-    startRecording().catch(error => {
+    // Pass true to enable system audio capture (will prompt user to share screen/tab)
+    startRecording(true).catch(error => {
+      console.error('Recording start error:', error);
       toast({
         variant: 'destructive',
-        title: 'Microphone Access Required',
-        description: 'Please allow microphone access to start recording.'
+        title: 'Recording Access Required',
+        description: 'Please allow microphone access and share your screen/tab with audio to record both sides of the call.'
       });
       onClose();
     });
@@ -497,6 +500,21 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
                 isRecording={isRecording}
                 isPaused={isPaused}
               />
+            </div>
+            
+            {/* Audio capture mode indicator */}
+            <div className="flex items-center gap-2 text-sm">
+              {isSystemAudioCapture ? (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full border border-green-500/20">
+                  <Headphones className="h-4 w-4" />
+                  <span>Recording both sides (mic + system audio)</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full border border-yellow-500/20">
+                  <Mic className="h-4 w-4" />
+                  <span>Microphone only</span>
+                </div>
+              )}
             </div>
             
             {/* Controls */}

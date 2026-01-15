@@ -5,12 +5,12 @@ interface UseMp3RecorderReturn {
   isRecording: boolean;
   isPaused: boolean;
   audioLevel: number;
-  startRecording: () => Promise<void>;
+  startRecording: (captureSystemAudio?: boolean) => Promise<void>;
   stopRecording: () => Promise<Blob | null>;
   pauseRecording: () => void;
   resumeRecording: () => void;
   getAudioChunk: () => Promise<Blob | null>;
-  recordingMethod: 'webm-opus' | 'native-fallback' | 'electron-system';
+  recordingMethod: 'webm-opus' | 'native-fallback' | 'electron-system' | 'display-media';
   isSystemAudioCapture: boolean;
 }
 
@@ -33,7 +33,7 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
-  const [recordingMethod, setRecordingMethod] = useState<'webm-opus' | 'native-fallback' | 'electron-system'>('webm-opus');
+  const [recordingMethod, setRecordingMethod] = useState<'webm-opus' | 'native-fallback' | 'electron-system' | 'display-media'>('webm-opus');
   const [isSystemAudioCapture, setIsSystemAudioCapture] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -41,9 +41,64 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const displayStreamRef = useRef<MediaStream | null>(null);
   const additionalStreamsRef = useRef<MediaStream[]>([]);
   const chunksRef = useRef<Blob[]>([]);
   const animationFrameRef = useRef<number | null>(null);
+
+  // Capture system audio using getDisplayMedia (browser-based approach)
+  const captureSystemAudioBrowser = useCallback(async (): Promise<MediaStream | null> => {
+    try {
+      // Request screen/tab share with audio
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true, // Required, but we'll ignore it
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        } as MediaTrackConstraints,
+      });
+      
+      displayStreamRef.current = displayStream;
+      
+      // Check if audio track is available
+      const audioTracks = displayStream.getAudioTracks();
+      if (audioTracks.length === 0) {
+        console.warn('No audio track in display stream - user may not have shared audio');
+        // Stop video track since we don't need it
+        displayStream.getVideoTracks().forEach(track => track.stop());
+        return null;
+      }
+      
+      // Stop video track - we only need audio
+      displayStream.getVideoTracks().forEach(track => track.stop());
+      
+      console.log('System audio captured via getDisplayMedia:', audioTracks[0].label);
+      
+      // Create audio-only stream
+      return new MediaStream(audioTracks);
+    } catch (error) {
+      console.error('Failed to capture system audio:', error);
+      return null;
+    }
+  }, []);
+
+  // Mix microphone and system audio streams
+  const mixAudioStreams = useCallback(async (micStream: MediaStream, systemStream: MediaStream): Promise<MediaStream> => {
+    const audioContext = new AudioContext({ sampleRate: 16000 });
+    const destination = audioContext.createMediaStreamDestination();
+    
+    // Connect microphone
+    const micSource = audioContext.createMediaStreamSource(micStream);
+    micSource.connect(destination);
+    
+    // Connect system audio
+    const systemSource = audioContext.createMediaStreamSource(systemStream);
+    systemSource.connect(destination);
+    
+    console.log('Mixed mic + system audio streams');
+    return destination.stream;
+  }, []);
 
   const updateAudioLevel = useCallback(() => {
     if (!analyserRef.current) return;
@@ -57,36 +112,62 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
   }, []);
 
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(async (captureSystemAudio: boolean = true) => {
     try {
       let stream: MediaStream;
       
-      // Check if running in Electron - use system audio capture
+      // Check if running in Electron - use system audio capture via desktopCapturer
       if (isElectron()) {
         console.log('ELECTRON DETECTED: Attempting system audio capture...');
         const audioCapture = await captureBothAudioSources();
         
         if (audioCapture) {
           stream = audioCapture.combinedStream;
-          // Store additional streams for cleanup
           additionalStreamsRef.current = [audioCapture.micStream, audioCapture.systemStream];
           setRecordingMethod('electron-system');
           setIsSystemAudioCapture(true);
           console.log('ELECTRON AUDIO: Capturing both microphone and system audio (both call sides)');
         } else {
-          // Fallback to mic only in Electron
           stream = await navigator.mediaDevices.getUserMedia({
             audio: AUDIO_CONSTRAINTS
           });
           setIsSystemAudioCapture(false);
           console.log('ELECTRON FALLBACK: Using microphone only');
         }
+      } else if (captureSystemAudio) {
+        // Browser: Try to capture system audio via getDisplayMedia
+        console.log('BROWSER: Attempting system audio capture via screen share...');
+        
+        // First get microphone
+        const micStream = await navigator.mediaDevices.getUserMedia({
+          audio: AUDIO_CONSTRAINTS
+        });
+        
+        // Then try to get system audio
+        const systemStream = await captureSystemAudioBrowser();
+        
+        if (systemStream) {
+          // Mix both streams
+          stream = await mixAudioStreams(micStream, systemStream);
+          additionalStreamsRef.current = [micStream, systemStream];
+          setRecordingMethod('display-media');
+          setIsSystemAudioCapture(true);
+          console.log('BROWSER AUDIO: Capturing both microphone and system audio');
+        } else {
+          // Fallback to mic only
+          stream = micStream;
+          setRecordingMethod('webm-opus');
+          setIsSystemAudioCapture(false);
+          console.log('BROWSER FALLBACK: Using microphone only (user cancelled or no audio shared)');
+        }
       } else {
         // Standard web recording - microphone only
         stream = await navigator.mediaDevices.getUserMedia({
           audio: AUDIO_CONSTRAINTS
         });
+        setRecordingMethod('webm-opus');
         setIsSystemAudioCapture(false);
+        console.log('BROWSER: Microphone only recording');
       }
       
       streamRef.current = stream;
@@ -166,7 +247,12 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
         if (streamRef.current) {
           streamRef.current.getTracks().forEach((track) => track.stop());
         }
-        // Clean up additional streams from Electron capture
+        // Clean up display stream
+        if (displayStreamRef.current) {
+          displayStreamRef.current.getTracks().forEach((track) => track.stop());
+          displayStreamRef.current = null;
+        }
+        // Clean up additional streams from Electron/browser capture
         additionalStreamsRef.current.forEach(s => {
           s.getTracks().forEach(track => track.stop());
         });
