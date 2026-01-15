@@ -67,33 +67,36 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
   // Capture system audio using getDisplayMedia (browser-based approach)
   const captureSystemAudioBrowser = useCallback(async (): Promise<MediaStream | null> => {
     try {
-      // Request screen/tab share with audio
+      // Note: browsers will only provide "system/tab audio" when the user selects a browser tab
+      // and explicitly enables the "Share audio" toggle in the picker.
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true, // Required, but we'll ignore it
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-        } as MediaTrackConstraints,
+        video: true,
+        audio: true,
       });
-      
+
       displayStreamRef.current = displayStream;
-      
-      // Check if audio track is available
+
       const audioTracks = displayStream.getAudioTracks();
       if (audioTracks.length === 0) {
-        console.warn('No audio track in display stream - user may not have shared audio');
-        // Stop video track since we don't need it
-        displayStream.getVideoTracks().forEach(track => track.stop());
+        console.warn(
+          'No audio track in display stream. Tip: choose a browser tab and enable "Share tab audio" (screen/window shares usually have no audio).'
+        );
+        // Stop capture so the browser stops showing "sharing"
+        displayStream.getTracks().forEach((t) => t.stop());
+        displayStreamRef.current = null;
         return null;
       }
-      
-      // Stop video track - we only need audio
-      displayStream.getVideoTracks().forEach(track => track.stop());
-      
-      console.log('System audio captured via getDisplayMedia:', audioTracks[0].label);
-      
-      // Create audio-only stream
+
+      const t = audioTracks[0];
+      console.log('System audio captured via getDisplayMedia:', {
+        label: t.label,
+        readyState: t.readyState,
+        muted: (t as any).muted,
+        enabled: t.enabled,
+        settings: typeof t.getSettings === 'function' ? t.getSettings() : undefined,
+      });
+
+      // Keep the original displayStream alive; we only pass an audio-only stream downstream.
       return new MediaStream(audioTracks);
     } catch (error) {
       console.error('Failed to capture system audio:', error);
