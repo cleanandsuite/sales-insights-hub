@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, Square, X, Headphones, Mic } from 'lucide-react';
+import { Pause, Play, Square, X, Headphones, Mic, Settings2 } from 'lucide-react';
 import { useMp3Recorder } from '@/hooks/useMp3Recorder';
 import { AudioWaveform } from './AudioWaveform';
 import { RecordingTimer } from './RecordingTimer';
@@ -9,10 +9,19 @@ import { TranscriptionPanel } from './TranscriptionPanel';
 import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
 import { LiveCoachingSidebar } from './LiveCoachingSidebar';
 import { RecordingNameDialog } from './RecordingNameDialog';
+import { AudioSourceSelector } from './AudioSourceSelector';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useLiveCoaching } from '@/hooks/useLiveCoaching';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 
 interface LiveRecordingInterfaceProps {
@@ -35,9 +44,13 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     resumeRecording,
     getAudioChunk,
     recordingMethod,
-    isSystemAudioCapture
+    isSystemAudioCapture,
+    isElectronEnvironment,
+    availableSources,
+    refreshSources
   } = useMp3Recorder();
 
+  const [selectedSourceId, setSelectedSourceId] = useState<string | undefined>(undefined);
   const [transcription, setTranscription] = useState('');
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [sentiment, setSentiment] = useState<'positive' | 'neutral' | 'negative'>('neutral');
@@ -61,13 +74,15 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
   // Start recording immediately when component mounts
   useEffect(() => {
-    // Pass true to enable system audio capture (will prompt user to share screen/tab)
-    startRecording(true).catch(error => {
+    // In Electron, use selected source; otherwise prompt for screen share
+    startRecording(true, selectedSourceId).catch(error => {
       console.error('Recording start error:', error);
       toast({
         variant: 'destructive',
         title: 'Recording Access Required',
-        description: 'Please allow microphone access and share your screen/tab with audio to record both sides of the call.'
+        description: isElectronEnvironment 
+          ? 'Please allow microphone access to record.'
+          : 'Please allow microphone access and share your screen/tab with audio to record both sides of the call.'
       });
       onClose();
     });
@@ -475,14 +490,46 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
           <h2 className="text-xl font-semibold text-foreground">Live Recording</h2>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleCancel}
-            disabled={isSaving}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Audio Source Settings (Electron only) */}
+            {isElectronEnvironment && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" disabled={isRecording}>
+                    <Settings2 className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Audio Settings</SheetTitle>
+                    <SheetDescription>
+                      Select which application's audio to capture along with your microphone.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <AudioSourceSelector
+                      sources={availableSources}
+                      selectedSourceId={selectedSourceId}
+                      onSourceChange={setSelectedSourceId}
+                      onRefresh={refreshSources}
+                      isDisabled={isRecording}
+                    />
+                    <p className="mt-4 text-sm text-muted-foreground">
+                      Changes will apply to your next recording. Stop the current recording to change the audio source.
+                    </p>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Main content */}
