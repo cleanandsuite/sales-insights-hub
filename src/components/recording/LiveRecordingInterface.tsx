@@ -552,18 +552,22 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
             {/* Audio capture mode indicator */}
             <div className="flex items-center gap-2 text-sm">
               {isSystemAudioCapture ? (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full border border-green-500/20">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full border border-primary/20">
                   <Headphones className="h-4 w-4" />
                   <span>Recording both sides (mic + system audio)</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded-full border border-yellow-500/20">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full border border-border">
                   <Mic className="h-4 w-4" />
-                  <span>Microphone only</span>
+                  <span>
+                    {isElectronEnvironment
+                      ? 'Microphone only'
+                      : 'Microphone only (share a tab + enable Share audio to capture both sides)'}
+                  </span>
                 </div>
               )}
             </div>
-            
+
             {/* Controls */}
             <div className="flex items-center gap-4">
               {isPaused ? (
