@@ -250,6 +250,51 @@ function updateUI() {
 }`
 };
 
+async function generateIconPng(size: number): Promise<Blob> {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d')!;
+  
+  // Background gradient
+  const gradient = ctx.createLinearGradient(0, 0, size, size);
+  gradient.addColorStop(0, '#6366f1');
+  gradient.addColorStop(1, '#8b5cf6');
+  
+  // Rounded rectangle
+  const radius = size * 0.2;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, size, size, radius);
+  ctx.fillStyle = gradient;
+  ctx.fill();
+  
+  // Microphone icon (simple circle + stem)
+  ctx.fillStyle = 'white';
+  const circleRadius = size * 0.16;
+  ctx.beginPath();
+  ctx.arc(size / 2, size * 0.38, circleRadius, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Stem
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = size * 0.06;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(size / 2, size * 0.55);
+  ctx.lineTo(size / 2, size * 0.72);
+  ctx.stroke();
+  
+  // Base
+  ctx.beginPath();
+  ctx.moveTo(size * 0.35, size * 0.72);
+  ctx.lineTo(size * 0.65, size * 0.72);
+  ctx.stroke();
+  
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob!), 'image/png');
+  });
+}
+
 async function downloadExtension() {
   const zip = new JSZip();
   
@@ -258,14 +303,14 @@ async function downloadExtension() {
     zip.file(name, content);
   });
   
-  // Add placeholder icons (simple colored squares as base64 PNG)
+  // Generate actual PNG icons
   const iconFolder = zip.folder('icons');
-  const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#6366f1"/><stop offset="100%" style="stop-color:#8b5cf6"/></linearGradient></defs><rect width="128" height="128" rx="24" fill="url(#g)"/><circle cx="64" cy="50" r="20" fill="white"/><path d="M64 75 L64 95 M54 95 L74 95" stroke="white" stroke-width="6" stroke-linecap="round"/></svg>`;
+  const sizes = [16, 48, 128];
   
-  // Add SVG icons (user needs to convert to PNG or Chrome will use them as-is in newer versions)
-  iconFolder?.file('icon16.svg', iconSvg);
-  iconFolder?.file('icon48.svg', iconSvg);
-  iconFolder?.file('icon128.svg', iconSvg);
+  for (const size of sizes) {
+    const pngBlob = await generateIconPng(size);
+    iconFolder?.file(`icon${size}.png`, pngBlob);
+  }
   
   // Add README
   zip.file('README.txt', `GritCall Chrome Extension
@@ -276,9 +321,6 @@ Installation:
 2. Enable "Developer mode" (top right toggle)
 3. Click "Load unpacked"
 4. Select this extracted folder
-
-Note: You may need to convert the SVG icons to PNG files.
-Use any online converter or image editor.
 
 After installation, click the extension icon to start recording!`);
   
