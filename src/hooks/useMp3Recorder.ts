@@ -1,22 +1,24 @@
-import { useState, useRef, useCallback } from 'react';
-import { isElectron, captureBothAudioSources } from '@/lib/electronAudio';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { isElectron, captureBothAudioSources, getDesktopSources, type DesktopSource } from '@/lib/electronAudio';
 
 interface UseMp3RecorderReturn {
   isRecording: boolean;
   isPaused: boolean;
   audioLevel: number;
-  startRecording: (captureSystemAudio?: boolean) => Promise<void>;
+  startRecording: (captureSystemAudio?: boolean, sourceId?: string) => Promise<void>;
   stopRecording: () => Promise<Blob | null>;
   pauseRecording: () => void;
   resumeRecording: () => void;
   getAudioChunk: () => Promise<Blob | null>;
   recordingMethod: 'webm-opus' | 'native-fallback' | 'electron-system' | 'display-media';
   isSystemAudioCapture: boolean;
+  // Electron-specific
+  isElectronEnvironment: boolean;
+  availableSources: DesktopSource[];
+  refreshSources: () => Promise<void>;
 }
 
-// Optimal settings for speech: mono 16kHz WebM Opus at 64kbps
-// Whisper accepts WebM directly - no transcoding needed
-const AUDIO_CONSTRAINTS = {
+const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
   echoCancellation: false,
   noiseSuppression: false,
   autoGainControl: true,
@@ -35,6 +37,8 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
   const [audioLevel, setAudioLevel] = useState(0);
   const [recordingMethod, setRecordingMethod] = useState<'webm-opus' | 'native-fallback' | 'electron-system' | 'display-media'>('webm-opus');
   const [isSystemAudioCapture, setIsSystemAudioCapture] = useState(false);
+  const [isElectronEnvironment] = useState(() => isElectron());
+  const [availableSources, setAvailableSources] = useState<DesktopSource[]>([]);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mimeTypeRef = useRef<string>('audio/webm;codecs=opus');
@@ -45,6 +49,20 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
   const additionalStreamsRef = useRef<MediaStream[]>([]);
   const chunksRef = useRef<Blob[]>([]);
   const animationFrameRef = useRef<number | null>(null);
+
+  // Refresh available desktop sources (Electron only)
+  const refreshSources = useCallback(async () => {
+    if (!isElectronEnvironment) return;
+    const sources = await getDesktopSources();
+    setAvailableSources(sources);
+  }, [isElectronEnvironment]);
+
+  // Load sources on mount if in Electron
+  useEffect(() => {
+    if (isElectronEnvironment) {
+      refreshSources();
+    }
+  }, [isElectronEnvironment, refreshSources]);
 
   // Capture system audio using getDisplayMedia (browser-based approach)
   const captureSystemAudioBrowser = useCallback(async (): Promise<MediaStream | null> => {
@@ -112,14 +130,14 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
   }, []);
 
-  const startRecording = useCallback(async (captureSystemAudio: boolean = true) => {
+  const startRecording = useCallback(async (captureSystemAudio: boolean = true, sourceId?: string) => {
     try {
       let stream: MediaStream;
       
       // Check if running in Electron - use system audio capture via desktopCapturer
-      if (isElectron()) {
-        console.log('ELECTRON DETECTED: Attempting system audio capture...');
-        const audioCapture = await captureBothAudioSources();
+      if (isElectronEnvironment) {
+        console.log('ELECTRON DETECTED: Attempting system audio capture with sourceId:', sourceId);
+        const audioCapture = await captureBothAudioSources(sourceId);
         
         if (audioCapture) {
           stream = audioCapture.combinedStream;
@@ -325,5 +343,8 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
     getAudioChunk,
     recordingMethod,
     isSystemAudioCapture,
+    isElectronEnvironment,
+    availableSources,
+    refreshSources,
   };
 }
