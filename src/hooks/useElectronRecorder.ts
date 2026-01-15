@@ -1,49 +1,58 @@
-import { useState, useRef, useCallback } from 'react';
-import { isElectron, captureBothAudioSources } from '@/lib/electronAudio';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { isElectron, captureBothAudioSources, getDesktopSources, type DesktopSource } from '@/lib/electronAudio';
 
-interface UseMp3RecorderReturn {
+interface UseElectronRecorderReturn {
   isRecording: boolean;
   isPaused: boolean;
   audioLevel: number;
-  startRecording: () => Promise<void>;
+  startRecording: (sourceId?: string) => Promise<void>;
   stopRecording: () => Promise<Blob | null>;
   pauseRecording: () => void;
   resumeRecording: () => void;
   getAudioChunk: () => Promise<Blob | null>;
-  recordingMethod: 'webm-opus' | 'native-fallback' | 'electron-system';
-  isSystemAudioCapture: boolean;
+  isElectronEnvironment: boolean;
+  availableSources: DesktopSource[];
+  refreshSources: () => Promise<void>;
+  captureMode: 'system' | 'mic-only';
 }
-
-// Optimal settings for speech: mono 16kHz WebM Opus at 64kbps
-// Whisper accepts WebM directly - no transcoding needed
-const AUDIO_CONSTRAINTS = {
-  echoCancellation: false,
-  noiseSuppression: false,
-  autoGainControl: true,
-  channelCount: 1,
-  sampleRate: 16000,
-};
 
 const RECORDER_OPTIONS = {
   mimeType: 'audio/webm;codecs=opus',
   audioBitsPerSecond: 64000,
 };
 
-export function useMp3Recorder(): UseMp3RecorderReturn {
+export function useElectronRecorder(): UseElectronRecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
-  const [recordingMethod, setRecordingMethod] = useState<'webm-opus' | 'native-fallback' | 'electron-system'>('webm-opus');
-  const [isSystemAudioCapture, setIsSystemAudioCapture] = useState(false);
-  
+  const [isElectronEnvironment] = useState(() => isElectron());
+  const [availableSources, setAvailableSources] = useState<DesktopSource[]>([]);
+  const [captureMode, setCaptureMode] = useState<'system' | 'mic-only'>('system');
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const mimeTypeRef = useRef<string>('audio/webm;codecs=opus');
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const additionalStreamsRef = useRef<MediaStream[]>([]);
+  const streamsRef = useRef<{
+    combined?: MediaStream;
+    mic?: MediaStream;
+    system?: MediaStream;
+  }>({});
   const chunksRef = useRef<Blob[]>([]);
   const animationFrameRef = useRef<number | null>(null);
+
+  // Refresh available desktop sources
+  const refreshSources = useCallback(async () => {
+    if (!isElectronEnvironment) return;
+    const sources = await getDesktopSources();
+    setAvailableSources(sources);
+  }, [isElectronEnvironment]);
+
+  // Load sources on mount if in Electron
+  useEffect(() => {
+    if (isElectronEnvironment) {
+      refreshSources();
+    }
+  }, [isElectronEnvironment, refreshSources]);
 
   const updateAudioLevel = useCallback(() => {
     if (!analyserRef.current) return;
@@ -57,55 +66,54 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
   }, []);
 
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(async (sourceId?: string) => {
     try {
       let stream: MediaStream;
-      
-      // Check if running in Electron - use system audio capture
-      if (isElectron()) {
-        console.log('ELECTRON DETECTED: Attempting system audio capture...');
-        const audioCapture = await captureBothAudioSources();
+
+      if (isElectronEnvironment) {
+        // Try to capture both system and mic audio
+        const audioCapture = await captureBothAudioSources(sourceId);
         
         if (audioCapture) {
           stream = audioCapture.combinedStream;
-          // Store additional streams for cleanup
-          additionalStreamsRef.current = [audioCapture.micStream, audioCapture.systemStream];
-          setRecordingMethod('electron-system');
-          setIsSystemAudioCapture(true);
-          console.log('ELECTRON AUDIO: Capturing both microphone and system audio (both call sides)');
+          streamsRef.current = {
+            combined: audioCapture.combinedStream,
+            mic: audioCapture.micStream,
+            system: audioCapture.systemStream,
+          };
+          setCaptureMode('system');
+          console.log('ELECTRON AUDIO: Capturing both system and microphone audio');
         } else {
-          // Fallback to mic only in Electron
+          // Fallback to microphone only
           stream = await navigator.mediaDevices.getUserMedia({
-            audio: AUDIO_CONSTRAINTS
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: true,
+              channelCount: 1,
+              sampleRate: 16000,
+            },
           });
-          setIsSystemAudioCapture(false);
-          console.log('ELECTRON FALLBACK: Using microphone only');
+          streamsRef.current = { combined: stream, mic: stream };
+          setCaptureMode('mic-only');
+          console.log('ELECTRON AUDIO: Fallback to microphone only');
         }
       } else {
-        // Standard web recording - microphone only
+        // Web fallback - microphone only
         stream = await navigator.mediaDevices.getUserMedia({
-          audio: AUDIO_CONSTRAINTS
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: true,
+            channelCount: 1,
+            sampleRate: 16000,
+          },
         });
-        setIsSystemAudioCapture(false);
+        streamsRef.current = { combined: stream, mic: stream };
+        setCaptureMode('mic-only');
       }
-      
-      streamRef.current = stream;
-      
-      // Log audio source details
-      const audioTrack = stream.getAudioTracks()[0];
-      if (audioTrack) {
-        const settings = audioTrack.getSettings();
-        console.log('AUDIO SOURCE:', {
-          label: audioTrack.label,
-          enabled: audioTrack.enabled,
-          channelCount: settings.channelCount,
-          sampleRate: settings.sampleRate,
-          isElectron: isElectron(),
-          isSystemAudio: isElectron() && additionalStreamsRef.current.length > 0,
-        });
-      }
-      
-      // Set up audio analysis with 16kHz context
+
+      // Set up audio analysis
       audioContextRef.current = new AudioContext({ sampleRate: 16000 });
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
@@ -113,12 +121,9 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
       const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
 
-      // Determine best supported format - prefer WebM Opus
+      // Determine MIME type
       let mimeType = RECORDER_OPTIONS.mimeType;
-      let bitRate = RECORDER_OPTIONS.audioBitsPerSecond;
-      
       if (!MediaRecorder.isTypeSupported(mimeType)) {
-        // Fallback chain
         const fallbacks = ['audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
         for (const type of fallbacks) {
           if (MediaRecorder.isTypeSupported(type)) {
@@ -126,61 +131,54 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
             break;
           }
         }
-        setRecordingMethod('native-fallback');
-        console.log('Using fallback format:', mimeType);
-      } else {
-        setRecordingMethod('webm-opus');
-        console.log('Using optimized WebM Opus @ 64kbps mono 16kHz');
       }
-      
-      mimeTypeRef.current = mimeType;
-      
-      const mediaRecorder = new MediaRecorder(stream, { 
+
+      const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
-        audioBitsPerSecond: bitRate
+        audioBitsPerSecond: RECORDER_OPTIONS.audioBitsPerSecond,
       });
-      
+
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
-      
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
         }
       };
-      
+
       mediaRecorder.start(100);
       setIsRecording(true);
       setIsPaused(false);
       updateAudioLevel();
-      
+
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error('Error starting Electron recording:', error);
       throw error;
     }
-  }, [updateAudioLevel]);
+  }, [isElectronEnvironment, updateAudioLevel]);
 
   const stopRecording = useCallback(async (): Promise<Blob | null> => {
     return new Promise((resolve) => {
       const cleanup = () => {
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-        }
-        // Clean up additional streams from Electron capture
-        additionalStreamsRef.current.forEach(s => {
-          s.getTracks().forEach(track => track.stop());
+        // Stop all streams
+        Object.values(streamsRef.current).forEach(stream => {
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+          }
         });
-        additionalStreamsRef.current = [];
-        
+        streamsRef.current = {};
+
         if (audioContextRef.current) {
           audioContextRef.current.close();
+          audioContextRef.current = null;
         }
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
         }
         setIsPaused(false);
         setAudioLevel(0);
-        setIsSystemAudioCapture(false);
       };
 
       if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
@@ -190,11 +188,13 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
       }
 
       mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
-        console.log('Recording stopped:', {
-          format: mimeTypeRef.current,
+        const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        console.log('Electron recording stopped:', {
+          format: mimeType,
           size: blob.size,
-          chunks: chunksRef.current.length
+          chunks: chunksRef.current.length,
+          captureMode,
         });
         cleanup();
         resolve(blob);
@@ -203,7 +203,7 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
     });
-  }, []);
+  }, [captureMode]);
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -225,7 +225,8 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
 
   const getAudioChunk = useCallback(async (): Promise<Blob | null> => {
     if (chunksRef.current.length === 0) return null;
-    return new Blob([...chunksRef.current], { type: mimeTypeRef.current });
+    const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
+    return new Blob([...chunksRef.current], { type: mimeType });
   }, []);
 
   return {
@@ -237,7 +238,9 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
     pauseRecording,
     resumeRecording,
     getAudioChunk,
-    recordingMethod,
-    isSystemAudioCapture,
+    isElectronEnvironment,
+    availableSources,
+    refreshSources,
+    captureMode,
   };
 }
