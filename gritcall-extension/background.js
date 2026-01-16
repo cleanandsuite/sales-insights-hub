@@ -1,6 +1,7 @@
-// GritCall Extension - Background Service Worker
+// Sellsig Extension - Background Service Worker
 
 let isRecording = false;
+let isPaused = false;
 let offscreenDocumentCreated = false;
 let recordingTabId = null;
 
@@ -100,8 +101,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   
+  if (message.type === 'PAUSE_RECORDING') {
+    handlePauseRecording()
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+  
+  if (message.type === 'RESUME_RECORDING') {
+    handleResumeRecording()
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+  
   if (message.type === 'GET_STATUS') {
-    sendResponse({ isRecording, extensionInstalled: true });
+    sendResponse({ isRecording, isPaused, extensionInstalled: true });
     return false;
   }
   
@@ -115,6 +130,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'RECORDING_ERROR') {
     console.error('Recording error from offscreen:', message.error);
     isRecording = false;
+    isPaused = false;
     broadcastToTabs({ type: 'RECORDING_ERROR', error: message.error });
     return false;
   }
@@ -166,6 +182,7 @@ async function handleStartRecording(tabId) {
           
           if (response.success) {
             isRecording = true;
+            isPaused = false;
             // Notify all tabs that recording has started
             broadcastToTabs({ 
               type: 'RECORDING_STARTED',
@@ -219,6 +236,7 @@ async function handleStopRecording() {
           chrome.runtime.onMessage.removeListener(messageHandler);
           
           isRecording = false;
+          isPaused = false;
           recordingTabId = null;
           
           // Notify all tabs that recording has stopped
@@ -242,6 +260,7 @@ async function handleStopRecording() {
       setTimeout(() => {
         chrome.runtime.onMessage.removeListener(messageHandler);
         isRecording = false;
+        isPaused = false;
         recordingTabId = null;
         resolve({ success: true });
       }, 10000);
@@ -249,12 +268,91 @@ async function handleStopRecording() {
   } catch (error) {
     console.error('Failed to stop recording:', error);
     isRecording = false;
+    isPaused = false;
     recordingTabId = null;
     return { success: false, error: error.message };
   }
 }
 
-// Forward messages to content scripts in GritCall tabs
+async function handlePauseRecording() {
+  if (!isRecording || isPaused) {
+    return { success: false, error: 'Not recording or already paused' };
+  }
+  
+  console.log('Pausing recording');
+  
+  try {
+    return new Promise((resolve) => {
+      const messageHandler = (response) => {
+        if (response?.type === 'OFFSCREEN_RECORDING_PAUSED') {
+          chrome.runtime.onMessage.removeListener(messageHandler);
+          
+          if (response.success) {
+            isPaused = true;
+            broadcastToTabs({ type: 'RECORDING_PAUSED' });
+          }
+          
+          resolve({ success: response.success, error: response.error });
+        }
+      };
+      
+      chrome.runtime.onMessage.addListener(messageHandler);
+      
+      chrome.runtime.sendMessage({
+        type: 'OFFSCREEN_PAUSE_RECORDING'
+      });
+      
+      setTimeout(() => {
+        chrome.runtime.onMessage.removeListener(messageHandler);
+        resolve({ success: false, error: 'Timeout waiting for pause' });
+      }, 5000);
+    });
+  } catch (error) {
+    console.error('Failed to pause recording:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function handleResumeRecording() {
+  if (!isRecording || !isPaused) {
+    return { success: false, error: 'Not paused' };
+  }
+  
+  console.log('Resuming recording');
+  
+  try {
+    return new Promise((resolve) => {
+      const messageHandler = (response) => {
+        if (response?.type === 'OFFSCREEN_RECORDING_RESUMED') {
+          chrome.runtime.onMessage.removeListener(messageHandler);
+          
+          if (response.success) {
+            isPaused = false;
+            broadcastToTabs({ type: 'RECORDING_RESUMED' });
+          }
+          
+          resolve({ success: response.success, error: response.error });
+        }
+      };
+      
+      chrome.runtime.onMessage.addListener(messageHandler);
+      
+      chrome.runtime.sendMessage({
+        type: 'OFFSCREEN_RESUME_RECORDING'
+      });
+      
+      setTimeout(() => {
+        chrome.runtime.onMessage.removeListener(messageHandler);
+        resolve({ success: false, error: 'Timeout waiting for resume' });
+      }, 5000);
+    });
+  } catch (error) {
+    console.error('Failed to resume recording:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Forward messages to content scripts in Sellsig tabs
 async function forwardToContentScript(message) {
   try {
     const tabs = await chrome.tabs.query({
@@ -284,4 +382,4 @@ chrome.action.onClicked.addListener(async (tab) => {
   // This is a fallback if we remove the popup
 });
 
-console.log('GritCall extension background script loaded');
+console.log('Sellsig extension background script loaded');

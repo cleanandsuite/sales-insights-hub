@@ -1,4 +1,4 @@
-// GritCall Extension - Offscreen Document for Audio Capture
+// Sellsig Extension - Offscreen Document for Audio Capture
 
 let mediaRecorder = null;
 let audioContext = null;
@@ -46,6 +46,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch((error) => {
         chrome.runtime.sendMessage({
           type: 'OFFSCREEN_RECORDING_STOPPED',
+          success: false,
+          error: error.message
+        });
+      });
+    return true;
+  }
+  
+  if (message.type === 'OFFSCREEN_PAUSE_RECORDING') {
+    pauseRecording()
+      .then((result) => {
+        chrome.runtime.sendMessage({
+          type: 'OFFSCREEN_RECORDING_PAUSED',
+          ...result
+        });
+      })
+      .catch((error) => {
+        chrome.runtime.sendMessage({
+          type: 'OFFSCREEN_RECORDING_PAUSED',
+          success: false,
+          error: error.message
+        });
+      });
+    return true;
+  }
+  
+  if (message.type === 'OFFSCREEN_RESUME_RECORDING') {
+    resumeRecording()
+      .then((result) => {
+        chrome.runtime.sendMessage({
+          type: 'OFFSCREEN_RECORDING_RESUMED',
+          ...result
+        });
+      })
+      .catch((error) => {
+        chrome.runtime.sendMessage({
+          type: 'OFFSCREEN_RECORDING_RESUMED',
           success: false,
           error: error.message
         });
@@ -219,6 +255,38 @@ async function stopRecording() {
   }
 }
 
+async function pauseRecording() {
+  console.log('Pausing recording...');
+  
+  try {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.pause();
+      console.log('Recording paused successfully');
+      return { success: true };
+    }
+    return { success: false, error: 'Not recording' };
+  } catch (error) {
+    console.error('Failed to pause recording:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function resumeRecording() {
+  console.log('Resuming recording...');
+  
+  try {
+    if (mediaRecorder && mediaRecorder.state === 'paused') {
+      mediaRecorder.resume();
+      console.log('Recording resumed successfully');
+      return { success: true };
+    }
+    return { success: false, error: 'Not paused' };
+  } catch (error) {
+    console.error('Failed to resume recording:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 function cleanup() {
   console.log('Cleaning up audio resources...');
   
@@ -264,4 +332,4 @@ function cleanup() {
   console.log('Cleanup complete');
 }
 
-console.log('GritCall offscreen document loaded');
+console.log('Sellsig offscreen document loaded');

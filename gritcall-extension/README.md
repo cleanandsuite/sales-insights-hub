@@ -1,13 +1,14 @@
-# GritCall Audio Capture Extension
+# Sellsig Audio Capture Extension
 
-A Chrome extension that captures both microphone and tab audio for call recording in GritCall.
+A Chrome extension that captures both microphone and tab audio for call recording in Sellsig.
 
 ## Features
 
 - **Dual Audio Capture**: Records both your microphone (your voice) and the current tab's audio (the other person's voice)
 - **No Screen Share Picker**: Uses Chrome's tabCapture API for seamless audio capture
-- **Real-time Streaming**: Sends audio chunks to GritCall for live transcription
-- **Simple Controls**: Start/stop recording from the extension popup or directly from GritCall
+- **Real-time Streaming**: Sends audio chunks to Sellsig for live transcription
+- **Pause/Resume Support**: Pause and resume recording without stopping
+- **Simple Controls**: Start/stop recording from the extension popup or directly from Sellsig
 
 ## Installation
 
@@ -36,14 +37,14 @@ Or use any online SVG to PNG converter.
 
 ### From the Extension Popup
 
-1. Click the GritCall extension icon in your toolbar
+1. Click the Sellsig extension icon in your toolbar
 2. Click "Start Recording"
 3. The extension will capture audio from the current tab and your microphone
 4. Click "Stop Recording" when done
 
-### From GritCall Web App
+### From Sellsig Web App
 
-1. Navigate to GritCall (https://sales-muse-44.lovable.app or localhost)
+1. Navigate to Sellsig (https://sales-muse-44.lovable.app or localhost)
 2. The app will automatically detect the extension
 3. Use the in-app recording controls - the extension handles audio capture
 
@@ -52,7 +53,7 @@ Or use any online SVG to PNG converter.
 1. **Tab Capture**: Uses `chrome.tabCapture` API to get the current tab's audio stream
 2. **Microphone**: Uses standard `getUserMedia` to capture your microphone
 3. **Audio Mixing**: Combines both streams using Web Audio API
-4. **Streaming**: Sends audio chunks to the GritCall web app via content script messaging
+4. **Streaming**: Sends audio chunks to the Sellsig web app via content script messaging
 
 ## Permissions
 
@@ -71,7 +72,7 @@ Or use any online SVG to PNG converter.
                                │
                                ▼
                         ┌──────────────────┐     ┌─────────────────┐
-                        │   Content.js     │────▶│  GritCall App   │
+                        │   Content.js     │────▶│  Sellsig App    │
                         │    (Bridge)      │     │   (Web App)     │
                         └──────────────────┘     └─────────────────┘
 ```
@@ -87,5 +88,5 @@ Or use any online SVG to PNG converter.
 - Check Chrome's site settings for microphone access
 
 ### Extension Not Detected
-- Refresh the GritCall page
+- Refresh the Sellsig page
 - Make sure the extension is enabled in Chrome

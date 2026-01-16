@@ -1,4 +1,4 @@
-// GritCall Extension - Popup Script
+// Sellsig Extension - Popup Script
 
 document.addEventListener('DOMContentLoaded', async () => {
   const recordBtn = document.getElementById('recordBtn');
@@ -8,12 +8,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const errorDiv = document.getElementById('error');
   
   let isRecording = false;
+  let isPaused = false;
   
   // Get current status
   async function updateStatus() {
     try {
       const response = await chrome.runtime.sendMessage({ type: 'GET_STATUS' });
       isRecording = response?.isRecording ?? false;
+      isPaused = response?.isPaused ?? false;
       updateUI();
     } catch (error) {
       console.error('Failed to get status:', error);
@@ -23,11 +25,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Update UI based on recording state
   function updateUI() {
     if (isRecording) {
-      recordBtn.className = 'btn btn-danger';
-      btnText.textContent = 'Stop Recording';
-      statusDot.className = 'status-dot recording';
-      statusText.className = 'status-text recording';
-      statusText.textContent = 'Recording in progress...';
+      if (isPaused) {
+        recordBtn.className = 'btn btn-primary';
+        btnText.textContent = 'Resume Recording';
+        statusDot.className = 'status-dot paused';
+        statusText.className = 'status-text paused';
+        statusText.textContent = 'Recording paused';
+      } else {
+        recordBtn.className = 'btn btn-danger';
+        btnText.textContent = 'Stop Recording';
+        statusDot.className = 'status-dot recording';
+        statusText.className = 'status-text recording';
+        statusText.textContent = 'Recording in progress...';
+      }
     } else {
       recordBtn.className = 'btn btn-primary';
       btnText.textContent = 'Start Recording';
@@ -55,6 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (response?.success) {
           isRecording = false;
+          isPaused = false;
           updateUI();
         } else {
           showError(response?.error || 'Failed to stop recording');
@@ -76,6 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (response?.success) {
           isRecording = true;
+          isPaused = false;
           updateUI();
           
           // Show what sources are being captured
