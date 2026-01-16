@@ -8,11 +8,11 @@ After exporting to GitHub, add these to your `package.json`:
 
 ```json
 {
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:8080 && electron .\"",
     "electron:build": "npm run build && electron-builder",
     "electron:build:mac": "npm run build && electron-builder --mac",
     "electron:build:win": "npm run build && electron-builder --win",
@@ -62,13 +62,13 @@ Add these scripts to your `package.json`:
 ```json
 {
   "scripts": {
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:8080 && electron .\"",
     "electron:build": "npm run build && electron-builder",
     "electron:build:mac": "npm run build && electron-builder --mac",
     "electron:build:win": "npm run build && electron-builder --win",
     "electron:build:linux": "npm run build && electron-builder --linux"
   },
-  "main": "electron/main.js"
+  "main": "electron/main.cjs"
 }
 ```
 
@@ -93,6 +93,31 @@ npm run electron:build:linux
 ```
 
 Built apps will be in the `release/` folder.
+
+## Troubleshooting
+
+### "ReferenceError: require is not defined"
+
+This error occurs when `package.json` has `"type": "module"` but Electron files use CommonJS `require()` syntax.
+
+**Solution**: The Electron files use `.cjs` extension to force CommonJS mode:
+- `electron/main.cjs` (not `.js`)
+- `electron/preload.cjs` (not `.js`)
+
+Make sure your `package.json` has:
+```json
+"main": "electron/main.cjs"
+```
+
+### Electron doesn't open after Vite starts
+
+**Check the port**: The `wait-on` command must match Vite's port. Check your terminal output:
+- If Vite shows `http://localhost:8080/` → use port `8080` in scripts
+- If Vite shows `http://localhost:5173/` → use port `5173` in scripts
+
+Update both:
+1. `package.json` → `electron:dev` script's `wait-on` URL
+2. `electron/main.cjs` → `mainWindow.loadURL()` in development mode
 
 ## System Audio Capture
 
@@ -161,26 +186,12 @@ await refreshSources();
 await startRecording(availableSources[0].id);
 ```
 
-## Troubleshooting
-
-### No System Audio on macOS
-- Ensure Screen Recording permission is granted
-- Restart the app after granting permission
-
-### Audio Quality Issues
-- The app records at 16kHz mono (optimized for speech)
-- System audio quality depends on the source application
-
-### Build Errors
-- Ensure all platform-specific dependencies are installed
-- On macOS, you may need to run: `xcode-select --install`
-
 ## File Structure
 
 ```
 ├── electron/
-│   ├── main.js          # Electron main process
-│   └── preload.js       # Preload script (IPC bridge)
+│   ├── main.cjs          # Electron main process
+│   └── preload.cjs       # Preload script (IPC bridge)
 ├── src/
 │   ├── lib/
 │   │   └── electronAudio.ts    # Electron audio utilities
