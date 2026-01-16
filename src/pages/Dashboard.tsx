@@ -5,7 +5,7 @@ import { AILeadStatus } from '@/components/leads/AILeadStatus';
 import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
 import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
 import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
-import { ExtensionInstallBanner } from '@/components/recording/ExtensionInstallBanner';
+import { ProfileSetupBanner } from '@/components/recording/ProfileSetupBanner';
 import { Phone, Clock, ThumbsUp, Mic, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -225,8 +225,8 @@ export default function Dashboard() {
             </Button>
           </div>
 
-          {/* Extension Install Banner */}
-          <ExtensionInstallBanner variant="full" />
+          {/* Profile Setup Banner */}
+          <ProfileSetupBanner variant="full" />
 
           {/* AI Lead Status */}
           <AILeadStatus

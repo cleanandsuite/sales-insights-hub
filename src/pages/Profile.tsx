@@ -7,9 +7,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getToastErrorMessage } from '@/lib/errorSanitizer';
-import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart } from 'lucide-react';
+import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart, Chrome } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { ExtensionInstallBanner } from '@/components/recording/ExtensionInstallBanner';
 
 interface Profile {
   full_name: string | null;
@@ -423,6 +424,21 @@ export default function Profile() {
               </Select>
             </div>
           </div>
+        </div>
+
+        {/* Recording Setup Card */}
+        <div className="card-gradient rounded-xl border border-border/50 p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Chrome className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Recording Setup</h2>
+              <p className="text-sm text-muted-foreground">Install the Chrome extension to capture both sides of calls</p>
+            </div>
+          </div>
+          
+          <ExtensionInstallBanner variant="full" />
         </div>
 
         {/* Save Button */}
