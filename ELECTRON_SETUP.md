@@ -2,6 +2,32 @@
 
 This guide explains how to build and run GritCall as a desktop application with **system audio capture** (records both sides of a call).
 
+## Quick Copy: package.json Changes
+
+After exporting to GitHub, add these to your `package.json`:
+
+```json
+{
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "npm run build && electron-builder",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:win": "npm run build && electron-builder --win",
+    "electron:build:linux": "npm run build && electron-builder --linux"
+  }
+}
+```
+
+Then install dev dependencies:
+```bash
+npm install --save-dev electron electron-builder concurrently wait-on
+```
+
+---
+
 ## Prerequisites
 
 - Node.js 18+ 
