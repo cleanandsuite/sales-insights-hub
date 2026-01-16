@@ -7,10 +7,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getToastErrorMessage } from '@/lib/errorSanitizer';
-import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart, Chrome, Search, Briefcase, CheckCircle2, MapPin } from 'lucide-react';
+import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart, Monitor, Search, Briefcase, CheckCircle2, MapPin, Volume2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ExtensionInstallBanner } from '@/components/recording/ExtensionInstallBanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast as sonnerToast } from 'sonner';
 
@@ -194,16 +193,28 @@ export default function Profile() {
         const newStrengths = [...profile.company_strengths];
         const newDifferentiators = [...profile.unique_differentiators];
         
+        // Add pain points as company strengths (things you can solve)
         if (research.painPoints) {
           research.painPoints.forEach(point => {
-            if (!newDifferentiators.includes(point)) {
-              newDifferentiators.push(point);
+            if (!newStrengths.includes(point)) {
+              newStrengths.push(point);
+            }
+          });
+        }
+        
+        // Add competitors as differentiators
+        if (research.competitors) {
+          research.competitors.forEach(competitor => {
+            const diffText = `Compete against ${competitor}`;
+            if (!newDifferentiators.includes(diffText)) {
+              newDifferentiators.push(diffText);
             }
           });
         }
         
         setProfile({
           ...profile,
+          company_strengths: newStrengths,
           unique_differentiators: newDifferentiators,
         });
         
@@ -586,19 +597,54 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Recording Setup Card */}
+        {/* Screen Share Recording Instructions */}
         <div className="card-gradient rounded-xl border border-border/50 p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Chrome className="h-5 w-5 text-primary" />
+              <Monitor className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Recording Setup</h2>
-              <p className="text-sm text-muted-foreground">Install the Chrome extension to capture both sides of calls</p>
+              <h2 className="text-lg font-semibold text-foreground">Screen Recording Setup</h2>
+              <p className="text-sm text-muted-foreground">How to capture both sides of your calls</p>
             </div>
           </div>
           
-          <ExtensionInstallBanner variant="full" />
+          <div className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-4 border border-border/30">
+              <h3 className="font-medium text-foreground mb-3">When prompted to share your screen:</h3>
+              <ol className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+                  <span>Click the <strong className="text-foreground">"Entire Screen"</strong> tab at the top right of the dialog</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+                  <span>Select your screen from the options shown below</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="h-4 w-4 text-primary" />
+                    <span>Enable <strong className="text-foreground">"Also share system audio"</strong> at the bottom of the dialog</span>
+                  </div>
+                </li>
+              </ol>
+            </div>
+            
+            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+              <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+              <p>
+                <strong className="text-amber-600 dark:text-amber-400">Pro tip:</strong> This allows the app to capture both your voice and the other person's voice for accurate transcription and AI analysis.
+              </p>
+            </div>
+            
+            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+              <Monitor className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+              <p>
+                <strong className="text-blue-600 dark:text-blue-400">Note:</strong> For security reasons, browsers require you to confirm screen sharing each time you start a new recording. This is a browser security requirement and cannot be bypassed.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Save Button */}
