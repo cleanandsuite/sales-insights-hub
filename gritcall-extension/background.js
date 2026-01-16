@@ -2,10 +2,22 @@
 
 let isRecording = false;
 let offscreenDocumentCreated = false;
+let recordingTabId = null;
 
 // Create offscreen document for audio capture
 async function ensureOffscreenDocument() {
   if (offscreenDocumentCreated) return;
+  
+  // Check if document already exists
+  const existingContexts = await chrome.runtime.getContexts({
+    contextTypes: ['OFFSCREEN_DOCUMENT'],
+    documentUrls: [chrome.runtime.getURL('offscreen.html')]
+  });
+  
+  if (existingContexts.length > 0) {
+    offscreenDocumentCreated = true;
+    return;
+  }
   
   try {
     await chrome.offscreen.createDocument({
@@ -35,6 +47,7 @@ async function closeOffscreenDocument() {
     console.log('Offscreen document closed');
   } catch (error) {
     console.error('Failed to close offscreen document:', error);
+    offscreenDocumentCreated = false;
   }
 }
 
@@ -44,6 +57,8 @@ async function getTabCaptureStreamId(tabId) {
     chrome.tabCapture.getMediaStreamId({ targetTabId: tabId }, (streamId) => {
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
+      } else if (!streamId) {
+        reject(new Error('Failed to get stream ID'));
       } else {
         resolve(streamId);
       }
@@ -51,12 +66,28 @@ async function getTabCaptureStreamId(tabId) {
   });
 }
 
-// Handle messages from content script and popup
+// Handle messages from content script, popup, and offscreen document
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Background received message:', message.type);
+  console.log('Background received message:', message.type, 'from:', sender.url || 'unknown');
   
   if (message.type === 'START_RECORDING') {
-    handleStartRecording(sender.tab?.id || message.tabId)
+    // Get the tab ID from sender or active tab
+    const getTabId = async () => {
+      if (sender.tab?.id) {
+        return sender.tab.id;
+      }
+      // Get active tab
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      return activeTab?.id;
+    };
+    
+    getTabId()
+      .then(tabId => {
+        if (!tabId) {
+          throw new Error('Could not determine tab ID');
+        }
+        return handleStartRecording(tabId);
+      })
       .then((result) => sendResponse(result))
       .catch((error) => sendResponse({ success: false, error: error.message }));
     return true; // Keep channel open for async response
@@ -74,9 +105,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return false;
   }
   
+  // Messages from offscreen document
   if (message.type === 'AUDIO_CHUNK') {
-    // Forward audio chunk to content script
+    // Forward audio chunk to content script in the recording tab
     forwardToContentScript(message);
+    return false;
+  }
+  
+  if (message.type === 'RECORDING_ERROR') {
+    console.error('Recording error from offscreen:', message.error);
+    isRecording = false;
+    broadcastToTabs({ type: 'RECORDING_ERROR', error: message.error });
+    return false;
+  }
+  
+  if (message.type === 'OFFSCREEN_RECORDING_RESULT') {
+    // Response from offscreen document about recording start
+    console.log('Offscreen recording result:', message);
     return false;
   }
   
@@ -91,57 +136,120 @@ async function handleStartRecording(tabId) {
     return { success: false, error: 'Already recording' };
   }
   
+  console.log('Starting recording for tab:', tabId);
+  recordingTabId = tabId;
+  
   try {
     // Ensure offscreen document exists
     await ensureOffscreenDocument();
     
+    // Small delay to ensure offscreen document is ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     // Get the tab capture stream ID
-    const streamId = await getTabCaptureStreamId(tabId);
-    console.log('Got stream ID for tab:', tabId);
-    
-    // Send to offscreen document to start recording
-    const response = await chrome.runtime.sendMessage({
-      type: 'OFFSCREEN_START_RECORDING',
-      streamId: streamId,
-      tabId: tabId
-    });
-    
-    if (response?.success) {
-      isRecording = true;
-      // Notify all tabs that recording has started
-      broadcastToTabs({ type: 'RECORDING_STARTED' });
+    let streamId;
+    try {
+      streamId = await getTabCaptureStreamId(tabId);
+      console.log('Got stream ID for tab:', tabId, streamId ? 'success' : 'failed');
+    } catch (streamError) {
+      console.error('Failed to get tab capture stream:', streamError);
+      // Continue without tab audio - we'll still capture microphone
+      streamId = null;
     }
     
-    return response || { success: false, error: 'No response from offscreen' };
+    // Send message to offscreen document to start recording
+    // Using chrome.runtime.sendMessage since offscreen is part of the extension
+    return new Promise((resolve) => {
+      const messageHandler = (response, responseSender) => {
+        if (response?.type === 'OFFSCREEN_RECORDING_STARTED') {
+          chrome.runtime.onMessage.removeListener(messageHandler);
+          
+          if (response.success) {
+            isRecording = true;
+            // Notify all tabs that recording has started
+            broadcastToTabs({ 
+              type: 'RECORDING_STARTED',
+              hasTabAudio: response.hasTabAudio,
+              hasMicAudio: response.hasMicAudio
+            });
+          }
+          
+          resolve({
+            success: response.success,
+            error: response.error,
+            hasTabAudio: response.hasTabAudio,
+            hasMicAudio: response.hasMicAudio
+          });
+        }
+      };
+      
+      chrome.runtime.onMessage.addListener(messageHandler);
+      
+      // Send to offscreen document
+      chrome.runtime.sendMessage({
+        type: 'OFFSCREEN_START_RECORDING',
+        streamId: streamId,
+        tabId: tabId
+      });
+      
+      // Timeout after 15 seconds
+      setTimeout(() => {
+        chrome.runtime.onMessage.removeListener(messageHandler);
+        resolve({ success: false, error: 'Timeout waiting for recording to start' });
+      }, 15000);
+    });
   } catch (error) {
     console.error('Failed to start recording:', error);
+    recordingTabId = null;
     return { success: false, error: error.message };
   }
 }
 
 async function handleStopRecording() {
   if (!isRecording) {
-    return { success: false, error: 'Not recording' };
+    return { success: true }; // Already stopped
   }
   
+  console.log('Stopping recording');
+  
   try {
-    // Tell offscreen document to stop
-    const response = await chrome.runtime.sendMessage({
-      type: 'OFFSCREEN_STOP_RECORDING'
+    return new Promise((resolve) => {
+      const messageHandler = (response) => {
+        if (response?.type === 'OFFSCREEN_RECORDING_STOPPED') {
+          chrome.runtime.onMessage.removeListener(messageHandler);
+          
+          isRecording = false;
+          recordingTabId = null;
+          
+          // Notify all tabs that recording has stopped
+          broadcastToTabs({ type: 'RECORDING_STOPPED' });
+          
+          // Close offscreen document after a delay
+          setTimeout(() => closeOffscreenDocument(), 1000);
+          
+          resolve({ success: response.success, error: response.error });
+        }
+      };
+      
+      chrome.runtime.onMessage.addListener(messageHandler);
+      
+      // Tell offscreen document to stop
+      chrome.runtime.sendMessage({
+        type: 'OFFSCREEN_STOP_RECORDING'
+      });
+      
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        chrome.runtime.onMessage.removeListener(messageHandler);
+        isRecording = false;
+        recordingTabId = null;
+        resolve({ success: true });
+      }, 10000);
     });
-    
-    isRecording = false;
-    
-    // Notify all tabs that recording has stopped
-    broadcastToTabs({ type: 'RECORDING_STOPPED' });
-    
-    // Close offscreen document after a delay
-    setTimeout(() => closeOffscreenDocument(), 1000);
-    
-    return response || { success: true };
   } catch (error) {
     console.error('Failed to stop recording:', error);
     isRecording = false;
+    recordingTabId = null;
     return { success: false, error: error.message };
   }
 }
