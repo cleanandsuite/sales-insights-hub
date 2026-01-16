@@ -3048,6 +3048,10 @@ export type Database = {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
+      is_team_manager_of_lead_owner: {
+        Args: { _lead_owner_id: string; _manager_user_id: string }
+        Returns: boolean
+      }
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
