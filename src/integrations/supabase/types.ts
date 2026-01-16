@@ -1749,6 +1749,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           personal_tone: string | null
+          position: string | null
           role: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -1767,6 +1768,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           personal_tone?: string | null
+          position?: string | null
           role?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -1785,6 +1787,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           personal_tone?: string | null
+          position?: string | null
           role?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null

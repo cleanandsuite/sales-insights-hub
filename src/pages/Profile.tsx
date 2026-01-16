@@ -7,14 +7,30 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getToastErrorMessage } from '@/lib/errorSanitizer';
-import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart, Chrome } from 'lucide-react';
+import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart, Chrome, Search, Briefcase, CheckCircle2, MapPin } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ExtensionInstallBanner } from '@/components/recording/ExtensionInstallBanner';
+import { Card, CardContent } from '@/components/ui/card';
+import { toast as sonnerToast } from 'sonner';
+
+interface CompanyResearchData {
+  name: string;
+  description?: string;
+  industry?: string;
+  size?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  website?: string;
+  painPoints?: string[];
+  competitors?: string[];
+}
 
 interface Profile {
   full_name: string | null;
   company: string | null;
+  position: string | null;
   avatar_url: string | null;
   company_strengths: string[];
   unique_differentiators: string[];
@@ -33,8 +49,8 @@ const COMMON_STRENGTHS = [
 
 const TONE_OPTIONS = [
   { value: 'Neutral', label: 'Neutral', description: 'Balanced, professional approach' },
-  { value: 'High-Energy (Cardone)', label: 'High-Energy (Cardone)', description: 'Aggressive, action-oriented style' },
-  { value: 'Smooth Persuasion (Belfort)', label: 'Smooth Persuasion (Belfort)', description: 'Charismatic, relationship-focused' },
+  { value: '10X Sales Strat', label: '10X Sales Strat', description: 'Aggressive, action-oriented style' },
+  { value: 'Straight Line Method', label: 'Straight Line Method', description: 'Charismatic, relationship-focused' },
 ];
 
 export default function Profile() {
@@ -44,9 +60,12 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [newStrength, setNewStrength] = useState('');
   const [newDifferentiator, setNewDifferentiator] = useState('');
+  const [companyResearch, setCompanyResearch] = useState<CompanyResearchData | null>(null);
+  const [isResearchingCompany, setIsResearchingCompany] = useState(false);
   const [profile, setProfile] = useState<Profile>({
     full_name: '',
     company: '',
+    position: '',
     avatar_url: '',
     company_strengths: [],
     unique_differentiators: [],
@@ -61,7 +80,7 @@ export default function Profile() {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, company, avatar_url, company_strengths, unique_differentiators, personal_tone')
+        .select('full_name, company, position, avatar_url, company_strengths, unique_differentiators, personal_tone')
         .eq('user_id', user.id)
         .single();
 
@@ -69,6 +88,7 @@ export default function Profile() {
         setProfile({
           full_name: data.full_name || '',
           company: data.company || '',
+          position: data.position || '',
           avatar_url: data.avatar_url || '',
           company_strengths: (data.company_strengths as string[]) || [],
           unique_differentiators: (data.unique_differentiators as string[]) || [],
@@ -90,6 +110,7 @@ export default function Profile() {
       .update({
         full_name: profile.full_name,
         company: profile.company,
+        position: profile.position,
         company_strengths: profile.company_strengths,
         unique_differentiators: profile.unique_differentiators,
         personal_tone: profile.personal_tone,
@@ -141,6 +162,59 @@ export default function Profile() {
       ...profile,
       unique_differentiators: profile.unique_differentiators.filter((d) => d !== diff),
     });
+  };
+
+  const handleResearchCompany = async () => {
+    if (!profile.company?.trim()) {
+      sonnerToast.error('Please enter a company name first');
+      return;
+    }
+
+    setIsResearchingCompany(true);
+    setCompanyResearch(null);
+
+    try {
+      const response = await supabase.functions.invoke('company-lookup', {
+        body: { companyName: profile.company.trim(), confirmed: true }
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      const data = response.data;
+
+      if (data.status === 'not_found') {
+        sonnerToast.info('Company not found. Enter details manually.');
+      } else if (data.status === 'found') {
+        const research = data.research as CompanyResearchData;
+        setCompanyResearch(research);
+        
+        // Auto-populate strengths and differentiators from research
+        const newStrengths = [...profile.company_strengths];
+        const newDifferentiators = [...profile.unique_differentiators];
+        
+        if (research.painPoints) {
+          research.painPoints.forEach(point => {
+            if (!newDifferentiators.includes(point)) {
+              newDifferentiators.push(point);
+            }
+          });
+        }
+        
+        setProfile({
+          ...profile,
+          unique_differentiators: newDifferentiators,
+        });
+        
+        sonnerToast.success(`Found ${research.name}! Insights added to your profile.`);
+      }
+    } catch (error) {
+      console.error('Company lookup error:', error);
+      sonnerToast.error('Failed to research company. Enter details manually.');
+    } finally {
+      setIsResearchingCompany(false);
+    }
   };
 
   if (loading) {
@@ -234,18 +308,104 @@ export default function Profile() {
               <Label htmlFor="company" className="text-foreground">
                 Company Name
               </Label>
-              <div className="relative">
-                <Building className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="company"
-                  value={profile.company || ''}
-                  onChange={(e) =>
-                    setProfile({ ...profile, company: e.target.value })
-                  }
-                  className="pl-10 bg-input border-border focus:border-primary"
-                  placeholder="Enter your company name"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Building className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="company"
+                    value={profile.company || ''}
+                    onChange={(e) => {
+                      setProfile({ ...profile, company: e.target.value });
+                      setCompanyResearch(null);
+                    }}
+                    className="pl-10 bg-input border-border focus:border-primary"
+                    placeholder="Enter your company name"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResearchCompany}
+                  disabled={isResearchingCompany || !profile.company?.trim()}
+                  className="gap-2"
+                >
+                  {isResearchingCompany ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                  {isResearchingCompany ? 'Researching...' : 'Research'}
+                </Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Click "Research" to auto-fill company insights for better scripts
+              </p>
+            </div>
+
+            {/* Company Research Results */}
+            {companyResearch && (
+              <Card className="border-green-500/30 bg-green-500/5">
+                <CardContent className="py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                          Research Complete: {companyResearch.name}
+                        </p>
+                        {companyResearch.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {companyResearch.description}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {companyResearch.industry && (
+                            <Badge variant="secondary" className="text-xs">{companyResearch.industry}</Badge>
+                          )}
+                          {companyResearch.size && (
+                            <Badge variant="secondary" className="text-xs">{companyResearch.size}</Badge>
+                          )}
+                          {companyResearch.city && companyResearch.state && (
+                            <Badge variant="secondary" className="text-xs">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              {companyResearch.city}, {companyResearch.state}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setCompanyResearch(null)}
+                      className="text-xs"
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Position Field */}
+            <div className="space-y-2">
+              <Label htmlFor="position" className="text-foreground flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                Position
+                <Badge variant="outline" className="text-xs font-normal">Optional</Badge>
+              </Label>
+              <Input
+                id="position"
+                value={profile.position || ''}
+                onChange={(e) =>
+                  setProfile({ ...profile, position: e.target.value })
+                }
+                className="bg-input border-border focus:border-primary"
+                placeholder="Sales Representative (default)"
+              />
+              <p className="text-xs text-muted-foreground">
+                Your position affects how call scripts are tailored for your role
+              </p>
             </div>
           </div>
         </div>
