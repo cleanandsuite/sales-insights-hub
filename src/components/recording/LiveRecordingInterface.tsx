@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, Square, X, Headphones, Mic, Settings2, Plug, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Pause, Play, Square, X, Headphones, Mic, Settings2 } from 'lucide-react';
 import { useMp3Recorder } from '@/hooks/useMp3Recorder';
-import { useExtensionAudio } from '@/hooks/useExtensionAudio';
 import { AudioWaveform } from './AudioWaveform';
 import { RecordingTimer } from './RecordingTimer';
 import { TranscriptionPanel } from './TranscriptionPanel';
@@ -11,7 +10,6 @@ import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
 import { LiveCoachingSidebar } from './LiveCoachingSidebar';
 import { RecordingNameDialog } from './RecordingNameDialog';
 import { AudioSourceSelector } from './AudioSourceSelector';
-import { ExtensionInstallBanner } from './ExtensionInstallBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -52,34 +50,8 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     refreshSources
   } = useMp3Recorder();
 
-  // Extension audio hook for Chrome extension support
-  const {
-    extensionInstalled,
-    isRecording: extensionRecording,
-    isPaused: extensionPaused,
-    hasTabAudio,
-    hasMicAudio,
-    startRecording: startExtensionRecording,
-    stopRecording: stopExtensionRecording,
-    pauseRecording: pauseExtensionRecording,
-    resumeRecording: resumeExtensionRecording,
-    onAudioChunk,
-    error: extensionError,
-  } = useExtensionAudio();
-
   const [selectedSourceId, setSelectedSourceId] = useState<string | undefined>(undefined);
-  const [showExtensionBanner, setShowExtensionBanner] = useState(true);
-  const [useExtension, setUseExtension] = useState(false);
-  const extensionChunksRef = useRef<Blob[]>([]);
-  const extensionInstalledRef = useRef(extensionInstalled);
   const initStartedRef = useRef(false);
-
-  const effectiveIsRecording = useExtension ? extensionRecording : isRecording;
-  const effectiveIsPaused = useExtension ? extensionPaused : isPaused;
-
-  useEffect(() => {
-    extensionInstalledRef.current = extensionInstalled;
-  }, [extensionInstalled]);
 
   const [transcription, setTranscription] = useState('');
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
@@ -102,72 +74,12 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
   const lastProcessedChunkRef = useRef<number>(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Handle extension audio chunks
-  useEffect(() => {
-    if (useExtension && extensionInstalled) {
-      onAudioChunk((chunk) => {
-        // Convert base64 to blob
-        const binaryString = atob(chunk.data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const blob = new Blob([bytes], { type: chunk.mimeType });
-        extensionChunksRef.current.push(blob);
-      });
-    }
-  }, [useExtension, extensionInstalled, onAudioChunk]);
-
   // Start recording immediately when component mounts
   useEffect(() => {
     if (initStartedRef.current) return;
     initStartedRef.current = true;
 
-    const waitForExtensionInstalled = (timeoutMs: number) => {
-      if (extensionInstalledRef.current) return Promise.resolve(true);
-
-      return new Promise<boolean>((resolve) => {
-        const handleMessage = (event: MessageEvent) => {
-          if (event.source !== window) return;
-
-          const type = event.data?.type;
-          if (type === 'GRITCALL_PONG' || type === 'GRITCALL_EXTENSION_READY') {
-            window.removeEventListener('message', handleMessage);
-            clearTimeout(timeoutId);
-            resolve(true);
-          }
-        };
-
-        const timeoutId = window.setTimeout(() => {
-          window.removeEventListener('message', handleMessage);
-          resolve(extensionInstalledRef.current);
-        }, timeoutMs);
-
-        window.addEventListener('message', handleMessage);
-        window.postMessage({ type: 'GRITCALL_PING' }, '*');
-      });
-    };
-
     const initRecording = async () => {
-      // Try extension first if installed (browser only)
-      const shouldTryExtension =
-        !isElectronEnvironment &&
-        (extensionInstalledRef.current || (await waitForExtensionInstalled(1500)));
-
-      if (shouldTryExtension) {
-        console.log('Using Chrome extension for audio capture');
-        setUseExtension(true);
-        const success = await startExtensionRecording();
-        if (success) {
-          setShowExtensionBanner(false);
-          return;
-        }
-        // Fall back to regular recording if extension fails
-        console.warn('Extension recording failed, falling back to standard');
-        setUseExtension(false);
-      }
-
-      // Standard recording (Electron or browser fallback)
       try {
         await startRecording(selectedSourceId);
       } catch (error) {
@@ -177,7 +89,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
           title: 'Recording Access Required',
           description: isElectronEnvironment
             ? 'Please allow microphone access to record.'
-            : 'Please allow microphone access to record. Install the Chrome extension to capture both sides of the call.',
+            : 'Please allow microphone and screen share access to record both sides of the call.',
         });
         onClose();
       }
@@ -193,7 +105,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         clearTimeout(retryTimeoutRef.current);
       }
     };
-  }, [isElectronEnvironment, onClose, selectedSourceId, startExtensionRecording, startRecording, toast]);
+  }, [isElectronEnvironment, onClose, selectedSourceId, startRecording, toast]);
 
 
   // Countdown timer for rate limiting
@@ -346,7 +258,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     
     try {
       // Check if we have an active recording first
-      const hasActiveRecording = isRecording || isPaused || (useExtension && extensionRecording);
+      const hasActiveRecording = isRecording || isPaused;
       if (!hasActiveRecording) {
         toast({
           variant: 'destructive',
@@ -356,20 +268,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         return;
       }
 
-      let audioBlob: Blob | null = null;
-
-      if (useExtension) {
-        // Stop extension recording
-        await stopExtensionRecording();
-        
-        // Combine extension chunks
-        if (extensionChunksRef.current.length > 0) {
-          audioBlob = new Blob(extensionChunksRef.current, { type: 'audio/webm;codecs=opus' });
-          extensionChunksRef.current = [];
-        }
-      } else {
-        audioBlob = await stopRecording();
-      }
+      const audioBlob = await stopRecording();
       
       if (!audioBlob) {
         toast({
@@ -664,42 +563,18 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
             
             {/* Audio capture mode indicator */}
             <div className="flex items-center gap-2 text-sm">
-              {useExtension && extensionInstalled ? (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success rounded-full border border-success/20">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>
-                    {hasTabAudio && hasMicAudio 
-                      ? 'Sellsig extension connected — capturing tab + mic audio' 
-                      : hasTabAudio 
-                        ? 'Sellsig extension connected — capturing tab audio'
-                        : hasMicAudio
-                          ? 'Sellsig extension connected — capturing mic audio'
-                          : 'Sellsig extension connected'}
-                  </span>
-                </div>
-              ) : isSystemAudioCapture ? (
+              {isSystemAudioCapture ? (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full border border-primary/20">
                   <Headphones className="h-4 w-4" />
-                  <span>Recording both sides (mic + system audio)</span>
+                  <span>Recording both sides (mic + screen audio)</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full border border-border">
                   <Mic className="h-4 w-4" />
-                  <span>
-                    {isElectronEnvironment
-                      ? 'Microphone only'
-                      : 'Microphone only — install Sellsig extension for full call capture'}
-                  </span>
+                  <span>Microphone only</span>
                 </div>
               )}
             </div>
-            
-            {/* Extension install banner for browsers */}
-            {!isElectronEnvironment && !extensionInstalled && showExtensionBanner && !isRecording && (
-              <div className="w-full max-w-xl">
-                <ExtensionInstallBanner onDismiss={() => setShowExtensionBanner(false)} />
-              </div>
-            )}
 
             {/* Controls */}
             <div className="flex items-center gap-4">
