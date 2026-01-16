@@ -10,12 +10,16 @@ interface ProfileSetupBannerProps {
   onDismiss?: () => void;
 }
 
+const BANNER_DISMISSED_KEY = 'gritcall_profile_banner_dismissed';
+
 export function ProfileSetupBanner({ variant = 'full', onDismiss }: ProfileSetupBannerProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isComplete, setIsComplete] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    return localStorage.getItem(BANNER_DISMISSED_KEY) === 'true';
+  });
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -52,6 +56,7 @@ export function ProfileSetupBanner({ variant = 'full', onDismiss }: ProfileSetup
   }
 
   const handleDismiss = () => {
+    localStorage.setItem(BANNER_DISMISSED_KEY, 'true');
     setDismissed(true);
     onDismiss?.();
   };
