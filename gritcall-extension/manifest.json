@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "GritCall Audio Capture",
+  "name": "Sellsig Audio Capture",
   "version": "1.0.0",
-  "description": "Capture both microphone and tab audio for GritCall call recording",
+  "description": "Capture both microphone and tab audio for Sellsig call recording",
   "permissions": [
     "tabCapture",
     "offscreen",

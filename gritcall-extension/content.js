@@ -1,4 +1,4 @@
-// GritCall Extension - Content Script (Bridge between extension and web app)
+// Sellsig Extension - Content Script (Bridge between extension and web app)
 
 (function() {
   'use strict';
@@ -9,11 +9,11 @@
   function announceExtension() {
     extensionReady = true;
     window.postMessage({
-      type: 'GRITCALL_EXTENSION_READY',
+      type: 'SELLSIG_EXTENSION_READY',
       version: '1.0.0',
       extensionInstalled: true
     }, '*');
-    console.log('GritCall: Extension announced to web app');
+    console.log('Sellsig: Extension announced to web app');
   }
   
   // Listen for messages from the web app
@@ -23,36 +23,36 @@
     
     const message = event.data;
     
-    if (message.type === 'GRITCALL_PING') {
+    if (message.type === 'SELLSIG_PING') {
       // Respond to ping from web app
-      console.log('GritCall: Received PING from web app');
+      console.log('Sellsig: Received PING from web app');
       window.postMessage({
-        type: 'GRITCALL_PONG',
+        type: 'SELLSIG_PONG',
         extensionInstalled: true
       }, '*');
       return;
     }
     
-    if (message.type === 'GRITCALL_START_RECORDING') {
-      console.log('GritCall: Starting recording...');
+    if (message.type === 'SELLSIG_START_RECORDING') {
+      console.log('Sellsig: Starting recording...');
       try {
         const response = await chrome.runtime.sendMessage({
           type: 'START_RECORDING'
         });
         
-        console.log('GritCall: Recording start response:', response);
+        console.log('Sellsig: Recording start response:', response);
         
         window.postMessage({
-          type: 'GRITCALL_RECORDING_STARTED',
+          type: 'SELLSIG_RECORDING_STARTED',
           success: response?.success ?? false,
           error: response?.error,
           hasTabAudio: response?.hasTabAudio ?? false,
           hasMicAudio: response?.hasMicAudio ?? false
         }, '*');
       } catch (error) {
-        console.error('GritCall: Error starting recording:', error);
+        console.error('Sellsig: Error starting recording:', error);
         window.postMessage({
-          type: 'GRITCALL_RECORDING_STARTED',
+          type: 'SELLSIG_RECORDING_STARTED',
           success: false,
           error: error.message
         }, '*');
@@ -60,24 +60,24 @@
       return;
     }
     
-    if (message.type === 'GRITCALL_STOP_RECORDING') {
-      console.log('GritCall: Stopping recording...');
+    if (message.type === 'SELLSIG_STOP_RECORDING') {
+      console.log('Sellsig: Stopping recording...');
       try {
         const response = await chrome.runtime.sendMessage({
           type: 'STOP_RECORDING'
         });
         
-        console.log('GritCall: Recording stop response:', response);
+        console.log('Sellsig: Recording stop response:', response);
         
         window.postMessage({
-          type: 'GRITCALL_RECORDING_STOPPED',
+          type: 'SELLSIG_RECORDING_STOPPED',
           success: response?.success ?? false,
           error: response?.error
         }, '*');
       } catch (error) {
-        console.error('GritCall: Error stopping recording:', error);
+        console.error('Sellsig: Error stopping recording:', error);
         window.postMessage({
-          type: 'GRITCALL_RECORDING_STOPPED',
+          type: 'SELLSIG_RECORDING_STOPPED',
           success: false,
           error: error.message
         }, '*');
@@ -85,21 +85,73 @@
       return;
     }
     
-    if (message.type === 'GRITCALL_GET_STATUS') {
+    if (message.type === 'SELLSIG_PAUSE_RECORDING') {
+      console.log('Sellsig: Pausing recording...');
+      try {
+        const response = await chrome.runtime.sendMessage({
+          type: 'PAUSE_RECORDING'
+        });
+        
+        console.log('Sellsig: Recording pause response:', response);
+        
+        window.postMessage({
+          type: 'SELLSIG_RECORDING_PAUSED',
+          success: response?.success ?? false,
+          error: response?.error
+        }, '*');
+      } catch (error) {
+        console.error('Sellsig: Error pausing recording:', error);
+        window.postMessage({
+          type: 'SELLSIG_RECORDING_PAUSED',
+          success: false,
+          error: error.message
+        }, '*');
+      }
+      return;
+    }
+    
+    if (message.type === 'SELLSIG_RESUME_RECORDING') {
+      console.log('Sellsig: Resuming recording...');
+      try {
+        const response = await chrome.runtime.sendMessage({
+          type: 'RESUME_RECORDING'
+        });
+        
+        console.log('Sellsig: Recording resume response:', response);
+        
+        window.postMessage({
+          type: 'SELLSIG_RECORDING_RESUMED',
+          success: response?.success ?? false,
+          error: response?.error
+        }, '*');
+      } catch (error) {
+        console.error('Sellsig: Error resuming recording:', error);
+        window.postMessage({
+          type: 'SELLSIG_RECORDING_RESUMED',
+          success: false,
+          error: error.message
+        }, '*');
+      }
+      return;
+    }
+    
+    if (message.type === 'SELLSIG_GET_STATUS') {
       try {
         const response = await chrome.runtime.sendMessage({
           type: 'GET_STATUS'
         });
         
         window.postMessage({
-          type: 'GRITCALL_STATUS',
+          type: 'SELLSIG_STATUS',
           isRecording: response?.isRecording ?? false,
+          isPaused: response?.isPaused ?? false,
           extensionInstalled: true
         }, '*');
       } catch (error) {
         window.postMessage({
-          type: 'GRITCALL_STATUS',
+          type: 'SELLSIG_STATUS',
           isRecording: false,
+          isPaused: false,
           extensionInstalled: true,
           error: error.message
         }, '*');
@@ -110,12 +162,12 @@
   
   // Listen for messages from background script
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log('GritCall: Received from background:', message.type);
+    console.log('Sellsig: Received from background:', message.type);
     
     // Forward audio chunks to web app
     if (message.type === 'AUDIO_CHUNK') {
       window.postMessage({
-        type: 'GRITCALL_AUDIO_CHUNK',
+        type: 'SELLSIG_AUDIO_CHUNK',
         data: message.data,
         mimeType: message.mimeType,
         timestamp: message.timestamp
@@ -125,7 +177,7 @@
     
     if (message.type === 'RECORDING_STARTED') {
       window.postMessage({
-        type: 'GRITCALL_EXTENSION_RECORDING_STARTED',
+        type: 'SELLSIG_EXTENSION_RECORDING_STARTED',
         hasTabAudio: message.hasTabAudio,
         hasMicAudio: message.hasMicAudio
       }, '*');
@@ -134,14 +186,28 @@
     
     if (message.type === 'RECORDING_STOPPED') {
       window.postMessage({
-        type: 'GRITCALL_EXTENSION_RECORDING_STOPPED'
+        type: 'SELLSIG_EXTENSION_RECORDING_STOPPED'
+      }, '*');
+      return;
+    }
+    
+    if (message.type === 'RECORDING_PAUSED') {
+      window.postMessage({
+        type: 'SELLSIG_EXTENSION_RECORDING_PAUSED'
+      }, '*');
+      return;
+    }
+    
+    if (message.type === 'RECORDING_RESUMED') {
+      window.postMessage({
+        type: 'SELLSIG_EXTENSION_RECORDING_RESUMED'
       }, '*');
       return;
     }
     
     if (message.type === 'RECORDING_ERROR') {
       window.postMessage({
-        type: 'GRITCALL_RECORDING_ERROR',
+        type: 'SELLSIG_RECORDING_ERROR',
         error: message.error
       }, '*');
       return;
@@ -161,5 +227,5 @@
   setTimeout(announceExtension, 3000);
   setTimeout(announceExtension, 5000);
   
-  console.log('GritCall content script loaded');
+  console.log('Sellsig content script loaded');
 })();

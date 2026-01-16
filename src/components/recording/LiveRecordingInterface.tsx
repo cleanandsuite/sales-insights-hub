@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, Square, X, Headphones, Mic, Settings2, Chrome } from 'lucide-react';
+import { Pause, Play, Square, X, Headphones, Mic, Settings2, Plug, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useMp3Recorder } from '@/hooks/useMp3Recorder';
 import { useExtensionAudio } from '@/hooks/useExtensionAudio';
 import { AudioWaveform } from './AudioWaveform';
@@ -56,10 +56,13 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
   const {
     extensionInstalled,
     isRecording: extensionRecording,
+    isPaused: extensionPaused,
     hasTabAudio,
     hasMicAudio,
     startRecording: startExtensionRecording,
     stopRecording: stopExtensionRecording,
+    pauseRecording: pauseExtensionRecording,
+    resumeRecording: resumeExtensionRecording,
     onAudioChunk,
     error: extensionError,
   } = useExtensionAudio();
@@ -72,7 +75,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
   const initStartedRef = useRef(false);
 
   const effectiveIsRecording = useExtension ? extensionRecording : isRecording;
-  const effectiveIsPaused = useExtension ? false : isPaused;
+  const effectiveIsPaused = useExtension ? extensionPaused : isPaused;
 
   useEffect(() => {
     extensionInstalledRef.current = extensionInstalled;
@@ -661,17 +664,23 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
             
             {/* Audio capture mode indicator */}
             <div className="flex items-center gap-2 text-sm">
-              {(useExtension && hasTabAudio && hasMicAudio) || isSystemAudioCapture ? (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full border border-primary/20">
-                  <Headphones className="h-4 w-4" />
+              {useExtension && extensionInstalled ? (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success rounded-full border border-success/20">
+                  <CheckCircle2 className="h-4 w-4" />
                   <span>
-                    {useExtension ? 'Recording both sides (extension)' : 'Recording both sides (mic + system audio)'}
+                    {hasTabAudio && hasMicAudio 
+                      ? 'Sellsig extension connected — capturing tab + mic audio' 
+                      : hasTabAudio 
+                        ? 'Sellsig extension connected — capturing tab audio'
+                        : hasMicAudio
+                          ? 'Sellsig extension connected — capturing mic audio'
+                          : 'Sellsig extension connected'}
                   </span>
                 </div>
-              ) : useExtension ? (
+              ) : isSystemAudioCapture ? (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full border border-primary/20">
-                  <Chrome className="h-4 w-4" />
-                  <span>Recording via extension</span>
+                  <Headphones className="h-4 w-4" />
+                  <span>Recording both sides (mic + system audio)</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-muted text-muted-foreground rounded-full border border-border">
@@ -679,7 +688,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
                   <span>
                     {isElectronEnvironment
                       ? 'Microphone only'
-                      : 'Microphone only - install extension for full call capture'}
+                      : 'Microphone only — install Sellsig extension for full call capture'}
                   </span>
                 </div>
               )}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GritCall Audio Capture</title>
+  <title>Sellsig Audio Capture</title>
   <style>
     * {
       margin: 0;
@@ -69,6 +69,10 @@
       animation: pulse 1.5s infinite;
     }
     
+    .status-dot.paused {
+      background: #f59e0b;
+    }
+    
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
@@ -81,6 +85,10 @@
     
     .status-text.recording {
       color: #ef4444;
+    }
+    
+    .status-text.paused {
+      color: #f59e0b;
     }
     
     .btn {
@@ -156,7 +164,7 @@
         <line x1="8" y1="23" x2="16" y2="23"/>
       </svg>
     </div>
-    <h1>GritCall Audio</h1>
+    <h1>Sellsig Audio</h1>
   </div>
   
   <div class="status" id="status">
