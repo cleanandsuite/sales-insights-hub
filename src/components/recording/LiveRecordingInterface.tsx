@@ -68,6 +68,16 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
   const [showExtensionBanner, setShowExtensionBanner] = useState(true);
   const [useExtension, setUseExtension] = useState(false);
   const extensionChunksRef = useRef<Blob[]>([]);
+  const extensionInstalledRef = useRef(extensionInstalled);
+  const initStartedRef = useRef(false);
+
+  const effectiveIsRecording = useExtension ? extensionRecording : isRecording;
+  const effectiveIsPaused = useExtension ? false : isPaused;
+
+  useEffect(() => {
+    extensionInstalledRef.current = extensionInstalled;
+  }, [extensionInstalled]);
+
   const [transcription, setTranscription] = useState('');
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [sentiment, setSentiment] = useState<'positive' | 'neutral' | 'negative'>('neutral');
@@ -84,7 +94,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     fileName: string;
     defaultName: string;
   } | null>(null);
-  
+
   const transcriptionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastProcessedChunkRef = useRef<number>(0);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -107,9 +117,41 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
   // Start recording immediately when component mounts
   useEffect(() => {
+    if (initStartedRef.current) return;
+    initStartedRef.current = true;
+
+    const waitForExtensionInstalled = (timeoutMs: number) => {
+      if (extensionInstalledRef.current) return Promise.resolve(true);
+
+      return new Promise<boolean>((resolve) => {
+        const handleMessage = (event: MessageEvent) => {
+          if (event.source !== window) return;
+
+          const type = event.data?.type;
+          if (type === 'GRITCALL_PONG' || type === 'GRITCALL_EXTENSION_READY') {
+            window.removeEventListener('message', handleMessage);
+            clearTimeout(timeoutId);
+            resolve(true);
+          }
+        };
+
+        const timeoutId = window.setTimeout(() => {
+          window.removeEventListener('message', handleMessage);
+          resolve(extensionInstalledRef.current);
+        }, timeoutMs);
+
+        window.addEventListener('message', handleMessage);
+        window.postMessage({ type: 'GRITCALL_PING' }, '*');
+      });
+    };
+
     const initRecording = async () => {
       // Try extension first if installed (browser only)
-      if (extensionInstalled && !isElectronEnvironment) {
+      const shouldTryExtension =
+        !isElectronEnvironment &&
+        (extensionInstalledRef.current || (await waitForExtensionInstalled(1500)));
+
+      if (shouldTryExtension) {
         console.log('Using Chrome extension for audio capture');
         setUseExtension(true);
         const success = await startExtensionRecording();
@@ -130,9 +172,9 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         toast({
           variant: 'destructive',
           title: 'Recording Access Required',
-          description: isElectronEnvironment 
+          description: isElectronEnvironment
             ? 'Please allow microphone access to record.'
-            : 'Please allow microphone access to record. Install the Chrome extension to capture both sides of the call.'
+            : 'Please allow microphone access to record. Install the Chrome extension to capture both sides of the call.',
         });
         onClose();
       }
@@ -148,7 +190,8 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
         clearTimeout(retryTimeoutRef.current);
       }
     };
-  }, []);
+  }, [isElectronEnvironment, onClose, selectedSourceId, startExtensionRecording, startRecording, toast]);
+
 
   // Countdown timer for rate limiting
   useEffect(() => {
