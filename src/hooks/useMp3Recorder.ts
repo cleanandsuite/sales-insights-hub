@@ -98,13 +98,67 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
           console.log('ELECTRON FALLBACK: Using microphone only');
         }
       } else {
-        // Browser: Microphone only (extension handles dual capture separately)
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: AUDIO_CONSTRAINTS
-        });
-        setRecordingMethod('webm-opus');
-        setIsSystemAudioCapture(false);
-        console.log('BROWSER: Microphone only recording');
+        // Browser: Try to capture screen/tab audio + microphone using getDisplayMedia
+        console.log('BROWSER: Attempting screen share for system audio capture');
+        try {
+          // Request screen share with audio
+          const displayStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true, // Required for getDisplayMedia
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+            }
+          });
+          
+          // Get microphone stream
+          const micStream = await navigator.mediaDevices.getUserMedia({
+            audio: AUDIO_CONSTRAINTS
+          });
+          
+          // Check if we got audio from the display
+          const displayAudioTracks = displayStream.getAudioTracks();
+          
+          if (displayAudioTracks.length > 0) {
+            // Mix both audio streams
+            const audioContext = new AudioContext({ sampleRate: 16000 });
+            const destination = audioContext.createMediaStreamDestination();
+            
+            // Connect microphone
+            const micSource = audioContext.createMediaStreamSource(micStream);
+            micSource.connect(destination);
+            
+            // Connect display audio
+            const displaySource = audioContext.createMediaStreamSource(
+              new MediaStream(displayAudioTracks)
+            );
+            displaySource.connect(destination);
+            
+            stream = destination.stream;
+            additionalStreamsRef.current = [micStream, displayStream];
+            setRecordingMethod('webm-opus');
+            setIsSystemAudioCapture(true);
+            console.log('BROWSER: Capturing both microphone and tab/screen audio');
+            
+            // Stop the video track since we only need audio
+            displayStream.getVideoTracks().forEach(track => track.stop());
+          } else {
+            // No audio from display, use mic only but keep display stream for cleanup
+            console.log('BROWSER: Screen share has no audio, using microphone only');
+            stream = micStream;
+            displayStream.getTracks().forEach(track => track.stop());
+            setRecordingMethod('webm-opus');
+            setIsSystemAudioCapture(false);
+          }
+        } catch (displayError) {
+          // User cancelled screen share or not supported - fall back to mic only
+          console.log('BROWSER: Screen share not available or cancelled, using microphone only');
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: AUDIO_CONSTRAINTS
+          });
+          setRecordingMethod('webm-opus');
+          setIsSystemAudioCapture(false);
+        }
       }
       
       streamRef.current = stream;
