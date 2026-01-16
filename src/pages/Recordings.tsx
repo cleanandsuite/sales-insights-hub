@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { CallSummaryCard } from '@/components/leads/CallSummaryCard';
@@ -6,12 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic, Download, Search, FileText, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic, Download, Search, FileText, Trash2, Upload, File, X, CheckCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { createPlayableObjectUrl } from '@/lib/audioPlayback';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
+import { getToastErrorMessage } from '@/lib/errorSanitizer';
+import { transcodeToMp3 } from '@/lib/audioTranscoder';
 
 interface CallRecording {
   id: string;
@@ -54,6 +57,13 @@ interface CallSummary {
   created_at: string;
 }
 
+interface UploadedFile {
+  file: File;
+  status: 'pending' | 'uploading' | 'success' | 'error';
+  progress: number;
+  customName: string;
+}
+
 export default function Recordings() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -66,6 +76,11 @@ export default function Recordings() {
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Upload state
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState<UploadedFile[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -227,6 +242,160 @@ export default function Recordings() {
     sonnerToast.info('Export feature coming soon');
   };
 
+  // Upload handlers
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files).filter(
+      (file) => file.type.startsWith('audio/') || file.name.endsWith('.mp3') || file.name.endsWith('.wav')
+    );
+    addUploadFiles(droppedFiles);
+  }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      addUploadFiles(selectedFiles);
+    }
+  };
+
+  const addUploadFiles = (newFiles: File[]) => {
+    const files: UploadedFile[] = newFiles.map((file) => {
+      const baseName = file.name.replace(/\.[^/.]+$/, '');
+      const defaultName = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }) + ' - ' + baseName;
+      return {
+        file,
+        status: 'pending',
+        progress: 0,
+        customName: defaultName,
+      };
+    });
+    setUploadFiles((prev) => [...prev, ...files]);
+  };
+
+  const updateUploadFileName = (index: number, newName: string) => {
+    setUploadFiles((prev) =>
+      prev.map((f, idx) => (idx === index ? { ...f, customName: newName } : f))
+    );
+  };
+
+  const removeUploadFile = (index: number) => {
+    setUploadFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const handleUploadFiles = async () => {
+    if (!user) return;
+
+    for (let i = 0; i < uploadFiles.length; i++) {
+      if (uploadFiles[i].status !== 'pending') continue;
+
+      setUploadFiles((prev) =>
+        prev.map((f, idx) => (idx === i ? { ...f, status: 'uploading' } : f))
+      );
+
+      const file = uploadFiles[i].file;
+      
+      let finalBlob: Blob;
+      let fileName: string;
+      
+      try {
+        const transcodeResult = await transcodeToMp3(file);
+        finalBlob = transcodeResult.blob;
+        const baseName = file.name.replace(/\.[^/.]+$/, '');
+        fileName = `${baseName}.mp3`;
+      } catch (transcodeError) {
+        console.error('Transcode failed, using original:', transcodeError);
+        finalBlob = file;
+        fileName = file.name;
+      }
+      
+      const filePath = `${user.id}/${Date.now()}-${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('call-recordings')
+        .upload(filePath, finalBlob, {
+          contentType: fileName.endsWith('.mp3') ? 'audio/mpeg' : file.type
+        });
+
+      if (uploadError) {
+        setUploadFiles((prev) =>
+          prev.map((f, idx) => (idx === i ? { ...f, status: 'error' } : f))
+        );
+        toast({
+          title: 'Upload failed',
+          description: getToastErrorMessage(uploadError, 'upload'),
+          variant: 'destructive',
+        });
+        continue;
+      }
+
+      const { data: newRecording, error: dbError } = await supabase.from('call_recordings').insert({
+        user_id: user.id,
+        file_name: fileName,
+        name: uploadFiles[i].customName || fileName,
+        file_url: null,
+        audio_url: filePath,
+        file_size: finalBlob.size,
+        status: 'pending',
+      }).select().single();
+
+      if (dbError) {
+        setUploadFiles((prev) =>
+          prev.map((f, idx) => (idx === i ? { ...f, status: 'error' } : f))
+        );
+        toast({
+          title: 'Save failed',
+          description: getToastErrorMessage(dbError, 'save'),
+          variant: 'destructive',
+        });
+        continue;
+      }
+
+      setUploadFiles((prev) =>
+        prev.map((f, idx) => (idx === i ? { ...f, status: 'success', progress: 100 } : f))
+      );
+      
+      // Add to recordings list
+      if (newRecording) {
+        setRecordings(prev => [newRecording, ...prev]);
+      }
+    }
+
+    toast({
+      title: 'Upload complete',
+      description: 'Your files have been uploaded.',
+    });
+    
+    // Clear successful uploads after a delay
+    setTimeout(() => {
+      setUploadFiles(prev => prev.filter(f => f.status !== 'success'));
+    }, 2000);
+  };
+
+  const pendingUploadCount = uploadFiles.filter((f) => f.status === 'pending').length;
+
   const handleDeleteRecording = async (recordingId: string) => {
     try {
       const { error } = await supabase
@@ -267,6 +436,117 @@ export default function Recordings() {
               <Download className="h-4 w-4" />
               Export All
             </Button>
+            <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Upload
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Upload Call Recordings</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  {/* Upload Area */}
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`rounded-xl border-2 border-dashed p-8 text-center transition-all duration-300 ${
+                      isDragging
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border/50 hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="mx-auto w-fit">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mx-auto mb-4">
+                        <Upload className="h-6 w-6 text-primary" />
+                      </div>
+                      <p className="text-sm text-foreground font-medium mb-1">
+                        Drop audio files here
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        or click to browse
+                      </p>
+                      <label>
+                        <input
+                          type="file"
+                          accept="audio/*,.mp3,.wav,.m4a"
+                          multiple
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        <Button variant="outline" size="sm" className="cursor-pointer" asChild>
+                          <span>Browse Files</span>
+                        </Button>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* File List */}
+                  {uploadFiles.length > 0 && (
+                    <div className="border rounded-lg divide-y divide-border/50 max-h-60 overflow-y-auto">
+                      {uploadFiles.map((uploadFile, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 gap-3"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                              <File className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              {uploadFile.status === 'pending' ? (
+                                <Input
+                                  value={uploadFile.customName}
+                                  onChange={(e) => updateUploadFileName(index, e.target.value)}
+                                  className="h-7 text-sm"
+                                  placeholder="Recording name..."
+                                />
+                              ) : (
+                                <p className="font-medium text-sm text-foreground truncate">
+                                  {uploadFile.customName}
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {formatFileSize(uploadFile.file.size)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {uploadFile.status === 'uploading' && (
+                              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            )}
+                            {uploadFile.status === 'success' && (
+                              <CheckCircle className="h-4 w-4 text-success" />
+                            )}
+                            {uploadFile.status === 'error' && (
+                              <span className="text-xs text-destructive">Failed</span>
+                            )}
+                            {uploadFile.status === 'pending' && (
+                              <button
+                                onClick={() => removeUploadFile(index)}
+                                className="p-1 rounded hover:bg-destructive/10"
+                              >
+                                <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Upload Button */}
+                  {pendingUploadCount > 0 && (
+                    <Button onClick={handleUploadFiles} className="w-full">
+                      Upload {pendingUploadCount} file{pendingUploadCount > 1 ? 's' : ''}
+                    </Button>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button onClick={() => navigate('/dashboard')} size="default" className="gap-2">
               <Mic className="h-4 w-4" />
               New Recording

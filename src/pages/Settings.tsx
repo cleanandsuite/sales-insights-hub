@@ -255,8 +255,22 @@ export default function Settings() {
 
           {/* Audio Settings */}
           <TabsContent value="audio">
-            <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
-              <h2 className="text-lg font-semibold text-foreground">Audio Devices</h2>
+            <div className="space-y-6">
+              {/* Audio Setup Reminder */}
+              {(!settings.default_mic_device_id || !settings.default_speaker_device_id) && (
+                <div className="flex items-start gap-3 p-4 bg-primary/10 border border-primary/20 rounded-xl">
+                  <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Configure your audio devices before recording</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Select your preferred microphone and speaker for optimal call recording quality.
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
+                <h2 className="text-lg font-semibold text-foreground">Audio Devices</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -326,6 +340,7 @@ export default function Settings() {
                     onCheckedChange={(checked) => setSettings({ ...settings, noise_cancellation: checked })}
                   />
                 </div>
+              </div>
               </div>
             </div>
           </TabsContent>

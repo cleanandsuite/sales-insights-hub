@@ -18,7 +18,6 @@ const baseNavItems = [
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/coaching', icon: Trophy, label: 'Coaching' },
   { to: '/team', icon: Users, label: 'Team' },
-  { to: '/upload', icon: Upload, label: 'Upload' },
   { to: '/profile', icon: UserCircle, label: 'Your Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];

@@ -124,7 +124,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
 
       // Standard recording (Electron or browser fallback)
       try {
-        await startRecording(true, selectedSourceId);
+        await startRecording(selectedSourceId);
       } catch (error) {
         console.error('Recording start error:', error);
         toast({
@@ -132,7 +132,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
           title: 'Recording Access Required',
           description: isElectronEnvironment 
             ? 'Please allow microphone access to record.'
-            : 'Please allow microphone access and share your screen/tab with audio to record both sides of the call.'
+            : 'Please allow microphone access to record. Install the Chrome extension to capture both sides of the call.'
         });
         onClose();
       }
@@ -636,7 +636,7 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
                   <span>
                     {isElectronEnvironment
                       ? 'Microphone only'
-                      : 'Microphone only (share a tab + enable Share audio to capture both sides)'}
+                      : 'Microphone only - install extension for full call capture'}
                   </span>
                 </div>
               )}
