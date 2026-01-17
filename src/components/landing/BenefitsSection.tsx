@@ -1,76 +1,75 @@
-import { TrendingUp, Zap, Target, Clock } from 'lucide-react';
+import { Target, Clock, TrendingUp, Zap, BarChart3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-const benefits = [{
-  icon: Target,
-  stat: '90%',
-  statLabel: 'cold calls rejected',
-  title: 'Detect Objections Live',
-  description: 'Our AI Sales Coach identifies objection patterns in real-time, giving you instant rebuttals that actually work.',
-  highlight: 'Reduce rejection rate by 47%'
-}, {
-  icon: Zap,
-  stat: '400%',
-  statLabel: 'productivity lost to bad tools',
-  title: 'Insights in 60 Seconds',
-  description: 'No more wasting hours on manual call reviews. Get AI Coaching insights instantly after every call.',
-  highlight: 'Save 8+ hours per week'
-}, {
-  icon: TrendingUp,
-  stat: '20%',
-  statLabel: 'average rep close rate',
-  title: 'Top Users Hit 42%+',
-  description: 'Our AI Sales Coaching platform helps reps double their close rates with personalized, data-driven guidance.',
-  highlight: 'Double your close rate'
-}, {
-  icon: Clock,
-  stat: '3-6mo',
-  statLabel: 'typical Gong setup',
-  title: 'Instant Browser Recording',
-  description: 'Unlike competitors that take months to deploy, start using our AI Coach in under 60 seconds. No IT required.',
-  highlight: 'Zero setup time'
-}];
+
+const benefits = [
+  {
+    icon: Target,
+    title: 'Lead Generation & Scoring',
+    description: 'AI sales tools help with lead generation and scoring, so sales teams can target the right people, improve conversion, and focus on the most valuable prospects.',
+    color: 'bg-primary/10 text-primary',
+  },
+  {
+    icon: BarChart3,
+    title: 'Forecasting Accuracy',
+    description: 'AI improves forecasting accuracy because AI sales tools analyze data from past deals, buyer behavior, and activity to predict future revenue with better precision.',
+    color: 'bg-success/10 text-success',
+  },
+  {
+    icon: Clock,
+    title: 'Time Savings',
+    description: 'AI sales tools reduce time spent on repetitive tasks, replace manual data entry, and streamline scheduling, email outreach, and report creation, which reduces cost per contact.',
+    color: 'bg-accent/10 text-accent',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Pricing & Cross-sell Decisions',
+    description: 'AI-based sales analysis supports pricing, cross-sell, and up-sell decisions, so managers can show clear revenue impact and explain the benefits of each sales initiative.',
+    color: 'bg-warning/10 text-warning',
+  },
+  {
+    icon: Zap,
+    title: 'Consistent Dashboards & Insights',
+    description: 'AI sales tools deliver consistent dashboards, tailored insights, and driven recommendations that help sales managers adjust strategy and allocate resources with confidence.',
+    color: 'bg-purple-100 text-purple-600',
+  },
+];
+
 export function BenefitsSection() {
-  return <section className="py-24 bg-muted/40" id="benefits">
+  return (
+    <section className="py-20 md:py-28 bg-background" id="benefits">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-5">
-            Why Sales Teams Choose Our{' '}
-            <span className="text-primary">
-AI Sales Coaching</span>
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            Key Benefits of AI for{' '}
+            <span className="gradient-text">Sales Teams</span>
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Real problems. Real solutions. Real results with AI Coaching that works.
+          <p className="text-lg text-muted-foreground">
+            The main benefits of using AI inside sales organizations are visible across prospecting, 
+            engagement, and closing. Effective AI sales tools help sales teams achieve measurable results faster.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {benefits.map((benefit, index) => <Card key={index} className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-card rounded-xl hover:-translate-y-1">
-              <CardContent className="p-8">
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0">
-                    <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <benefit.icon className="h-7 w-7 text-primary" />
-                    </div>
-                  </div>
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-black text-destructive">{benefit.stat}</span>
-                      <span className="text-base text-muted-foreground font-medium">{benefit.statLabel}</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-foreground">
-                      {benefit.title}
-                    </h3>
-                    <p className="text-muted-foreground text-lg leading-relaxed">
-                      {benefit.description}
-                    </p>
-                    <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-success/15 text-success text-base font-semibold">
-                      ✓ {benefit.highlight}
-                    </div>
-                  </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {benefits.map((benefit, index) => (
+            <Card 
+              key={benefit.title}
+              className="group hover:shadow-xl transition-all duration-300 border-border hover:border-primary/30"
+            >
+              <CardContent className="p-6">
+                <div className={`h-14 w-14 rounded-xl ${benefit.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                  <benefit.icon className="h-7 w-7" />
                 </div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  {benefit.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {benefit.description}
+                </p>
               </CardContent>
-            </Card>)}
+            </Card>
+          ))}
         </div>
       </div>
-    </section>;
+    </section>
+  );
 }

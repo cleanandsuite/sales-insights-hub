@@ -1,6 +1,5 @@
 import { useState, lazy, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -9,11 +8,20 @@ import { LandingHeader } from '@/components/landing/LandingHeader';
 import { HeroSection } from '@/components/landing/HeroSection';
 
 // Below-the-fold components lazy loaded for faster initial paint
+const IntroSection = lazy(() => import('@/components/landing/IntroSection').then(m => ({ default: m.IntroSection })));
+const WhatIsAISection = lazy(() => import('@/components/landing/WhatIsAISection').then(m => ({ default: m.WhatIsAISection })));
 const BenefitsSection = lazy(() => import('@/components/landing/BenefitsSection').then(m => ({ default: m.BenefitsSection })));
-const DemoVideoSection = lazy(() => import('@/components/landing/DemoVideoSection').then(m => ({ default: m.DemoVideoSection })));
-const FeaturesSection = lazy(() => import('@/components/landing/FeaturesSection').then(m => ({ default: m.FeaturesSection })));
-const TestimonialsSection = lazy(() => import('@/components/landing/TestimonialsSection').then(m => ({ default: m.TestimonialsSection })));
-const PricingSection = lazy(() => import('@/components/landing/PricingSection').then(m => ({ default: m.PricingSection })));
+const CoreFeaturesSection = lazy(() => import('@/components/landing/CoreFeaturesSection').then(m => ({ default: m.CoreFeaturesSection })));
+const UseCasesSection = lazy(() => import('@/components/landing/UseCasesSection').then(m => ({ default: m.UseCasesSection })));
+const HowToChooseSection = lazy(() => import('@/components/landing/HowToChooseSection').then(m => ({ default: m.HowToChooseSection })));
+const ImplementationSection = lazy(() => import('@/components/landing/ImplementationSection').then(m => ({ default: m.ImplementationSection })));
+const ROISection = lazy(() => import('@/components/landing/ROISection').then(m => ({ default: m.ROISection })));
+const ToolCategoriesSection = lazy(() => import('@/components/landing/ToolCategoriesSection').then(m => ({ default: m.ToolCategoriesSection })));
+const IntegrationsSection = lazy(() => import('@/components/landing/IntegrationsSection').then(m => ({ default: m.IntegrationsSection })));
+const GovernanceSection = lazy(() => import('@/components/landing/GovernanceSection').then(m => ({ default: m.GovernanceSection })));
+const FutureOutlookSection = lazy(() => import('@/components/landing/FutureOutlookSection').then(m => ({ default: m.FutureOutlookSection })));
+const PracticalTipsSection = lazy(() => import('@/components/landing/PracticalTipsSection').then(m => ({ default: m.PracticalTipsSection })));
+const FinalCTASection = lazy(() => import('@/components/landing/FinalCTASection').then(m => ({ default: m.FinalCTASection })));
 const LandingFooter = lazy(() => import('@/components/landing/LandingFooter').then(m => ({ default: m.LandingFooter })));
 const DemoVideoModal = lazy(() => import('@/components/landing/DemoVideoModal').then(m => ({ default: m.DemoVideoModal })));
 
@@ -55,10 +63,10 @@ export default function Landing() {
         {demoModalOpen && <DemoVideoModal open={demoModalOpen} onOpenChange={setDemoModalOpen} />}
       </Suspense>
       
-      {/* Fixed Header - Critical */}
+      {/* Fixed Header */}
       <LandingHeader onStartTrialClick={() => handleStartTrial()} />
 
-      {/* Hero Section - Critical above-the-fold */}
+      {/* Hero Section */}
       <HeroSection 
         onStartTrialClick={() => handleStartTrial()} 
         onWatchDemoClick={() => setDemoModalOpen(true)} 
@@ -68,7 +76,7 @@ export default function Landing() {
       <section className="py-8 border-y border-border bg-card">
         <div className="container mx-auto px-4">
           <p className="text-center text-xs uppercase tracking-wider text-muted-foreground mb-6 font-medium">
-            Trusted by teams at
+            Trusted by sales teams at
           </p>
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
             {TRUSTED_BY.map((company) => (
@@ -83,9 +91,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Below-the-fold sections - Lazy loaded */}
+      {/* Content Sections */}
       <Suspense fallback={<SectionLoader />}>
-        <DemoVideoSection onWatchDemoClick={() => setDemoModalOpen(true)} />
+        <IntroSection />
+      </Suspense>
+
+      <Suspense fallback={<SectionLoader />}>
+        <WhatIsAISection />
       </Suspense>
 
       <Suspense fallback={<SectionLoader />}>
@@ -93,56 +105,54 @@ export default function Landing() {
       </Suspense>
 
       <Suspense fallback={<SectionLoader />}>
-        <FeaturesSection />
+        <CoreFeaturesSection />
       </Suspense>
 
       <Suspense fallback={<SectionLoader />}>
-        <TestimonialsSection />
+        <UseCasesSection />
       </Suspense>
 
       <Suspense fallback={<SectionLoader />}>
-        <PricingSection />
+        <HowToChooseSection />
       </Suspense>
 
-      {/* CTA Section */}
-      <section className="relative py-16 md:py-20 bg-cta-gradient overflow-hidden">
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-white">
-              Ready to Boost Your Close Rate?
-            </h2>
-            <p className="text-lg text-white/90 max-w-xl mx-auto">
-              Join the first 100 sales reps to lock in grandfathered pricing.
-              Start your 14-day free trial today.
-            </p>
-            <div className="pt-2">
-              <Button 
-                size="lg" 
-                onClick={() => handleStartTrial()}
-                className="gap-2 font-semibold text-base px-8 py-6 bg-white text-primary hover:bg-white/95 shadow-lg rounded-lg"
-                disabled={loadingPlan !== null}
-              >
-                {loadingPlan ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Starting...
-                  </>
-                ) : (
-                  <>
-                    Start Your Free Trial
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </Button>
-              <p className="text-sm text-white/80 mt-4">
-                Card required • 14 days free • Cancel anytime
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Suspense fallback={<SectionLoader />}>
+        <ImplementationSection />
+      </Suspense>
 
-      {/* Footer - Lazy loaded */}
+      <Suspense fallback={<SectionLoader />}>
+        <ROISection />
+      </Suspense>
+
+      <Suspense fallback={<SectionLoader />}>
+        <ToolCategoriesSection />
+      </Suspense>
+
+      <Suspense fallback={<SectionLoader />}>
+        <IntegrationsSection />
+      </Suspense>
+
+      <Suspense fallback={<SectionLoader />}>
+        <GovernanceSection />
+      </Suspense>
+
+      <Suspense fallback={<SectionLoader />}>
+        <PracticalTipsSection />
+      </Suspense>
+
+      <Suspense fallback={<SectionLoader />}>
+        <FutureOutlookSection />
+      </Suspense>
+
+      {/* Final CTA */}
+      <Suspense fallback={<SectionLoader />}>
+        <FinalCTASection 
+          onStartTrialClick={() => handleStartTrial()} 
+          loadingPlan={loadingPlan} 
+        />
+      </Suspense>
+
+      {/* Footer */}
       <Suspense fallback={<SectionLoader />}>
         <LandingFooter />
       </Suspense>
