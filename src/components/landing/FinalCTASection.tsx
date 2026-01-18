@@ -1,12 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface FinalCTASectionProps {
   onStartTrialClick: () => void;
-  loadingPlan: string | null;
 }
 
-export function FinalCTASection({ onStartTrialClick, loadingPlan }: FinalCTASectionProps) {
+export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
   return (
     <section className="relative py-20 md:py-28 bg-cta-gradient overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
@@ -24,19 +23,9 @@ export function FinalCTASection({ onStartTrialClick, loadingPlan }: FinalCTASect
               size="lg" 
               onClick={onStartTrialClick}
               className="gap-2 font-bold text-lg px-10 py-7 bg-white text-primary hover:bg-white/95 shadow-xl hover:shadow-2xl rounded-lg animate-cta-pulse"
-              disabled={loadingPlan !== null}
             >
-              {loadingPlan ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Starting...
-                </>
-              ) : (
-                <>
-                  Start Your Free Trial
-                  <ArrowRight className="h-5 w-5" />
-                </>
-              )}
+              Start Your Free Trial
+              <ArrowRight className="h-5 w-5" />
             </Button>
             <p className="text-sm text-white/80 mt-4">
               14-day free trial • No credit card required • Full access to all features
