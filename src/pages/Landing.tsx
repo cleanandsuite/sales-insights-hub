@@ -1,7 +1,5 @@
 import { useState, lazy, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 // Critical above-the-fold components loaded eagerly
 import { LandingHeader } from '@/components/landing/LandingHeader';
@@ -25,6 +23,9 @@ const FinalCTASection = lazy(() => import('@/components/landing/FinalCTASection'
 const LandingFooter = lazy(() => import('@/components/landing/LandingFooter').then(m => ({ default: m.LandingFooter })));
 const DemoVideoModal = lazy(() => import('@/components/landing/DemoVideoModal').then(m => ({ default: m.DemoVideoModal })));
 
+// Stripe payment link
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/fZu6oG1zi7O7euubi69k400';
+
 // Minimal section loading placeholder
 const SectionLoader = () => (
   <div className="flex items-center justify-center py-16">
@@ -36,25 +37,9 @@ const TRUSTED_BY = ['TechFlow', 'CloudScale', 'DataSync', 'SalesForge', 'RevHub'
 
 export default function Landing() {
   const [demoModalOpen, setDemoModalOpen] = useState(false);
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const handleStartTrial = async (planKey: string = 'single_user') => {
-    setLoadingPlan(planKey);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-trial-checkout', {
-        body: { plan: planKey },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Failed to start checkout. Please try again.');
-    } finally {
-      setLoadingPlan(null);
-    }
+  const handleStartTrial = () => {
+    window.open(STRIPE_PAYMENT_LINK, '_blank');
   };
 
   return (
@@ -146,10 +131,7 @@ export default function Landing() {
 
       {/* Final CTA */}
       <Suspense fallback={<SectionLoader />}>
-        <FinalCTASection 
-          onStartTrialClick={() => handleStartTrial()} 
-          loadingPlan={loadingPlan} 
-        />
+        <FinalCTASection onStartTrialClick={handleStartTrial} />
       </Suspense>
 
       {/* Footer */}
