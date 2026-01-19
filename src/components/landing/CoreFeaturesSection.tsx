@@ -43,20 +43,17 @@ export function CoreFeaturesSection() {
       {/* Subtle aurora background */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3" />
 
-     import React from 'react';
-
-function Features() {
-  return (
-    <div className="container mx-auto px-4 relative z-10">
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-          Core Features For The
-          <span className="text-primary"> AI Coaching Program & Sales Calls</span>
-        </h2>
-      </div>
-    </div>
-  );
-}
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            Core Features For The
+            <span className="text-primary"> Ai Coaching Program & Sales Calls</span>
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Within the same workspace, teams track call outcomes alongside pipeline metrics. Link conversation quality
+            directly to revenue for a stronger case for development investment.
+          </p>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature) => (
