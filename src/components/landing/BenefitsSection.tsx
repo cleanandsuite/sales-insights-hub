@@ -19,7 +19,7 @@ const benefits = [
     icon: TrendingUp,
     title: "Quality Standards",
     description:
-      'Define what "good" looks like for discovery, demos, and pricing discussions. Link those standards to observation tools and AI insights across all sales calls.',
+      'Define what "good" looks like for discovery, demos, and pricing discussions. Link those standards to observation tools and insights across all sales calls.',
     gradient: "from-accent/20 to-accent/5",
   },
   {
