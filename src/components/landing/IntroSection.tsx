@@ -6,7 +6,8 @@ export function IntroSection() {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">Why Every Sales Conversations Need  AI Coaching<span className="gradient-text">AI Coaching</span>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">Why Every Sales Conversations Need
+AI Coaching<span className="gradient-text">AI Coaching</span>
           </h2>
 
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">Senior leaders navigate complex deals and high-stakes customer interactions, yet traditional development support often fails to keep pace. Workshops and occasional coaching sessions create insight, but impact fades once people return to real pressure and real sales calls.</p>
