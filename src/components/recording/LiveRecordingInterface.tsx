@@ -26,9 +26,10 @@ import {
 
 interface LiveRecordingInterfaceProps {
   onClose: () => void;
+  useScreenShare?: boolean;
 }
 
-export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps) {
+export function LiveRecordingInterface({ onClose, useScreenShare = false }: LiveRecordingInterfaceProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -47,8 +48,14 @@ export function LiveRecordingInterface({ onClose }: LiveRecordingInterfaceProps)
     isSystemAudioCapture,
     isElectronEnvironment,
     availableSources,
-    refreshSources
+    refreshSources,
+    setUseScreenShare
   } = useMp3Recorder();
+
+  // Set screen share mode based on prop
+  useEffect(() => {
+    setUseScreenShare(useScreenShare);
+  }, [useScreenShare, setUseScreenShare]);
 
   const [selectedSourceId, setSelectedSourceId] = useState<string | undefined>(undefined);
   const initStartedRef = useRef(false);

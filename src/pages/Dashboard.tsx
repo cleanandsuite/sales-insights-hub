@@ -6,8 +6,10 @@ import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
 import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
 import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { ProfileSetupBanner } from '@/components/recording/ProfileSetupBanner';
-import { Phone, Clock, ThumbsUp, Mic, Users } from 'lucide-react';
+import { Phone, Clock, ThumbsUp, Mic, Users, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
@@ -44,6 +46,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [aiActive, setAiActive] = useState(true);
+  const [headphoneMode, setHeadphoneMode] = useState(false);
   // Handle subscription success message with polling
   useEffect(() => {
     const subscription = searchParams.get('subscription');
@@ -204,7 +207,7 @@ export default function Dashboard() {
   return (
     <>
       {isRecording && (
-        <LiveRecordingInterface onClose={() => setIsRecording(false)} />
+        <LiveRecordingInterface onClose={() => setIsRecording(false)} useScreenShare={headphoneMode} />
       )}
       
       <DashboardLayout>
@@ -215,14 +218,27 @@ export default function Dashboard() {
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
               <p className="text-muted-foreground mt-1">AI-powered sales call analytics and lead generation</p>
             </div>
-            <Button
-              onClick={() => setIsRecording(true)}
-              size="lg"
-              className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow"
-            >
-              <Mic className="h-5 w-5" />
-              Start Recording
-            </Button>
+            <div className="flex flex-col items-end gap-3">
+              <Button
+                onClick={() => setIsRecording(true)}
+                size="lg"
+                className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow"
+              >
+                <Mic className="h-5 w-5" />
+                Start Recording
+              </Button>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="headphone-mode"
+                  checked={headphoneMode}
+                  onCheckedChange={setHeadphoneMode}
+                />
+                <Label htmlFor="headphone-mode" className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
+                  <Headphones className="h-4 w-4" />
+                  Headphone Mode
+                </Label>
+              </div>
+            </div>
           </div>
 
           {/* Profile Setup Banner */}
