@@ -12,7 +12,7 @@ const benefits = [
     icon: Brain,
     title: "Analyzed Sales Conversation",
     description:
-      "Before high-stakes meetings, short prompts help prepare for objections and clarify outcomes. Afterward, leaders debrief sales calls in minutes while interactions are still fresh.",
+      "Before high-stakes meetings, short prompts help prepare for objections and clarify outcomes. Afterward, leaders debrief calls in minutes while interactions are still fresh.",
     gradient: "from-success/20 to-success/5",
   },
   {
