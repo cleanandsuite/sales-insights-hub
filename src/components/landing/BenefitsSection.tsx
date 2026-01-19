@@ -44,7 +44,7 @@ export function BenefitsSection() {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
             How AI Coaching Elevates How AI Coaching Elevates
-            <span className="gradient-text">Sales Call Quality</span>
+            <span className="gradient-text"> Sales Call Quality</span>
           </h2>
           <p className="text-lg text-muted-foreground">
             Revenue leaders ask how the system improves what happens across sales calls. Our platform delivers insights
