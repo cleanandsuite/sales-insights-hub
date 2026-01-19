@@ -4,22 +4,22 @@ const pillars = [
   {
     icon: FileText,
     title: 'Data Policies',
-    description: 'Establish clear policies on data access, usage, and retention, and ensure that AI sales tools respect privacy settings and local regulations.',
+    description: 'Clear policies on data access, usage, and retention. AI coaching respects privacy settings and local regulations.',
   },
   {
     icon: Eye,
-    title: 'Bias Monitoring',
-    description: 'Monitor AI scoring and recommendation models for unintended bias, and adjust inputs or rules if certain prospect groups receive unfair treatment.',
+    title: 'Transparency',
+    description: 'Leaders understand how the system works, what information is captured, and how it will be used.',
   },
   {
     icon: Users,
-    title: 'Transparency',
-    description: 'Provide transparency to internal stakeholders about how AI tools make recommendations, including which data sources and patterns they use.',
+    title: 'Human Oversight',
+    description: 'No critical decision is made solely by AI. The platform provides insights that informed leaders can use with their own judgment.',
   },
   {
     icon: Lock,
-    title: 'Vendor Security',
-    description: 'Review vendor security practices regularly, including encryption, access controls, and incident response procedures.',
+    title: 'Security',
+    description: 'Data encryption, tight access controls, and incident response procedures aligned with your standards.',
   },
 ];
 
@@ -29,12 +29,13 @@ export function GovernanceSection() {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Risk Management,{' '}
-            <span className="gradient-text">Governance and Ethics</span>
+            Ethics & Trust in{' '}
+            <span className="gradient-text">AI Coaching</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            While AI sales tools offer strong benefits, they also require careful governance to ensure 
-            responsible use of data, fair treatment of prospects, and alignment with corporate values.
+            Any deployment of AI coaching must be grounded in ethics and trust. We design our 
+            systems based on strict governance principles that define what the platform can 
+            and cannot do.
           </p>
         </div>
 
@@ -42,9 +43,9 @@ export function GovernanceSection() {
           {pillars.map((pillar) => (
             <div 
               key={pillar.title}
-              className="bg-card rounded-xl border border-border p-6 text-center hover:shadow-lg transition-shadow"
+              className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border/50 p-6 text-center hover:shadow-xl hover:border-primary/30 transition-all duration-300"
             >
-              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto mb-4">
                 <pillar.icon className="h-7 w-7 text-primary" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -57,12 +58,13 @@ export function GovernanceSection() {
           ))}
         </div>
 
-        <div className="mt-12 bg-card rounded-xl border border-success/30 p-6 max-w-3xl mx-auto">
+        <div className="mt-12 bg-card/80 backdrop-blur-sm rounded-2xl border border-success/30 p-6 max-w-3xl mx-auto">
           <div className="flex items-start gap-4">
             <ShieldCheck className="h-6 w-6 text-success flex-shrink-0 mt-0.5" />
             <p className="text-muted-foreground">
-              By managing these aspects proactively, organizations can rely on AI sales tools as a secure, 
-              compliant, and trusted component of their revenue systems.
+              We maintain continuous monitoring so that as regulations evolve, your AI coaching 
+              program remains compliant and trustworthy—without compromising ethics, reputation, 
+              or stakeholder confidence.
             </p>
           </div>
         </div>

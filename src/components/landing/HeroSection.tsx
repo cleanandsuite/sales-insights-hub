@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Play, CheckCircle, BarChart3, Brain, TrendingUp } from 'lucide-react';
+import { ArrowRight, Play, CheckCircle, Phone, Brain, Sparkles } from 'lucide-react';
 import dashboardPreview from '@/assets/dashboard-preview.jpg';
 
 interface HeroSectionProps {
@@ -14,8 +14,9 @@ export function HeroSection({
 }: HeroSectionProps) {
   return (
     <section className="relative bg-hero-gradient min-h-[100vh] flex items-center overflow-hidden">
-      {/* Pattern overlay */}
-      <div className="bg-hero-ai-pattern" />
+      {/* Aurora mesh background - 2025 trend */}
+      <div className="bg-hero-aurora" />
+      <div className="bg-hero-mesh" />
       
       {/* Promo Banner */}
       <div className="absolute top-16 left-0 right-0 bg-promo-banner py-3 z-20">
@@ -34,23 +35,24 @@ export function HeroSection({
           <div className="space-y-8 text-center lg:text-left">
             {/* Pre-headline badge */}
             <div className="inline-block animate-fade-in">
-              <Badge className="bg-white/15 text-white border-white/30 px-4 py-2 text-sm font-medium backdrop-blur-sm">
-                ⚡ AI-Powered Sales Intelligence Platform
+              <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm font-medium backdrop-blur-md glass-effect">
+                <Sparkles className="h-3.5 w-3.5 mr-2" />
+                AI-Powered Sales Coaching Platform
               </Badge>
             </div>
 
-            {/* Main Headline */}
+            {/* Main Headline - H1 optimized */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] animate-slide-up">
-              Maximise AI Sales Tools for
+              AI Coaching for
               <br />
-              <span className="gradient-text">Competitive, Measurable Business Benefits</span>
+              <span className="gradient-text-aurora">High-Impact Sales Calls</span>
             </h1>
 
-            {/* Subheadline */}
+            {/* Subheadline - Description optimized */}
             <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-slide-up" style={{
               animationDelay: '0.1s'
             }}>
-              Discover how AI-powered sales tools streamline workflows, improve forecasting accuracy, and unlock measurable revenue growth while empowering your team to close more profitable, high-quality deals.
+              Drive measurable growth with AI coaching for executives and teams, optimizing sales performance, call quality, and leadership decisions through continuous, data-driven feedback.
             </p>
 
             {/* CTA Buttons */}
@@ -60,7 +62,7 @@ export function HeroSection({
               <Button 
                 size="lg" 
                 onClick={onStartTrialClick} 
-                className="group gap-2 font-bold text-lg px-8 py-6 bg-white text-primary hover:bg-white/95 shadow-xl hover:shadow-2xl transition-all rounded-lg animate-cta-pulse"
+                className="group gap-2 font-bold text-lg px-8 py-6 bg-white text-primary hover:bg-white/95 shadow-xl hover:shadow-2xl transition-all rounded-xl animate-cta-pulse glass-button"
               >
                 Start Free Trial
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -69,7 +71,7 @@ export function HeroSection({
                 size="lg" 
                 variant="outline" 
                 onClick={onWatchDemoClick} 
-                className="group gap-2 font-semibold text-lg px-8 py-6 border-2 border-white bg-white/20 text-white hover:bg-white hover:text-primary rounded-lg backdrop-blur-sm transition-all"
+                className="group gap-2 font-semibold text-lg px-8 py-6 border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary rounded-xl backdrop-blur-md transition-all glass-effect"
               >
                 <Play className="h-5 w-5 fill-current" />
                 Watch Demo
@@ -82,11 +84,11 @@ export function HeroSection({
             }}>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-accent" />
-                <span>Data-driven insights</span>
+                <span>Real-time AI coaching</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-accent" />
-                <span>Predictable revenue</span>
+                <span>Sales call analysis</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-accent" />
@@ -95,49 +97,49 @@ export function HeroSection({
             </div>
           </div>
 
-          {/* Right Side - Dashboard Preview */}
+          {/* Right Side - Dashboard Preview with glass effect */}
           <div className="relative animate-slide-in-right hidden lg:block">
             <div className="relative">
-              {/* Main dashboard image */}
-              <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/20 bg-white/5 backdrop-blur-sm">
-                <img src={dashboardPreview} alt="AI Sales Tools Dashboard" className="w-full h-auto" />
+              {/* Main dashboard image with glass frame */}
+              <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-white/5 backdrop-blur-xl glass-card">
+                <img src={dashboardPreview} alt="AI Coaching for Sales Calls Dashboard" className="w-full h-auto" />
               </div>
               
-              {/* Floating stat card */}
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-2xl p-4 animate-float">
+              {/* Floating stat card - glass style */}
+              <div className="absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 animate-float glass-card-solid">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-success/20 flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-success" />
+                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center">
+                    <Phone className="h-6 w-6 text-success" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">+35%</p>
-                    <p className="text-sm text-muted-foreground">Revenue Growth</p>
+                    <p className="text-2xl font-bold text-foreground">+40%</p>
+                    <p className="text-sm text-muted-foreground">Call Success Rate</p>
                   </div>
                 </div>
               </div>
 
               {/* Floating AI card */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-2xl p-4 animate-float" style={{
+              <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-4 animate-float glass-card-solid" style={{
                 animationDelay: '1s'
               }}>
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                     <Brain className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">AI Intelligence</p>
-                    <p className="text-xs text-muted-foreground">Predictive Analytics</p>
+                    <p className="text-sm font-semibold text-foreground">AI Coaching</p>
+                    <p className="text-xs text-muted-foreground">Real-time guidance</p>
                   </div>
                 </div>
               </div>
 
-              {/* Floating forecast card */}
-              <div className="absolute top-1/2 -right-8 bg-white rounded-xl shadow-2xl p-3 animate-float" style={{
+              {/* Floating sales call card */}
+              <div className="absolute top-1/2 -right-8 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-3 animate-float glass-card-solid" style={{
                 animationDelay: '2s'
               }}>
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-accent" />
-                  <span className="text-sm font-medium text-foreground">95% Forecast Accuracy</span>
+                  <Sparkles className="h-5 w-5 text-accent" />
+                  <span className="text-sm font-medium text-foreground">Live Sales Call Insights</span>
                 </div>
               </div>
             </div>
