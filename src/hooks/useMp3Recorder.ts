@@ -16,6 +16,8 @@ interface UseMp3RecorderReturn {
   isElectronEnvironment: boolean;
   availableSources: DesktopSource[];
   refreshSources: () => Promise<void>;
+  // Screen share mode control
+  setUseScreenShare: (value: boolean) => void;
 }
 
 const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
@@ -39,6 +41,7 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
   const [isSystemAudioCapture, setIsSystemAudioCapture] = useState(false);
   const [isElectronEnvironment] = useState(() => isElectron());
   const [availableSources, setAvailableSources] = useState<DesktopSource[]>([]);
+  const [useScreenShareMode, setUseScreenShare] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mimeTypeRef = useRef<string>('audio/webm;codecs=opus');
@@ -98,61 +101,72 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
           console.log('ELECTRON FALLBACK: Using microphone only');
         }
       } else {
-        // Browser: Try to capture screen/tab audio + microphone using getDisplayMedia
-        console.log('BROWSER: Attempting screen share for system audio capture');
-        try {
-          // Request screen share with audio
-          const displayStream = await navigator.mediaDevices.getDisplayMedia({
-            video: true, // Required for getDisplayMedia
-            audio: {
-              echoCancellation: false,
-              noiseSuppression: false,
-              autoGainControl: false,
+        // Browser: Check if screen share mode is enabled (headphone mode)
+        if (useScreenShareMode) {
+          // Try to capture screen/tab audio + microphone using getDisplayMedia
+          console.log('BROWSER: Headphone mode - Attempting screen share for system audio capture');
+          try {
+            // Request screen share with audio
+            const displayStream = await navigator.mediaDevices.getDisplayMedia({
+              video: true, // Required for getDisplayMedia
+              audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false,
+              }
+            });
+            
+            // Get microphone stream
+            const micStream = await navigator.mediaDevices.getUserMedia({
+              audio: AUDIO_CONSTRAINTS
+            });
+            
+            // Check if we got audio from the display
+            const displayAudioTracks = displayStream.getAudioTracks();
+            
+            if (displayAudioTracks.length > 0) {
+              // Mix both audio streams
+              const audioContext = new AudioContext({ sampleRate: 16000 });
+              const destination = audioContext.createMediaStreamDestination();
+              
+              // Connect microphone
+              const micSource = audioContext.createMediaStreamSource(micStream);
+              micSource.connect(destination);
+              
+              // Connect display audio
+              const displaySource = audioContext.createMediaStreamSource(
+                new MediaStream(displayAudioTracks)
+              );
+              displaySource.connect(destination);
+              
+              stream = destination.stream;
+              additionalStreamsRef.current = [micStream, displayStream];
+              setRecordingMethod('webm-opus');
+              setIsSystemAudioCapture(true);
+              console.log('BROWSER: Capturing both microphone and tab/screen audio');
+              
+              // Stop the video track since we only need audio
+              displayStream.getVideoTracks().forEach(track => track.stop());
+            } else {
+              // No audio from display, use mic only but keep display stream for cleanup
+              console.log('BROWSER: Screen share has no audio, using microphone only');
+              stream = micStream;
+              displayStream.getTracks().forEach(track => track.stop());
+              setRecordingMethod('webm-opus');
+              setIsSystemAudioCapture(false);
             }
-          });
-          
-          // Get microphone stream
-          const micStream = await navigator.mediaDevices.getUserMedia({
-            audio: AUDIO_CONSTRAINTS
-          });
-          
-          // Check if we got audio from the display
-          const displayAudioTracks = displayStream.getAudioTracks();
-          
-          if (displayAudioTracks.length > 0) {
-            // Mix both audio streams
-            const audioContext = new AudioContext({ sampleRate: 16000 });
-            const destination = audioContext.createMediaStreamDestination();
-            
-            // Connect microphone
-            const micSource = audioContext.createMediaStreamSource(micStream);
-            micSource.connect(destination);
-            
-            // Connect display audio
-            const displaySource = audioContext.createMediaStreamSource(
-              new MediaStream(displayAudioTracks)
-            );
-            displaySource.connect(destination);
-            
-            stream = destination.stream;
-            additionalStreamsRef.current = [micStream, displayStream];
-            setRecordingMethod('webm-opus');
-            setIsSystemAudioCapture(true);
-            console.log('BROWSER: Capturing both microphone and tab/screen audio');
-            
-            // Stop the video track since we only need audio
-            displayStream.getVideoTracks().forEach(track => track.stop());
-          } else {
-            // No audio from display, use mic only but keep display stream for cleanup
-            console.log('BROWSER: Screen share has no audio, using microphone only');
-            stream = micStream;
-            displayStream.getTracks().forEach(track => track.stop());
+          } catch (displayError) {
+            // User cancelled screen share or not supported - fall back to mic only
+            console.log('BROWSER: Screen share not available or cancelled, using microphone only');
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: AUDIO_CONSTRAINTS
+            });
             setRecordingMethod('webm-opus');
             setIsSystemAudioCapture(false);
           }
-        } catch (displayError) {
-          // User cancelled screen share or not supported - fall back to mic only
-          console.log('BROWSER: Screen share not available or cancelled, using microphone only');
+        } else {
+          // Microphone only mode (no headphones)
+          console.log('BROWSER: Microphone only mode - No screen share');
           stream = await navigator.mediaDevices.getUserMedia({
             audio: AUDIO_CONSTRAINTS
           });
@@ -230,7 +244,7 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
       console.error('Error starting recording:', error);
       throw error;
     }
-  }, [isElectronEnvironment, updateAudioLevel]);
+  }, [isElectronEnvironment, updateAudioLevel, useScreenShareMode]);
 
   const stopRecording = useCallback(async (): Promise<Blob | null> => {
     return new Promise((resolve) => {
@@ -314,5 +328,6 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
     isElectronEnvironment,
     availableSources,
     refreshSources,
+    setUseScreenShare,
   };
 }
