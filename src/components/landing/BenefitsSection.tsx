@@ -11,7 +11,8 @@ const benefits = [
   {
     icon: Brain,
     title: "Analyzed Sales Conversation",
-    description: "so managers can review each sales call with data, not opinion.",
+    description:
+      "Before high-stakes meetings, short prompts help prepare for objections and clarify outcomes. Afterward, leaders debrief sales calls in minutes while interactions are still fresh.",
     gradient: "from-success/20 to-success/5",
   },
   {
