@@ -1,46 +1,26 @@
-import { Briefcase, Users, DollarSign, Phone, CheckCircle } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FileSearch, MessageSquare, BarChart2, CheckCircle } from 'lucide-react';
 
-const useCases = [
+const steps = [
   {
-    id: 'revenue',
-    icon: Briefcase,
-    title: 'Revenue Leadership',
-    points: [
-      'Commercial organizations depend on effective sales call quality and resilient managers. Focus on how leaders prepare, run, and debrief customer meetings.',
-      'Regional VPs use AI coaching to simulate board-level presentations, test pricing strategies, and refine objection handling before critical sales calls.',
-      'Afterward, sit with an executive coach to explore influence patterns, organizational politics, and long-term positioning with customers.',
-    ],
+    letter: 'A',
+    title: 'Before the Call',
+    description: 'Use AI prompts to prep: outline goals, anticipate pushback, test strategies.',
+    icon: FileSearch,
+    color: 'from-primary to-primary/80',
   },
   {
-    id: 'managers',
-    icon: Users,
-    title: 'Sales Managers',
-    points: [
-      'Many top sellers became managers without formal training. Practice difficult performance conversations through the AI coaching platform.',
-      'Explore how AI prompts suggest more active listening during sales calls and connect individual targets to wider strategy.',
-      'Set clear expectations, manage deals effectively, and provide better day-to-day support to your team.',
-    ],
+    letter: 'B',
+    title: 'During the Call',
+    description: 'Get live sync and post-call debriefs with auto-summaries of strengths/gaps.',
+    icon: MessageSquare,
+    color: 'from-accent to-accent/80',
   },
   {
-    id: 'negotiations',
-    icon: DollarSign,
-    title: 'High-Stakes Negotiations',
-    points: [
-      'Identify which sales calls stall most often—typically price negotiations—and design focused interventions for those moments.',
-      'Create role-plays, targeted content, and specific behaviors your teams must demonstrate on critical calls.',
-      'Track how often discounting becomes the default response versus re-anchoring on value and impact.',
-    ],
-  },
-  {
-    id: 'quality',
-    icon: Phone,
-    title: 'Call Quality Standards',
-    points: [
-      'Set quality standards for all sales calls from first contact to executive reviews. Define what "good" looks like for discovery, demos, and pricing discussions.',
-      'Link standards to observation tools, feedback forms, and AI coaching insights across teams, regions, and partners.',
-      'Accelerate learning, help new hires start strong, and ensure everyone benefits from top performer experience.',
-    ],
+    letter: 'C',
+    title: 'After the Call',
+    description: 'Link insights to pipeline, share learnings, and improve scripts/messaging fast.',
+    icon: BarChart2,
+    color: 'from-success to-success/80',
   },
 ];
 
@@ -50,57 +30,44 @@ export function UseCasesSection() {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            From Sales Floor to{' '}
-            <span className="gradient-text">Boardroom</span>
+            How It Fits Your{' '}
+            <span className="gradient-text">Daily Sales Process</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            The most visible impact often starts with revenue leadership. AI coaching transforms 
-            how organizations approach sales calls at every level.
+            AI coaching that works with you at every stage of the sales call
           </p>
         </div>
 
-        <Tabs defaultValue="revenue" className="max-w-5xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto gap-2 bg-transparent p-0 mb-8">
-            {useCases.map((useCase) => (
-              <TabsTrigger 
-                key={useCase.id}
-                value={useCase.id}
-                className="flex items-center gap-2 py-3 px-4 rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary transition-all"
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6">
+            {steps.map((step) => (
+              <div
+                key={step.letter}
+                className="group bg-card/80 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-2xl hover:border-primary/30 transition-all duration-300 text-center"
               >
-                <useCase.icon className="h-4 w-4" />
-                <span className="text-sm font-medium hidden sm:inline">{useCase.title.split(' ')[0]}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {useCases.map((useCase) => (
-            <TabsContent 
-              key={useCase.id}
-              value={useCase.id}
-              className="mt-0 animate-fade-in"
-            >
-              <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border/50 p-6 md:p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                    <useCase.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-semibold text-foreground">
-                    {useCase.title}
-                  </h3>
+                {/* Letter badge */}
+                <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center mx-auto mb-5 shadow-lg group-hover:scale-110 transition-transform`}>
+                  <span className="text-3xl font-bold text-white">{step.letter}</span>
                 </div>
 
-                <div className="space-y-4">
-                  {useCase.points.map((point, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
-                      <p className="text-muted-foreground leading-relaxed">{point}</p>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <step.icon className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
                 </div>
+
+                <p className="text-muted-foreground text-sm leading-relaxed">{step.description}</p>
               </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+            ))}
+          </div>
+
+          {/* Connection line (visual) */}
+          <div className="hidden md:flex items-center justify-center mt-8">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <CheckCircle className="h-5 w-5 text-success" />
+              <span>Continuous improvement loop for every sales call</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import { TrendingUp, Target, Clock, DollarSign } from 'lucide-react';
+import { TrendingUp, Target, Clock, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const metrics = [
@@ -6,7 +6,7 @@ const metrics = [
     icon: TrendingUp,
     stat: '+35%',
     title: 'Revenue Growth',
-    description: 'Teams using AI coaching consistently outperform on close rates and deal velocity.',
+    description: 'Teams close bigger deals faster',
     gradient: 'from-success/20 to-success/5',
     color: 'text-success',
   },
@@ -14,7 +14,7 @@ const metrics = [
     icon: Target,
     stat: '95%',
     title: 'Forecast Accuracy',
-    description: 'Data-driven predictions replace guesswork in pipeline management.',
+    description: 'Data replaces gut feel',
     gradient: 'from-primary/20 to-primary/5',
     color: 'text-primary',
   },
@@ -22,15 +22,15 @@ const metrics = [
     icon: Clock,
     stat: '40%',
     title: 'Time Saved',
-    description: 'Automated call reviews and AI-generated summaries eliminate manual work.',
+    description: 'Auto-summaries end manual reviews',
     gradient: 'from-accent/20 to-accent/5',
     color: 'text-accent',
   },
   {
-    icon: DollarSign,
+    icon: Zap,
     stat: '2x',
     title: 'Deal Velocity',
-    description: 'Faster sales cycles through better preparation and real-time coaching.',
+    description: 'Better prep shortens cycles',
     gradient: 'from-warning/20 to-warning/5',
     color: 'text-warning',
   },
@@ -45,12 +45,11 @@ export function ROISection() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Measuring Impact of{' '}
-            <span className="gradient-text">AI Coaching</span>
+            Real Results{' '}
+            <span className="gradient-text">You Can Measure</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Senior stakeholders expect clear evidence that AI coaching investment delivers measurable value. 
-            Our platform links individual development to business results you can defend to the board.
+            AI coaching that delivers measurable impact on your sales performance
           </p>
         </div>
 
@@ -73,14 +72,6 @@ export function ROISection() {
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        <div className="mt-12 max-w-3xl mx-auto text-center">
-          <p className="text-lg text-muted-foreground italic">
-            Configurable dashboards show program reach, engagement levels, behavior changes, and 
-            correlations with key sales call metrics—transparency that helps allocate resources 
-            and demonstrate value.
-          </p>
         </div>
       </div>
     </section>

@@ -8,12 +8,11 @@ import { HeroSection } from '@/components/landing/HeroSection';
 // Below-the-fold components lazy loaded for faster initial paint
 const IntroSection = lazy(() => import('@/components/landing/IntroSection').then(m => ({ default: m.IntroSection })));
 const WhatIsAISection = lazy(() => import('@/components/landing/WhatIsAISection').then(m => ({ default: m.WhatIsAISection })));
-const BenefitsSection = lazy(() => import('@/components/landing/BenefitsSection').then(m => ({ default: m.BenefitsSection })));
 const CoreFeaturesSection = lazy(() => import('@/components/landing/CoreFeaturesSection').then(m => ({ default: m.CoreFeaturesSection })));
+const BenefitsSection = lazy(() => import('@/components/landing/BenefitsSection').then(m => ({ default: m.BenefitsSection })));
 const UseCasesSection = lazy(() => import('@/components/landing/UseCasesSection').then(m => ({ default: m.UseCasesSection })));
 const ROISection = lazy(() => import('@/components/landing/ROISection').then(m => ({ default: m.ROISection })));
 const GovernanceSection = lazy(() => import('@/components/landing/GovernanceSection').then(m => ({ default: m.GovernanceSection })));
-const FutureOutlookSection = lazy(() => import('@/components/landing/FutureOutlookSection').then(m => ({ default: m.FutureOutlookSection })));
 const FinalCTASection = lazy(() => import('@/components/landing/FinalCTASection').then(m => ({ default: m.FinalCTASection })));
 const LandingFooter = lazy(() => import('@/components/landing/LandingFooter').then(m => ({ default: m.LandingFooter })));
 const DemoVideoModal = lazy(() => import('@/components/landing/DemoVideoModal').then(m => ({ default: m.DemoVideoModal })));
@@ -71,37 +70,39 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Content Sections - Streamlined for ~1100 words total */}
+      {/* Intro - Platform Overview */}
       <Suspense fallback={<SectionLoader />}>
         <IntroSection />
       </Suspense>
 
+      {/* Problem - Why Sales Calls Need AI Coaching */}
       <Suspense fallback={<SectionLoader />}>
         <WhatIsAISection />
       </Suspense>
 
-      <Suspense fallback={<SectionLoader />}>
-        <BenefitsSection />
-      </Suspense>
-
+      {/* Solution - How SellSig Fixes Pain Points (1-2-3) */}
       <Suspense fallback={<SectionLoader />}>
         <CoreFeaturesSection />
       </Suspense>
 
+      {/* Benefits - Core Benefits Your Team Gets */}
+      <Suspense fallback={<SectionLoader />}>
+        <BenefitsSection />
+      </Suspense>
+
+      {/* Process - ABC Steps */}
       <Suspense fallback={<SectionLoader />}>
         <UseCasesSection />
       </Suspense>
 
+      {/* Results - Real Results You Can Measure */}
       <Suspense fallback={<SectionLoader />}>
         <ROISection />
       </Suspense>
 
+      {/* Differentiator - What Makes SellSig Different */}
       <Suspense fallback={<SectionLoader />}>
         <GovernanceSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionLoader />}>
-        <FutureOutlookSection />
       </Suspense>
 
       {/* Final CTA */}

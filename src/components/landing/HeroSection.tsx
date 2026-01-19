@@ -43,16 +43,16 @@ export function HeroSection({
 
             {/* Main Headline - H1 optimized */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] animate-slide-up">
-              AI Coaching for
+              AI Coaching for Sales Calls:
               <br />
-              <span className="gradient-text-aurora">High-Impact Sales Calls</span>
+              <span className="gradient-text-aurora">Win More Deals, Faster</span>
             </h1>
 
             {/* Subheadline - Description optimized */}
             <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-slide-up" style={{
               animationDelay: '0.1s'
             }}>
-              Drive measurable growth with AI coaching for executives and teams, optimizing sales performance, call quality, and leadership decisions through continuous, data-driven feedback.
+              Get AI coaching for sales calls that analyzes every conversation, gives real-time guidance, speeds up team ramp-up, and helps your reps win more deals with confidence—no guesswork needed.
             </p>
 
             {/* CTA Buttons */}

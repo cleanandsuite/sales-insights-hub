@@ -1,42 +1,34 @@
-import { Phone, Brain, LineChart, Users, BarChart2, Shield } from "lucide-react";
-const features = [
+import { Search, Zap, TrendingUp, CheckCircle } from "lucide-react";
+
+const steps = [
   {
-    icon: Phone,
-    title: "Sales Call Debriefs",
+    number: "1",
+    icon: Search,
+    title: "Analyzes Every Sales Call Automatically",
     description:
-      "Capture quick reflections linked to deal stages. Generates concise summaries highlighting strengths and gaps helping managers review the sales call without rewatching full recordings.",
+      "Our intelligent engine reviews recordings, notes, and CRM updates to spot what works and what doesn't—without you watching hours of video.",
+    color: "from-primary to-primary/80",
   },
   {
-    icon: Brain,
-    title: "Prompts and Ai coaching",
-    description:
-      "Just-in-time guidance before major negotiations. The AI coach asks you to outline objectives, anticipate objections, and test alternative strategies.",
+    number: "2",
+    icon: Zap,
+    title: "Delivers Real-Time and Just-in-Time Guidance",
+    points: [
+      "Before a big call: Get quick AI prompts to prepare objections, set goals, and plan your approach.",
+      "During/after: Receive instant feedback on tone, listening, and next steps—while details are fresh.",
+    ],
+    color: "from-accent to-accent/80",
   },
   {
-    icon: LineChart,
-    title: "Performance Analytics",
+    number: "3",
+    icon: TrendingUp,
+    title: "Builds Better Habits and Team Performance",
     description:
-      "Compare call summaries across regions and roles. See how tone, pacing, and listening affect conversion rates over time and how these metrics relate to leads, close rates, and the health of the broader sales pipeline.",
-  },
-  {
-    icon: Users,
-    title: "Team Insights",
-    description:
-      "Tie conversation quality directly to deals closed. Point to concrete shifts in close rates and cycle time tied to specific behaviors defined as ai coaching benchmarks.",
-  },
-  {
-    icon: BarChart2,
-    title: "Behavior Libraries",
-    description:
-      "Reusable assets for sales calls, QBRs, and steering committees. Pull examples of strong value narratives and objection handling from top performers, building a practical script library that every coach and rep can access.",
-  },
-  {
-    icon: Shield,
-    title: "Privacy & Governance",
-    description:
-      "Data encryption, tight access controls, and clear terms respecting both company policies and individual privacy during digital sessions and call reviews.",
+      "Link call quality directly to deals won. Share top-performer examples, set clear standards for discovery/demos/pricing, and track improvements in close rates, deal speed, and forecast accuracy.",
+    color: "from-success to-success/80",
   },
 ];
+
 export function CoreFeaturesSection() {
   return (
     <section className="py-20 md:py-28 bg-section-glass relative overflow-hidden" id="features">
@@ -46,26 +38,48 @@ export function CoreFeaturesSection() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Core Features For The
-            <span className="text-primary"> Ai Coaching Program & Sales Calls</span>
+            How SellSig's AI Coaching
+            <span className="text-primary"> Fixes These Pain Points</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Within the same workspace, teams track call outcomes alongside pipeline metrics. Link conversation quality
-            directly to revenue for a stronger case for development investment.
+            The simple 1-2-3 solution to transform your sales calls
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature) => (
+        <div className="max-w-4xl mx-auto space-y-8">
+          {steps.map((step) => (
             <div
-              key={feature.title}
-              className="group bg-card/80 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
+              key={step.number}
+              className="group bg-card/80 backdrop-blur-sm rounded-2xl border border-border/50 p-6 md:p-8 hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
             >
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <feature.icon className="h-6 w-6 text-primary" />
+              <div className="flex items-start gap-6">
+                {/* Step number */}
+                <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                  <span className="text-2xl font-bold text-white">{step.number}</span>
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <step.icon className="h-5 w-5 text-primary" />
+                    <h3 className="text-xl font-semibold text-foreground">{step.title}</h3>
+                  </div>
+                  
+                  {step.description && (
+                    <p className="text-muted-foreground leading-relaxed">{step.description}</p>
+                  )}
+                  
+                  {step.points && (
+                    <ul className="space-y-3 mt-2">
+                      {step.points.map((point, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <CheckCircle className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>
