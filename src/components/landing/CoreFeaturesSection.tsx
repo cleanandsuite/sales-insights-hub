@@ -1,60 +1,63 @@
-import { Users, Mail, LineChart, Calendar, BarChart2, Link2, Shield, Scale } from 'lucide-react';
+import { Phone, Brain, LineChart, Users, BarChart2, Shield } from 'lucide-react';
 
 const features = [
   {
-    icon: Users,
-    title: 'Lead and Account Scoring',
-    description: 'AI sales tools with advanced scoring models evaluate prospects based on activity, engagement, firmographic data, and digital signals, giving sales teams a clear view of which opportunities to pursue first.',
+    icon: Phone,
+    title: 'Sales Call Debriefs',
+    description: 'After every call with key prospects, capture quick reflections linked to deal stages and next steps. The system generates concise summaries highlighting strengths and gaps.',
   },
   {
-    icon: Mail,
-    title: 'AI-Powered Email & Language Assistance',
-    description: 'Tools that use natural language AI help sellers draft email, social messages, and call summaries faster, in accurate language that matches buyer expectations and brand guidelines.',
+    icon: Brain,
+    title: 'AI Coaching Prompts',
+    description: 'Just-in-time guidance before major negotiations. The AI coach asks you to outline objectives, anticipate objections, and test alternative strategies.',
   },
   {
     icon: LineChart,
-    title: 'Pipeline and Revenue Forecasting',
-    description: 'Modern AI sales tools use historical patterns, deal stage data, and activity signals to generate forecasting reports that show realistic revenue scenarios.',
+    title: 'Performance Analytics',
+    description: 'Compare call summaries across regions and roles. See how tone, pacing, and listening affect conversion rates over time.',
   },
   {
-    icon: Calendar,
-    title: 'Scheduling and Meeting Automation',
-    description: 'Integrated AI tools can schedule meetings, manage calendar conflicts, and book demos without manual back-and-forth, improving response speed and engagement.',
+    icon: Users,
+    title: 'Team Insights',
+    description: 'Tie conversation quality directly to deals closed. Point to concrete shifts in close rates and cycle time tied to specific AI coaching behaviors.',
   },
   {
     icon: BarChart2,
-    title: 'Analytics and Reporting',
-    description: 'Effective AI sales tools provide tailored dashboards, real-time analysis, and updates on pipeline health, conversion by stage, and performance by sales agents or areas.',
+    title: 'Behavior Libraries',
+    description: 'Reusable assets for sales calls, QBRs, and steering committees. Pull examples of strong value narratives and objection handling from top performers.',
   },
   {
-    icon: Link2,
-    title: 'Integrations and Platform Connectivity',
-    description: 'AI sales tools should connect with CRM platforms such as HubSpot and Salesforce, as well as marketing, support, and digital engagement systems.',
+    icon: Shield,
+    title: 'Privacy & Governance',
+    description: 'Data encryption, tight access controls, and clear terms respecting both company policies and individual privacy during AI coaching sessions.',
   },
 ];
 
 export function CoreFeaturesSection() {
   return (
-    <section className="py-20 md:py-28 bg-features-gradient" id="features">
-      <div className="container mx-auto px-4">
+    <section className="py-20 md:py-28 bg-section-glass relative overflow-hidden" id="features">
+      {/* Subtle aurora background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Core Features to Look For in{' '}
-            <span className="text-primary">AI Sales Tools</span>
+            Core Features for{' '}
+            <span className="text-primary">AI Coaching & Sales Calls</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            When assessing AI sales tools, review the features in relation to current systems, workflows, 
-            and industry requirements. Check how each tool fits existing sales models and privacy policies.
+            Within the same workspace, teams track call outcomes alongside pipeline metrics. 
+            Link conversation quality directly to revenue for a stronger case for development investment.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <div 
               key={feature.title}
-              className="group bg-card rounded-xl border border-border p-6 hover:shadow-xl hover:border-primary/30 transition-all duration-300"
+              className="group bg-card/80 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
             >
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <feature.icon className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-3">
@@ -65,23 +68,6 @@ export function CoreFeaturesSection() {
               </p>
             </div>
           ))}
-        </div>
-
-        {/* Additional Note */}
-        <div className="mt-12 bg-card rounded-xl border border-border p-6 max-w-3xl mx-auto">
-          <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-              <Scale className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-2">Scalability & Security</h4>
-              <p className="text-sm text-muted-foreground">
-                Beyond these features, check whether each AI sales tool can scale with team growth, 
-                support different sales models, and offer flexible access controls to protect customer 
-                data and privacy.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </section>

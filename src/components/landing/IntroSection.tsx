@@ -1,44 +1,47 @@
-import { Database, TrendingUp, Target, Zap } from 'lucide-react';
+import { Brain, Phone, TrendingUp, Zap } from 'lucide-react';
 
 export function IntroSection() {
   return (
-    <section className="py-20 md:py-28 bg-background">
-      <div className="container mx-auto px-4">
+    <section className="py-20 md:py-28 bg-section-aurora relative overflow-hidden">
+      {/* Subtle mesh background */}
+      <div className="absolute inset-0 bg-mesh-subtle opacity-50" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            AI Sales Tools: Data-Driven Platforms for{' '}
-            <span className="gradient-text">Revenue Growth</span>
+            Why Your Sales Calls Need{' '}
+            <span className="gradient-text">AI Coaching</span>
           </h2>
           
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            AI-powered sales now helps sales teams move from manual, time-consuming tasks to data-driven, 
-            digital selling. Our platform shows you how to use AI sales tools to optimize every stage of 
-            the sales cycle and increase predictable revenue.
+            Senior leaders navigate complex deals and high-stakes customer interactions, yet traditional 
+            development support often fails to keep pace. Workshops and occasional coaching sessions create 
+            insight, but impact fades once people return to real pressure.
           </p>
 
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            By combining AI, sales data, and modern tools in one platform, companies can analyze data, 
-            track activity, forecast results, and turn complex information into accurate, real decisions 
-            that directly support sales strategy and conversion.
+            This is exactly where AI coaching transforms sales calls. Instead of sporadic meetings, 
+            equip every team member with continuous, data-based guidance that adapts to their role and 
+            current pipeline—delivering stronger performance and measurable business outcomes.
           </p>
         </div>
 
-        {/* Visual Icons Grid */}
+        {/* Visual Icons Grid with glass effect */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 max-w-4xl mx-auto">
           {[
-            { icon: Database, label: 'Data Analysis', color: 'bg-primary/10 text-primary' },
-            { icon: TrendingUp, label: 'Revenue Tracking', color: 'bg-success/10 text-success' },
-            { icon: Target, label: 'Accurate Forecasts', color: 'bg-accent/10 text-accent' },
-            { icon: Zap, label: 'Real-time Decisions', color: 'bg-warning/10 text-warning' },
-          ].map((item, index) => (
+            { icon: Brain, label: 'AI Coaching', color: 'from-primary/20 to-primary/5' },
+            { icon: Phone, label: 'Sales Calls', color: 'from-success/20 to-success/5' },
+            { icon: TrendingUp, label: 'Growth Metrics', color: 'from-accent/20 to-accent/5' },
+            { icon: Zap, label: 'Real-time Feedback', color: 'from-warning/20 to-warning/5' },
+          ].map((item) => (
             <div 
               key={item.label}
-              className="flex flex-col items-center gap-3 p-6 rounded-xl bg-card border border-border hover:shadow-lg transition-shadow"
+              className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 hover:shadow-xl hover:border-primary/30 transition-all duration-300 glass-card-subtle"
             >
-              <div className={`h-14 w-14 rounded-full ${item.color} flex items-center justify-center`}>
-                <item.icon className="h-7 w-7" />
+              <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center`}>
+                <item.icon className="h-7 w-7 text-foreground" />
               </div>
-              <span className="text-sm font-medium text-foreground text-center">{item.label}</span>
+              <span className="text-sm font-semibold text-foreground text-center">{item.label}</span>
             </div>
           ))}
         </div>

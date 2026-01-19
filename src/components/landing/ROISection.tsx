@@ -1,88 +1,85 @@
-import { Clock, TrendingUp, Target, DollarSign } from 'lucide-react';
+import { TrendingUp, Target, Clock, DollarSign } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const metrics = [
   {
-    icon: Clock,
-    title: 'Productivity Impact',
-    description: 'Track how AI affects sales productivity, including time saved on manual tasks, data entry, and scheduling, and how this time is redirected toward high-value selling activities.',
-    stat: '40%',
-    statLabel: 'Time Saved',
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
-  },
-  {
     icon: TrendingUp,
-    title: 'Conversion Changes',
-    description: 'Measure changes in conversion from lead to opportunity and from opportunity to closed deals, and use AI reports to identify which actions contributed most to improvement.',
-    stat: '+25%',
-    statLabel: 'Higher Conversion',
+    stat: '+35%',
+    title: 'Revenue Growth',
+    description: 'Teams using AI coaching consistently outperform on close rates and deal velocity.',
+    gradient: 'from-success/20 to-success/5',
     color: 'text-success',
-    bgColor: 'bg-success/10',
   },
   {
     icon: Target,
-    title: 'Forecast Accuracy',
-    description: 'Compare forecast accuracy before and after AI implementation to show how AI sales tools support better planning and inventory, staffing, and cash flow decisions.',
     stat: '95%',
-    statLabel: 'Accuracy Rate',
+    title: 'Forecast Accuracy',
+    description: 'Data-driven predictions replace guesswork in pipeline management.',
+    gradient: 'from-primary/20 to-primary/5',
+    color: 'text-primary',
+  },
+  {
+    icon: Clock,
+    stat: '40%',
+    title: 'Time Saved',
+    description: 'Automated call reviews and AI-generated summaries eliminate manual work.',
+    gradient: 'from-accent/20 to-accent/5',
     color: 'text-accent',
-    bgColor: 'bg-accent/10',
   },
   {
     icon: DollarSign,
-    title: 'Deal Margin',
-    description: 'Assess whether AI-driven pricing and offer guidance increases deal margin, average contract value, and lifetime value of customers.',
-    stat: '+18%',
-    statLabel: 'Margin Increase',
+    stat: '2x',
+    title: 'Deal Velocity',
+    description: 'Faster sales cycles through better preparation and real-time coaching.',
+    gradient: 'from-warning/20 to-warning/5',
     color: 'text-warning',
-    bgColor: 'bg-warning/10',
   },
 ];
 
 export function ROISection() {
   return (
-    <section className="py-20 md:py-28 bg-features-gradient" id="roi">
-      <div className="container mx-auto px-4">
+    <section className="py-20 md:py-28 bg-section-aurora relative overflow-hidden" id="roi">
+      {/* Aurora background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/3 to-transparent" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Measuring Results and{' '}
-            <span className="text-primary">ROI of AI in Sales</span>
+            Measuring Impact of{' '}
+            <span className="gradient-text">AI Coaching</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            To justify ongoing investment, leaders must connect AI sales tools directly to performance metrics, 
-            costs, and revenue outcomes, using consistent reporting and analysis.
+            Senior stakeholders expect clear evidence that AI coaching investment delivers measurable value. 
+            Our platform links individual development to business results you can defend to the board.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {metrics.map((metric) => (
-            <Card key={metric.title} className="group hover:shadow-xl transition-all border-border hover:border-primary/30">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`h-12 w-12 rounded-xl ${metric.bgColor} flex items-center justify-center`}>
-                    <metric.icon className={`h-6 w-6 ${metric.color}`} />
+            <Card 
+              key={metric.title}
+              className="group hover:shadow-2xl transition-all duration-300 border-border/50 hover:border-primary/30 bg-card/80 backdrop-blur-sm overflow-hidden"
+            >
+              <CardContent className="p-6 text-center relative">
+                <div className={`absolute inset-0 bg-gradient-to-br ${metric.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className="relative z-10">
+                  <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${metric.gradient} flex items-center justify-center mx-auto mb-4`}>
+                    <metric.icon className={`h-7 w-7 ${metric.color}`} />
                   </div>
-                  <div className="text-right">
-                    <p className={`text-3xl font-bold ${metric.color}`}>{metric.stat}</p>
-                    <p className="text-xs text-muted-foreground">{metric.statLabel}</p>
-                  </div>
+                  <p className={`text-4xl font-bold ${metric.color} mb-2`}>{metric.stat}</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{metric.title}</h3>
+                  <p className="text-sm text-muted-foreground">{metric.description}</p>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {metric.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {metric.description}
-                </p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="mt-12 bg-card rounded-xl border border-border p-6 max-w-3xl mx-auto text-center">
-          <p className="text-muted-foreground">
-            When these indicators show consistent improvement, organizations can confidently expand AI 
-            across more sales areas and continue to refine their powered sales models.
+        <div className="mt-12 max-w-3xl mx-auto text-center">
+          <p className="text-lg text-muted-foreground italic">
+            Configurable dashboards show program reach, engagement levels, behavior changes, and 
+            correlations with key sales call metrics—transparency that helps allocate resources 
+            and demonstrate value.
           </p>
         </div>
       </div>

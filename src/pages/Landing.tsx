@@ -11,14 +11,9 @@ const WhatIsAISection = lazy(() => import('@/components/landing/WhatIsAISection'
 const BenefitsSection = lazy(() => import('@/components/landing/BenefitsSection').then(m => ({ default: m.BenefitsSection })));
 const CoreFeaturesSection = lazy(() => import('@/components/landing/CoreFeaturesSection').then(m => ({ default: m.CoreFeaturesSection })));
 const UseCasesSection = lazy(() => import('@/components/landing/UseCasesSection').then(m => ({ default: m.UseCasesSection })));
-const HowToChooseSection = lazy(() => import('@/components/landing/HowToChooseSection').then(m => ({ default: m.HowToChooseSection })));
-const ImplementationSection = lazy(() => import('@/components/landing/ImplementationSection').then(m => ({ default: m.ImplementationSection })));
 const ROISection = lazy(() => import('@/components/landing/ROISection').then(m => ({ default: m.ROISection })));
-const ToolCategoriesSection = lazy(() => import('@/components/landing/ToolCategoriesSection').then(m => ({ default: m.ToolCategoriesSection })));
-const IntegrationsSection = lazy(() => import('@/components/landing/IntegrationsSection').then(m => ({ default: m.IntegrationsSection })));
 const GovernanceSection = lazy(() => import('@/components/landing/GovernanceSection').then(m => ({ default: m.GovernanceSection })));
 const FutureOutlookSection = lazy(() => import('@/components/landing/FutureOutlookSection').then(m => ({ default: m.FutureOutlookSection })));
-const PracticalTipsSection = lazy(() => import('@/components/landing/PracticalTipsSection').then(m => ({ default: m.PracticalTipsSection })));
 const FinalCTASection = lazy(() => import('@/components/landing/FinalCTASection').then(m => ({ default: m.FinalCTASection })));
 const LandingFooter = lazy(() => import('@/components/landing/LandingFooter').then(m => ({ default: m.LandingFooter })));
 const DemoVideoModal = lazy(() => import('@/components/landing/DemoVideoModal').then(m => ({ default: m.DemoVideoModal })));
@@ -58,7 +53,7 @@ export default function Landing() {
       />
 
       {/* Trusted By Section */}
-      <section className="py-8 border-y border-border bg-card">
+      <section className="py-8 border-y border-border/50 bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <p className="text-center text-xs uppercase tracking-wider text-muted-foreground mb-6 font-medium">
             Trusted by sales teams at
@@ -76,7 +71,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Content Sections */}
+      {/* Content Sections - Streamlined for ~1100 words total */}
       <Suspense fallback={<SectionLoader />}>
         <IntroSection />
       </Suspense>
@@ -98,31 +93,11 @@ export default function Landing() {
       </Suspense>
 
       <Suspense fallback={<SectionLoader />}>
-        <HowToChooseSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionLoader />}>
-        <ImplementationSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionLoader />}>
         <ROISection />
       </Suspense>
 
       <Suspense fallback={<SectionLoader />}>
-        <ToolCategoriesSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionLoader />}>
-        <IntegrationsSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionLoader />}>
         <GovernanceSection />
-      </Suspense>
-
-      <Suspense fallback={<SectionLoader />}>
-        <PracticalTipsSection />
       </Suspense>
 
       <Suspense fallback={<SectionLoader />}>
