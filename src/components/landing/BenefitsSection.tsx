@@ -10,7 +10,7 @@ const benefits = [
   },
   {
     icon: Brain,
-    title: "Real-time AI Coaching",
+    title: "Analyzed Sales Conversation",
     description:
       "Before high-stakes meetings, short prompts help prepare for objections and clarify outcomes. Afterward, leaders debrief sales calls in minutes while interactions are still fresh.",
     gradient: "from-success/20 to-success/5",
