@@ -1,4 +1,5 @@
 import { Brain, Phone, TrendingUp, Zap } from "lucide-react";
+
 export function IntroSection() {
   return (
     <section className="py-20 md:py-28 bg-section-aurora relative overflow-hidden">
@@ -8,20 +9,14 @@ export function IntroSection() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-            Why Every Sales Conversations
-            <span className="gradient-text">Need AI Coaching</span>
+            Your All-in-One{" "}
+            <span className="gradient-text">AI Coaching Platform</span>
           </h2>
 
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Senior leaders navigate complex deals and high-stakes customer interactions, yet traditional development
-            support often fails to keep pace. Workshops and occasional coaching sessions create insight, but impact
-            fades once people return to real pressure and real sales calls.
-          </p>
-
-          <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            This is exactly where AI-driven guidance, where ai coaches operate in real time, thransforms customer calls.
-            Instead of sporadic meetings, equip every team member with continuous, data-based guidance that adapts to
-            their role and current pipeline—delivering stronger performance and measurable business outcomes.
+            SellSig brings your call recordings, CRM data, and team performance together in one simple platform. 
+            Our AI coaching turns every sales call into a chance to improve—helping your reps close more deals, 
+            forecast better, and give your company an unfair edge over competitors.
           </p>
         </div>
 
@@ -40,12 +35,12 @@ export function IntroSection() {
             },
             {
               icon: TrendingUp,
-              label: "Growth Metrics",
+              label: "Deal Velocity",
               color: "from-accent/20 to-accent/5",
             },
             {
               icon: Zap,
-              label: "Real-time Feedback",
+              label: "Real-time Guidance",
               color: "from-warning/20 to-warning/5",
             },
           ].map((item) => (

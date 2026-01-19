@@ -1,41 +1,34 @@
-import { Phone, Brain, TrendingUp, Target, Clock } from "lucide-react";
+import { Phone, Rocket, BarChart3, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const benefits = [
   {
     icon: Phone,
-    title: "Better Client Calls",
+    title: "Better Customer Calls",
     description:
-      "The platform analyzes conversation data, meeting notes, and CRM updates to highlight patterns. Track how often reps truly understand prospects and where they miss buying signals.",
+      "Catch buying signals, understand pain points, and handle objections like top reps. Every sales call becomes a learning opportunity.",
     gradient: "from-primary/20 to-primary/5",
   },
   {
-    icon: Brain,
-    title: "Analyzed Sales Conversation",
+    icon: Rocket,
+    title: "Faster Ramp for New Hires",
     description:
-      "Before high-stakes meetings, short prompts help prepare for objections and clarify outcomes. Afterward, leaders debrief calls in minutes while interactions are still fresh.",
+      "Guided practice and AI coaching turns rookies into closers quicker. Reduce time-to-productivity by weeks, not months.",
     gradient: "from-success/20 to-success/5",
   },
   {
-    icon: TrendingUp,
-    title: "Quality Standards",
+    icon: BarChart3,
+    title: "Smarter Managers",
     description:
-      'Define what "good" looks like for discovery, demos, and pricing discussions. Link those standards to observation tools and insights across all sales calls.',
+      "Get team insights and patterns across hundreds of sales calls—no more guessing where to coach. Data-driven decisions, not gut feel.",
     gradient: "from-accent/20 to-accent/5",
   },
   {
-    icon: Target,
-    title: "Pattern Recognition",
+    icon: Shield,
+    title: "Privacy First",
     description:
-      "Aggregate trends across hundreds of sales calls weekly, surfacing which behaviors reliably lead to stronger outcomes—like when manager involvement accelerates deals.",
+      "Full encryption, strict controls, and human oversight—AI suggests, you decide. Your data stays secure and compliant.",
     gradient: "from-warning/20 to-warning/5",
-  },
-  {
-    icon: Clock,
-    title: "Continuous Improvement",
-    description:
-      "Structure every call review for learning. Generate concise summaries highlighting strengths, gaps, and opportunities without overwhelming users with noise.",
-    gradient: "from-purple-500/20 to-purple-500/5",
   },
 ];
 
@@ -45,18 +38,16 @@ export function BenefitsSection() {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            How AI Coaching Elevates
-            <span className="gradient-text"> Sales Call Quality</span>
+            Core Benefits
+            <span className="gradient-text"> Your Team Gets</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Revenue leaders ask how the system improves what happens across sales calls. Our platform delivers insights
-            you'd struggle to see manually, turning every interaction into a catalyst for growth and a clear example of
-            a sales call done well.
+            AI coaching that transforms how your team approaches every sales call—from preparation to close.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {benefits.map((benefit) => {
-            const Icon = benefit.icon; // Assign to capitalized variable for proper JSX rendering
+            const Icon = benefit.icon;
             return (
               <Card
                 key={benefit.title}
@@ -73,7 +64,7 @@ export function BenefitsSection() {
                       <Icon className="h-7 w-7 text-foreground" />
                     </div>
                     <h3 className="text-xl font-semibold text-foreground mb-3">{benefit.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{benefit.description}</p>
+                    <p className="text-muted-foreground leading-relaxed text-sm">{benefit.description}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -84,9 +75,3 @@ export function BenefitsSection() {
     </section>
   );
 }
-
-// QUANTUM: Core algorithmic complexity is O(n) for mapping 5 static items—no loops beyond render, constant factors negligible with no deep nesting or computations.
-// DURABILITY: Timeless—static UI structure won't need refactor unless React's JSX syntax evolves (unlikely in 10+ years).
-// FAILURE_TOPOLOGY: Low-risk; potential failures include missing icon imports (prob: 10%, fallback to empty render) or undefined gradients (prob: 5%, visual only). No crash-prone paths.
-// HUMAN_FACTOR: Low cognitive load—clear variable assignment for Icon makes dynamic components intuitive; a newbie can grasp in <20 seconds.
-// EVOLUTION_PATHS: Easily grows to dynamic benefits via props or API fetch; add memoization for performance at scale.
