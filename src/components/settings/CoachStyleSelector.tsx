@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Badge } from '@/components/ui/badge';
-import { Crown, Zap, Target, Scale, Lock } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
+import { Crown, Zap, Target, Scale, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface CoachStyleSelectorProps {
   onStyleChange?: (style: string) => void;
@@ -17,47 +17,50 @@ interface CoachStyleSelectorProps {
 
 const COACH_STYLES = [
   {
-    id: 'sellsig',
-    name: 'Discovery Booker',
-    icon: '🧘',
-    description: 'Low-pressure discovery + natural appointment setting. Uncover needs, build curiosity/trust, secure low-stakes next discovery call.',
-    traits: ['No Stress', 'Discovery', 'Trust-First'],
-    color: 'border-emerald-500 bg-emerald-500/10',
-    badgeColor: 'bg-emerald-500',
+    id: "sellsig",
+    name: "Discovery Booker",
+    icon: "🧘",
+    description:
+      "Low-pressure discovery + natural appointment setting. Uncover needs, build curiosity/trust, secure low-stakes next discovery call.",
+    traits: ["No Stress", "Discovery", "Trust-First"],
+    color: "border-emerald-500 bg-emerald-500/10",
+    badgeColor: "bg-emerald-500",
   },
   {
-    id: 'cardone',
-    name: 'Energy Booster',
-    icon: '🔥',
-    description: 'High-enthusiasm, momentum-building style. Energize prospects and accelerate to booking via positive framing and urgency.',
-    traits: ['Energetic', 'Momentum', 'Urgent'],
-    color: 'border-orange-500 bg-orange-500/10',
-    badgeColor: 'bg-orange-500',
+    id: "cardone",
+    name: "Energy Booster",
+    icon: "🔥",
+    description:
+      "High-enthusiasm, momentum-building style. Energize prospects and accelerate to booking via positive framing and urgency.",
+    traits: ["Energetic", "Momentum", "Urgent"],
+    color: "border-orange-500 bg-orange-500/10",
+    badgeColor: "bg-orange-500",
   },
   {
-    id: 'belfort',
-    name: 'Layered Closer',
-    icon: '🎯',
-    description: 'Layered persuasion that builds agreement stack-by-stack. Pain → solution → proof → ask for inevitable yes.',
-    traits: ['Stacking', 'Logical', 'Pre-emptive'],
-    color: 'border-blue-500 bg-blue-500/10',
-    badgeColor: 'bg-blue-500',
+    id: "belfort",
+    name: "Layered Closer",
+    icon: "🎯",
+    description:
+      "Layered persuasion that builds agreement stack-by-stack. Pain → solution → proof → ask for inevitable yes.",
+    traits: ["Stacking", "Logical", "Pre-emptive"],
+    color: "border-blue-500 bg-blue-500/10",
+    badgeColor: "bg-blue-500",
   },
   {
-    id: 'neutral',
-    name: 'Balanced Coach',
-    icon: '⚖️',
-    description: 'Professional, balanced suggestions without a specific methodology. Great for general improvement.',
-    traits: ['Balanced', 'Professional', 'Flexible'],
-    color: 'border-muted bg-muted/30',
-    badgeColor: 'bg-muted-foreground',
+    id: "neutral",
+    name: "Balanced Coach",
+    icon: "⚖️",
+    description: "Professional, balanced suggestions without a specific methodology. Great for general improvement.",
+    traits: ["Balanced", "Professional", "Flexible"],
+    color: "border-muted bg-muted/30",
+    badgeColor: "bg-muted-foreground",
   },
 ];
 
 export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyleSelectorProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedStyle, setSelectedStyle] = useState('neutral');
+  const [selectedStyle, setSelectedStyle] = useState("neutral");
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
@@ -72,17 +75,17 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
 
     try {
       const { data, error } = await supabase
-        .from('ai_lead_settings')
-        .select('live_coach_style, live_coaching_enabled')
-        .eq('user_id', user.id)
+        .from("ai_lead_settings")
+        .select("live_coach_style, live_coaching_enabled")
+        .eq("user_id", user.id)
         .maybeSingle();
 
       if (data) {
-        setSelectedStyle(data.live_coach_style || 'neutral');
+        setSelectedStyle(data.live_coach_style || "neutral");
         setIsEnabled(data.live_coaching_enabled || false);
       }
     } catch (error) {
-      console.error('Error fetching coach settings:', error);
+      console.error("Error fetching coach settings:", error);
     } finally {
       setLoading(false);
     }
@@ -92,20 +95,20 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
     if (!user) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('check-subscription');
-      if (data?.plan === 'team' || data?.plan === 'enterprise') {
+      const { data, error } = await supabase.functions.invoke("check-subscription");
+      if (data?.plan === "team" || data?.plan === "enterprise") {
         setIsPremium(true);
       }
     } catch (error) {
-      console.error('Error checking subscription:', error);
+      console.error("Error checking subscription:", error);
     }
   };
 
   const handleStyleChange = async (style: string) => {
-    if (!isPremium && style !== 'neutral') {
+    if (!isPremium && style !== "neutral") {
       toast({
-        title: 'Premium Feature',
-        description: 'Coach styles require Team plan ($99/user/mo)',
+        title: "Premium Feature",
+        description: "Coach styles require Team plan ($99/user/mo)",
       });
       return;
     }
@@ -118,8 +121,8 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
   const handleEnabledChange = async (enabled: boolean) => {
     if (!isPremium && enabled) {
       toast({
-        title: 'Premium Feature',
-        description: 'Live AI coaching requires Team plan ($99/user/mo)',
+        title: "Premium Feature",
+        description: "Live AI coaching requires Team plan ($99/user/mo)",
       });
       return;
     }
@@ -133,25 +136,26 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('ai_lead_settings')
-        .upsert({
+      const { error } = await supabase.from("ai_lead_settings").upsert(
+        {
           user_id: user.id,
           live_coach_style: style,
           live_coaching_enabled: enabled,
           updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id'
-        });
+        },
+        {
+          onConflict: "user_id",
+        },
+      );
 
       if (error) throw error;
 
-      toast({ title: 'Settings saved' });
+      toast({ title: "Settings saved" });
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error("Error saving settings:", error);
       toast({
-        variant: 'destructive',
-        title: 'Failed to save settings',
+        variant: "destructive",
+        title: "Failed to save settings",
       });
     }
   };
@@ -173,9 +177,7 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
           <Crown className="h-5 w-5 text-primary" />
           <div>
             <Label className="text-base font-medium">Live AI Coaching</Label>
-            <p className="text-sm text-muted-foreground">
-              Get real-time suggestions during calls
-            </p>
+            <p className="text-sm text-muted-foreground">Get real-time suggestions during calls</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -185,29 +187,19 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
               Team Plan
             </Badge>
           )}
-          <Switch
-            checked={isEnabled}
-            onCheckedChange={handleEnabledChange}
-            disabled={!isPremium}
-          />
+          <Switch checked={isEnabled} onCheckedChange={handleEnabledChange} disabled={!isPremium} />
         </div>
       </div>
 
       {/* Coach Style Selection */}
       <div className="space-y-3">
         <Label className="text-base font-medium">Coach Style</Label>
-        <p className="text-sm text-muted-foreground">
-          Choose a coaching personality for live suggestions
-        </p>
+        <p className="text-sm text-muted-foreground">Choose a coaching personality for live suggestions</p>
 
-        <RadioGroup
-          value={selectedStyle}
-          onValueChange={handleStyleChange}
-          className="grid gap-4"
-        >
+        <RadioGroup value={selectedStyle} onValueChange={handleStyleChange} className="grid gap-4">
           {COACH_STYLES.map((style) => {
             const isSelected = selectedStyle === style.id;
-            const isLocked = !isPremium && style.id !== 'neutral';
+            const isLocked = !isPremium && style.id !== "neutral";
 
             return (
               <label
@@ -215,31 +207,21 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
                 className={cn(
                   "relative flex cursor-pointer rounded-lg border-2 p-4 transition-all",
                   isSelected ? style.color : "border-border hover:border-muted-foreground/50",
-                  isLocked && "opacity-60 cursor-not-allowed"
+                  isLocked && "opacity-60 cursor-not-allowed",
                 )}
               >
-                <RadioGroupItem
-                  value={style.id}
-                  className="sr-only"
-                  disabled={isLocked}
-                />
-                
+                <RadioGroupItem value={style.id} className="sr-only" disabled={isLocked} />
+
                 <div className="flex items-start gap-4 w-full">
                   <div className="text-3xl">{style.icon}</div>
-                  
+
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold">{style.name}</span>
-                      {isLocked && (
-                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                      )}
-                      {isSelected && (
-                        <Badge className={style.badgeColor}>Active</Badge>
-                      )}
+                      {isLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                      {isSelected && <Badge className={style.badgeColor}>Active</Badge>}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {style.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground mb-2">{style.description}</p>
                     <div className="flex flex-wrap gap-1">
                       {style.traits.map((trait) => (
                         <Badge key={trait} variant="outline" className="text-xs">
@@ -250,12 +232,7 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
                   </div>
                 </div>
 
-                {isSelected && (
-                  <div className={cn(
-                    "absolute top-2 right-2 h-3 w-3 rounded-full",
-                    style.badgeColor
-                  )} />
-                )}
+                {isSelected && <div className={cn("absolute top-2 right-2 h-3 w-3 rounded-full", style.badgeColor)} />}
               </label>
             );
           })}
@@ -268,7 +245,7 @@ export function CoachStyleSelector({ onStyleChange, onEnabledChange }: CoachStyl
           <div className="flex items-center gap-3">
             <Zap className="h-5 w-5 text-primary" />
             <div className="flex-1">
-              <p className="font-medium">Upgrade to Team Plan</p>
+              <p className="font-medium">Upgrade to Enterprise Now</p>
               <p className="text-sm text-muted-foreground">
                 Unlock all coach styles and live AI coaching for $99/user/mo
               </p>
