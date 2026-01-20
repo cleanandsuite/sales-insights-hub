@@ -45,7 +45,7 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const body = await req.json();
-    const { action, recordingId, date, existingCalls } = body;
+    const { action, recordingId, date, query, customPrompt } = body;
 
     if (action === "extract-from-transcript") {
       // Get recording transcript
@@ -73,13 +73,13 @@ serve(async (req) => {
       // Get call summary if available
       const { data: summary } = await supabase
         .from("call_summaries")
-        .select("agreed_next_steps, questions_to_ask, conversation_starters")
+        .select("agreed_next_steps, questions_to_ask, conversation_starters, key_points, objections_raised")
         .eq("recording_id", recordingId)
         .maybeSingle();
 
       const transcript = recording.live_transcription || "";
 
-      // Use AI to extract scheduling info from transcript
+      // Enhanced AI extraction with summary, key points, and objections
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -91,33 +91,38 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are a scheduling assistant. Extract scheduling information from a sales call transcript.
+              content: `You are a scheduling assistant and call analyst. Extract scheduling information and provide a comprehensive summary.
               
 Return a JSON object with:
 - suggested_title: A descriptive title for the follow-up call (e.g., "Follow-up: Demo walkthrough with Acme Corp")
 - contact_name: The contact's name mentioned in the call
 - contact_email: Email if mentioned
-- suggested_date: ISO date string if a specific date/time was mentioned (e.g., "next Tuesday at 2pm" -> calculate from today)
+- suggested_date: ISO date string if a specific date/time was mentioned (calculate from today)
 - suggested_time: Time in HH:MM format if mentioned
 - suggested_duration: Duration in minutes (15, 30, 45, 60, 90) based on context
 - meeting_provider: Inferred platform (zoom, teams, google_meet, other)
 - prep_notes: Brief notes for call preparation based on agreed next steps
 - confidence: 0-100 confidence score for the extraction
-- follow_up_reason: Why this follow-up is needed
+- follow_up_reason: Why this follow-up is needed (1-2 sentences)
 - urgency: "high", "medium", or "low" based on conversation context
+- ai_summary: A 2-3 sentence summary of the call (key outcome, main topic discussed, sentiment)
+- key_points: Array of 3-5 key discussion points from the call
+- objections: Array of any objections or concerns raised by the prospect
+- next_steps: Array of agreed next steps or action items
 
 Today's date is: ${new Date().toISOString()}`
             },
             {
               role: "user",
-              content: `Extract scheduling info from this call:
+              content: `Extract scheduling info and create a summary from this call:
 
 Recording: ${recording.name || "Untitled"}
 Lead Info: ${JSON.stringify(lead || {})}
 Previous Next Steps: ${JSON.stringify(summary?.agreed_next_steps || [])}
+Previous Key Points: ${JSON.stringify(summary?.key_points || [])}
 
 Transcript:
-${transcript.slice(0, 8000)}`
+${transcript.slice(0, 12000)}`
             }
           ],
           response_format: { type: "json_object" }
@@ -143,7 +148,7 @@ ${transcript.slice(0, 8000)}`
       const aiData = await aiResponse.json();
       const extraction = JSON.parse(aiData.choices[0].message.content);
 
-      // Merge with lead data
+      // Merge with lead data and existing summary
       return new Response(JSON.stringify({
         success: true,
         extraction: {
@@ -152,9 +157,149 @@ ${transcript.slice(0, 8000)}`
           contact_email: extraction.contact_email || lead?.email,
           lead_company: lead?.company,
           lead_timeline: lead?.timeline,
+          key_points: extraction.key_points || summary?.key_points || [],
+          objections: extraction.objections || summary?.objections_raised || [],
         },
         lead,
         summary
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "coaching-query") {
+      // On-demand coaching based on user query
+      const { data: recording } = await supabase
+        .from("call_recordings")
+        .select("live_transcription, name")
+        .eq("id", recordingId)
+        .eq("user_id", userData.user.id)
+        .single();
+
+      if (!recording) {
+        return new Response(
+          JSON.stringify({ error: "Recording not found" }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const coachResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert sales coach analyzing a sales call. Provide specific, actionable feedback based on the user's query. Be concise but insightful. Reference specific moments from the transcript when relevant.`
+            },
+            {
+              role: "user",
+              content: `Analyze this sales call transcript and answer the following question:
+
+Question: ${query}
+
+Call: ${recording.name || "Sales Call"}
+Transcript:
+${recording.live_transcription?.slice(0, 10000) || "No transcript available"}`
+            }
+          ]
+        }),
+      });
+
+      if (!coachResponse.ok) {
+        if (coachResponse.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded" }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw new Error("Coaching query failed");
+      }
+
+      const coachData = await coachResponse.json();
+      return new Response(JSON.stringify({
+        success: true,
+        response: coachData.choices[0].message.content
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "generate-email") {
+      // Generate follow-up email script
+      const { data: recording } = await supabase
+        .from("call_recordings")
+        .select("live_transcription, name")
+        .eq("id", recordingId)
+        .eq("user_id", userData.user.id)
+        .single();
+
+      const { data: lead } = await supabase
+        .from("leads")
+        .select("contact_name, company, email, agreed_next_steps")
+        .eq("recording_id", recordingId)
+        .maybeSingle();
+
+      const emailResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert at writing professional follow-up emails for sales calls. Create a personalized, engaging email that:
+- References specific topics discussed in the call
+- Reinforces agreed next steps
+- Maintains a professional but friendly tone
+- Includes a clear call-to-action
+
+Return a JSON object with:
+- subject: Email subject line (compelling, concise)
+- body: Full email body (formatted with greeting, paragraphs, sign-off placeholder [Your Name])
+- tone: The tone used (professional, friendly, urgent, etc.)`
+            },
+            {
+              role: "user",
+              content: `Create a follow-up email for this call:
+
+Contact: ${lead?.contact_name || "the prospect"}
+Company: ${lead?.company || "their company"}
+Call Summary: ${recording?.name || "Sales call"}
+Agreed Next Steps: ${JSON.stringify(lead?.agreed_next_steps || [])}
+${customPrompt ? `\nCustom Instructions: ${customPrompt}` : ''}
+
+Transcript excerpt:
+${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
+            }
+          ],
+          response_format: { type: "json_object" }
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        if (emailResponse.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded" }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw new Error("Email generation failed");
+      }
+
+      const emailData = await emailResponse.json();
+      const emailScript = JSON.parse(emailData.choices[0].message.content);
+
+      return new Response(JSON.stringify({
+        success: true,
+        emailScript
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -174,6 +319,14 @@ ${transcript.slice(0, 8000)}`
         .gte("scheduled_at", startDate.toISOString())
         .lte("scheduled_at", endDate.toISOString());
 
+      // Also check calendar events if connected
+      const { data: calendarEvents } = await supabase
+        .from("calendar_events")
+        .select("start_time, end_time")
+        .eq("user_id", userData.user.id)
+        .gte("start_time", startDate.toISOString())
+        .lte("start_time", endDate.toISOString());
+
       // Analyze past calls to find preferred times
       const { data: pastCalls } = await supabase
         .from("scheduled_calls")
@@ -190,11 +343,17 @@ ${transcript.slice(0, 8000)}`
         timeSlots[hour] = (timeSlots[hour] || 0) + 1;
       });
 
-      // Find available slots
-      const blockedSlots = (daysCalls || []).map(call => ({
-        start: new Date(call.scheduled_at),
-        end: new Date(new Date(call.scheduled_at).getTime() + call.duration_minutes * 60000)
-      }));
+      // Find blocked slots from scheduled calls
+      const blockedSlots = [
+        ...(daysCalls || []).map(call => ({
+          start: new Date(call.scheduled_at),
+          end: new Date(new Date(call.scheduled_at).getTime() + call.duration_minutes * 60000)
+        })),
+        ...(calendarEvents || []).map(event => ({
+          start: new Date(event.start_time),
+          end: new Date(event.end_time)
+        }))
+      ];
 
       const suggestedTimes: string[] = [];
       const businessHours = [9, 10, 11, 14, 15, 16];
@@ -237,26 +396,48 @@ ${transcript.slice(0, 8000)}`
     if (action === "check-conflicts") {
       const { proposedStart, proposedEnd } = body;
 
-      const { data: conflicts } = await supabase
+      // Check scheduled_calls
+      const { data: callConflicts } = await supabase
         .from("scheduled_calls")
         .select("id, title, scheduled_at, duration_minutes")
         .eq("user_id", userData.user.id)
         .neq("status", "cancelled")
         .or(`scheduled_at.gte.${new Date(new Date(proposedStart).getTime() - 3600000).toISOString()},scheduled_at.lte.${new Date(new Date(proposedEnd).getTime() + 3600000).toISOString()}`);
 
-      const actualConflicts = (conflicts || []).filter(call => {
+      // Check calendar_events
+      const { data: calendarConflicts } = await supabase
+        .from("calendar_events")
+        .select("id, title, start_time, end_time")
+        .eq("user_id", userData.user.id)
+        .gte("start_time", new Date(new Date(proposedStart).getTime() - 3600000).toISOString())
+        .lte("start_time", new Date(new Date(proposedEnd).getTime() + 3600000).toISOString());
+
+      const propStart = new Date(proposedStart);
+      const propEnd = new Date(proposedEnd);
+
+      const actualCallConflicts = (callConflicts || []).filter(call => {
         const callStart = new Date(call.scheduled_at);
         const callEnd = new Date(callStart.getTime() + call.duration_minutes * 60000);
-        const propStart = new Date(proposedStart);
-        const propEnd = new Date(proposedEnd);
-
         return (propStart < callEnd && propEnd > callStart);
       });
 
+      const actualCalendarConflicts = (calendarConflicts || []).filter(event => {
+        const eventStart = new Date(event.start_time);
+        const eventEnd = new Date(event.end_time);
+        return (propStart < eventEnd && propEnd > eventStart);
+      }).map(event => ({
+        id: event.id,
+        title: event.title,
+        scheduled_at: event.start_time,
+        duration_minutes: Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 60000)
+      }));
+
+      const allConflicts = [...actualCallConflicts, ...actualCalendarConflicts];
+
       return new Response(JSON.stringify({
         success: true,
-        hasConflict: actualConflicts.length > 0,
-        conflicts: actualConflicts
+        hasConflict: allConflicts.length > 0,
+        conflicts: allConflicts
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

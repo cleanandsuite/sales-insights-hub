@@ -16,6 +16,10 @@ interface ScheduleExtraction {
   urgency?: 'high' | 'medium' | 'low';
   lead_company?: string;
   lead_timeline?: string;
+  ai_summary?: string;
+  key_points?: string[];
+  objections?: string[];
+  next_steps?: string[];
 }
 
 interface ConflictInfo {
@@ -36,12 +40,20 @@ interface ScheduleAnalytics {
   completionRate: number;
 }
 
+interface EmailScript {
+  subject: string;
+  body: string;
+  tone: string;
+}
+
 export function useScheduleAssistant() {
   const { toast } = useToast();
   const [isExtracting, setIsExtracting] = useState(false);
   const [isSuggestingTimes, setIsSuggestingTimes] = useState(false);
   const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
+  const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
+  const [isCoaching, setIsCoaching] = useState(false);
 
   const extractFromTranscript = async (recordingId: string): Promise<ScheduleExtraction | null> => {
     setIsExtracting(true);
@@ -53,11 +65,19 @@ export function useScheduleAssistant() {
       if (error) throw error;
 
       if (data.error) {
-        toast({
-          variant: 'destructive',
-          title: 'Extraction failed',
-          description: data.error
-        });
+        if (data.error.includes('Rate limit')) {
+          toast({
+            variant: 'destructive',
+            title: 'Rate Limited',
+            description: 'Please try again in a moment'
+          });
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Extraction failed',
+            description: data.error
+          });
+        }
         return null;
       }
 
@@ -72,6 +92,65 @@ export function useScheduleAssistant() {
       return null;
     } finally {
       setIsExtracting(false);
+    }
+  };
+
+  const coachingQuery = async (recordingId: string, query: string): Promise<string> => {
+    setIsCoaching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('schedule-assistant', {
+        body: { action: 'coaching-query', recordingId, query }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Coaching query failed',
+          description: data.error
+        });
+        return 'Unable to process query. Please try again.';
+      }
+
+      return data.response;
+    } catch (error) {
+      console.error('Coaching error:', error);
+      return 'An error occurred. Please try again.';
+    } finally {
+      setIsCoaching(false);
+    }
+  };
+
+  const generateEmailScript = async (recordingId: string, customPrompt?: string): Promise<EmailScript | null> => {
+    setIsGeneratingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('schedule-assistant', {
+        body: { action: 'generate-email', recordingId, customPrompt }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Email generation failed',
+          description: data.error
+        });
+        return null;
+      }
+
+      return data.emailScript;
+    } catch (error) {
+      console.error('Email generation error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to generate email',
+        description: 'Please try again'
+      });
+      return null;
+    } finally {
+      setIsGeneratingEmail(false);
     }
   };
 
@@ -143,9 +222,13 @@ export function useScheduleAssistant() {
     suggestTimes,
     checkConflicts,
     getAnalytics,
+    coachingQuery,
+    generateEmailScript,
     isExtracting,
     isSuggestingTimes,
     isCheckingConflicts,
-    isLoadingAnalytics
+    isLoadingAnalytics,
+    isGeneratingEmail,
+    isCoaching
   };
 }

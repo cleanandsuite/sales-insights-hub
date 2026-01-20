@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
 import { 
   Sparkles, 
-  AlertTriangle, 
-  Clock, 
   Loader2,
-  CheckCircle,
   FileText
 } from 'lucide-react';
 import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
@@ -19,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { ScheduleConfirmModal } from './ScheduleConfirmModal';
 
 interface AIScheduleDialogProps {
   open: boolean;
@@ -34,11 +29,35 @@ interface CallRecording {
   created_at: string;
 }
 
+interface ExtractionData {
+  suggested_title?: string;
+  contact_name?: string;
+  contact_email?: string;
+  suggested_date?: string;
+  suggested_time?: string;
+  suggested_duration?: number;
+  meeting_provider?: string;
+  prep_notes?: string;
+  confidence?: number;
+  follow_up_reason?: string;
+  urgency?: 'high' | 'medium' | 'low';
+  ai_summary?: string;
+  key_points?: string[];
+  objections?: string[];
+  next_steps?: string[];
+}
+
 interface ConflictInfo {
   id: string;
   title: string;
   scheduled_at: string;
   duration_minutes: number;
+}
+
+interface EmailScript {
+  subject: string;
+  body: string;
+  tone: string;
 }
 
 export function AIScheduleDialog({ 
@@ -51,36 +70,20 @@ export function AIScheduleDialog({
   const { toast } = useToast();
   const { 
     extractFromTranscript, 
-    suggestTimes, 
     checkConflicts,
+    coachingQuery,
+    generateEmailScript,
     isExtracting,
-    isSuggestingTimes,
-    isCheckingConflicts
+    isGeneratingEmail
   } = useScheduleAssistant();
 
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
   const [selectedRecording, setSelectedRecording] = useState<string>('');
-  const [suggestedTimes, setSuggestedTimes] = useState<string[]>([]);
+  const [extraction, setExtraction] = useState<ExtractionData | null>(null);
   const [conflicts, setConflicts] = useState<ConflictInfo[]>([]);
+  const [emailScript, setEmailScript] = useState<EmailScript | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-
-  const [formData, setFormData] = useState({
-    title: '',
-    contactName: '',
-    contactEmail: '',
-    scheduledDate: '',
-    scheduledTime: '09:00',
-    duration: '30',
-    meetingProvider: 'zoom',
-    meetingUrl: '',
-    prepNotes: ''
-  });
-
-  const [extraction, setExtraction] = useState<{
-    confidence?: number;
-    urgency?: string;
-    follow_up_reason?: string;
-  } | null>(null);
 
   // Load recent recordings
   useEffect(() => {
@@ -106,96 +109,62 @@ export function AIScheduleDialog({
     loadRecordings();
   }, [user, open, preSelectedRecordingId]);
 
-  // Check conflicts when date/time changes
+  // Check conflicts when extraction has date/time
   useEffect(() => {
-    if (!formData.scheduledDate || !formData.scheduledTime) return;
+    if (!extraction?.suggested_date || !extraction?.suggested_time) return;
 
     const checkForConflicts = async () => {
-      const proposedStart = new Date(`${formData.scheduledDate}T${formData.scheduledTime}`);
-      const result = await checkConflicts(proposedStart, parseInt(formData.duration));
+      const proposedStart = new Date(`${extraction.suggested_date}T${extraction.suggested_time}`);
+      const result = await checkConflicts(proposedStart, extraction.suggested_duration || 30);
       setConflicts(result.conflicts);
     };
 
     checkForConflicts();
-  }, [formData.scheduledDate, formData.scheduledTime, formData.duration]);
-
-  // Suggest times when date changes
-  useEffect(() => {
-    if (!formData.scheduledDate) return;
-
-    const loadSuggestions = async () => {
-      const times = await suggestTimes(formData.scheduledDate);
-      setSuggestedTimes(times);
-    };
-
-    loadSuggestions();
-  }, [formData.scheduledDate]);
+  }, [extraction?.suggested_date, extraction?.suggested_time, extraction?.suggested_duration]);
 
   const handleExtract = async (recordingId: string) => {
     const result = await extractFromTranscript(recordingId);
     if (result) {
-      setFormData(prev => ({
-        ...prev,
-        title: result.suggested_title || prev.title,
-        contactName: result.contact_name || prev.contactName,
-        contactEmail: result.contact_email || prev.contactEmail,
-        scheduledDate: result.suggested_date ? result.suggested_date.split('T')[0] : prev.scheduledDate,
-        scheduledTime: result.suggested_time || prev.scheduledTime,
-        duration: result.suggested_duration?.toString() || prev.duration,
-        meetingProvider: result.meeting_provider || prev.meetingProvider,
-        prepNotes: result.prep_notes || prev.prepNotes
-      }));
-
-      setExtraction({
-        confidence: result.confidence,
-        urgency: result.urgency,
-        follow_up_reason: result.follow_up_reason
-      });
+      setExtraction(result);
+      setShowConfirmModal(true);
     }
   };
 
-  const handleCreate = async () => {
-    if (!user || !formData.title || !formData.scheduledDate) return;
+  const handleConfirm = async (data: ExtractionData) => {
+    if (!user || !data.suggested_title) return;
 
     setIsCreating(true);
     try {
-      const scheduledAt = new Date(`${formData.scheduledDate}T${formData.scheduledTime}`);
+      const scheduledAt = data.suggested_date && data.suggested_time
+        ? new Date(`${data.suggested_date}T${data.suggested_time}`)
+        : new Date();
 
       const { error } = await supabase
         .from('scheduled_calls')
         .insert({
           user_id: user.id,
-          title: formData.title,
-          contact_name: formData.contactName || null,
-          contact_email: formData.contactEmail || null,
+          title: data.suggested_title,
+          contact_name: data.contact_name || null,
+          contact_email: data.contact_email || null,
           scheduled_at: scheduledAt.toISOString(),
-          duration_minutes: parseInt(formData.duration),
-          meeting_provider: formData.meetingProvider,
-          meeting_url: formData.meetingUrl || null,
-          prep_notes: formData.prepNotes || null,
+          duration_minutes: data.suggested_duration || 30,
+          meeting_provider: data.meeting_provider || 'zoom',
+          prep_notes: data.prep_notes || null,
           status: 'scheduled'
         });
 
       if (error) throw error;
 
       toast({ title: 'Call scheduled successfully!' });
+      setShowConfirmModal(false);
       onSuccess();
       onOpenChange(false);
 
-      // Reset form
-      setFormData({
-        title: '',
-        contactName: '',
-        contactEmail: '',
-        scheduledDate: '',
-        scheduledTime: '09:00',
-        duration: '30',
-        meetingProvider: 'zoom',
-        meetingUrl: '',
-        prepNotes: ''
-      });
+      // Reset state
       setExtraction(null);
+      setEmailScript(null);
       setSelectedRecording('');
+      setConflicts([]);
     } catch (error) {
       console.error('Create error:', error);
       toast({
@@ -207,29 +176,41 @@ export function AIScheduleDialog({
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI-Assisted Scheduling
-          </DialogTitle>
-        </DialogHeader>
+  const handleGenerateEmail = async (customPrompt?: string) => {
+    if (!selectedRecording) return;
+    const script = await generateEmailScript(selectedRecording, customPrompt);
+    if (script) {
+      setEmailScript(script);
+    }
+  };
 
-        <div className="space-y-4 pt-2">
-          {/* Recording Selection */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Auto-fill from past call
-            </Label>
-            <div className="flex gap-2">
+  const handleCoachingQuery = async (query: string): Promise<string> => {
+    if (!selectedRecording) return 'Please select a recording first.';
+    return await coachingQuery(selectedRecording, query);
+  };
+
+  return (
+    <>
+      <Dialog open={open && !showConfirmModal} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              AI-Assisted Scheduling
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Select a call to extract scheduling info
+              </Label>
               <Select 
                 value={selectedRecording} 
                 onValueChange={setSelectedRecording}
               >
-                <SelectTrigger className="flex-1">
+                <SelectTrigger>
                   <SelectValue placeholder="Select a recording..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -240,196 +221,60 @@ export function AIScheduleDialog({
                   ))}
                 </SelectContent>
               </Select>
-              <Button
-                variant="secondary"
-                disabled={!selectedRecording || isExtracting}
-                onClick={() => handleExtract(selectedRecording)}
-              >
-                {isExtracting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-              </Button>
             </div>
-          </div>
 
-          {/* Extraction Result */}
-          {extraction && (
-            <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-success" />
-                <span className="text-sm font-medium">
-                  AI extracted details ({extraction.confidence}% confidence)
-                </span>
-                {extraction.urgency && (
-                  <Badge variant={extraction.urgency === 'high' ? 'destructive' : 'secondary'}>
-                    {extraction.urgency} priority
-                  </Badge>
-                )}
-              </div>
-              {extraction.follow_up_reason && (
-                <p className="text-xs text-muted-foreground">
-                  {extraction.follow_up_reason}
-                </p>
+            <div className="p-4 rounded-lg bg-muted/50 text-center">
+              <Sparkles className="h-8 w-8 mx-auto mb-2 text-primary opacity-60" />
+              <p className="text-sm text-muted-foreground mb-3">
+                AI will analyze the call transcript to extract:
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li>• Contact name & email</li>
+                <li>• Suggested meeting date/time</li>
+                <li>• Meeting platform</li>
+                <li>• Call summary & key points</li>
+                <li>• Follow-up email script</li>
+              </ul>
+            </div>
+
+            <Button
+              className="w-full"
+              disabled={!selectedRecording || isExtracting}
+              onClick={() => handleExtract(selectedRecording)}
+            >
+              {isExtracting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Analyzing Call...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Extract & Schedule
+                </>
               )}
-            </div>
-          )}
-
-          {/* Form Fields */}
-          <div className="space-y-2">
-            <Label>Call Title *</Label>
-            <Input
-              placeholder="Follow-up: Demo discussion"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
+            </Button>
           </div>
+        </DialogContent>
+      </Dialog>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Contact Name</Label>
-              <Input
-                placeholder="John Smith"
-                value={formData.contactName}
-                onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Contact Email</Label>
-              <Input
-                type="email"
-                placeholder="john@example.com"
-                value={formData.contactEmail}
-                onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Date *</Label>
-              <Input
-                type="date"
-                value={formData.scheduledDate}
-                onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Time *</Label>
-              <Input
-                type="time"
-                value={formData.scheduledTime}
-                onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* AI Time Suggestions */}
-          {suggestedTimes.length > 0 && (
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                Available times
-              </Label>
-              <div className="flex flex-wrap gap-1.5">
-                {suggestedTimes.map(time => (
-                  <Button
-                    key={time}
-                    size="sm"
-                    variant={formData.scheduledTime === time ? "default" : "outline"}
-                    className="text-xs h-7"
-                    onClick={() => setFormData({ ...formData, scheduledTime: time })}
-                  >
-                    {time}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Conflict Warning */}
-          {conflicts.length > 0 && (
-            <div className="p-3 rounded-lg bg-warning/10 border border-warning/30 flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-warning">Scheduling Conflict</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Overlaps with: {conflicts.map(c => c.title).join(', ')}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Duration</Label>
-              <Select
-                value={formData.duration}
-                onValueChange={(value) => setFormData({ ...formData, duration: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="15">15 min</SelectItem>
-                  <SelectItem value="30">30 min</SelectItem>
-                  <SelectItem value="45">45 min</SelectItem>
-                  <SelectItem value="60">1 hour</SelectItem>
-                  <SelectItem value="90">1.5 hours</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Platform</Label>
-              <Select
-                value={formData.meetingProvider}
-                onValueChange={(value) => setFormData({ ...formData, meetingProvider: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="zoom">Zoom</SelectItem>
-                  <SelectItem value="teams">Teams</SelectItem>
-                  <SelectItem value="google_meet">Google Meet</SelectItem>
-                  <SelectItem value="other">Phone/Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Meeting Link (optional)</Label>
-            <Input
-              placeholder="https://zoom.us/j/..."
-              value={formData.meetingUrl}
-              onChange={(e) => setFormData({ ...formData, meetingUrl: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Prep Notes</Label>
-            <Textarea
-              placeholder="Key topics to discuss, materials needed..."
-              value={formData.prepNotes}
-              onChange={(e) => setFormData({ ...formData, prepNotes: e.target.value })}
-              rows={3}
-            />
-          </div>
-
-          <Button 
-            className="w-full" 
-            onClick={handleCreate}
-            disabled={!formData.title || !formData.scheduledDate || isCreating}
-          >
-            {isCreating ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : null}
-            Schedule Call
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      <ScheduleConfirmModal
+        open={showConfirmModal}
+        onOpenChange={(open) => {
+          setShowConfirmModal(open);
+          if (!open) {
+            setExtraction(null);
+            setEmailScript(null);
+          }
+        }}
+        extraction={extraction}
+        conflicts={conflicts}
+        emailScript={emailScript}
+        isGeneratingEmail={isGeneratingEmail}
+        onConfirm={handleConfirm}
+        onGenerateEmail={handleGenerateEmail}
+        onCoachingQuery={handleCoachingQuery}
+      />
+    </>
   );
 }
