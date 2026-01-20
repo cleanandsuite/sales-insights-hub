@@ -3376,6 +3376,10 @@ export type Database = {
       }
       check_invitation_rate_limit: { Args: { p_ip: string }; Returns: boolean }
       check_password_strength: { Args: { password: string }; Returns: boolean }
+      demote_user_from_manager: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       get_manager_team_stats: {
         Args: { p_team_id: string }
         Returns: {
@@ -3392,6 +3396,18 @@ export type Database = {
       }
       get_public_pricing_availability: { Args: never; Returns: Json }
       get_team_kpis: { Args: { p_team_id: string }; Returns: Json }
+      get_team_member_stats: {
+        Args: { p_team_id: string }
+        Returns: {
+          active_leads: number
+          avg_score: number
+          full_name: string
+          joined_at: string
+          role: string
+          total_calls: number
+          user_id: string
+        }[]
+      }
       get_user_strengths: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
@@ -3415,6 +3431,10 @@ export type Database = {
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      promote_user_to_manager: {
+        Args: { target_user_id: string }
+        Returns: undefined
       }
       suggest_lead_assignment: {
         Args: { p_lead_id: string; p_team_id: string }
