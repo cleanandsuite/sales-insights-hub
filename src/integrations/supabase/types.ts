@@ -695,6 +695,62 @@ export type Database = {
           },
         ]
       }
+      coaching_assignments: {
+        Row: {
+          assigned_by: string | null
+          assigned_to: string
+          coaching_type: string
+          completed_at: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          priority: string | null
+          reason: string
+          status: string | null
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          assigned_to: string
+          coaching_type: string
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          reason: string
+          status?: string | null
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          assigned_to?: string
+          coaching_type?: string
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          reason?: string
+          status?: string | null
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_assignments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coaching_benchmarks: {
         Row: {
           average_score: number | null
@@ -2092,6 +2148,73 @@ export type Database = {
           },
         ]
       }
+      risk_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_resolved: boolean | null
+          lead_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          team_id: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          lead_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          team_id: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          lead_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          team_id?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_alerts_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_alerts_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "team_leads_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_alerts_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salesforce_sync_queue: {
         Row: {
           created_at: string
@@ -2503,6 +2626,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_kpi_snapshots: {
+        Row: {
+          avg_calls_per_rep: number | null
+          avg_closer_score: number | null
+          avg_discovery_score: number | null
+          coaching_coverage_pct: number | null
+          created_at: string
+          forecast_risk_pct: number | null
+          id: string
+          pipeline_coverage_ratio: number | null
+          pipeline_value: number | null
+          quota_value: number | null
+          snapshot_date: string
+          team_id: string
+          team_win_rate: number | null
+          total_reps: number | null
+        }
+        Insert: {
+          avg_calls_per_rep?: number | null
+          avg_closer_score?: number | null
+          avg_discovery_score?: number | null
+          coaching_coverage_pct?: number | null
+          created_at?: string
+          forecast_risk_pct?: number | null
+          id?: string
+          pipeline_coverage_ratio?: number | null
+          pipeline_value?: number | null
+          quota_value?: number | null
+          snapshot_date?: string
+          team_id: string
+          team_win_rate?: number | null
+          total_reps?: number | null
+        }
+        Update: {
+          avg_calls_per_rep?: number | null
+          avg_closer_score?: number | null
+          avg_discovery_score?: number | null
+          coaching_coverage_pct?: number | null
+          created_at?: string
+          forecast_risk_pct?: number | null
+          id?: string
+          pipeline_coverage_ratio?: number | null
+          pipeline_value?: number | null
+          quota_value?: number | null
+          snapshot_date?: string
+          team_id?: string
+          team_win_rate?: number | null
+          total_reps?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_kpi_snapshots_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -3140,6 +3322,7 @@ export type Database = {
         }[]
       }
       get_public_pricing_availability: { Args: never; Returns: Json }
+      get_team_kpis: { Args: { p_team_id: string }; Returns: Json }
       get_user_strengths: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {

@@ -29,6 +29,7 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const WinWords = lazy(() => import("./pages/WinWords"));
 const AudioTest = lazy(() => import("./pages/AudioTest"));
 const Manager = lazy(() => import("./pages/Manager"));
+const RevenueIntelligence = lazy(() => import("./pages/RevenueIntelligence"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -81,6 +82,7 @@ const App = () => (
               <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
               <Route path="/winwords" element={<ProtectedRoute><WinWords /></ProtectedRoute>} />
               <Route path="/manager" element={<ProtectedRoute><Manager /></ProtectedRoute>} />
+              <Route path="/revenue-intelligence" element={<ProtectedRoute><RevenueIntelligence /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
               <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
