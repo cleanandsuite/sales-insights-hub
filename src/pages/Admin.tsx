@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { 
   Shield, 
   Users, 
@@ -24,7 +25,9 @@ import {
   CreditCard,
   Mail,
   Check,
-  X
+  X,
+  ExternalLink,
+  ShoppingCart
 } from 'lucide-react';
 
 // Enterprise pricing tiers
@@ -67,15 +70,41 @@ interface PendingInvite {
 export default function Admin() {
   const { user } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdminRole();
+  const { initiateCheckout } = useEnterpriseSubscription();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   
   const [enterpriseUsers, setEnterpriseUsers] = useState<EnterpriseUser[]>([]);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [isPurchaseOpen, setIsPurchaseOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserTier, setNewUserTier] = useState<'executive' | 'staff'>('staff');
+  const [purchaseEmail, setPurchaseEmail] = useState('');
+  const [purchaseTier, setPurchaseTier] = useState<'executive' | 'staff'>('executive');
   const [addingUser, setAddingUser] = useState(false);
+  const [processingCheckout, setProcessingCheckout] = useState(false);
+
+  // Handle checkout success/cancel from URL params
+  useEffect(() => {
+    const checkoutStatus = searchParams.get('checkout');
+    const tier = searchParams.get('tier');
+    
+    if (checkoutStatus === 'success') {
+      toast({
+        title: 'Subscription activated!',
+        description: `${tier === 'executive' ? 'Executive' : 'Staff'} subscription is now active.`,
+      });
+      fetchEnterpriseUsers();
+    } else if (checkoutStatus === 'canceled') {
+      toast({
+        variant: 'destructive',
+        title: 'Checkout canceled',
+        description: 'The subscription purchase was canceled.',
+      });
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -247,6 +276,38 @@ export default function Admin() {
     }
   };
 
+  const handlePurchaseSubscription = async () => {
+    if (!purchaseEmail.trim()) {
+      toast({ variant: 'destructive', title: 'Please enter an email address' });
+      return;
+    }
+
+    setProcessingCheckout(true);
+    try {
+      const result = await initiateCheckout(purchaseTier, purchaseEmail);
+      
+      if (result.success) {
+        toast({
+          title: 'Redirecting to checkout...',
+          description: 'Complete the payment in the new tab.',
+        });
+        setIsPurchaseOpen(false);
+        setPurchaseEmail('');
+      } else {
+        throw new Error(result.error || 'Checkout failed');
+      }
+    } catch (error) {
+      console.error('Error initiating checkout:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Checkout failed',
+        description: error instanceof Error ? error.message : 'Please try again',
+      });
+    } finally {
+      setProcessingCheckout(false);
+    }
+  };
+
   if (adminLoading) {
     return (
       <DashboardLayout>
@@ -269,7 +330,7 @@ export default function Admin() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
               <Shield className="h-8 w-8 text-primary" />
@@ -278,73 +339,159 @@ export default function Admin() {
             <p className="text-muted-foreground mt-1">Manage enterprise users and billing</p>
           </div>
           
-          <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <UserPlus className="h-4 w-4" />
-                Add Enterprise User
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Enterprise User</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="user@company.com"
-                    value={newUserEmail}
-                    onChange={(e) => setNewUserEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tier">User Tier</Label>
-                  <Select value={newUserTier} onValueChange={(v) => setNewUserTier(v as 'executive' | 'staff')}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="executive">
-                        <div className="flex items-center gap-2">
-                          <Crown className="h-4 w-4 text-warning" />
-                          Executive User ($150/mo)
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="staff">
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                          Staff Addon ($99/mo)
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {newUserTier === 'executive' 
-                      ? 'Full platform access with team management authority'
-                      : 'Core platform features for team members'}
-                  </p>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddUserOpen(false)}>
-                  Cancel
+          <div className="flex gap-2">
+            {/* Purchase Subscription Dialog */}
+            <Dialog open={isPurchaseOpen} onOpenChange={setIsPurchaseOpen}>
+              <DialogTrigger asChild>
+                <Button variant="default" className="gap-2 bg-gradient-to-r from-primary to-primary/80">
+                  <ShoppingCart className="h-4 w-4" />
+                  Purchase Subscription
                 </Button>
-                <Button onClick={handleAddUser} disabled={addingUser}>
-                  {addingUser ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    'Add User'
-                  )}
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Purchase Enterprise Subscription
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="purchase-email">User Email</Label>
+                    <Input
+                      id="purchase-email"
+                      type="email"
+                      placeholder="user@company.com"
+                      value={purchaseEmail}
+                      onChange={(e) => setPurchaseEmail(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      The subscription will be linked to this email address
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="purchase-tier">Subscription Tier</Label>
+                    <Select value={purchaseTier} onValueChange={(v) => setPurchaseTier(v as 'executive' | 'staff')}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="executive">
+                          <div className="flex items-center gap-2">
+                            <Crown className="h-4 w-4 text-warning" />
+                            Executive User - $150/mo
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="staff">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            Staff Addon - $99/mo
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Pricing summary */}
+                  <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Monthly Total</span>
+                      <span className="text-xl font-bold text-foreground">
+                        ${purchaseTier === 'executive' ? '150' : '99'}/mo
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsPurchaseOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handlePurchaseSubscription} disabled={processingCheckout} className="gap-2">
+                    {processingCheckout ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <ExternalLink className="h-4 w-4" />
+                        Checkout with Stripe
+                      </>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Add User Dialog */}
+            <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Add User Manually
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Enterprise User</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="user@company.com"
+                      value={newUserEmail}
+                      onChange={(e) => setNewUserEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tier">User Tier</Label>
+                    <Select value={newUserTier} onValueChange={(v) => setNewUserTier(v as 'executive' | 'staff')}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="executive">
+                          <div className="flex items-center gap-2">
+                            <Crown className="h-4 w-4 text-warning" />
+                            Executive User ($150/mo)
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="staff">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            Staff Addon ($99/mo)
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {newUserTier === 'executive' 
+                        ? 'Full platform access with team management authority'
+                        : 'Core platform features for team members'}
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddUserOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddUser} disabled={addingUser}>
+                    {addingUser ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      'Add User'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Stats Cards */}
