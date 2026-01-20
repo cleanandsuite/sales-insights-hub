@@ -88,9 +88,9 @@ export function SellSigLogo({
   const colors = variantClasses[variant];
 
   const logoContent = (
-    <div className={cn("flex items-center gap-2.5 hover:opacity-90 transition-opacity group", className)}>
+    <div className={cn("flex items-center gap-2 hover:opacity-90 transition-opacity group", className)}>
       <div className={cn(
-        "rounded-xl flex items-center justify-center backdrop-blur-sm border group-hover:border-opacity-60 transition-colors",
+        "rounded-lg flex items-center justify-center backdrop-blur-sm border group-hover:border-opacity-60 transition-colors",
         sizes.container,
         colors.containerBg,
         colors.containerBorder
@@ -98,7 +98,7 @@ export function SellSigLogo({
         <SellSigIcon className={sizes.icon} />
       </div>
       <div className="flex flex-col">
-        <span className={cn("font-bold tracking-tight leading-none", sizes.text, colors.text)}>
+        <span className={cn("font-semibold tracking-tight leading-none", sizes.text, colors.text)}>
           Sell<span className={colors.highlight}>Sig</span>
         </span>
         {showTagline && (
