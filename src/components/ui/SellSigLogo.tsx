@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
-// Custom SellSig Logo Icon - Signal wave with upward momentum
+// Custom SellSig Logo Icon - Signal wave with AI spark
 const SellSigIcon = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 32 32"
@@ -10,17 +10,20 @@ const SellSigIcon = ({ className }: { className?: string }) => (
     className={cn("h-7 w-7", className)}
   >
     {/* Signal bars representing call analysis */}
-    <rect x="4" y="18" width="4" height="10" rx="2" fill="url(#gradient1)" />
-    <rect x="10" y="12" width="4" height="16" rx="2" fill="url(#gradient1)" />
-    <rect x="16" y="6" width="4" height="22" rx="2" fill="url(#gradient1)" />
+    <rect x="4" y="18" width="4" height="10" rx="2" fill="url(#sellsig-gradient1)" />
+    <rect x="10" y="12" width="4" height="16" rx="2" fill="url(#sellsig-gradient1)" />
+    <rect x="16" y="6" width="4" height="22" rx="2" fill="url(#sellsig-gradient1)" />
     {/* AI spark/lightning accent */}
-    <path d="M24 4L22 12H26L22 20L24 12H20L24 4Z" fill="url(#gradient2)" />
+    <path
+      d="M24 4L22 12H26L22 20L24 12H20L24 4Z"
+      fill="url(#sellsig-gradient2)"
+    />
     <defs>
-      <linearGradient id="gradient1" x1="12" y1="4" x2="12" y2="28" gradientUnits="userSpaceOnUse">
+      <linearGradient id="sellsig-gradient1" x1="12" y1="4" x2="12" y2="28" gradientUnits="userSpaceOnUse">
         <stop stopColor="#60A5FA" />
         <stop offset="1" stopColor="#3B82F6" />
       </linearGradient>
-      <linearGradient id="gradient2" x1="23" y1="4" x2="23" y2="20" gradientUnits="userSpaceOnUse">
+      <linearGradient id="sellsig-gradient2" x1="23" y1="4" x2="23" y2="20" gradientUnits="userSpaceOnUse">
         <stop stopColor="#FBBF24" />
         <stop offset="1" stopColor="#F59E0B" />
       </linearGradient>
@@ -36,75 +39,75 @@ interface SellSigLogoProps {
   className?: string;
 }
 
-const sizeClasses = {
-  sm: {
-    container: 'h-7 w-7',
-    icon: 'h-4 w-4',
-    text: 'text-sm',
-    tagline: 'text-[8px]',
-    gap: 'gap-1.5',
-  },
-  md: {
-    container: 'h-8 w-8',
-    icon: 'h-5 w-5',
-    text: 'text-lg',
-    tagline: 'text-[9px]',
-    gap: 'gap-2',
-  },
-  lg: {
-    container: 'h-10 w-10',
-    icon: 'h-6 w-6',
-    text: 'text-xl',
-    tagline: 'text-[10px]',
-    gap: 'gap-2',
-  },
-};
-
-const variantClasses = {
-  default: {
-    containerBg: 'bg-primary/10',
-    text: 'text-foreground',
-    highlight: 'text-primary',
-    tagline: 'text-muted-foreground',
-  },
-  light: {
-    containerBg: 'bg-white/10',
-    text: 'text-white',
-    highlight: 'text-blue-400',
-    tagline: 'text-white/50',
-  },
-};
-
-export function SellSigLogo({
-  size = 'md',
+export function SellSigLogo({ 
+  size = 'md', 
   variant = 'default',
   showTagline = true,
   linkTo = '/',
-  className
+  className 
 }: SellSigLogoProps) {
+  const sizeClasses = {
+    sm: {
+      container: 'h-8 w-8',
+      icon: 'h-5 w-5',
+      text: 'text-base',
+      tagline: 'text-[9px]',
+    },
+    md: {
+      container: 'h-10 w-10',
+      icon: 'h-7 w-7',
+      text: 'text-xl',
+      tagline: 'text-[10px]',
+    },
+    lg: {
+      container: 'h-12 w-12',
+      icon: 'h-8 w-8',
+      text: 'text-2xl',
+      tagline: 'text-xs',
+    },
+  };
+
+  const variantClasses = {
+    default: {
+      containerBg: 'bg-primary/10',
+      containerBorder: 'border-primary/20',
+      text: 'text-foreground',
+      highlight: 'text-blue-500',
+      tagline: 'text-muted-foreground',
+    },
+    light: {
+      containerBg: 'bg-white/15',
+      containerBorder: 'border-white/10',
+      text: 'text-white',
+      highlight: 'text-blue-400',
+      tagline: 'text-white/50',
+    },
+  };
+
   const sizes = sizeClasses[size];
   const colors = variantClasses[variant];
 
   const logoContent = (
-    <div className={cn("flex items-center hover:opacity-90 transition-opacity group", sizes.gap, className)}>
+    <div className={cn("flex items-center gap-2.5 hover:opacity-90 transition-opacity group", className)}>
       <div className={cn(
-        "rounded-md flex items-center justify-center",
+        "rounded-xl flex items-center justify-center backdrop-blur-sm border group-hover:border-opacity-60 transition-colors",
         sizes.container,
-        colors.containerBg
+        colors.containerBg,
+        colors.containerBorder
       )}>
         <SellSigIcon className={sizes.icon} />
       </div>
       <div className="flex flex-col">
-        <span className={cn("font-semibold tracking-tight leading-none", sizes.text, colors.text)}>
-          SellSig
+        <span className={cn("font-bold tracking-tight leading-none", sizes.text, colors.text)}>
+          Sell<span className={colors.highlight}>Sig</span>
         </span>
         {showTagline && (
           <span className={cn(
-            "font-medium tracking-wider uppercase leading-none mt-0.5",
+            "font-medium tracking-widest uppercase leading-none mt-0.5",
             sizes.tagline,
             colors.tagline
           )}>
-            AI COACH
+            AI Coach
           </span>
         )}
       </div>
@@ -117,3 +120,5 @@ export function SellSigLogo({
 
   return logoContent;
 }
+
+export { SellSigIcon };
