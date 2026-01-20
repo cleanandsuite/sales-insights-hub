@@ -12,11 +12,14 @@ import {
   Award,
   BarChart3,
   Zap,
-  Brain
+  Brain,
+  ClipboardList
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { CoachingROIDashboard } from '@/components/coaching/CoachingROIDashboard';
+import { CoachingQueueCard } from '@/components/coaching/CoachingQueueCard';
+import { CompletedCoachingList } from '@/components/coaching/CompletedCoachingList';
 
 interface SkillData {
   name: string;
@@ -187,11 +190,15 @@ export default function Coaching() {
           <p className="text-muted-foreground mt-1">Track your progress and improve your sales skills</p>
         </div>
 
-        <Tabs defaultValue="ai-coach" className="w-full">
+        <Tabs defaultValue="queue" className="w-full">
           <TabsList className="mb-6">
+            <TabsTrigger value="queue" className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Queue
+            </TabsTrigger>
             <TabsTrigger value="ai-coach" className="gap-2">
               <Brain className="h-4 w-4" />
-              AI Deal Coach
+              AI Coach
             </TabsTrigger>
             <TabsTrigger value="skills" className="gap-2">
               <Target className="h-4 w-4" />
@@ -202,6 +209,17 @@ export default function Coaching() {
               Training
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="queue" className="mt-0">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <CoachingQueueCard />
+              </div>
+              <div>
+                <CompletedCoachingList />
+              </div>
+            </div>
+          </TabsContent>
 
           <TabsContent value="ai-coach" className="mt-0">
             <CoachingROIDashboard />
