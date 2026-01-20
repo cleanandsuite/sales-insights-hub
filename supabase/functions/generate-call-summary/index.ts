@@ -124,11 +124,46 @@ serve(async (req) => {
     }
 
     const aiData = await aiResponse.json();
-    const analysis = JSON.parse(aiData.choices[0].message.content);
+    const rawContent = aiData.choices?.[0]?.message?.content || "{}";
+    
+    // Robust JSON parsing with fallback
+    let analysis: Record<string, unknown>;
+    try {
+      // Try direct parse first
+      analysis = JSON.parse(rawContent);
+    } catch (parseError) {
+      console.warn("Direct JSON parse failed, attempting extraction:", parseError);
+      // Try to extract JSON from markdown code blocks or other wrappers
+      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/) || 
+                        rawContent.match(/(\{[\s\S]*\})/);
+      if (jsonMatch && jsonMatch[1]) {
+        try {
+          analysis = JSON.parse(jsonMatch[1].trim());
+        } catch (innerError) {
+          console.error("JSON extraction also failed:", innerError);
+          // Return minimal valid analysis to prevent complete failure
+          analysis = {
+            quick_skim: { pain: "Unable to analyze", need: "Unable to analyze" },
+            key_points: ["Call analysis failed - please review manually"],
+            emotional_tone: "neutral",
+            should_create_lead: false,
+            salesforce_sync_recommended: false
+          };
+        }
+      } else {
+        analysis = {
+          quick_skim: { pain: "Unable to analyze", need: "Unable to analyze" },
+          key_points: ["Call analysis failed - please review manually"],
+          emotional_tone: "neutral",
+          should_create_lead: false,
+          salesforce_sync_recommended: false
+        };
+      }
+    }
 
     console.log("AI Analysis complete:", { 
       shouldCreateLead: analysis.should_create_lead,
-      confidence: analysis.lead_info?.ai_confidence 
+      confidence: (analysis.lead_info as Record<string, unknown>)?.ai_confidence 
     });
 
     // Create call summary
