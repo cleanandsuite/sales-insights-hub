@@ -404,6 +404,24 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
         console.error('Update error:', updateError);
       }
 
+      // Only transcribe if we have substantial audio data (at least 1KB)
+      if (finalBlob.size < 1024) {
+        console.log('Audio too short for transcription, skipping...', finalBlob.size, 'bytes');
+        setProcessingStatus('Analyzing call...');
+        
+        // Update recording status and skip transcription
+        await supabase
+          .from('call_recordings')
+          .update({
+            status: 'completed',
+            live_transcription: transcription || 'Recording too short to transcribe.'
+          })
+          .eq('id', recording.id);
+          
+        navigate(`/analysis/${recording.id}`);
+        return;
+      }
+
       setProcessingStatus('Transcribing with AI...');
       
       // Transcribe the full audio using Whisper API
