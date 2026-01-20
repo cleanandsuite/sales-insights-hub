@@ -151,18 +151,27 @@ export function LiveCoachingSidebar({
     }
   }, [transcript, coachStyle, isRecording, isPaused, isMuted, toast]);
 
-  // Debounced analysis - run every 8 seconds during recording
+  // Trigger analysis immediately when transcript changes (debounced 2s)
   useEffect(() => {
-    if (!isRecording || isPaused) return;
+    if (!isRecording || isPaused || !transcript || transcript.length < 30) return;
+    if (transcript === lastAnalyzedRef.current) return;
 
-    analysisTimeoutRef.current = setInterval(analyzeForCoaching, 8000);
+    // Clear any pending analysis
+    if (analysisTimeoutRef.current) {
+      clearTimeout(analysisTimeoutRef.current);
+    }
+
+    // Debounce: analyze 2 seconds after transcript stops updating
+    analysisTimeoutRef.current = setTimeout(() => {
+      analyzeForCoaching();
+    }, 2000);
 
     return () => {
       if (analysisTimeoutRef.current) {
-        clearInterval(analysisTimeoutRef.current);
+        clearTimeout(analysisTimeoutRef.current);
       }
     };
-  }, [isRecording, isPaused, analyzeForCoaching]);
+  }, [transcript, isRecording, isPaused, analyzeForCoaching]);
 
   const handleFeedback = (suggestionId: string, helpful: boolean) => {
     onSuggestionFeedback?.(suggestionId, helpful);
