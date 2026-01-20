@@ -2217,6 +2217,56 @@ export type Database = {
           },
         ]
       }
+      rep_goals: {
+        Row: {
+          created_at: string
+          created_by: string
+          current_value: number | null
+          id: string
+          metric: string
+          period_end: string
+          period_start: string
+          target_value: number
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          current_value?: number | null
+          id?: string
+          metric: string
+          period_end: string
+          period_start: string
+          target_value: number
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          current_value?: number | null
+          id?: string
+          metric?: string
+          period_end?: string
+          period_start?: string
+          target_value?: number
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rep_goals_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       risk_alerts: {
         Row: {
           alert_type: string
