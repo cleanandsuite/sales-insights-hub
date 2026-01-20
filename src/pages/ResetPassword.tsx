@@ -88,7 +88,7 @@ export default function ResetPassword() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-              <img src={sellsigLogo} alt="SellSig" className="h-8 w-8 object-contain" />
+              <img src={sellsigLogo} alt="SellSig" className="h-8 w-8 object-contain" loading="lazy" />
             </div>
           </div>
           {success ? (

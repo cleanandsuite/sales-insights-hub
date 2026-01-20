@@ -9,7 +9,7 @@ export function StaticPageHeader() {
         <nav className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-              <img src={sellsigLogo} alt="SellSig" className="h-6 w-6 object-contain" />
+              <img src={sellsigLogo} alt="SellSig" className="h-6 w-6 object-contain" loading="lazy" />
             </div>
             <span className="font-bold text-xl">SellSig</span>
           </Link>
