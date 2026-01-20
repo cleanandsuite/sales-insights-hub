@@ -51,10 +51,12 @@ interface RecentRecording {
 }
 
 export default function Schedule() {
-  const { user } = useAuth();
+  // All hooks must be called unconditionally at the top
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { checkConflicts } = useScheduleAssistant();
+  const scheduleAssistant = useScheduleAssistant();
+  const { checkConflicts } = scheduleAssistant;
   
   const [calls, setCalls] = useState<ScheduledCall[]>([]);
   const [loading, setLoading] = useState(true);
