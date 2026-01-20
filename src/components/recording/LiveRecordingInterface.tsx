@@ -60,6 +60,8 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
   const [selectedSourceId, setSelectedSourceId] = useState<string | undefined>(undefined);
   const initStartedRef = useRef(false);
 
+  const [isStartingRecording, setIsStartingRecording] = useState(true);
+
   const [transcription, setTranscription] = useState('');
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [sentiment, setSentiment] = useState<'positive' | 'neutral' | 'negative'>('neutral');
@@ -87,8 +89,11 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
     initStartedRef.current = true;
 
     const initRecording = async () => {
+      setIsStartingRecording(true);
+      console.log('RECORDER UI: initRecording start');
       try {
         await startRecording(selectedSourceId);
+        console.log('RECORDER UI: initRecording success');
       } catch (error) {
         console.error('Recording start error:', error);
         toast({
@@ -99,12 +104,17 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
             : 'Please allow microphone and screen share access to record both sides of the call.',
         });
         onClose();
+      } finally {
+        setIsStartingRecording(false);
       }
     };
 
     initRecording();
 
     return () => {
+      // StrictMode mounts/unmounts components twice in dev; ensure we always release devices.
+      void stopRecording();
+
       if (transcriptionIntervalRef.current) {
         clearInterval(transcriptionIntervalRef.current);
       }
@@ -112,7 +122,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
         clearTimeout(retryTimeoutRef.current);
       }
     };
-  }, [isElectronEnvironment, onClose, selectedSourceId, startRecording, toast]);
+  }, [isElectronEnvironment, onClose, selectedSourceId, startRecording, stopRecording, toast]);
 
 
   // Countdown timer for rate limiting
