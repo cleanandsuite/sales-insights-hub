@@ -6,17 +6,27 @@ import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
 import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
 import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { ProfileSetupBanner } from '@/components/recording/ProfileSetupBanner';
-import { ManagerDashboardWidget } from '@/components/enterprise/ManagerDashboardWidget';
-import { Phone, Clock, ThumbsUp, Mic, Users, Headphones } from 'lucide-react';
+import { Phone, Clock, ThumbsUp, Mic, Users, Headphones, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+
+// Enterprise Components
+import { KPICards } from '@/components/enterprise/KPICards';
+import { StaffPerformanceGrid } from '@/components/enterprise/StaffPerformanceGrid';
+import { CallActivityCharts } from '@/components/enterprise/CallActivityCharts';
+import { CompanyGoalsWidget } from '@/components/enterprise/CompanyGoalsWidget';
+import { TeamLeadManagement } from '@/components/enterprise/TeamLeadManagement';
+import { EnterpriseActivityFeed } from '@/components/enterprise/EnterpriseActivityFeed';
+import { TeamProgressionChart } from '@/components/enterprise/TeamProgressionChart';
 
 interface CallRecording {
   id: string;
@@ -39,9 +49,20 @@ interface Lead {
   recording_id: string | null;
 }
 
+interface TeamKPIs {
+  teamWinRate: number;
+  avgCallsPerRep: number;
+  coachingCoveragePct: number;
+  avgDiscoveryScore: number;
+  avgCloserScore: number;
+  forecastRiskPct: number;
+  totalReps: number;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { isManager, teamId } = useUserRole();
+  const { isEnterprise, tier } = useEnterpriseSubscription();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
@@ -50,7 +71,11 @@ export default function Dashboard() {
   const [isRecording, setIsRecording] = useState(false);
   const [aiActive, setAiActive] = useState(true);
   const [headphoneMode, setHeadphoneMode] = useState(false);
-  // Handle subscription success message with polling
+  const [kpis, setKpis] = useState<TeamKPIs | null>(null);
+
+  const isExecutive = isEnterprise && tier === 'executive';
+
+  // Handle subscription success message
   useEffect(() => {
     const subscription = searchParams.get('subscription');
     const fromCheckout = searchParams.get('from_checkout') === 'true';
@@ -60,58 +85,15 @@ export default function Dashboard() {
         duration: 5000,
         description: 'Your premium features are now available.',
       });
-
-      // Ensure session is hydrated after magic-link login
       supabase.auth.getSession().then(() => supabase.auth.refreshSession()).catch(() => {});
-
-      // Poll for profile activation (webhook can be delayed)
-      let pollCount = 0;
-      const maxPolls = 6; // 30 seconds total (5s * 6)
-      const pollInterval = setInterval(async () => {
-        pollCount++;
-        if (pollCount >= maxPolls) {
-          clearInterval(pollInterval);
-          return;
-        }
-
-        try {
-          if (user) {
-            const { data } = await supabase
-              .from('profiles')
-              .select('is_active, subscription_status')
-              .eq('user_id', user.id)
-              .maybeSingle();
-
-            if (data?.is_active) {
-              clearInterval(pollInterval);
-              return;
-            }
-          }
-
-          // Fallback to Stripe-based check if profile hasn’t updated yet
-          const { data } = await supabase.functions.invoke('check-subscription');
-          if ((data as any)?.subscribed) {
-            clearInterval(pollInterval);
-            await supabase.auth.refreshSession();
-          }
-        } catch (error) {
-          console.log('Subscription activation poll:', error);
-        }
-      }, 5000);
-
-      // Remove handled query params
       const nextParams = new URLSearchParams(searchParams);
       nextParams.delete('subscription');
       nextParams.delete('from_checkout');
       setSearchParams(nextParams, { replace: true });
-
-      return () => clearInterval(pollInterval);
     }
 
     if (subscription === 'canceled') {
-      toast.info('Subscription checkout was canceled.', {
-        duration: 4000,
-      });
+      toast.info('Subscription checkout was canceled.', { duration: 4000 });
       const nextParams = new URLSearchParams(searchParams);
       nextParams.delete('subscription');
       nextParams.delete('from_checkout');
@@ -147,6 +129,23 @@ export default function Dashboard() {
 
     fetchData();
   }, [user]);
+
+  // Fetch KPIs for enterprise users
+  useEffect(() => {
+    if (isExecutive && teamId) {
+      fetchKPIs();
+    }
+  }, [isExecutive, teamId]);
+
+  const fetchKPIs = async () => {
+    if (!teamId) return;
+    try {
+      const { data } = await (supabase.rpc as any)('get_team_kpis', { p_team_id: teamId });
+      setKpis(data);
+    } catch (error) {
+      console.error('Error fetching KPIs:', error);
+    }
+  };
 
   const totalCalls = recordings.length;
   const analyzedCalls = recordings.filter(r => r.status === 'analyzed').length;
@@ -198,15 +197,83 @@ export default function Dashboard() {
       count: hotLeads,
       description: '>90% confidence'
     }] : []),
-    ...(last24hCalls > 0 ? [{
-      id: '3',
-      type: 'scheduled_today' as const,
-      title: 'Calls Today',
-      count: last24hCalls,
-      description: 'with lead potential'
-    }] : [])
   ];
 
+  // Enterprise Dashboard for Executive users
+  if (isExecutive && teamId) {
+    return (
+      <>
+        {isRecording && (
+          <LiveRecordingInterface onClose={() => setIsRecording(false)} useScreenShare={headphoneMode} />
+        )}
+        
+        <DashboardLayout>
+          <div className="space-y-6 animate-fade-in">
+            {/* Enterprise Header */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Executive Dashboard</h1>
+                  <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium gap-1">
+                    <Crown className="h-3 w-3" />
+                    Enterprise
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground mt-1">Team performance, goals, and revenue intelligence</p>
+              </div>
+              <div className="flex flex-col items-end gap-3">
+                <Button
+                  onClick={() => setIsRecording(true)}
+                  size="lg"
+                  className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <Mic className="h-5 w-5" />
+                  Start Recording
+                </Button>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="headphone-mode"
+                    checked={headphoneMode}
+                    onCheckedChange={setHeadphoneMode}
+                  />
+                  <Label htmlFor="headphone-mode" className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
+                    <Headphones className="h-4 w-4" />
+                    Headphone Mode
+                  </Label>
+                </div>
+              </div>
+            </div>
+
+            {/* KPI Cards */}
+            {kpis && <KPICards kpis={kpis} />}
+
+            {/* Main Charts Row */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <TeamProgressionChart teamId={teamId} />
+              <CallActivityCharts teamId={teamId} />
+            </div>
+
+            {/* Staff Performance */}
+            <StaffPerformanceGrid 
+              teamId={teamId} 
+              onSelectStaff={(userId, name) => navigate('/revenue-intelligence')}
+            />
+
+            {/* Goals & Lead Management */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <CompanyGoalsWidget teamId={teamId} kpis={kpis} />
+              <TeamLeadManagement teamId={teamId} />
+            </div>
+
+            {/* Activity Feed */}
+            <EnterpriseActivityFeed teamId={teamId} />
+          </div>
+        </DashboardLayout>
+      </>
+    );
+  }
+
+  // Standard Dashboard for non-enterprise users
   return (
     <>
       {isRecording && (
@@ -244,10 +311,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Profile Setup Banner */}
           <ProfileSetupBanner variant="full" />
 
-          {/* AI Lead Status */}
           <AILeadStatus
             isActive={aiActive}
             todaysLeads={todaysLeads}
@@ -259,7 +324,6 @@ export default function Dashboard() {
             onViewLogs={() => toast.info('Logs coming soon')}
           />
 
-          {/* Quick Overview Cards */}
           <QuickOverviewCards
             newLeadsToday={todaysLeads}
             pendingFollowups={pendingFollowups}
@@ -267,7 +331,6 @@ export default function Dashboard() {
             recentCalls={last24hCalls}
           />
 
-          {/* Priority Alerts */}
           {alerts.length > 0 && (
             <PriorityAlerts
               alerts={alerts}
@@ -281,122 +344,30 @@ export default function Dashboard() {
             />
           )}
 
-          {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              title="Total Calls"
-              value={totalCalls}
-              icon={Phone}
-              trend={{ value: 12, isPositive: true }}
-            />
-            <StatCard
-              title="Leads Generated"
-              value={leads.length}
-              icon={Users}
-              trend={{ value: 8, isPositive: true }}
-            />
-            <StatCard
-              title="Total Duration"
-              value={formatDuration(totalDuration)}
-              icon={Clock}
-            />
-            <StatCard
-              title="Avg Sentiment"
-              value={avgSentiment ? `${(avgSentiment * 100).toFixed(0)}%` : 'N/A'}
-              icon={ThumbsUp}
-            />
+            <StatCard title="Total Calls" value={totalCalls} icon={Phone} trend={{ value: 12, isPositive: true }} />
+            <StatCard title="Leads Generated" value={leads.length} icon={Users} trend={{ value: 8, isPositive: true }} />
+            <StatCard title="Total Duration" value={formatDuration(totalDuration)} icon={Clock} />
+            <StatCard title="Avg Sentiment" value={avgSentiment ? `${(avgSentiment * 100).toFixed(0)}%` : 'N/A'} icon={ThumbsUp} />
           </div>
 
-          {/* Manager Dashboard Widget */}
-          {isManager && teamId && (
-            <ManagerDashboardWidget teamId={teamId} />
-          )}
-
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Recent Calls */}
-            <div className="lg:col-span-2 card-enterprise overflow-hidden">
-              <div className="border-b border-border px-6 py-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-foreground">Recent Calls</h2>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/call-history')}>
-                  View All
-                </Button>
-              </div>
-              <div className="p-6">
-                {loading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                  </div>
-                ) : recordings.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Phone className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground font-medium">No calls recorded yet</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Start recording to see your calls here
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {recordings.slice(0, 5).map((recording) => (
-                      <div
-                        key={recording.id}
-                        onClick={() => navigate(`/recording/${recording.id}`)}
-                        className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <Phone className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground">{recording.file_name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(recording.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          {recording.duration_seconds && (
-                            <span className="text-sm text-muted-foreground">
-                              {formatDuration(recording.duration_seconds)}
-                            </span>
-                          )}
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              recording.status === 'analyzed'
-                                ? 'bg-success/20 text-success'
-                                : recording.status === 'processing'
-                                ? 'bg-warning/20 text-warning'
-                                : 'bg-muted text-muted-foreground'
-                            }`}
-                          >
-                            {recording.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <RecentActivityFeed
-              activities={recentActivities}
-              onViewLead={(id) => navigate('/leads')}
-              onViewSummary={(id) => {
-                const lead = leads.find(l => l.id === id);
-                if (lead?.recording_id) navigate(`/recording/${lead.recording_id}`);
-              }}
-              onCallNow={(id) => {
-                const lead = leads.find(l => l.id === id);
-                toast.info(`Calling ${lead?.contact_name || 'lead'}...`);
-              }}
-              onSchedule={() => navigate('/schedule')}
-              onEmail={(id) => {
-                const lead = leads.find(l => l.id === id);
-                toast.info(`Emailing ${lead?.contact_name || 'lead'}...`);
-              }}
-            />
-          </div>
+          <RecentActivityFeed
+            activities={recentActivities}
+            onViewLead={() => navigate('/leads')}
+            onViewSummary={(id) => {
+              const lead = leads.find(l => l.id === id);
+              if (lead?.recording_id) navigate(`/recording/${lead.recording_id}`);
+            }}
+            onCallNow={(id) => {
+              const lead = leads.find(l => l.id === id);
+              toast.info(`Calling ${lead?.contact_name || 'lead'}...`);
+            }}
+            onSchedule={() => navigate('/schedule')}
+            onEmail={(id) => {
+              const lead = leads.find(l => l.id === id);
+              toast.info(`Emailing ${lead?.contact_name || 'lead'}...`);
+            }}
+          />
         </div>
       </DashboardLayout>
     </>
