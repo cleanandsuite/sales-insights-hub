@@ -1,4 +1,4 @@
-import { Phone, Rocket, BarChart3, Shield } from "lucide-react";
+import { Phone, Rocket, BarChart3, Shield, Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const benefits = [
@@ -8,6 +8,7 @@ const benefits = [
     description:
       "Catch buying signals, understand pain points, and handle objections like top reps. Every sales call becomes a learning opportunity.",
     gradient: "from-primary/20 to-primary/5",
+    iconColor: "text-primary",
   },
   {
     icon: Rocket,
@@ -15,6 +16,7 @@ const benefits = [
     description:
       "Guided practice and AI coaching turns rookies into closers quicker. Reduce time-to-productivity by weeks, not months.",
     gradient: "from-success/20 to-success/5",
+    iconColor: "text-success",
   },
   {
     icon: BarChart3,
@@ -22,6 +24,7 @@ const benefits = [
     description:
       "Get team insights and patterns across hundreds of sales calls—no more guessing where to coach. Data-driven decisions, not gut feel.",
     gradient: "from-accent/20 to-accent/5",
+    iconColor: "text-accent",
   },
   {
     icon: Shield,
@@ -29,6 +32,7 @@ const benefits = [
     description:
       "Full encryption, strict controls, and human oversight—AI suggests, you decide. Your data stays secure and compliant.",
     gradient: "from-warning/20 to-warning/5",
+    iconColor: "text-warning",
   },
 ];
 
@@ -37,6 +41,11 @@ export function BenefitsSection() {
     <section className="py-20 md:py-28 bg-background relative" id="benefits">
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
+          {/* Section badge */}
+          <div className="inline-flex items-center gap-2 bg-success/10 rounded-full px-4 py-2 mb-6">
+            <Star className="h-4 w-4 text-success" />
+            <span className="text-sm font-medium text-success">Your Unfair Advantage</span>
+          </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
             Core Benefits
             <span className="gradient-text"> Your Team Gets</span>
@@ -61,9 +70,9 @@ export function BenefitsSection() {
                     <div
                       className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${benefit.gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}
                     >
-                      <Icon className="h-7 w-7 text-foreground" />
+                      <Icon className={`h-7 w-7 ${benefit.iconColor}`} />
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">{benefit.title}</h3>
+                    <h3 className="text-xl font-bold text-foreground mb-3">{benefit.title}</h3>
                     <p className="text-muted-foreground leading-relaxed text-sm">{benefit.description}</p>
                   </div>
                 </CardContent>

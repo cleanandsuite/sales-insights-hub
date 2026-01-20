@@ -77,12 +77,12 @@ export default function Landing() {
 
       {/* Problem - Why Sales Calls Need AI Coaching */}
       <Suspense fallback={<SectionLoader />}>
-        <WhatIsAISection />
+        <WhatIsAISection onStartTrialClick={handleStartTrial} />
       </Suspense>
 
-      {/* Solution - How SellSig Fixes Pain Points (1-2-3) */}
+      {/* Solution - How SellSig Fixes Pain Points (1-2-3) with Mid-Page CTA */}
       <Suspense fallback={<SectionLoader />}>
-        <CoreFeaturesSection />
+        <CoreFeaturesSection onStartTrialClick={handleStartTrial} />
       </Suspense>
 
       {/* Benefits - Core Benefits Your Team Gets */}
@@ -95,9 +95,9 @@ export default function Landing() {
         <UseCasesSection />
       </Suspense>
 
-      {/* Results - Real Results You Can Measure */}
+      {/* Results - Real Results You Can Measure with Mid-Page CTA */}
       <Suspense fallback={<SectionLoader />}>
-        <ROISection />
+        <ROISection onStartTrialClick={handleStartTrial} />
       </Suspense>
 
       {/* Differentiator - What Makes SellSig Different */}
