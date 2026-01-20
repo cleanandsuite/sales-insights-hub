@@ -33,10 +33,10 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
             <Button
               size="lg"
               onClick={onStartTrialClick}
-              className="group gap-3 font-bold text-xl px-12 py-8 bg-white text-primary hover:bg-white/95 shadow-2xl hover:shadow-3xl rounded-xl animate-cta-pulse"
+              className="group gap-3 font-bold text-lg px-8 py-7 bg-white text-primary hover:bg-white/95 shadow-2xl hover:shadow-3xl rounded-xl animate-cta-pulse"
             >
               Start Your Free Trial Now
-              <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <p className="text-sm text-white/80 mt-4 flex flex-wrap items-center justify-center gap-4">
               <span className="flex items-center gap-1">
