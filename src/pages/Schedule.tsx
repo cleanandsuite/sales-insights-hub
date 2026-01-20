@@ -15,12 +15,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Phone,
-  FileText
+  FileText,
+  Sparkles,
+  AlertTriangle
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { AIScheduleDialog } from '@/components/schedule/AIScheduleDialog';
+import { ScheduleAnalyticsWidget } from '@/components/schedule/ScheduleAnalyticsWidget';
+import { FollowUpPrompt } from '@/components/schedule/FollowUpPrompt';
+import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
 
 interface ScheduledCall {
   id: string;
@@ -36,16 +42,28 @@ interface ScheduledCall {
   prep_notes: string | null;
 }
 
+interface RecentRecording {
+  id: string;
+  name: string | null;
+  file_name: string;
+  created_at: string;
+}
+
 export default function Schedule() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { checkConflicts } = useScheduleAssistant();
   
   const [calls, setCalls] = useState<ScheduledCall[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
+  const [preSelectedRecordingId, setPreSelectedRecordingId] = useState<string | null>(null);
+  const [recentRecording, setRecentRecording] = useState<RecentRecording | null>(null);
+  const [conflicts, setConflicts] = useState<{id: string; title: string}[]>([]);
   
   // Form state
   const [newCall, setNewCall] = useState({
@@ -62,7 +80,24 @@ export default function Schedule() {
 
   useEffect(() => {
     fetchCalls();
+    checkRecentRecordings();
   }, [user, currentMonth]);
+
+  // Check for conflicts when date/time changes
+  useEffect(() => {
+    if (!newCall.scheduledAt || !newCall.scheduledTime) {
+      setConflicts([]);
+      return;
+    }
+
+    const checkForConflicts = async () => {
+      const proposedStart = new Date(`${newCall.scheduledAt}T${newCall.scheduledTime}`);
+      const result = await checkConflicts(proposedStart, parseInt(newCall.duration));
+      setConflicts(result.conflicts.map(c => ({ id: c.id, title: c.title })));
+    };
+
+    checkForConflicts();
+  }, [newCall.scheduledAt, newCall.scheduledTime, newCall.duration]);
 
   const fetchCalls = async () => {
     if (!user) return;
@@ -85,6 +120,37 @@ export default function Schedule() {
       console.error('Error fetching calls:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkRecentRecordings = async () => {
+    if (!user) return;
+
+    // Check for recently completed recordings (last 2 hours)
+    const twoHoursAgo = new Date();
+    twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+
+    const { data } = await supabase
+      .from('call_recordings')
+      .select('id, name, file_name, created_at')
+      .eq('user_id', user.id)
+      .eq('status', 'completed')
+      .gte('created_at', twoHoursAgo.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (data && data.length > 0) {
+      // Check if already has a scheduled follow-up
+      const { data: existingCall } = await supabase
+        .from('scheduled_calls')
+        .select('id')
+        .eq('user_id', user.id)
+        .ilike('title', `%${data[0].name || data[0].file_name}%`)
+        .limit(1);
+
+      if (!existingCall || existingCall.length === 0) {
+        setRecentRecording(data[0]);
+      }
     }
   };
 
@@ -134,6 +200,11 @@ export default function Schedule() {
     }
   };
 
+  const handleFollowUpSchedule = (recordingId: string) => {
+    setPreSelectedRecordingId(recordingId);
+    setIsAIDialogOpen(true);
+  };
+
   const days = eachDayOfInterval({
     start: startOfMonth(currentMonth),
     end: endOfMonth(currentMonth)
@@ -175,120 +246,157 @@ export default function Schedule() {
             <p className="text-muted-foreground mt-1">Plan and prepare for upcoming calls</p>
           </div>
           
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Schedule Call
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Schedule a Call</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Call Title</Label>
-                  <Input
-                    placeholder="Discovery call with Acme Corp"
-                    value={newCall.title}
-                    onChange={(e) => setNewCall({ ...newCall, title: e.target.value })}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Contact Name</Label>
-                    <Input
-                      placeholder="John Smith"
-                      value={newCall.contactName}
-                      onChange={(e) => setNewCall({ ...newCall, contactName: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Contact Email</Label>
-                    <Input
-                      type="email"
-                      placeholder="john@acme.com"
-                      value={newCall.contactEmail}
-                      onChange={(e) => setNewCall({ ...newCall, contactEmail: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Date</Label>
-                    <Input
-                      type="date"
-                      value={newCall.scheduledAt}
-                      onChange={(e) => setNewCall({ ...newCall, scheduledAt: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Time</Label>
-                    <Input
-                      type="time"
-                      value={newCall.scheduledTime}
-                      onChange={(e) => setNewCall({ ...newCall, scheduledTime: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Duration</Label>
-                    <Select 
-                      value={newCall.duration}
-                      onValueChange={(value) => setNewCall({ ...newCall, duration: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="15">15 minutes</SelectItem>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">1 hour</SelectItem>
-                        <SelectItem value="90">1.5 hours</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Platform</Label>
-                    <Select 
-                      value={newCall.meetingProvider}
-                      onValueChange={(value) => setNewCall({ ...newCall, meetingProvider: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="zoom">Zoom</SelectItem>
-                        <SelectItem value="teams">Teams</SelectItem>
-                        <SelectItem value="google_meet">Google Meet</SelectItem>
-                        <SelectItem value="other">Phone/Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Meeting Link (optional)</Label>
-                  <Input
-                    placeholder="https://zoom.us/j/..."
-                    value={newCall.meetingUrl}
-                    onChange={(e) => setNewCall({ ...newCall, meetingUrl: e.target.value })}
-                  />
-                </div>
-
-                <Button onClick={handleCreateCall} className="w-full">
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="gap-2"
+              onClick={() => {
+                setPreSelectedRecordingId(null);
+                setIsAIDialogOpen(true);
+              }}
+            >
+              <Sparkles className="h-4 w-4" />
+              AI Schedule
+            </Button>
+            
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
                   Schedule Call
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Schedule a Call</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label>Call Title</Label>
+                    <Input
+                      placeholder="Discovery call with Acme Corp"
+                      value={newCall.title}
+                      onChange={(e) => setNewCall({ ...newCall, title: e.target.value })}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Contact Name</Label>
+                      <Input
+                        placeholder="John Smith"
+                        value={newCall.contactName}
+                        onChange={(e) => setNewCall({ ...newCall, contactName: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Contact Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="john@acme.com"
+                        value={newCall.contactEmail}
+                        onChange={(e) => setNewCall({ ...newCall, contactEmail: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Date</Label>
+                      <Input
+                        type="date"
+                        value={newCall.scheduledAt}
+                        onChange={(e) => setNewCall({ ...newCall, scheduledAt: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Time</Label>
+                      <Input
+                        type="time"
+                        value={newCall.scheduledTime}
+                        onChange={(e) => setNewCall({ ...newCall, scheduledTime: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Conflict Warning */}
+                  {conflicts.length > 0 && (
+                    <div className="p-3 rounded-lg bg-warning/10 border border-warning/30 flex items-start gap-2">
+                      <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-warning">Scheduling Conflict</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Overlaps with: {conflicts.map(c => c.title).join(', ')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Duration</Label>
+                      <Select 
+                        value={newCall.duration}
+                        onValueChange={(value) => setNewCall({ ...newCall, duration: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15 minutes</SelectItem>
+                          <SelectItem value="30">30 minutes</SelectItem>
+                          <SelectItem value="45">45 minutes</SelectItem>
+                          <SelectItem value="60">1 hour</SelectItem>
+                          <SelectItem value="90">1.5 hours</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Platform</Label>
+                      <Select 
+                        value={newCall.meetingProvider}
+                        onValueChange={(value) => setNewCall({ ...newCall, meetingProvider: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="zoom">Zoom</SelectItem>
+                          <SelectItem value="teams">Teams</SelectItem>
+                          <SelectItem value="google_meet">Google Meet</SelectItem>
+                          <SelectItem value="other">Phone/Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Meeting Link (optional)</Label>
+                    <Input
+                      placeholder="https://zoom.us/j/..."
+                      value={newCall.meetingUrl}
+                      onChange={(e) => setNewCall({ ...newCall, meetingUrl: e.target.value })}
+                    />
+                  </div>
+
+                  <Button onClick={handleCreateCall} className="w-full">
+                    Schedule Call
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
+
+        {/* Follow-up Prompt for Recent Recording */}
+        {recentRecording && (
+          <FollowUpPrompt
+            recordingId={recentRecording.id}
+            recordingName={recentRecording.name || recentRecording.file_name}
+            onSchedule={handleFollowUpSchedule}
+            onDismiss={() => setRecentRecording(null)}
+          />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar */}
@@ -373,8 +481,9 @@ export default function Schedule() {
             </div>
           </div>
 
-          {/* Selected Day Details */}
+          {/* Right Sidebar */}
           <div className="space-y-4">
+            {/* Selected Day Details */}
             <div className="card-gradient rounded-xl border border-border/50 p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">
                 {selectedDate 
@@ -442,9 +551,20 @@ export default function Schedule() {
                 ))}
               </div>
             </div>
+
+            {/* Analytics Widget */}
+            <ScheduleAnalyticsWidget />
           </div>
         </div>
       </div>
+
+      {/* AI Schedule Dialog */}
+      <AIScheduleDialog
+        open={isAIDialogOpen}
+        onOpenChange={setIsAIDialogOpen}
+        onSuccess={fetchCalls}
+        preSelectedRecordingId={preSelectedRecordingId}
+      />
     </DashboardLayout>
   );
 }
