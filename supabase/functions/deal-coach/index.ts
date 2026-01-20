@@ -235,11 +235,18 @@ serve(async (req) => {
     const result = await response.json();
     const content = result.choices[0].message.content;
     
-    // Parse the JSON response
+    // Parse the JSON response with robust fallback
     let coaching;
     try {
-      // Try to extract JSON from the response (in case there's extra text)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      // Try to extract JSON from markdown code blocks first
+      let jsonContent = content;
+      const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        jsonContent = codeBlockMatch[1].trim();
+      }
+      
+      // Try to extract JSON object
+      const jsonMatch = jsonContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         coaching = JSON.parse(jsonMatch[0]);
       } else {
@@ -248,10 +255,23 @@ serve(async (req) => {
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
       console.error('Raw content:', content.substring(0, 500));
-      return new Response(
-        JSON.stringify({ error: 'Failed to parse coaching analysis' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      
+      // Return a default coaching object when parsing fails
+      coaching = {
+        overall_score: 50,
+        win_probability: 30,
+        potential_win_probability: 50,
+        missed_opportunities: [],
+        deal_risks: [{ risk: 'Analysis incomplete', severity: 'info', recommendation: 'Please try running the analysis again' }],
+        better_responses: [],
+        key_moments: [],
+        improvement_areas: [],
+        executive_summary: 'The AI analysis encountered an issue. Please try running the analysis again for detailed coaching insights.',
+        strengths: [],
+        weaknesses: [],
+        action_items: ['Re-run the deal coach analysis']
+      };
+      console.log('Using fallback coaching response');
     }
 
     console.log('Deal Coach analysis complete. Score:', coaching.overall_score);
