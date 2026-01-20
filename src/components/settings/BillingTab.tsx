@@ -27,10 +27,12 @@ export function BillingTab() {
   const [teamSize, setTeamSize] = useState(1);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
-  const handleStartCheckout = async (planKey: 'single_user' | 'team') => {
+  const handleStartCheckout = async (planKey: 'single_user' | 'enterprise') => {
     setCheckoutLoading(planKey);
     try {
-      await startCheckout(planKey, planKey === 'team' ? teamSize : 1);
+      // Map 'enterprise' to 'team' for the backend
+      const backendPlanKey = planKey === 'enterprise' ? 'team' : planKey;
+      await startCheckout(backendPlanKey as 'single_user' | 'team', planKey === 'enterprise' ? teamSize : 1);
     } catch (error) {
       toast.error('Failed to start checkout');
     } finally {
@@ -155,10 +157,10 @@ export function BillingTab() {
 
           <div className="space-y-4">
             <PricingCard
-              name={PRICING_TIERS.team.name}
-              price={PRICING_TIERS.team.price}
+              name={PRICING_TIERS.enterprise.name}
+              price={PRICING_TIERS.enterprise.price}
               description="For sales teams up to 10 users (per user)"
-              features={PRICING_TIERS.team.features}
+              features={PRICING_TIERS.enterprise.features}
               isCurrentPlan={plan === 'team'}
               isPopular
               onSelect={() => {}}
@@ -181,7 +183,7 @@ export function BillingTab() {
                     className="w-20"
                   />
                   <span className="text-sm text-muted-foreground">
-                    users × ${PRICING_TIERS.team.price} = <strong>${teamSize * PRICING_TIERS.team.price}/mo</strong>
+                    users × ${PRICING_TIERS.enterprise.price} = <strong>${teamSize * PRICING_TIERS.enterprise.price}/mo</strong>
                   </span>
                 </div>
               </div>
