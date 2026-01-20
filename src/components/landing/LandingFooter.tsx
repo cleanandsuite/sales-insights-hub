@@ -18,26 +18,26 @@ export function LandingFooter() {
           <div className="flex items-center gap-6 text-sm">
             <Link 
               to="/support" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-foreground/70 hover:text-foreground transition-colors"
             >
               Support
             </Link>
             <Link 
               to="/privacy" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-foreground/70 hover:text-foreground transition-colors"
             >
               Privacy Policy
             </Link>
             <Link 
               to="/terms" 
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-foreground/70 hover:text-foreground transition-colors"
             >
               Terms of Service
             </Link>
           </div>
 
           {/* Copyright */}
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-foreground/70">
             © {new Date().getFullYear()} SellSig. All rights reserved.
           </p>
         </div>

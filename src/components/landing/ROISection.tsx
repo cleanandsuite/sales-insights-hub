@@ -14,7 +14,7 @@ const metrics = [
     title: 'Revenue Growth',
     description: 'Teams close bigger deals faster',
     gradient: 'from-success/20 to-success/5',
-    color: 'text-success',
+    color: 'text-green-700',
   },
   {
     icon: Target,
@@ -30,7 +30,7 @@ const metrics = [
     title: 'Time Saved',
     description: 'Auto-summaries end manual reviews',
     gradient: 'from-accent/20 to-accent/5',
-    color: 'text-accent',
+    color: 'text-teal-700',
   },
   {
     icon: Zap,
@@ -38,7 +38,7 @@ const metrics = [
     title: 'Deal Velocity',
     description: 'Better prep shortens cycles',
     gradient: 'from-warning/20 to-warning/5',
-    color: 'text-warning',
+    color: 'text-amber-600',
   },
 ];
 
@@ -48,15 +48,15 @@ export function ROISection({ onStartTrialClick }: ROISectionProps) {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           {/* Section badge */}
-          <div className="inline-flex items-center gap-2 bg-success/10 rounded-full px-4 py-2 mb-6">
-            <Award className="h-4 w-4 text-success" />
-            <span className="text-sm font-medium text-success">Proven Results</span>
+          <div className="inline-flex items-center gap-2 bg-success/20 rounded-full px-4 py-2 mb-6">
+            <Award className="h-4 w-4 text-green-700" />
+            <span className="text-sm font-medium text-green-700">Proven Results</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
             Real Results{' '}
             <span className="gradient-text">You Can Measure</span>
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-foreground/70">
             AI coaching for sales calls that delivers measurable impact on your sales performance
           </p>
         </div>

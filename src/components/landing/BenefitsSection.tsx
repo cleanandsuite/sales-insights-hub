@@ -42,15 +42,15 @@ export function BenefitsSection() {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           {/* Section badge */}
-          <div className="inline-flex items-center gap-2 bg-success/10 rounded-full px-4 py-2 mb-6">
-            <Star className="h-4 w-4 text-success" />
-            <span className="text-sm font-medium text-success">Your Unfair Advantage</span>
+          <div className="inline-flex items-center gap-2 bg-success/20 rounded-full px-4 py-2 mb-6">
+            <Star className="h-4 w-4 text-green-700" />
+            <span className="text-sm font-medium text-green-700">Your Unfair Advantage</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
             Core Benefits
             <span className="gradient-text"> Your Team Gets</span>
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-foreground/70">
             AI coaching that transforms how your team approaches every sales call—from preparation to close.
           </p>
         </div>

@@ -61,7 +61,7 @@ export default function Landing() {
             {TRUSTED_BY.map((company) => (
               <div 
                 key={company} 
-                className="text-lg md:text-xl font-semibold text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                className="text-lg md:text-xl font-semibold text-foreground/70 hover:text-foreground transition-colors"
               >
                 {company}
               </div>
