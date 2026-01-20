@@ -48,39 +48,42 @@ export function SellSigLogo({
 }: SellSigLogoProps) {
   const sizeClasses = {
     sm: {
+      container: 'h-7 w-7',
+      icon: 'h-4 w-4',
+      text: 'text-sm',
+      tagline: 'text-[8px]',
+      gap: 'gap-1.5',
+    },
+    md: {
       container: 'h-8 w-8',
       icon: 'h-5 w-5',
       text: 'text-base',
       tagline: 'text-[9px]',
-    },
-    md: {
-      container: 'h-10 w-10',
-      icon: 'h-7 w-7',
-      text: 'text-xl',
-      tagline: 'text-[10px]',
+      gap: 'gap-1.5',
     },
     lg: {
-      container: 'h-12 w-12',
-      icon: 'h-8 w-8',
-      text: 'text-2xl',
-      tagline: 'text-xs',
+      container: 'h-10 w-10',
+      icon: 'h-6 w-6',
+      text: 'text-lg',
+      tagline: 'text-[10px]',
+      gap: 'gap-2',
     },
   };
 
   const variantClasses = {
     default: {
-      containerBg: 'bg-primary/10',
-      containerBorder: 'border-primary/20',
+      containerBg: 'bg-[#1e3a5f]',
+      containerBorder: 'border-transparent',
       text: 'text-foreground',
-      highlight: 'text-blue-500',
+      highlight: 'text-foreground',
       tagline: 'text-muted-foreground',
     },
     light: {
-      containerBg: 'bg-white/15',
-      containerBorder: 'border-white/10',
+      containerBg: 'bg-[#1e3a5f]',
+      containerBorder: 'border-transparent',
       text: 'text-white',
-      highlight: 'text-blue-400',
-      tagline: 'text-white/50',
+      highlight: 'text-white',
+      tagline: 'text-white/60',
     },
   };
 
@@ -88,26 +91,25 @@ export function SellSigLogo({
   const colors = variantClasses[variant];
 
   const logoContent = (
-    <div className={cn("flex items-center gap-2 hover:opacity-90 transition-opacity group", className)}>
+    <div className={cn("flex items-center hover:opacity-90 transition-opacity group", sizes.gap, className)}>
       <div className={cn(
-        "rounded-lg flex items-center justify-center backdrop-blur-sm border group-hover:border-opacity-60 transition-colors",
+        "rounded-md flex items-center justify-center",
         sizes.container,
-        colors.containerBg,
-        colors.containerBorder
+        colors.containerBg
       )}>
         <SellSigIcon className={sizes.icon} />
       </div>
       <div className="flex flex-col">
         <span className={cn("font-semibold tracking-tight leading-none", sizes.text, colors.text)}>
-          Sell<span className={colors.highlight}>Sig</span>
+          SellSig
         </span>
         {showTagline && (
           <span className={cn(
-            "font-medium tracking-widest uppercase leading-none mt-0.5",
+            "font-medium tracking-wider uppercase leading-none mt-0.5",
             sizes.tagline,
             colors.tagline
           )}>
-            AI Coach
+            AI COACH
           </span>
         )}
       </div>
