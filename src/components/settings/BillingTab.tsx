@@ -69,7 +69,15 @@ export function BillingTab() {
   }
 
   // Check if Enterprise is coming soon
-  const isEnterprisePlanComingSoon = PRICING_TIERS.team.comingSoon === true;
+  const isEnterprisePlanComingSoon = PRICING_TIERS.enterprise.comingSoon === true;
+  
+  // Map backend plan names to pricing tier keys
+  const getPricingTier = (planName: string | null) => {
+    if (planName === 'team') return PRICING_TIERS.enterprise;
+    if (planName === 'single_user') return PRICING_TIERS.single_user;
+    return null;
+  };
+  const currentTier = getPricingTier(plan);
 
   return (
     <div className="space-y-6">
@@ -85,9 +93,9 @@ export function BillingTab() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">{PRICING_TIERS[plan]?.name || plan}</p>
+                <p className="font-medium">{currentTier?.name || plan}</p>
                 <p className="text-sm text-muted-foreground">
-                  ${PRICING_TIERS[plan]?.price || 0}/month
+                  ${currentTier?.price || 0}/month
                   {quantity > 1 && ` × ${quantity} users`}
                 </p>
               </div>
