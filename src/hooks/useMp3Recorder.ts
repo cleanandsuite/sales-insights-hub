@@ -21,11 +21,12 @@ interface UseMp3RecorderReturn {
 }
 
 const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
-  echoCancellation: false,
-  noiseSuppression: false,
+  // Keep constraints broadly compatible across browsers/devices.
+  // (sampleRate is not reliably honored and can lead to odd capture behavior.)
+  echoCancellation: true,
+  noiseSuppression: true,
   autoGainControl: true,
   channelCount: 1,
-  sampleRate: 16000,
 };
 
 const RECORDER_OPTIONS = {
@@ -123,35 +124,29 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
             
             // Check if we got audio from the display
             const displayAudioTracks = displayStream.getAudioTracks();
-            
+
             if (displayAudioTracks.length > 0) {
-              // Mix both audio streams
-              const audioContext = new AudioContext({ sampleRate: 16000 });
-              const destination = audioContext.createMediaStreamDestination();
-              
-              // Connect microphone
-              const micSource = audioContext.createMediaStreamSource(micStream);
-              micSource.connect(destination);
-              
-              // Connect display audio
-              const displaySource = audioContext.createMediaStreamSource(
-                new MediaStream(displayAudioTracks)
-              );
-              displaySource.connect(destination);
-              
-              stream = destination.stream;
+              // Combine microphone + display audio tracks into a single stream.
+              // This avoids relying on an AudioContext mixer which can be suspended
+              // by autoplay policies when recording starts without a direct user gesture.
+              const combinedStream = new MediaStream([
+                ...micStream.getAudioTracks(),
+                ...displayAudioTracks,
+              ]);
+
+              stream = combinedStream;
               additionalStreamsRef.current = [micStream, displayStream];
               setRecordingMethod('webm-opus');
               setIsSystemAudioCapture(true);
               console.log('BROWSER: Capturing both microphone and tab/screen audio');
-              
+
               // Stop the video track since we only need audio
-              displayStream.getVideoTracks().forEach(track => track.stop());
+              displayStream.getVideoTracks().forEach((track) => track.stop());
             } else {
               // No audio from display, use mic only but keep display stream for cleanup
               console.log('BROWSER: Screen share has no audio, using microphone only');
               stream = micStream;
-              displayStream.getTracks().forEach(track => track.stop());
+              displayStream.getTracks().forEach((track) => track.stop());
               setRecordingMethod('webm-opus');
               setIsSystemAudioCapture(false);
             }
