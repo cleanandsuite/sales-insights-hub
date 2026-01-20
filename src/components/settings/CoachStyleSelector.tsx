@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crown, Zap, Target, Scale, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 interface CoachStyleSelectorProps {
@@ -61,6 +62,7 @@ export function CoachStyleSelector({
   const {
     user
   } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdminRole();
   const {
     toast
   } = useToast();
@@ -152,11 +154,16 @@ export function CoachStyleSelector({
       });
     }
   };
-  if (loading) {
+  if (loading || adminLoading) {
     return <div className="animate-pulse space-y-4">
         <div className="h-8 bg-muted rounded w-48" />
         <div className="h-32 bg-muted rounded" />
       </div>;
+  }
+
+  // Only show Coach Style selector to admin users
+  if (!isAdmin) {
+    return null;
   }
   return <div className="space-y-6">
       {/* Enable Toggle */}
