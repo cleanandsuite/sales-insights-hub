@@ -46,11 +46,6 @@ const COMMON_STRENGTHS = [
   { value: 'Industry leader', icon: Award },
 ];
 
-const TONE_OPTIONS = [
-  { value: 'Neutral', label: 'Neutral', description: 'Balanced, professional approach' },
-  { value: '10X Sales Strat', label: '10X Sales Strat', description: 'Aggressive, action-oriented style' },
-  { value: 'Straight Line Method', label: 'Straight Line Method', description: 'Charismatic, relationship-focused' },
-];
 
 export default function Profile() {
   const { user } = useAuth();
@@ -562,38 +557,6 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Tone Preference */}
-            <div className="space-y-3">
-              <Label className="text-foreground flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                Preferred Tone
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Choose the communication style for your scripts
-              </p>
-              <Select
-                value={profile.personal_tone}
-                onValueChange={(value) =>
-                  setProfile({ ...profile, personal_tone: value })
-                }
-              >
-                <SelectTrigger className="bg-input border-border">
-                  <SelectValue placeholder="Select tone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TONE_OPTIONS.map((tone) => (
-                    <SelectItem key={tone.value} value={tone.value}>
-                      <div className="flex flex-col">
-                        <span>{tone.label}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {tone.description}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </div>
 
