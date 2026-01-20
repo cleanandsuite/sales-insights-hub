@@ -99,21 +99,14 @@ export function SellSigLogo({
       )}>
         <SellSigIcon className={sizes.icon} />
       </div>
-      <div className="flex flex-col">
-        <span className={cn("font-semibold tracking-tight leading-none", sizes.text, colors.text)}>
-          SellSig
-        </span>
-        {showTagline && (
-          <span className={cn(
-            "font-medium tracking-wider uppercase leading-none mt-0.5",
-            sizes.tagline,
-            colors.tagline
-          )}>
-            AI COACH
-          </span>
-        )}
-      </div>
-    </div>
+    <div className="flex flex-col">
+              <span className="font-bold text-xl tracking-tight text-white leading-none">
+                Sell<span className="text-blue-400">Sig</span>
+              </span>
+              <span className="text-[10px] text-white/50 font-medium tracking-widest uppercase leading-none mt-0.5">
+                AI Coach
+              </span>
+            </div>
   );
 
   if (linkTo) {
