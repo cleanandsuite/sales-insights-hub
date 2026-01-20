@@ -8,11 +8,15 @@ import { Crown, Zap, Target, Scale, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useEnterpriseSubscription } from "@/hooks/useEnterpriseSubscription";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+
 interface CoachStyleSelectorProps {
   onStyleChange?: (style: string) => void;
   onEnabledChange?: (enabled: boolean) => void;
+  /** If true, renders in standalone mode for Enterprise users (no admin check) */
+  enterpriseMode?: boolean;
 }
 const COACH_STYLES = [{
   id: "sellsig",
@@ -57,19 +61,18 @@ const COACH_STYLES = [{
 }];
 export function CoachStyleSelector({
   onStyleChange,
-  onEnabledChange
+  onEnabledChange,
+  enterpriseMode = false
 }: CoachStyleSelectorProps) {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdminRole();
-  const {
-    toast
-  } = useToast();
+  const { isEnterprise, loading: enterpriseLoading } = useEnterpriseSubscription();
+  const { toast } = useToast();
   const [selectedStyle, setSelectedStyle] = useState("neutral");
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+
   useEffect(() => {
     fetchSettings();
     checkSubscription();
@@ -157,17 +160,20 @@ export function CoachStyleSelector({
       });
     }
   };
-  if (loading || adminLoading) {
+  if (loading || adminLoading || enterpriseLoading) {
     return <div className="animate-pulse space-y-4">
         <div className="h-8 bg-muted rounded w-48" />
         <div className="h-32 bg-muted rounded" />
       </div>;
   }
 
-  // Only show Coach Style selector to admin users
-  if (!isAdmin) {
+  // In enterprise mode, allow Enterprise users; otherwise require admin
+  const canAccess = enterpriseMode ? isEnterprise : isAdmin;
+  
+  if (!canAccess) {
     return null;
   }
+
   return <div className="space-y-6">
       {/* Enable Toggle */}
       <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-card">
