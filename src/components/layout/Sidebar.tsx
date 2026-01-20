@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
@@ -22,6 +22,7 @@ const baseNavItems = [
 ];
 
 const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
+const revenueIntelligenceItem = { to: '/revenue-intelligence', icon: TrendingUp, label: 'Revenue Intel' };
 const adminNavItem = { to: '/experiments', icon: FlaskConical, label: 'Experiments' };
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
@@ -30,7 +31,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { isAdmin } = useAdminRole();
   
   let navItems = isManager 
-    ? [...baseNavItems.slice(0, -1), managerNavItem, baseNavItems[baseNavItems.length - 1]]
+    ? [...baseNavItems.slice(0, -1), managerNavItem, revenueIntelligenceItem, baseNavItems[baseNavItems.length - 1]]
     : baseNavItems;
   
   if (isAdmin) {
