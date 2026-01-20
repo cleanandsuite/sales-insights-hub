@@ -16,6 +16,7 @@ import { TeamTrendsHeatmap } from '@/components/enterprise/TeamTrendsHeatmap';
 import { PredictiveScoreCard } from '@/components/enterprise/PredictiveScoreCard';
 import { EnterpriseExportPanel } from '@/components/enterprise/EnterpriseExportPanel';
 import { AlertPreferencesDialog } from '@/components/enterprise/AlertPreferencesDialog';
+import { RepTrendChart } from '@/components/enterprise/RepTrendChart';
 import { 
   BarChart3, TrendingUp, Download, RefreshCw, Crown, AlertTriangle, Zap, Bell, Brain
 } from 'lucide-react';
@@ -166,6 +167,7 @@ export default function RevenueIntelligence() {
 
           <TabsContent value="performance" className="space-y-4">
             {teamId && <RepPerformanceTable teamId={teamId} />}
+            {teamId && <RepTrendChart teamId={teamId} />}
           </TabsContent>
 
           <TabsContent value="actions" className="space-y-4">
