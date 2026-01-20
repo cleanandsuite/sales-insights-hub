@@ -17,6 +17,15 @@ interface CoachStyleSelectorProps {
 
 const COACH_STYLES = [
   {
+    id: 'sellsig',
+    name: 'SellSig Discovery',
+    icon: '🧘',
+    description: 'Low-pressure, high-trust discovery. Calm, consultative, non-pushy—focus on uncovering needs and booking next steps naturally.',
+    traits: ['No Stress', 'Discovery', 'Trust-First'],
+    color: 'border-emerald-500 bg-emerald-500/10',
+    badgeColor: 'bg-emerald-500',
+  },
+  {
     id: 'cardone',
     name: '10X Momentum',
     icon: '🔥',

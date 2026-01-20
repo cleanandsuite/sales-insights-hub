@@ -32,7 +32,7 @@ interface CoachingSuggestion {
 
 interface LiveCoachingSidebarProps {
   transcript: string;
-  coachStyle: 'cardone' | 'belfort' | 'neutral';
+  coachStyle: 'sellsig' | 'cardone' | 'belfort' | 'neutral';
   isRecording: boolean;
   isPaused: boolean;
   onSuggestionFeedback?: (suggestionId: string, helpful: boolean) => void;
@@ -63,6 +63,7 @@ const URGENCY_STYLES = {
 };
 
 const STYLE_LABELS = {
+  sellsig: { name: 'SellSig Discovery', icon: '🧘', color: 'bg-emerald-500' },
   cardone: { name: '10X Momentum', icon: '🔥', color: 'bg-orange-500' },
   belfort: { name: 'Straight Line', icon: '🎯', color: 'bg-blue-500' },
   neutral: { name: 'Balanced', icon: '⚖️', color: 'bg-muted' },
