@@ -59,6 +59,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
   }, [useScreenShare, setUseScreenShare]);
 
   const [selectedSourceId, setSelectedSourceId] = useState<string | undefined>(undefined);
+  const [isInitializing, setIsInitializing] = useState(true);
   const initStartedRef = useRef(false);
 
   const [transcription, setTranscription] = useState('');
@@ -88,6 +89,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
     initStartedRef.current = true;
 
     const initRecording = async () => {
+      setIsInitializing(true);
       try {
         await startRecording(selectedSourceId);
       } catch (error) {
@@ -97,9 +99,11 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
           title: 'Recording Access Required',
           description: isElectronEnvironment
             ? 'Please allow microphone access to record.'
-            : 'Please allow microphone and screen share access to record both sides of the call.',
+            : 'Please allow microphone access to record. On mobile, only microphone recording is available.',
         });
         onClose();
+      } finally {
+        setIsInitializing(false);
       }
     };
 
@@ -522,12 +526,28 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
     onClose();
   };
 
+  // Show loading state while initializing
+  if (isInitializing) {
+    return (
+      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
+          <p className="text-lg font-medium text-foreground">Initializing Recording...</p>
+          <p className="text-sm text-muted-foreground">Please allow microphone access when prompted</p>
+          <Button variant="ghost" onClick={onClose} className="mt-4">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm animate-fade-in">
-      <div className="h-full flex flex-col">
+    <div className="fixed inset-0 z-50 bg-background animate-fade-in overflow-auto">
+      <div className="min-h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
-          <h2 className="text-xl font-semibold text-foreground">Live Recording</h2>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border/50">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground">Live Recording</h2>
           <div className="flex items-center gap-2">
             {/* Audio Source Settings (Electron only) */}
             {isElectronEnvironment && (
@@ -571,7 +591,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col p-6 gap-6 overflow-hidden">
+        <div className="flex-1 flex flex-col p-4 sm:p-6 gap-4 sm:gap-6 overflow-auto">
           {/* Timer and waveform */}
           <div className="flex flex-col items-center gap-4">
             <RecordingTimer 
@@ -637,8 +657,8 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
             </div>
           </div>
 
-          {/* Transcription and AI panels */}
-          <div className="flex-1 flex gap-4 overflow-hidden min-h-0">
+          {/* Transcription and AI panels - stack on mobile */}
+          <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-auto min-h-0">
             {/* Live Summary Panel - always visible during recording */}
             <LiveSummaryPanel
               transcript={transcription}
