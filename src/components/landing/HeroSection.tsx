@@ -242,20 +242,6 @@ export function HeroSection({
             <ProductMockup />
           </div>
         </div>
-
-        {/* Trusted By - Moved below hero content */}
-        <div className="mt-16 pt-12 border-t border-white/10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <p className="text-center text-white/50 text-sm font-medium mb-6 uppercase tracking-wider">
-            Trusted by Sales Teams at
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-            {['TechFlow', 'CloudScale', 'DataSync', 'SalesForge', 'RevHub'].map((company) => (
-              <div key={company} className="text-white/40 font-bold text-lg md:text-xl tracking-wide hover:text-white/60 transition-colors">
-                {company}
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
