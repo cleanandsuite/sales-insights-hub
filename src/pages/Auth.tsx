@@ -103,7 +103,7 @@ export default function Auth() {
         <div className="relative z-10 text-center px-12 animate-fade-in">
           <Link to="/" className="flex items-center justify-center gap-4 mb-8 hover:opacity-80 transition-opacity">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 overflow-hidden shadow-md">
-              <img src={sellsigLogo} alt="SellSig" className="h-10 w-10 object-contain" />
+              <img src={sellsigLogo} alt="SellSig" className="h-10 w-10 object-contain" loading="lazy" />
             </div>
           </Link>
           <h1 className="text-4xl font-bold mb-4 gradient-text">SellSig</h1>
