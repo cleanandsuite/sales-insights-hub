@@ -21,12 +21,11 @@ interface UseMp3RecorderReturn {
 }
 
 const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
-  // Keep constraints broadly compatible across browsers/devices.
-  // (sampleRate is not reliably honored and can lead to odd capture behavior.)
-  echoCancellation: true,
-  noiseSuppression: true,
+  echoCancellation: false,
+  noiseSuppression: false,
   autoGainControl: true,
   channelCount: 1,
+  sampleRate: 16000,
 };
 
 const RECORDER_OPTIONS = {
@@ -124,29 +123,35 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
             
             // Check if we got audio from the display
             const displayAudioTracks = displayStream.getAudioTracks();
-
+            
             if (displayAudioTracks.length > 0) {
-              // Combine microphone + display audio tracks into a single stream.
-              // This avoids relying on an AudioContext mixer which can be suspended
-              // by autoplay policies when recording starts without a direct user gesture.
-              const combinedStream = new MediaStream([
-                ...micStream.getAudioTracks(),
-                ...displayAudioTracks,
-              ]);
-
-              stream = combinedStream;
+              // Mix both audio streams
+              const audioContext = new AudioContext({ sampleRate: 16000 });
+              const destination = audioContext.createMediaStreamDestination();
+              
+              // Connect microphone
+              const micSource = audioContext.createMediaStreamSource(micStream);
+              micSource.connect(destination);
+              
+              // Connect display audio
+              const displaySource = audioContext.createMediaStreamSource(
+                new MediaStream(displayAudioTracks)
+              );
+              displaySource.connect(destination);
+              
+              stream = destination.stream;
               additionalStreamsRef.current = [micStream, displayStream];
               setRecordingMethod('webm-opus');
               setIsSystemAudioCapture(true);
               console.log('BROWSER: Capturing both microphone and tab/screen audio');
-
+              
               // Stop the video track since we only need audio
-              displayStream.getVideoTracks().forEach((track) => track.stop());
+              displayStream.getVideoTracks().forEach(track => track.stop());
             } else {
               // No audio from display, use mic only but keep display stream for cleanup
               console.log('BROWSER: Screen share has no audio, using microphone only');
               stream = micStream;
-              displayStream.getTracks().forEach((track) => track.stop());
+              displayStream.getTracks().forEach(track => track.stop());
               setRecordingMethod('webm-opus');
               setIsSystemAudioCapture(false);
             }
@@ -170,52 +175,34 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
         }
       }
       
-      // Validate we got audio tracks
-      const audioTracks = stream.getAudioTracks();
-      console.log('RECORDER: Captured stream', {
-        audioTracks: audioTracks.length,
-        videoTracks: stream.getVideoTracks().length,
-        isElectron: isElectronEnvironment,
-        useScreenShareMode,
-      });
-
-      if (audioTracks.length === 0) {
-        throw new Error('No audio tracks available from capture source');
-      }
-
-      // Log audio source details (first track)
-      const audioTrack = audioTracks[0];
-      const settings = audioTrack.getSettings();
-      console.log('AUDIO SOURCE:', {
-        label: audioTrack.label,
-        enabled: audioTrack.enabled,
-        channelCount: settings.channelCount,
-        sampleRate: settings.sampleRate,
-        isElectron: isElectron(),
-        isSystemAudio: isElectron() && additionalStreamsRef.current.length > 0,
-      });
-
-      // Use the first audio track for analysis (some browsers can misbehave with multi-track streams)
-      const analyserStream = new MediaStream([audioTrack]);
       streamRef.current = stream;
-
-      // Set up audio analysis – don't force sampleRate; can break on some devices
-      audioContextRef.current = new AudioContext();
-      try {
-        await audioContextRef.current.resume();
-      } catch {
-        // ignore – autoplay policy; recording still works
+      
+      // Log audio source details
+      const audioTrack = stream.getAudioTracks()[0];
+      if (audioTrack) {
+        const settings = audioTrack.getSettings();
+        console.log('AUDIO SOURCE:', {
+          label: audioTrack.label,
+          enabled: audioTrack.enabled,
+          channelCount: settings.channelCount,
+          sampleRate: settings.sampleRate,
+          isElectron: isElectron(),
+          isSystemAudio: isElectron() && additionalStreamsRef.current.length > 0,
+        });
       }
+      
+      // Set up audio analysis with 16kHz context
+      audioContextRef.current = new AudioContext({ sampleRate: 16000 });
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
-
-      const source = audioContextRef.current.createMediaStreamSource(analyserStream);
+      
+      const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
 
       // Determine best supported format - prefer WebM Opus
       let mimeType = RECORDER_OPTIONS.mimeType;
       let bitRate = RECORDER_OPTIONS.audioBitsPerSecond;
-
+      
       if (!MediaRecorder.isTypeSupported(mimeType)) {
         // Fallback chain
         const fallbacks = ['audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
@@ -229,45 +216,25 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
         console.log('Using fallback format:', mimeType);
       } else if (!isElectronEnvironment) {
         setRecordingMethod('webm-opus');
-        console.log('Using optimized WebM Opus @ 64kbps mono');
+        console.log('Using optimized WebM Opus @ 64kbps mono 16kHz');
       }
-
+      
       mimeTypeRef.current = mimeType;
-
-      // Create MediaRecorder – fallback to single-track if multi-track fails
-      let mediaRecorder: MediaRecorder;
-      try {
-        mediaRecorder = new MediaRecorder(stream, {
-          mimeType,
-          audioBitsPerSecond: bitRate,
-        });
-      } catch (err) {
-        console.warn('MediaRecorder init failed; falling back to single-track stream', err);
-        const singleTrackStream = new MediaStream([audioTrack]);
-        streamRef.current = singleTrackStream;
-        mediaRecorder = new MediaRecorder(singleTrackStream, {
-          mimeType,
-          audioBitsPerSecond: bitRate,
-        });
-      }
-
+      
+      const mediaRecorder = new MediaRecorder(stream, { 
+        mimeType,
+        audioBitsPerSecond: bitRate
+      });
+      
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
-
-      mediaRecorder.onstart = () => {
-        console.log('RECORDER: MediaRecorder started', { mimeType, state: mediaRecorder.state });
-      };
-
-      mediaRecorder.onerror = (event) => {
-        console.error('RECORDER: MediaRecorder error', event);
-      };
-
+      
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
         }
       };
-
+      
       mediaRecorder.start(100);
       setIsRecording(true);
       setIsPaused(false);
@@ -302,32 +269,24 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
         setIsSystemAudioCapture(false);
       };
 
-      const recorder = mediaRecorderRef.current;
-      if (!recorder || recorder.state === 'inactive') {
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
         cleanup();
         resolve(null);
         return;
       }
 
-      recorder.onstop = () => {
+      mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
         console.log('Recording stopped:', {
           format: mimeTypeRef.current,
           size: blob.size,
-          chunks: chunksRef.current.length,
+          chunks: chunksRef.current.length
         });
         cleanup();
-        resolve(blob.size > 0 ? blob : null);
+        resolve(blob);
       };
 
-      // Try to flush any buffered audio before stopping
-      try {
-        recorder.requestData();
-      } catch {
-        // ignore
-      }
-
-      recorder.stop();
+      mediaRecorderRef.current.stop();
       setIsRecording(false);
     });
   }, []);

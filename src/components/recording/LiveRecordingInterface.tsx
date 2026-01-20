@@ -5,7 +5,7 @@ import { Pause, Play, Square, X, Headphones, Mic, Settings2 } from 'lucide-react
 import { useMp3Recorder } from '@/hooks/useMp3Recorder';
 import { AudioWaveform } from './AudioWaveform';
 import { RecordingTimer } from './RecordingTimer';
-import { LiveSummaryPanel } from './LiveSummaryPanel';
+import { TranscriptionPanel } from './TranscriptionPanel';
 import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
 import { LiveCoachingSidebar } from './LiveCoachingSidebar';
 import { RecordingNameDialog } from './RecordingNameDialog';
@@ -60,8 +60,6 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
   const [selectedSourceId, setSelectedSourceId] = useState<string | undefined>(undefined);
   const initStartedRef = useRef(false);
 
-  const [isStartingRecording, setIsStartingRecording] = useState(true);
-
   const [transcription, setTranscription] = useState('');
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [sentiment, setSentiment] = useState<'positive' | 'neutral' | 'negative'>('neutral');
@@ -89,11 +87,8 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
     initStartedRef.current = true;
 
     const initRecording = async () => {
-      setIsStartingRecording(true);
-      console.log('RECORDER UI: initRecording start');
       try {
         await startRecording(selectedSourceId);
-        console.log('RECORDER UI: initRecording success');
       } catch (error) {
         console.error('Recording start error:', error);
         toast({
@@ -104,17 +99,12 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
             : 'Please allow microphone and screen share access to record both sides of the call.',
         });
         onClose();
-      } finally {
-        setIsStartingRecording(false);
       }
     };
 
     initRecording();
 
     return () => {
-      // StrictMode mounts/unmounts components twice in dev; ensure we always release devices.
-      void stopRecording();
-
       if (transcriptionIntervalRef.current) {
         clearInterval(transcriptionIntervalRef.current);
       }
@@ -122,7 +112,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
         clearTimeout(retryTimeoutRef.current);
       }
     };
-  }, [isElectronEnvironment, onClose, selectedSourceId, startRecording, stopRecording, toast]);
+  }, [isElectronEnvironment, onClose, selectedSourceId, startRecording, toast]);
 
 
   // Countdown timer for rate limiting
@@ -143,8 +133,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
 
     try {
       const audioBlob = await getAudioChunk();
-      // Skip if no blob, blob is empty, or size hasn't changed
-      if (!audioBlob || audioBlob.size === 0 || audioBlob.size === lastProcessedChunkRef.current) return;
+      if (!audioBlob || audioBlob.size === lastProcessedChunkRef.current) return;
       
       lastProcessedChunkRef.current = audioBlob.size;
       setIsProcessing(true);
@@ -154,16 +143,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
-        const result = reader.result as string;
-        const base64Audio = result?.split(',')[1];
-        
-        // Validate base64 audio data exists
-        if (!base64Audio || base64Audio.length === 0) {
-          console.warn('Empty audio data, skipping transcription');
-          setIsProcessing(false);
-          setTranscriptionStatus('idle');
-          return;
-        }
+        const base64Audio = (reader.result as string).split(',')[1];
 
         try {
           // Send to transcription API
@@ -297,11 +277,11 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
 
       const audioBlob = await stopRecording();
       
-      if (!audioBlob || audioBlob.size === 0) {
+      if (!audioBlob) {
         toast({
           variant: 'destructive',
           title: 'No Recording Data',
-          description: 'The recording contains no audio data. Please check your mic/system audio and try again.'
+          description: 'The recording contains no audio data. Please try again.'
         });
         return;
       }
@@ -435,12 +415,6 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
           reader.onloadend = async () => {
             try {
               const base64Audio = (reader.result as string).split(',')[1];
-
-              if (!base64Audio || base64Audio.length === 0) {
-                console.warn('Final transcription skipped: empty audio data');
-                resolve();
-                return;
-              }
               
               const { data: transcribeData, error: transcribeError } = await supabase.functions.invoke('transcribe-audio', {
                 body: { audio: base64Audio, useAssemblyAI: true }
@@ -616,7 +590,6 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
                   onClick={resumeRecording}
                   size="lg"
                   className="gap-2"
-                  disabled={isSaving || isStartingRecording}
                 >
                   <Play className="h-5 w-5" />
                   Resume
@@ -627,7 +600,6 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
                   variant="secondary"
                   size="lg"
                   className="gap-2"
-                  disabled={isSaving || isStartingRecording || !isRecording}
                 >
                   <Pause className="h-5 w-5" />
                   Pause
@@ -638,36 +610,42 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
                 variant="destructive"
                 size="lg"
                 className="gap-2"
-                disabled={isSaving || isStartingRecording || (!isRecording && !isPaused)}
+                disabled={isSaving}
               >
                 <Square className="h-5 w-5" />
-                {isSaving
-                  ? processingStatus || 'Processing...'
-                  : isStartingRecording
-                    ? 'Starting...'
-                    : 'Stop & Save'}
+                {isSaving ? processingStatus || 'Processing...' : 'Stop & Save'}
               </Button>
             </div>
           </div>
 
-          {/* Live Summary and AI Coaching panels */}
+          {/* Transcription and AI panels */}
           <div className="flex-1 flex gap-6 overflow-hidden min-h-0">
-            <LiveSummaryPanel 
+            <TranscriptionPanel 
               transcription={transcription}
-              isRecording={isRecording}
-              isPaused={isPaused}
+              isProcessing={isProcessing}
+              status={transcriptionStatus}
+              retryCountdown={retryCountdown}
             />
             
-            {/* Always show Live Coaching sidebar for real-time advice */}
-            <LiveCoachingSidebar
-              transcript={transcription}
-              coachStyle={liveCoachingEnabled ? coachStyle : 'neutral'}
-              isRecording={isRecording}
-              isPaused={isPaused}
-              onSuggestionFeedback={(id, helpful) => {
-                console.log('Feedback:', id, helpful);
-              }}
-            />
+            {/* Show Live Coaching sidebar if enabled (premium), otherwise standard suggestions */}
+            {liveCoachingEnabled ? (
+              <LiveCoachingSidebar
+                transcript={transcription}
+                coachStyle={coachStyle}
+                isRecording={isRecording}
+                isPaused={isPaused}
+                onSuggestionFeedback={(id, helpful) => {
+                  console.log('Feedback:', id, helpful);
+                }}
+              />
+            ) : (
+              <AISuggestionsPanel 
+                suggestions={suggestions}
+                sentiment={sentiment}
+                keyTopics={keyTopics}
+                isAnalyzing={isAnalyzing}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -134,17 +134,15 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
 
   const stopRecording = useCallback(async (): Promise<Blob | null> => {
     return new Promise((resolve) => {
-      const recorder = mediaRecorderRef.current;
-
-      if (!recorder || recorder.state === 'inactive') {
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
         resolve(null);
         return;
       }
-
-      recorder.onstop = () => {
+      
+      mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
         console.log('Recording stopped:', blob.size, 'bytes');
-
+        
         // Clean up
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
@@ -155,23 +153,15 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
         }
-
+        
         setIsRecording(false);
         setIsPaused(false);
         setAudioLevel(0);
-
-        // Treat empty recordings as "no data"
-        resolve(blob.size > 0 ? blob : null);
+        
+        resolve(blob);
       };
-
-      // Try to flush any buffered audio before stopping
-      try {
-        recorder.requestData();
-      } catch {
-        // ignore
-      }
-
-      recorder.stop();
+      
+      mediaRecorderRef.current.stop();
     });
   }, []);
 

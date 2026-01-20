@@ -181,15 +181,14 @@ export function useElectronRecorder(): UseElectronRecorderReturn {
         setAudioLevel(0);
       };
 
-      const recorder = mediaRecorderRef.current;
-      if (!recorder || recorder.state === 'inactive') {
+      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
         cleanup();
         resolve(null);
         return;
       }
 
-      recorder.onstop = () => {
-        const mimeType = recorder.mimeType || 'audio/webm';
+      mediaRecorderRef.current.onstop = () => {
+        const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
         const blob = new Blob(chunksRef.current, { type: mimeType });
         console.log('Electron recording stopped:', {
           format: mimeType,
@@ -198,17 +197,10 @@ export function useElectronRecorder(): UseElectronRecorderReturn {
           captureMode,
         });
         cleanup();
-        resolve(blob.size > 0 ? blob : null);
+        resolve(blob);
       };
 
-      // Try to flush any buffered audio before stopping
-      try {
-        recorder.requestData();
-      } catch {
-        // ignore
-      }
-
-      recorder.stop();
+      mediaRecorderRef.current.stop();
       setIsRecording(false);
     });
   }, [captureMode]);
