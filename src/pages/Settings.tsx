@@ -20,10 +20,11 @@ import {
   RefreshCw,
   Check,
   AlertCircle,
+  Database,
   CreditCard,
   Mail
 } from 'lucide-react';
-
+import { DataExportTab } from '@/components/settings/DataExportTab';
 import { PasswordChangeCard } from '@/components/settings/PasswordChangeCard';
 import { BillingTab } from '@/components/settings/BillingTab';
 import { InvitesTab } from '@/components/settings/InvitesTab';
@@ -241,6 +242,10 @@ export default function Settings() {
             <TabsTrigger value="privacy" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Privacy</span>
+            </TabsTrigger>
+            <TabsTrigger value="data" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Database className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Data</span>
             </TabsTrigger>
             <TabsTrigger value="invites" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -584,6 +589,10 @@ export default function Settings() {
             </div>
           </TabsContent>
 
+          {/* Data Export */}
+          <TabsContent value="data">
+            <DataExportTab />
+          </TabsContent>
 
           {/* Billing */}
           <TabsContent value="billing">

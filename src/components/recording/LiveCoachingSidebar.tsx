@@ -63,9 +63,9 @@ const URGENCY_STYLES = {
 };
 
 const STYLE_LABELS = {
-  cardone: { name: '10X Momentum', icon: '🔥', color: 'bg-orange-500' },
-  belfort: { name: 'Straight Line', icon: '🎯', color: 'bg-blue-500' },
-  neutral: { name: 'Balanced', icon: '⚖️', color: 'bg-muted' },
+  cardone: { name: 'Grant Cardone', icon: '🔥', color: 'bg-orange-500' },
+  belfort: { name: 'Jordan Belfort', icon: '🎯', color: 'bg-blue-500' },
+  neutral: { name: 'Neutral', icon: '⚖️', color: 'bg-muted' },
 };
 
 export function LiveCoachingSidebar({ 

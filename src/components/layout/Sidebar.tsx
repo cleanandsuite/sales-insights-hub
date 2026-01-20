@@ -17,6 +17,7 @@ const baseNavItems = [
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/coaching', icon: Trophy, label: 'Coaching' },
+  { to: '/team', icon: Users, label: 'Team' },
   { to: '/profile', icon: UserCircle, label: 'Your Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];

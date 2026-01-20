@@ -18,7 +18,7 @@ interface CoachStyleSelectorProps {
 const COACH_STYLES = [
   {
     id: 'cardone',
-    name: '10X Momentum',
+    name: 'Grant Cardone',
     icon: '🔥',
     description: 'High-energy, pain-focused. Push for massive action and aggressive objection handling.',
     traits: ['10X Energy', 'Pain Focus', 'Close Hard'],
@@ -27,16 +27,16 @@ const COACH_STYLES = [
   },
   {
     id: 'belfort',
-    name: 'Straight Line',
+    name: 'Jordan Belfort',
     icon: '🎯',
-    description: 'Focus on tonality, looping objections, and building certainty with prospects.',
+    description: 'Straight Line Selling. Focus on tonality, looping objections, and building certainty.',
     traits: ['Tonality', 'Looping', 'Certainty'],
     color: 'border-blue-500 bg-blue-500/10',
     badgeColor: 'bg-blue-500',
   },
   {
     id: 'neutral',
-    name: 'Balanced Coach',
+    name: 'Neutral Coach',
     icon: '⚖️',
     description: 'Balanced, professional approach. Practical suggestions without a specific persona.',
     traits: ['Balanced', 'Professional', 'Practical'],

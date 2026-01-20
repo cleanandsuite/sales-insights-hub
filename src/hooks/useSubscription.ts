@@ -31,7 +31,7 @@ export const PRICING_TIERS: Record<string, {
     ],
     maxUsers: 1,
   },
-  enterprise: {
+  team: {
     name: 'Enterprise',
     priceId: 'price_1SmY6YAbfbNoHWTTnHLW4w07',
     price: 99,
@@ -42,7 +42,6 @@ export const PRICING_TIERS: Record<string, {
       'Manager dashboard & analytics',
       'AI-suggested lead assignments',
       'Team performance benchmarks',
-      'SSO / SAML Authentication',
     ],
     maxUsers: 10,
     comingSoon: true,
