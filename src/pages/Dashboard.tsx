@@ -6,12 +6,14 @@ import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
 import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
 import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { ProfileSetupBanner } from '@/components/recording/ProfileSetupBanner';
+import { ManagerDashboardWidget } from '@/components/enterprise/ManagerDashboardWidget';
 import { Phone, Clock, ThumbsUp, Mic, Users, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -39,6 +41,7 @@ interface Lead {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { isManager, teamId } = useUserRole();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
@@ -303,6 +306,11 @@ export default function Dashboard() {
               icon={ThumbsUp}
             />
           </div>
+
+          {/* Manager Dashboard Widget */}
+          {isManager && teamId && (
+            <ManagerDashboardWidget teamId={teamId} />
+          )}
 
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Recent Calls */}
