@@ -47,6 +47,16 @@ const COACH_STYLES = [
     badgeColor: "bg-blue-500",
   },
   {
+    id: "highticket",
+    name: "High Stakes Closer",
+    icon: "💎",
+    description:
+      "High-status closing for analytical buyers. Frame-Problem-Heaven-Hell methodology for high-ticket commitments.",
+    traits: ["High-Ticket", "Identity Shift", "Urgency"],
+    color: "border-purple-500 bg-purple-500/10",
+    badgeColor: "bg-purple-500",
+  },
+  {
     id: "neutral",
     name: "Balanced Coach",
     icon: "⚖️",
