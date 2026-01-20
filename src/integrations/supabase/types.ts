@@ -1311,6 +1311,56 @@ export type Database = {
           },
         ]
       }
+      email_digest_preferences: {
+        Row: {
+          created_at: string
+          day_of_week: number | null
+          enabled: boolean
+          frequency: string
+          id: string
+          include_goals_progress: boolean
+          include_rep_breakdown: boolean
+          include_risk_alerts: boolean
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week?: number | null
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          include_goals_progress?: boolean
+          include_rep_breakdown?: boolean
+          include_risk_alerts?: boolean
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number | null
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          include_goals_progress?: boolean
+          include_rep_breakdown?: boolean
+          include_risk_alerts?: boolean
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_digest_preferences_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enterprise_invitations: {
         Row: {
           accepted_at: string | null
@@ -2226,6 +2276,7 @@ export type Database = {
           metric: string
           period_end: string
           period_start: string
+          status: string
           target_value: number
           team_id: string
           updated_at: string
@@ -2239,6 +2290,7 @@ export type Database = {
           metric: string
           period_end: string
           period_start: string
+          status?: string
           target_value: number
           team_id: string
           updated_at?: string
@@ -2252,6 +2304,7 @@ export type Database = {
           metric?: string
           period_end?: string
           period_start?: string
+          status?: string
           target_value?: number
           team_id?: string
           updated_at?: string
@@ -2698,6 +2751,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "team_benchmarks_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_goals: {
+        Row: {
+          created_at: string
+          created_by: string
+          current_value: number | null
+          id: string
+          metric: string
+          period_end: string
+          period_start: string
+          status: string
+          target_value: number
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          current_value?: number | null
+          id?: string
+          metric: string
+          period_end: string
+          period_start: string
+          status?: string
+          target_value: number
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          current_value?: number | null
+          id?: string
+          metric?: string
+          period_end?: string
+          period_start?: string
+          status?: string
+          target_value?: number
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_goals_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
