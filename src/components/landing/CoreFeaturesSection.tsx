@@ -1,4 +1,10 @@
-import { Search, Zap, TrendingUp, CheckCircle } from "lucide-react";
+import { Search, Zap, TrendingUp, CheckCircle, Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+
+interface CoreFeaturesSectionProps {
+  onStartTrialClick?: () => void;
+}
 
 const steps = [
   {
@@ -8,6 +14,7 @@ const steps = [
     description:
       "Our intelligent engine reviews recordings, notes, and CRM updates to spot what works and what doesn't—without you watching hours of video.",
     color: "from-primary to-primary/80",
+    highlight: "Save 40% of review time",
   },
   {
     number: "2",
@@ -18,6 +25,7 @@ const steps = [
       "During/after: Receive instant feedback on tone, listening, and next steps—while details are fresh.",
     ],
     color: "from-accent to-accent/80",
+    highlight: "Coaching in 60 seconds",
   },
   {
     number: "3",
@@ -26,10 +34,11 @@ const steps = [
     description:
       "Link call quality directly to deals won. Share top-performer examples, set clear standards for discovery/demos/pricing, and track improvements in close rates, deal speed, and forecast accuracy.",
     color: "from-success to-success/80",
+    highlight: "+35% revenue growth",
   },
 ];
 
-export function CoreFeaturesSection() {
+export function CoreFeaturesSection({ onStartTrialClick }: CoreFeaturesSectionProps) {
   return (
     <section className="py-20 md:py-28 bg-section-glass relative overflow-hidden" id="features">
       {/* Subtle aurora background */}
@@ -37,12 +46,17 @@ export function CoreFeaturesSection() {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
+          {/* Section badge */}
+          <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-6">
+            <Lightbulb className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">The Solution</span>
+          </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            How SellSig's AI Coaching
-            <span className="text-primary"> Fixes These Pain Points</span>
+            Real-Time AI Coaching
+            <span className="text-primary"> That Actually Works</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            The simple 1-2-3 solution to transform your sales calls
+            The simple 1-2-3 solution to transform your sales calls into consistent wins
           </p>
         </div>
 
@@ -54,14 +68,17 @@ export function CoreFeaturesSection() {
             >
               <div className="flex items-start gap-6">
                 {/* Step number */}
-                <div className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                  <span className="text-2xl font-bold text-white">{step.number}</span>
+                <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
+                  <span className="text-3xl font-bold text-white">{step.number}</span>
                 </div>
 
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
                     <step.icon className="h-5 w-5 text-primary" />
-                    <h3 className="text-xl font-semibold text-foreground">{step.title}</h3>
+                    <h3 className="text-xl font-bold text-foreground">{step.title}</h3>
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-full bg-gradient-to-r ${step.color} text-white`}>
+                      {step.highlight}
+                    </span>
                   </div>
                   
                   {step.description && (
@@ -83,6 +100,23 @@ export function CoreFeaturesSection() {
             </div>
           ))}
         </div>
+
+        {/* Mid-page CTA */}
+        {onStartTrialClick && (
+          <div className="mt-12 text-center">
+            <Button 
+              size="lg" 
+              onClick={onStartTrialClick}
+              className="group gap-2 font-bold text-lg px-10 py-7 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl rounded-xl animate-cta-pulse"
+            >
+              Start Your Free Trial Now
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <p className="text-sm text-muted-foreground mt-3">
+              14-day free trial • Full access to AI coaching for sales calls
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

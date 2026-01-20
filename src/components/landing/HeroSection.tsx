@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Play, CheckCircle, Phone, Brain, Sparkles } from 'lucide-react';
+import { ArrowRight, Play, CheckCircle, Phone, Brain, Sparkles, Users } from 'lucide-react';
 import dashboardPreview from '@/assets/dashboard-preview.jpg';
 
 interface HeroSectionProps {
@@ -14,7 +14,7 @@ export function HeroSection({
 }: HeroSectionProps) {
   return (
     <section className="relative bg-hero-gradient min-h-[100vh] flex items-center overflow-hidden">
-      {/* Aurora mesh background - 2025 trend */}
+      {/* Aurora mesh background - 2025/2026 trend */}
       <div className="bg-hero-aurora" />
       <div className="bg-hero-mesh" />
       
@@ -37,11 +37,11 @@ export function HeroSection({
             <div className="inline-block animate-fade-in">
               <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm font-medium backdrop-blur-md glass-effect">
                 <Sparkles className="h-3.5 w-3.5 mr-2" />
-                AI-Powered Sales Coaching Platform
+                AI-Powered Sales Coaching in 60 Seconds
               </Badge>
             </div>
 
-            {/* Main Headline - H1 optimized */}
+            {/* Main Headline - H1 optimized for SEO */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] animate-slide-up">
               AI Coaching for Sales Calls:
               <br />
@@ -55,27 +55,37 @@ export function HeroSection({
               Get AI coaching for sales calls that analyzes every conversation, gives real-time guidance, speeds up team ramp-up, and helps your reps win more deals with confidence—no guesswork needed.
             </p>
 
-            {/* CTA Buttons */}
+            {/* Primary CTA - Made bigger and more prominent */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-slide-up" style={{
               animationDelay: '0.2s'
             }}>
               <Button 
                 size="lg" 
                 onClick={onStartTrialClick} 
-                className="group gap-2 font-bold text-lg px-8 py-6 bg-white text-primary hover:bg-white/95 shadow-xl hover:shadow-2xl transition-all rounded-xl animate-cta-pulse glass-button"
+                className="group gap-3 font-bold text-lg px-10 py-7 bg-white text-primary hover:bg-white/95 shadow-2xl hover:shadow-3xl transition-all rounded-xl animate-cta-pulse glass-button"
               >
-                Start Free Trial
+                Start 14-Day Free Trial
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
                 onClick={onWatchDemoClick} 
-                className="group gap-2 font-semibold text-lg px-8 py-6 border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary rounded-xl backdrop-blur-md transition-all glass-effect"
+                className="group gap-2 font-semibold text-lg px-8 py-7 border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary rounded-xl backdrop-blur-md transition-all glass-effect"
               >
                 <Play className="h-5 w-5 fill-current" />
                 Watch Demo
               </Button>
+            </div>
+
+            {/* Social Proof - Added rep count */}
+            <div className="flex items-center gap-3 justify-center lg:justify-start animate-slide-up" style={{
+              animationDelay: '0.25s'
+            }}>
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+                <Users className="h-4 w-4 text-accent" />
+                <span className="text-white/90 text-sm font-medium">Join 500+ reps becoming rejection-proof</span>
+              </div>
             </div>
 
             {/* Trust indicators */}
@@ -92,7 +102,7 @@ export function HeroSection({
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-accent" />
-                <span>Measurable ROI</span>
+                <span>No credit card required</span>
               </div>
             </div>
           </div>
@@ -102,7 +112,7 @@ export function HeroSection({
             <div className="relative">
               {/* Main dashboard image with glass frame */}
               <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-white/5 backdrop-blur-xl glass-card">
-                <img src={dashboardPreview} alt="AI Coaching for Sales Calls Dashboard" className="w-full h-auto" />
+                <img src={dashboardPreview} alt="AI Coaching for Sales Calls Dashboard - Real-time analysis and guidance" className="w-full h-auto" />
               </div>
               
               {/* Floating stat card - glass style */}
