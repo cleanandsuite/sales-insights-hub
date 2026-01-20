@@ -63,9 +63,9 @@ const URGENCY_STYLES = {
 };
 
 const STYLE_LABELS = {
-  sellsig: { name: 'SellSig Discovery', icon: '🧘', color: 'bg-emerald-500' },
-  cardone: { name: '10X Momentum', icon: '🔥', color: 'bg-orange-500' },
-  belfort: { name: 'Straight Line', icon: '🎯', color: 'bg-blue-500' },
+  sellsig: { name: 'Discovery Booker', icon: '🧘', color: 'bg-emerald-500' },
+  cardone: { name: 'Energy Booster', icon: '🔥', color: 'bg-orange-500' },
+  belfort: { name: 'Layered Closer', icon: '🎯', color: 'bg-blue-500' },
   neutral: { name: 'Balanced', icon: '⚖️', color: 'bg-muted' },
 };
 
