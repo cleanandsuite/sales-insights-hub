@@ -45,12 +45,8 @@ serve(async (req) => {
 
     const { audio, useAssemblyAI = true } = await req.json();
     
-    if (!audio || audio.length === 0) {
-      console.log('Empty audio data received, returning empty result');
-      return new Response(
-        JSON.stringify({ text: '', service: 'none', message: 'No audio data to transcribe' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!audio) {
+      throw new Error('No audio data provided');
     }
 
     console.log('Received audio chunk for transcription, length:', audio.length);
