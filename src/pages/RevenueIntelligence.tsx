@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,8 +13,11 @@ import { RepPerformanceTable } from '@/components/enterprise/RepPerformanceTable
 import { AIActionCards } from '@/components/enterprise/AIActionCards';
 import { RiskAlertsWidget } from '@/components/enterprise/RiskAlertsWidget';
 import { TeamTrendsHeatmap } from '@/components/enterprise/TeamTrendsHeatmap';
+import { PredictiveScoreCard } from '@/components/enterprise/PredictiveScoreCard';
+import { EnterpriseExportPanel } from '@/components/enterprise/EnterpriseExportPanel';
+import { AlertPreferencesDialog } from '@/components/enterprise/AlertPreferencesDialog';
 import { 
-  BarChart3, Users, TrendingUp, Download, RefreshCw, Crown, AlertTriangle, Zap
+  BarChart3, TrendingUp, Download, RefreshCw, Crown, AlertTriangle, Zap, Bell, Brain
 } from 'lucide-react';
 
 interface TeamKPIs {
@@ -37,6 +37,7 @@ export default function RevenueIntelligence() {
   const [kpis, setKpis] = useState<TeamKPIs | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [alertPrefsOpen, setAlertPrefsOpen] = useState(false);
 
   useEffect(() => {
     if (!roleLoading && !isManager) {
@@ -82,31 +83,6 @@ export default function RevenueIntelligence() {
     setRefreshing(false);
   };
 
-  const handleExport = () => {
-    if (!kpis) return;
-    
-    const csvContent = `Team Revenue Intelligence Report
-Generated: ${new Date().toLocaleString()}
-
-Key Performance Indicators
-Team Win Rate,${kpis.teamWinRate}%
-Calls/Rep/Week,${kpis.avgCallsPerRep}
-Coaching Coverage,${kpis.coachingCoveragePct}%
-Avg Discovery Score,${kpis.avgDiscoveryScore}
-Avg Closer Score,${kpis.avgCloserScore}
-Forecast Risk,${kpis.forecastRiskPct}%
-Total Reps,${kpis.totalReps}
-`;
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `revenue-intelligence-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Report exported');
-  };
 
   if (roleLoading || loading) {
     return (
@@ -141,21 +117,21 @@ Total Reps,${kpis.totalReps}
             <Button 
               variant="outline" 
               size="sm" 
+              onClick={() => setAlertPrefsOpen(true)}
+              className="gap-2"
+            >
+              <Bell className="h-4 w-4" />
+              <span className="hidden sm:inline">Alerts</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
               onClick={handleRefresh}
               disabled={refreshing}
               className="gap-2"
             >
               <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleExport}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
           </div>
         </div>
@@ -165,7 +141,7 @@ Total Reps,${kpis.totalReps}
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="performance" className="space-y-4">
-          <TabsList className="bg-muted grid w-full grid-cols-4">
+          <TabsList className="bg-muted grid w-full grid-cols-5">
             <TabsTrigger value="performance" className="gap-1.5">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Performance</span>
@@ -176,11 +152,15 @@ Total Reps,${kpis.totalReps}
             </TabsTrigger>
             <TabsTrigger value="risks" className="gap-1.5">
               <AlertTriangle className="h-4 w-4" />
-              <span className="hidden sm:inline">Risk Alerts</span>
+              <span className="hidden sm:inline">Risks</span>
             </TabsTrigger>
-            <TabsTrigger value="trends" className="gap-1.5">
-              <TrendingUp className="h-4 w-4" />
-              <span className="hidden sm:inline">Trends</span>
+            <TabsTrigger value="predictions" className="gap-1.5">
+              <Brain className="h-4 w-4" />
+              <span className="hidden sm:inline">Predictions</span>
+            </TabsTrigger>
+            <TabsTrigger value="export" className="gap-1.5">
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Export</span>
             </TabsTrigger>
           </TabsList>
 
@@ -196,10 +176,26 @@ Total Reps,${kpis.totalReps}
             {teamId && <RiskAlertsWidget teamId={teamId} />}
           </TabsContent>
 
-          <TabsContent value="trends" className="space-y-4">
-            {teamId && <TeamTrendsHeatmap teamId={teamId} />}
+          <TabsContent value="predictions" className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-2">
+              {teamId && <PredictiveScoreCard teamId={teamId} />}
+              {teamId && <TeamTrendsHeatmap teamId={teamId} />}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="export" className="space-y-4">
+            {teamId && <EnterpriseExportPanel teamId={teamId} kpis={kpis} />}
           </TabsContent>
         </Tabs>
+
+        {/* Alert Preferences Dialog */}
+        {teamId && (
+          <AlertPreferencesDialog 
+            open={alertPrefsOpen} 
+            onOpenChange={setAlertPrefsOpen} 
+            teamId={teamId} 
+          />
+        )}
       </div>
     </DashboardLayout>
   );
