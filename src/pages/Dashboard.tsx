@@ -20,13 +20,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 // Enterprise Components
-import { KPICards } from '@/components/enterprise/KPICards';
+import { PipelineKPICards } from '@/components/enterprise/PipelineKPICards';
+import { PipelineTrendChart } from '@/components/enterprise/PipelineTrendChart';
+import { StaffCallOverview } from '@/components/enterprise/StaffCallOverview';
 import { StaffPerformanceGrid } from '@/components/enterprise/StaffPerformanceGrid';
-import { CallActivityCharts } from '@/components/enterprise/CallActivityCharts';
 import { CompanyGoalsWidget } from '@/components/enterprise/CompanyGoalsWidget';
 import { TeamLeadManagement } from '@/components/enterprise/TeamLeadManagement';
 import { EnterpriseActivityFeed } from '@/components/enterprise/EnterpriseActivityFeed';
-import { TeamProgressionChart } from '@/components/enterprise/TeamProgressionChart';
+import { ProductsAppointmentsCard } from '@/components/enterprise/ProductsAppointmentsCard';
+import { DealBriefPanel } from '@/components/enterprise/DealBriefPanel';
 
 interface CallRecording {
   id: string;
@@ -59,6 +61,19 @@ interface TeamKPIs {
   totalReps: number;
 }
 
+interface PipelineKPIs {
+  bookingAttainment: number;
+  bookingTarget: number;
+  gapToTarget: number;
+  coverage: number;
+  openPipeline: number;
+  totalPipelineCreated: number;
+  pipelineTarget: number;
+  productsSold: number;
+  appointmentsSet: number;
+  appointmentTarget: number;
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { isManager, teamId } = useUserRole();
@@ -72,6 +87,19 @@ export default function Dashboard() {
   const [aiActive, setAiActive] = useState(true);
   const [headphoneMode, setHeadphoneMode] = useState(false);
   const [kpis, setKpis] = useState<TeamKPIs | null>(null);
+  const [pipelineKpis, setPipelineKpis] = useState<PipelineKPIs>({
+    bookingAttainment: 4150000,
+    bookingTarget: 15000000,
+    gapToTarget: 10850000,
+    coverage: 2.5,
+    openPipeline: 27100000,
+    totalPipelineCreated: 30000000,
+    pipelineTarget: 45000000,
+    productsSold: 47,
+    appointmentsSet: 28,
+    appointmentTarget: 50,
+  });
+  const [selectedDeal, setSelectedDeal] = useState<{ id: string; name: string; company: string } | null>(null);
 
   const isExecutive = isEnterprise && tier === 'executive';
 
@@ -244,19 +272,24 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* KPI Cards */}
-            {kpis && <KPICards kpis={kpis} />}
+            {/* Pipeline KPI Cards */}
+            <PipelineKPICards kpis={pipelineKpis} />
 
-            {/* Main Charts Row */}
-            <div className="grid gap-6 lg:grid-cols-2">
-              <TeamProgressionChart teamId={teamId} />
-              <CallActivityCharts teamId={teamId} />
+            {/* Pipeline Trend Chart */}
+            <PipelineTrendChart teamId={teamId} />
+
+            {/* Staff Overview & Targets */}
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <StaffCallOverview teamId={teamId} />
+              </div>
+              <ProductsAppointmentsCard teamId={teamId} />
             </div>
 
-            {/* Staff Performance */}
+            {/* Staff Performance Grid */}
             <StaffPerformanceGrid 
               teamId={teamId} 
-              onSelectStaff={(userId, name) => navigate('/revenue-intelligence')}
+              onSelectStaff={(userId, name) => setSelectedDeal({ id: userId, name, company: 'View Details' })}
             />
 
             {/* Goals & Lead Management */}
@@ -267,6 +300,17 @@ export default function Dashboard() {
 
             {/* Activity Feed */}
             <EnterpriseActivityFeed teamId={teamId} />
+
+            {/* Deal Brief Panel */}
+            {selectedDeal && (
+              <DealBriefPanel
+                dealId={selectedDeal.id}
+                dealName={selectedDeal.name}
+                companyName={selectedDeal.company}
+                onClose={() => setSelectedDeal(null)}
+                teamId={teamId}
+              />
+            )}
           </div>
         </DashboardLayout>
       </>
