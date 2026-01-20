@@ -45,11 +45,12 @@ export default function Landing() {
       {/* Fixed Header */}
       <LandingHeader onStartTrialClick={() => handleStartTrial()} />
 
-      {/* Hero Section */}
-      <HeroSection 
-        onStartTrialClick={() => handleStartTrial()} 
-        onWatchDemoClick={() => setDemoModalOpen(true)} 
-      />
+      <main>
+        {/* Hero Section */}
+        <HeroSection 
+          onStartTrialClick={() => handleStartTrial()} 
+          onWatchDemoClick={() => setDemoModalOpen(true)} 
+        />
 
       {/* Trusted By Section */}
       <section className="py-8 border-y border-border/50 bg-card/80 backdrop-blur-sm">
@@ -109,6 +110,7 @@ export default function Landing() {
       <Suspense fallback={<SectionLoader />}>
         <FinalCTASection onStartTrialClick={handleStartTrial} />
       </Suspense>
+      </main>
 
       {/* Footer */}
       <Suspense fallback={<SectionLoader />}>
