@@ -1,8 +1,31 @@
+# SellSig AI Sales Coaching - robots.txt
+# Secure sitemap configuration
+
 User-agent: Googlebot
 Allow: /
+Disallow: /dashboard
+Disallow: /recordings
+Disallow: /leads
+Disallow: /coaching
+Disallow: /analytics
+Disallow: /settings
+Disallow: /profile
+Disallow: /team
+Disallow: /manager
+Disallow: /upload
 
 User-agent: Bingbot
 Allow: /
+Disallow: /dashboard
+Disallow: /recordings
+Disallow: /leads
+Disallow: /coaching
+Disallow: /analytics
+Disallow: /settings
+Disallow: /profile
+Disallow: /team
+Disallow: /manager
+Disallow: /upload
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +35,16 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /recordings
+Disallow: /leads
+Disallow: /coaching
+Disallow: /analytics
+Disallow: /settings
+Disallow: /profile
+Disallow: /team
+Disallow: /manager
+Disallow: /upload
+
+# Sitemap location
+Sitemap: https://sellsig.com/sitemap.xml
