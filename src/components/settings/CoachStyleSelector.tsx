@@ -108,8 +108,8 @@ export function CoachStyleSelector({
       console.error("Error checking subscription:", error);
     }
   };
-  // Admins bypass premium checks
-  const canAccessFeatures = isPremium || isAdmin;
+  // Admins and Enterprise users bypass premium checks
+  const canAccessFeatures = isPremium || isAdmin || isEnterprise;
 
   const handleStyleChange = async (style: string) => {
     if (!canAccessFeatures && style !== "neutral") {
