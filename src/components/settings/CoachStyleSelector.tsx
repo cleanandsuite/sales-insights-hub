@@ -105,8 +105,11 @@ export function CoachStyleSelector({
       console.error("Error checking subscription:", error);
     }
   };
+  // Admins bypass premium checks
+  const canAccessFeatures = isPremium || isAdmin;
+
   const handleStyleChange = async (style: string) => {
-    if (!isPremium && style !== "neutral") {
+    if (!canAccessFeatures && style !== "neutral") {
       toast({
         title: "Premium Feature",
         description: "Coach styles require Team plan ($99/user/mo)"
@@ -118,7 +121,7 @@ export function CoachStyleSelector({
     await saveSettings(style, isEnabled);
   };
   const handleEnabledChange = async (enabled: boolean) => {
-    if (!isPremium && enabled) {
+    if (!canAccessFeatures && enabled) {
       toast({
         title: "Premium Feature",
         description: "Live AI coaching requires Team plan ($99/user/mo)"
@@ -176,11 +179,14 @@ export function CoachStyleSelector({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!isPremium && <Badge variant="outline" className="gap-1">
+          {!canAccessFeatures && <Badge variant="outline" className="gap-1">
               <Lock className="h-3 w-3" />
               Team Plan
             </Badge>}
-          <Switch checked={isEnabled} onCheckedChange={handleEnabledChange} disabled={!isPremium} />
+          {isAdmin && <Badge variant="outline" className="gap-1 border-primary text-primary">
+              Admin
+            </Badge>}
+          <Switch checked={isEnabled} onCheckedChange={handleEnabledChange} disabled={!canAccessFeatures} />
         </div>
       </div>
 
@@ -192,7 +198,7 @@ export function CoachStyleSelector({
         <RadioGroup value={selectedStyle} onValueChange={handleStyleChange} className="grid gap-4">
           {COACH_STYLES.map(style => {
           const isSelected = selectedStyle === style.id;
-          const isLocked = !isPremium && style.id !== "neutral";
+          const isLocked = !canAccessFeatures && style.id !== "neutral";
           return <label key={style.id} className={cn("relative flex cursor-pointer rounded-lg border-2 p-4 transition-all", isSelected ? style.color : "border-border hover:border-muted-foreground/50", isLocked && "opacity-60 cursor-not-allowed")}>
                 <RadioGroupItem value={style.id} className="sr-only" disabled={isLocked} />
 
@@ -220,8 +226,8 @@ export function CoachStyleSelector({
         </RadioGroup>
       </div>
 
-      {/* Premium CTA */}
-      {!isPremium && <Card className="p-4 border-primary/50 bg-primary/5">
+      {/* Premium CTA - hide for admins */}
+      {!canAccessFeatures && <Card className="p-4 border-primary/50 bg-primary/5">
           <div className="flex items-center gap-3">
             <Zap className="h-5 w-5 text-primary" />
             <div className="flex-1">
