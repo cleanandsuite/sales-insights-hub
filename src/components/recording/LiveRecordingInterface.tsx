@@ -616,6 +616,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
                   onClick={resumeRecording}
                   size="lg"
                   className="gap-2"
+                  disabled={isSaving || isStartingRecording}
                 >
                   <Play className="h-5 w-5" />
                   Resume
@@ -626,6 +627,7 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
                   variant="secondary"
                   size="lg"
                   className="gap-2"
+                  disabled={isSaving || isStartingRecording || !isRecording}
                 >
                   <Pause className="h-5 w-5" />
                   Pause
@@ -636,10 +638,14 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
                 variant="destructive"
                 size="lg"
                 className="gap-2"
-                disabled={isSaving}
+                disabled={isSaving || isStartingRecording || (!isRecording && !isPaused)}
               >
                 <Square className="h-5 w-5" />
-                {isSaving ? processingStatus || 'Processing...' : 'Stop & Save'}
+                {isSaving
+                  ? processingStatus || 'Processing...'
+                  : isStartingRecording
+                    ? 'Starting...'
+                    : 'Stop & Save'}
               </Button>
             </div>
           </div>

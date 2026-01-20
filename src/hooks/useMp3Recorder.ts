@@ -170,34 +170,52 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
         }
       }
       
-      streamRef.current = stream;
-      
-      // Log audio source details
-      const audioTrack = stream.getAudioTracks()[0];
-      if (audioTrack) {
-        const settings = audioTrack.getSettings();
-        console.log('AUDIO SOURCE:', {
-          label: audioTrack.label,
-          enabled: audioTrack.enabled,
-          channelCount: settings.channelCount,
-          sampleRate: settings.sampleRate,
-          isElectron: isElectron(),
-          isSystemAudio: isElectron() && additionalStreamsRef.current.length > 0,
-        });
+      // Validate we got audio tracks
+      const audioTracks = stream.getAudioTracks();
+      console.log('RECORDER: Captured stream', {
+        audioTracks: audioTracks.length,
+        videoTracks: stream.getVideoTracks().length,
+        isElectron: isElectronEnvironment,
+        useScreenShareMode,
+      });
+
+      if (audioTracks.length === 0) {
+        throw new Error('No audio tracks available from capture source');
       }
-      
-      // Set up audio analysis with 16kHz context
-      audioContextRef.current = new AudioContext({ sampleRate: 16000 });
+
+      // Log audio source details (first track)
+      const audioTrack = audioTracks[0];
+      const settings = audioTrack.getSettings();
+      console.log('AUDIO SOURCE:', {
+        label: audioTrack.label,
+        enabled: audioTrack.enabled,
+        channelCount: settings.channelCount,
+        sampleRate: settings.sampleRate,
+        isElectron: isElectron(),
+        isSystemAudio: isElectron() && additionalStreamsRef.current.length > 0,
+      });
+
+      // Use the first audio track for analysis (some browsers can misbehave with multi-track streams)
+      const analyserStream = new MediaStream([audioTrack]);
+      streamRef.current = stream;
+
+      // Set up audio analysis – don't force sampleRate; can break on some devices
+      audioContextRef.current = new AudioContext();
+      try {
+        await audioContextRef.current.resume();
+      } catch {
+        // ignore – autoplay policy; recording still works
+      }
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
-      
-      const source = audioContextRef.current.createMediaStreamSource(stream);
+
+      const source = audioContextRef.current.createMediaStreamSource(analyserStream);
       source.connect(analyserRef.current);
 
       // Determine best supported format - prefer WebM Opus
       let mimeType = RECORDER_OPTIONS.mimeType;
       let bitRate = RECORDER_OPTIONS.audioBitsPerSecond;
-      
+
       if (!MediaRecorder.isTypeSupported(mimeType)) {
         // Fallback chain
         const fallbacks = ['audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
@@ -211,25 +229,45 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
         console.log('Using fallback format:', mimeType);
       } else if (!isElectronEnvironment) {
         setRecordingMethod('webm-opus');
-        console.log('Using optimized WebM Opus @ 64kbps mono 16kHz');
+        console.log('Using optimized WebM Opus @ 64kbps mono');
       }
-      
+
       mimeTypeRef.current = mimeType;
-      
-      const mediaRecorder = new MediaRecorder(stream, { 
-        mimeType,
-        audioBitsPerSecond: bitRate
-      });
-      
+
+      // Create MediaRecorder – fallback to single-track if multi-track fails
+      let mediaRecorder: MediaRecorder;
+      try {
+        mediaRecorder = new MediaRecorder(stream, {
+          mimeType,
+          audioBitsPerSecond: bitRate,
+        });
+      } catch (err) {
+        console.warn('MediaRecorder init failed; falling back to single-track stream', err);
+        const singleTrackStream = new MediaStream([audioTrack]);
+        streamRef.current = singleTrackStream;
+        mediaRecorder = new MediaRecorder(singleTrackStream, {
+          mimeType,
+          audioBitsPerSecond: bitRate,
+        });
+      }
+
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
-      
+
+      mediaRecorder.onstart = () => {
+        console.log('RECORDER: MediaRecorder started', { mimeType, state: mediaRecorder.state });
+      };
+
+      mediaRecorder.onerror = (event) => {
+        console.error('RECORDER: MediaRecorder error', event);
+      };
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
         }
       };
-      
+
       mediaRecorder.start(100);
       setIsRecording(true);
       setIsPaused(false);
