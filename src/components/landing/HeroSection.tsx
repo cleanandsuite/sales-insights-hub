@@ -1,6 +1,18 @@
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Play, CheckCircle, Phone, Brain, Sparkles, Users, Zap, MessageSquare, TrendingUp, Shield } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowRight,
+  Play,
+  CheckCircle,
+  Phone,
+  Brain,
+  Sparkles,
+  Users,
+  Zap,
+  MessageSquare,
+  TrendingUp,
+  Shield,
+} from "lucide-react";
 
 interface HeroSectionProps {
   onStartTrialClick: () => void;
@@ -25,7 +37,7 @@ const ProductMockup = () => (
           </div>
         </div>
       </div>
-      
+
       {/* Call Interface */}
       <div className="p-6 space-y-4">
         {/* Call header */}
@@ -57,7 +69,7 @@ const ProductMockup = () => (
               style={{
                 height: `${Math.random() * 60 + 20}%`,
                 animationDelay: `${i * 0.05}s`,
-                animationDuration: `${0.5 + Math.random() * 0.5}s`
+                animationDuration: `${0.5 + Math.random() * 0.5}s`,
               }}
             />
           ))}
@@ -67,7 +79,9 @@ const ProductMockup = () => (
         <div className="space-y-2 bg-slate-700/20 rounded-xl p-4">
           <div className="flex items-start gap-2">
             <span className="text-blue-400 text-xs font-medium shrink-0">Prospect:</span>
-            <p className="text-white/80 text-xs leading-relaxed">"The price seems high compared to what we're paying now..."</p>
+            <p className="text-white/80 text-xs leading-relaxed">
+              "The price seems high compared to what we're paying now..."
+            </p>
           </div>
         </div>
       </div>
@@ -89,7 +103,8 @@ const ProductMockup = () => (
       </p>
       <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
         <p className="text-xs text-slate-600 italic">
-          "I understand. Many clients felt that way initially—but after seeing 40% more closed deals in 90 days, they found it paid for itself 3x over."
+          "I understand. Many clients felt that way initially—but after seeing 40% more closed deals in 90 days, they
+          found it paid for itself 3x over."
         </p>
       </div>
       <div className="flex items-center gap-2 mt-3">
@@ -101,7 +116,10 @@ const ProductMockup = () => (
     </div>
 
     {/* Floating stat - Deal velocity */}
-    <div className="absolute -left-6 bottom-16 bg-white rounded-xl shadow-xl p-4 animate-float border border-slate-100" style={{ animationDelay: '1s' }}>
+    <div
+      className="absolute -left-6 bottom-16 bg-white rounded-xl shadow-xl p-4 animate-float border border-slate-100"
+      style={{ animationDelay: "1s" }}
+    >
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
           <TrendingUp className="w-5 h-5 text-green-600" />
@@ -114,7 +132,10 @@ const ProductMockup = () => (
     </div>
 
     {/* Floating stat - Success rate */}
-    <div className="absolute -left-2 top-8 bg-white rounded-xl shadow-xl p-3 animate-float border border-slate-100" style={{ animationDelay: '2s' }}>
+    <div
+      className="absolute -left-2 top-8 bg-white rounded-xl shadow-xl p-3 animate-float border border-slate-100"
+      style={{ animationDelay: "2s" }}
+    >
       <div className="flex items-center gap-2">
         <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
           <Phone className="w-4 h-4 text-blue-600" />
@@ -127,23 +148,23 @@ const ProductMockup = () => (
     </div>
 
     {/* Live insights badge */}
-    <div className="absolute -bottom-4 right-1/4 bg-slate-900 text-white rounded-full px-4 py-2 shadow-xl animate-float flex items-center gap-2" style={{ animationDelay: '0.5s' }}>
+    <div
+      className="absolute -bottom-4 right-1/4 bg-slate-900 text-white rounded-full px-4 py-2 shadow-xl animate-float flex items-center gap-2"
+      style={{ animationDelay: "0.5s" }}
+    >
       <Sparkles className="w-4 h-4 text-yellow-400" />
       <span className="text-xs font-medium">Live Insights Active</span>
     </div>
   </div>
 );
 
-export function HeroSection({
-  onStartTrialClick,
-  onWatchDemoClick
-}: HeroSectionProps) {
+export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
     <section className="relative bg-hero-gradient min-h-[100vh] flex items-center overflow-hidden">
       {/* Aurora mesh background - 2025/2026 trend */}
       <div className="bg-hero-aurora" />
       <div className="bg-hero-mesh" />
-      
+
       {/* Promo Banner */}
       <div className="absolute top-16 left-0 right-0 bg-promo-banner py-3 z-20">
         <div className="container mx-auto px-4 text-center">
@@ -153,10 +174,9 @@ export function HeroSection({
           </p>
         </div>
       </div>
-      
+
       <div className="container mx-auto px-4 pt-36 pb-20 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          
           {/* Left Content - Split hero: headline + CTA */}
           <div className="space-y-8 text-center lg:text-left">
             {/* Pre-headline badge */}
@@ -175,27 +195,31 @@ export function HeroSection({
             </h1>
 
             {/* Subheadline - Shorter, punchier */}
-            <p className="text-lg md:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-slide-up" style={{
-              animationDelay: '0.1s'
-            }}>
-              Real-time AI coaching that analyzes every call, handles objections for you, and turns your reps into closers—all in 60 seconds.
+            <p
+              className="text-lg md:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-slide-up"
+              style={{
+                animationDelay: "0.1s",
+              }}
+            >
+              Real-time AI coaching that analyzes every call, handles objections for you, and turns your reps into
+              closers—all in 60 seconds.
             </p>
 
             {/* Primary CTA - BIG and prominent with urgency */}
-            <div className="flex flex-col gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <div className="flex flex-col gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
-                <Button 
-                  size="lg" 
-                  onClick={onStartTrialClick} 
+                <Button
+                  size="lg"
+                  onClick={onStartTrialClick}
                   className="group gap-3 font-bold text-lg px-8 py-7 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-2xl hover:shadow-green-500/25 transition-all rounded-xl animate-cta-pulse border-0"
                 >
-                  Claim 40% Off & Start Free Trial
+                  Claim 40% Off & Free Trial
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  onClick={onWatchDemoClick} 
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={onWatchDemoClick}
                   className="group gap-2 font-semibold text-lg px-8 py-7 border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary rounded-xl backdrop-blur-md transition-all glass-effect"
                 >
                   <Play className="h-5 w-5 fill-current" />
@@ -220,9 +244,12 @@ export function HeroSection({
             </div>
 
             {/* Social Proof - Combined with stats */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start animate-slide-up" style={{
-              animationDelay: '0.3s'
-            }}>
+            <div
+              className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start animate-slide-up"
+              style={{
+                animationDelay: "0.3s",
+              }}
+            >
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
                 <Users className="h-4 w-4 text-accent" />
                 <span className="text-white/90 text-sm font-medium">Join 500+ reps becoming rejection-proof</span>
