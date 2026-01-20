@@ -5,7 +5,7 @@ import { Pause, Play, Square, X, Headphones, Mic, Settings2 } from 'lucide-react
 import { useMp3Recorder } from '@/hooks/useMp3Recorder';
 import { AudioWaveform } from './AudioWaveform';
 import { RecordingTimer } from './RecordingTimer';
-import { TranscriptionPanel } from './TranscriptionPanel';
+import { LiveSummaryPanel } from './LiveSummaryPanel';
 import { AISuggestionsPanel, AISuggestion } from './AISuggestionsPanel';
 import { LiveCoachingSidebar } from './LiveCoachingSidebar';
 import { RecordingNameDialog } from './RecordingNameDialog';
@@ -618,34 +618,24 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
             </div>
           </div>
 
-          {/* Transcription and AI panels */}
+          {/* Live Summary and AI Coaching panels */}
           <div className="flex-1 flex gap-6 overflow-hidden min-h-0">
-            <TranscriptionPanel 
+            <LiveSummaryPanel 
               transcription={transcription}
-              isProcessing={isProcessing}
-              status={transcriptionStatus}
-              retryCountdown={retryCountdown}
+              isRecording={isRecording}
+              isPaused={isPaused}
             />
             
-            {/* Show Live Coaching sidebar if enabled (premium), otherwise standard suggestions */}
-            {liveCoachingEnabled ? (
-              <LiveCoachingSidebar
-                transcript={transcription}
-                coachStyle={coachStyle}
-                isRecording={isRecording}
-                isPaused={isPaused}
-                onSuggestionFeedback={(id, helpful) => {
-                  console.log('Feedback:', id, helpful);
-                }}
-              />
-            ) : (
-              <AISuggestionsPanel 
-                suggestions={suggestions}
-                sentiment={sentiment}
-                keyTopics={keyTopics}
-                isAnalyzing={isAnalyzing}
-              />
-            )}
+            {/* Always show Live Coaching sidebar for real-time advice */}
+            <LiveCoachingSidebar
+              transcript={transcription}
+              coachStyle={liveCoachingEnabled ? coachStyle : 'neutral'}
+              isRecording={isRecording}
+              isPaused={isPaused}
+              onSuggestionFeedback={(id, helpful) => {
+                console.log('Feedback:', id, helpful);
+              }}
+            />
           </div>
         </div>
       </div>
