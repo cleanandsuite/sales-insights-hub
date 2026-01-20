@@ -21,26 +21,39 @@ interface CalendarConnection {
   outlook_connected: boolean;
   last_google_sync?: string;
   last_outlook_sync?: string;
+  connected_via_oauth?: boolean;
 }
 
 export function useCalendarSync() {
   const [isLoading, setIsLoading] = useState(false);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [connection, setConnection] = useState<CalendarConnection | null>(null);
+  const [isAutoConnected, setIsAutoConnected] = useState(false);
 
   const getConnectionStatus = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      // Check if user signed in with Google (auto-connected)
+      const provider = session.user?.app_metadata?.provider;
+      const isGoogleUser = provider === 'google';
+      setIsAutoConnected(isGoogleUser);
+
       const { data, error } = await supabase.functions.invoke('calendar-sync', {
         body: { action: 'get-status' },
       });
 
       if (error) throw error;
-      setConnection(data.connection);
-      return data.connection;
-    } catch (error: any) {
+      
+      const connectionData = {
+        ...data.connection,
+        connected_via_oauth: isGoogleUser && data.connection?.google_connected,
+      };
+      
+      setConnection(connectionData);
+      return connectionData;
+    } catch (error: unknown) {
       console.error('Failed to get calendar status:', error);
       return null;
     }
@@ -68,7 +81,7 @@ export function useCalendarSync() {
 
       // Redirect to Google OAuth
       window.location.href = data.authUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('Failed to connect Google Calendar');
       console.error(error);
     } finally {
@@ -101,7 +114,7 @@ export function useCalendarSync() {
       await getConnectionStatus();
       await syncEvents();
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('Failed to complete calendar connection');
       console.error(error);
       return false;
@@ -126,7 +139,7 @@ export function useCalendarSync() {
 
       toast.success(`Synced ${data.eventsSynced} events from calendar`);
       await fetchEvents();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('Failed to sync calendar events');
       console.error(error);
     } finally {
@@ -185,7 +198,7 @@ export function useCalendarSync() {
       toast.success(`${provider === 'google' ? 'Google' : 'Outlook'} Calendar disconnected`);
       await getConnectionStatus();
       setEvents(events.filter(e => e.provider !== provider));
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('Failed to disconnect calendar');
       console.error(error);
     } finally {
@@ -212,6 +225,7 @@ export function useCalendarSync() {
     isLoading,
     events,
     connection,
+    isAutoConnected,
     getConnectionStatus,
     connectGoogle,
     handleOAuthCallback,

@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, RefreshCw, Link, Unlink, AlertCircle } from 'lucide-react';
+import { Calendar, RefreshCw, Link, Unlink, CheckCircle2 } from 'lucide-react';
 import { useCalendarSync } from '@/hooks/useCalendarSync';
 import { format } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function CalendarSyncPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     isLoading,
     connection,
+    isAutoConnected,
     getConnectionStatus,
     connectGoogle,
     handleOAuthCallback,
@@ -53,7 +53,9 @@ export function CalendarSyncPanel() {
           Calendar Sync
         </CardTitle>
         <CardDescription>
-          Connect your calendars to see conflicts and auto-suggest meeting times
+          {isAutoConnected && connection?.google_connected 
+            ? 'Your Google Calendar is automatically synced via your Google sign-in'
+            : 'Connect your calendars to see conflicts and auto-suggest meeting times'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -71,11 +73,19 @@ export function CalendarSyncPanel() {
             <div>
               <p className="font-medium">Google Calendar</p>
               {connection?.google_connected ? (
-                <p className="text-sm text-muted-foreground">
-                  Last synced: {connection.last_google_sync 
-                    ? format(new Date(connection.last_google_sync), 'MMM d, h:mm a')
-                    : 'Never'}
-                </p>
+                <div className="flex items-center gap-2">
+                  {connection.connected_via_oauth && (
+                    <span className="text-xs text-success flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Via Google Sign-In
+                    </span>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Last synced: {connection.last_google_sync 
+                      ? format(new Date(connection.last_google_sync), 'MMM d, h:mm a')
+                      : 'Never'}
+                  </p>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">Not connected</p>
               )}
@@ -135,12 +145,12 @@ export function CalendarSyncPanel() {
           <Badge variant="outline">Coming Soon</Badge>
         </div>
 
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <strong>Setup Required:</strong> To enable Google Calendar sync, add <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> to your backend secrets.
-          </AlertDescription>
-        </Alert>
+        {/* Helpful tip for email/password users */}
+        {!connection?.google_connected && !isAutoConnected && (
+          <p className="text-xs text-muted-foreground text-center pt-2">
+            💡 Tip: Sign in with Google for automatic calendar sync
+          </p>
+        )}
       </CardContent>
     </Card>
   );
