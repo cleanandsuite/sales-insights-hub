@@ -13,12 +13,15 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000, // Suppress chunk size warnings (KiB)
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Vendor chunks for better caching
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs', '@radix-ui/react-tooltip'],
-          'vendor-charts': ['recharts'],
-          'vendor-query': ['@tanstack/react-query'],
+        manualChunks(id) {
+          // Only split React core into a vendor chunk for caching
+          // Let Vite handle dynamic imports for lazy-loaded pages naturally
+          if (id.includes('node_modules/react/') || 
+              id.includes('node_modules/react-dom/') || 
+              id.includes('node_modules/react-router')) {
+            return 'vendor-react';
+          }
+          // recharts and other heavy libs will be code-split with their lazy pages
         },
       },
     },
