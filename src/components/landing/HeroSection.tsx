@@ -234,7 +234,7 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle className="h-4 w-4 text-green-400" />
-                  Free for 14 Days
+                  No Charge until 15th Day
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Shield className="h-4 w-4 text-green-400" />
