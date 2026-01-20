@@ -287,11 +287,11 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
 
       const audioBlob = await stopRecording();
       
-      if (!audioBlob) {
+      if (!audioBlob || audioBlob.size === 0) {
         toast({
           variant: 'destructive',
           title: 'No Recording Data',
-          description: 'The recording contains no audio data. Please try again.'
+          description: 'The recording contains no audio data. Please check your mic/system audio and try again.'
         });
         return;
       }
@@ -425,6 +425,12 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
           reader.onloadend = async () => {
             try {
               const base64Audio = (reader.result as string).split(',')[1];
+
+              if (!base64Audio || base64Audio.length === 0) {
+                console.warn('Final transcription skipped: empty audio data');
+                resolve();
+                return;
+              }
               
               const { data: transcribeData, error: transcribeError } = await supabase.functions.invoke('transcribe-audio', {
                 body: { audio: base64Audio, useAssemblyAI: true }
