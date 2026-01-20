@@ -269,24 +269,32 @@ export function useMp3Recorder(): UseMp3RecorderReturn {
         setIsSystemAudioCapture(false);
       };
 
-      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder || recorder.state === 'inactive') {
         cleanup();
         resolve(null);
         return;
       }
 
-      mediaRecorderRef.current.onstop = () => {
+      recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mimeTypeRef.current });
         console.log('Recording stopped:', {
           format: mimeTypeRef.current,
           size: blob.size,
-          chunks: chunksRef.current.length
+          chunks: chunksRef.current.length,
         });
         cleanup();
-        resolve(blob);
+        resolve(blob.size > 0 ? blob : null);
       };
 
-      mediaRecorderRef.current.stop();
+      // Try to flush any buffered audio before stopping
+      try {
+        recorder.requestData();
+      } catch {
+        // ignore
+      }
+
+      recorder.stop();
       setIsRecording(false);
     });
   }, []);
