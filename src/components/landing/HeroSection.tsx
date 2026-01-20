@@ -183,11 +183,11 @@ export function HeroSection({
 
             {/* Primary CTA - BIG and prominent with urgency */}
             <div className="flex flex-col gap-4 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
                 <Button 
                   size="lg" 
                   onClick={onStartTrialClick} 
-                  className="group gap-3 font-bold text-lg px-10 py-8 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-2xl hover:shadow-green-500/25 transition-all rounded-xl animate-cta-pulse border-0"
+                  className="group gap-3 font-bold text-lg px-8 py-7 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-2xl hover:shadow-green-500/25 transition-all rounded-xl animate-cta-pulse border-0"
                 >
                   Claim 40% Off & Start Free Trial
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -196,7 +196,7 @@ export function HeroSection({
                   size="lg" 
                   variant="outline" 
                   onClick={onWatchDemoClick} 
-                  className="group gap-2 font-semibold text-lg px-8 py-8 border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary rounded-xl backdrop-blur-md transition-all glass-effect"
+                  className="group gap-2 font-semibold text-lg px-8 py-7 border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary rounded-xl backdrop-blur-md transition-all glass-effect"
                 >
                   <Play className="h-5 w-5 fill-current" />
                   See It In Action
