@@ -133,7 +133,8 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
 
     try {
       const audioBlob = await getAudioChunk();
-      if (!audioBlob || audioBlob.size === lastProcessedChunkRef.current) return;
+      // Skip if no blob, blob is empty, or size hasn't changed
+      if (!audioBlob || audioBlob.size === 0 || audioBlob.size === lastProcessedChunkRef.current) return;
       
       lastProcessedChunkRef.current = audioBlob.size;
       setIsProcessing(true);
@@ -143,7 +144,16 @@ export function LiveRecordingInterface({ onClose, useScreenShare = false }: Live
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
-        const base64Audio = (reader.result as string).split(',')[1];
+        const result = reader.result as string;
+        const base64Audio = result?.split(',')[1];
+        
+        // Validate base64 audio data exists
+        if (!base64Audio || base64Audio.length === 0) {
+          console.warn('Empty audio data, skipping transcription');
+          setIsProcessing(false);
+          setTranscriptionStatus('idle');
+          return;
+        }
 
         try {
           // Send to transcription API
