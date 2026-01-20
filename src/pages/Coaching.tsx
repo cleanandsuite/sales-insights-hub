@@ -17,9 +17,11 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { CoachingROIDashboard } from '@/components/coaching/CoachingROIDashboard';
 import { CoachingQueueCard } from '@/components/coaching/CoachingQueueCard';
 import { CompletedCoachingList } from '@/components/coaching/CompletedCoachingList';
+import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
 
 interface SkillData {
   name: string;
@@ -39,6 +41,7 @@ interface Recommendation {
 
 export default function Coaching() {
   const { user } = useAuth();
+  const { isEnterprise } = useEnterpriseSubscription();
   const [loading, setLoading] = useState(true);
   const [overallScore, setOverallScore] = useState(0);
   const [callsAnalyzed, setCallsAnalyzed] = useState(0);
@@ -221,7 +224,20 @@ export default function Coaching() {
             </div>
           </TabsContent>
 
-          <TabsContent value="ai-coach" className="mt-0">
+          <TabsContent value="ai-coach" className="mt-0 space-y-6">
+            {/* AI Coach Style Selector - Enterprise Only */}
+            {isEnterprise && (
+              <div className="card-gradient rounded-xl border border-border/50 p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  Select Your AI Coach
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Choose a coaching personality that matches your sales style. Your selection applies to live coaching during calls.
+                </p>
+                <CoachStyleSelector enterpriseMode={true} />
+              </div>
+            )}
             <CoachingROIDashboard />
           </TabsContent>
 
