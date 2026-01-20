@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { SellSigLogo } from '@/components/ui/SellSigLogo';
+import sellsigLogo from '@/assets/sellsig-logo.png';
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -40,8 +40,11 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <SellSigLogo size="sm" linkTo="/dashboard" />
+      <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
+          <img src={sellsigLogo} alt="SellSig" className="h-6 w-6 object-contain" />
+        </div>
+        <span className="text-lg font-semibold text-sidebar-foreground">SellSig</span>
       </div>
 
       {/* Navigation */}
@@ -85,7 +88,12 @@ export function MobileHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 lg:hidden">
-      <SellSigLogo size="sm" linkTo="/dashboard" showTagline={false} />
+      <div className="flex items-center gap-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
+          <img src={sellsigLogo} alt="SellSig" className="h-5 w-5 object-contain" />
+        </div>
+        <span className="text-base font-semibold text-sidebar-foreground">SellSig</span>
+      </div>
       
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
