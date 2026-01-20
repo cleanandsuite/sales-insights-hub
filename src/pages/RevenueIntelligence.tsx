@@ -17,8 +17,10 @@ import { PredictiveScoreCard } from '@/components/enterprise/PredictiveScoreCard
 import { EnterpriseExportPanel } from '@/components/enterprise/EnterpriseExportPanel';
 import { AlertPreferencesDialog } from '@/components/enterprise/AlertPreferencesDialog';
 import { RepTrendChart } from '@/components/enterprise/RepTrendChart';
+import { TeamComparisonChart } from '@/components/enterprise/TeamComparisonChart';
+import { GoalTrackingPanel } from '@/components/enterprise/GoalTrackingPanel';
 import { 
-  BarChart3, TrendingUp, Download, RefreshCw, Crown, AlertTriangle, Zap, Bell, Brain
+  BarChart3, TrendingUp, Download, RefreshCw, Crown, AlertTriangle, Zap, Bell, Brain, Target
 } from 'lucide-react';
 
 interface TeamKPIs {
@@ -142,10 +144,14 @@ export default function RevenueIntelligence() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="performance" className="space-y-4">
-          <TabsList className="bg-muted grid w-full grid-cols-5">
+          <TabsList className="bg-muted grid w-full grid-cols-6">
             <TabsTrigger value="performance" className="gap-1.5">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Performance</span>
+            </TabsTrigger>
+            <TabsTrigger value="goals" className="gap-1.5">
+              <Target className="h-4 w-4" />
+              <span className="hidden sm:inline">Goals</span>
             </TabsTrigger>
             <TabsTrigger value="actions" className="gap-1.5">
               <Zap className="h-4 w-4" />
@@ -167,7 +173,14 @@ export default function RevenueIntelligence() {
 
           <TabsContent value="performance" className="space-y-4">
             {teamId && <RepPerformanceTable teamId={teamId} />}
-            {teamId && <RepTrendChart teamId={teamId} />}
+            <div className="grid gap-4 lg:grid-cols-2">
+              {teamId && <TeamComparisonChart teamId={teamId} />}
+              {teamId && <RepTrendChart teamId={teamId} />}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="goals" className="space-y-4">
+            {teamId && <GoalTrackingPanel teamId={teamId} />}
           </TabsContent>
 
           <TabsContent value="actions" className="space-y-4">
