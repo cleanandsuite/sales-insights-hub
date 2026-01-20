@@ -22,8 +22,9 @@ import { GoalTrackingPanel } from '@/components/enterprise/GoalTrackingPanel';
 import { TeamGoalsPanel } from '@/components/enterprise/TeamGoalsPanel';
 import { GoalHistoryPanel } from '@/components/enterprise/GoalHistoryPanel';
 import { EmailDigestSettings } from '@/components/enterprise/EmailDigestSettings';
+import { RepLeaderboard } from '@/components/enterprise/RepLeaderboard';
 import { 
-  BarChart3, Download, RefreshCw, Crown, AlertTriangle, Zap, Bell, Brain, Target, Mail
+  BarChart3, Download, RefreshCw, Crown, AlertTriangle, Zap, Bell, Brain, Target, Trophy
 } from 'lucide-react';
 
 interface TeamKPIs {
@@ -147,10 +148,14 @@ export default function RevenueIntelligence() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="performance" className="space-y-4">
-          <TabsList className="bg-muted grid w-full grid-cols-6">
+          <TabsList className="bg-muted grid w-full grid-cols-7">
             <TabsTrigger value="performance" className="gap-1.5">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Performance</span>
+            </TabsTrigger>
+            <TabsTrigger value="leaderboard" className="gap-1.5">
+              <Trophy className="h-4 w-4" />
+              <span className="hidden sm:inline">Leaderboard</span>
             </TabsTrigger>
             <TabsTrigger value="goals" className="gap-1.5">
               <Target className="h-4 w-4" />
@@ -180,6 +185,10 @@ export default function RevenueIntelligence() {
               {teamId && <TeamComparisonChart teamId={teamId} />}
               {teamId && <RepTrendChart teamId={teamId} />}
             </div>
+          </TabsContent>
+
+          <TabsContent value="leaderboard" className="space-y-4">
+            {teamId && <RepLeaderboard teamId={teamId} />}
           </TabsContent>
 
           <TabsContent value="goals" className="space-y-4">
