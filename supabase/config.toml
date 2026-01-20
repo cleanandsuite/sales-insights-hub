@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.schedule-assistant]
 verify_jwt = false
+
+[functions.calendar-sync]
+verify_jwt = false

@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AIScheduleDialog } from '@/components/schedule/AIScheduleDialog';
 import { ScheduleAnalyticsWidget } from '@/components/schedule/ScheduleAnalyticsWidget';
 import { FollowUpPrompt } from '@/components/schedule/FollowUpPrompt';
+import { CalendarSyncPanel } from '@/components/schedule/CalendarSyncPanel';
 import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
 
 interface ScheduledCall {
@@ -554,6 +555,9 @@ export default function Schedule() {
 
             {/* Analytics Widget */}
             <ScheduleAnalyticsWidget />
+
+            {/* Calendar Sync */}
+            <CalendarSyncPanel />
           </div>
         </div>
       </div>
