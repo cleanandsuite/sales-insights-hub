@@ -364,8 +364,6 @@ export default function Dashboard() {
             conversionRate={28}
             avgResponseTime="1.2 hrs"
             onToggleAI={() => setAiActive(!aiActive)}
-            onTestMode={() => toast.info('Test mode coming soon')}
-            onViewLogs={() => toast.info('Logs coming soon')}
           />
 
           <QuickOverviewCards
