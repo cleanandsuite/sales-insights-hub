@@ -27,7 +27,7 @@ const personaSchema = z.object({
   role: z.string().max(100).optional(),
   industry: z.string().max(100).optional(),
   companySize: z.string().max(100).optional(),
-  painPoints: z.array(z.string().max(200)).max(10).optional(),
+  painPoints: z.array(z.string().max(2000)).max(10).optional(),
   personalityStyle: z.string().max(100).optional(),
   companyName: z.string().max(200).optional(),
   companyResearch: companyResearchSchema.nullable().optional(),
