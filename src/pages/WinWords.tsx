@@ -308,7 +308,7 @@ export default function WinWords() {
                   <CardDescription>Help us personalize the script for your buyer</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <PersonaForm persona={persona} onChange={setPersona} />
+                  <PersonaForm persona={persona} onChange={setPersona} scenario={scenario} />
 
                   <div className="flex justify-between">
                     <Button variant="outline" onClick={() => handleStepChange(1)}>
@@ -330,7 +330,7 @@ export default function WinWords() {
                   <CardDescription>What do you already know about this opportunity?</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <DealContextForm context={dealContext} onChange={setDealContext} />
+                  <DealContextForm context={dealContext} onChange={setDealContext} scenario={scenario} />
 
                   <div className="flex justify-between">
                     <Button variant="outline" onClick={() => handleStepChange(2)}>

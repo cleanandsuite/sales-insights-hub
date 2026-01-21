@@ -34,12 +34,12 @@ const personaSchema = z.object({
 }).optional();
 
 const dealContextSchema = z.object({
-  stage: z.string().max(200).optional(),
-  budget: z.string().max(200).optional(),
-  timeline: z.string().max(200).optional(),
-  competition: z.string().max(500).optional(),
-  previousInteractions: z.string().max(1000).optional(),
-  knownObjections: z.array(z.string().max(500)).max(10).optional(),
+  stage: z.string().max(500).optional(),
+  budget: z.string().max(500).optional(),
+  timeline: z.string().max(500).optional(),
+  competition: z.string().max(2000).optional(),
+  previousInteractions: z.string().max(5000).optional(),
+  knownObjections: z.array(z.string().max(2000)).max(10).optional(),
 }).optional();
 
 const requestSchema = z.object({

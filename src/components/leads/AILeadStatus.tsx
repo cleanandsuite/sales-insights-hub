@@ -1,4 +1,4 @@
-import { Activity, Pause, Play, FileText, TrendingUp, Clock, Percent } from 'lucide-react';
+import { Activity, Pause, Play, TrendingUp, Clock, Percent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -9,8 +9,6 @@ interface AILeadStatusProps {
   conversionRate: number;
   avgResponseTime: string;
   onToggleAI: () => void;
-  onTestMode: () => void;
-  onViewLogs: () => void;
 }
 
 export function AILeadStatus({
@@ -20,8 +18,6 @@ export function AILeadStatus({
   conversionRate,
   avgResponseTime,
   onToggleAI,
-  onTestMode,
-  onViewLogs
 }: AILeadStatusProps) {
   return (
     <div className="card-gradient rounded-xl border border-border/50 p-6">
@@ -73,14 +69,6 @@ export function AILeadStatus({
         <Button variant="outline" onClick={onToggleAI} className="gap-2">
           {isActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           {isActive ? 'Pause AI' : 'Resume AI'}
-        </Button>
-        <Button variant="outline" onClick={onTestMode} className="gap-2">
-          <Activity className="h-4 w-4" />
-          Test Mode
-        </Button>
-        <Button variant="outline" onClick={onViewLogs} className="gap-2">
-          <FileText className="h-4 w-4" />
-          View Logs
         </Button>
       </div>
     </div>

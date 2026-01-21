@@ -469,8 +469,6 @@ export default function Leads() {
           conversionRate={stats.conversionRate}
           avgResponseTime={stats.avgResponseTime}
           onToggleAI={() => setAiActive(!aiActive)}
-          onTestMode={() => handleToggleDemo()}
-          onViewLogs={() => toast.info('Logs coming soon')}
         />
 
         {/* Quick Overview */}
