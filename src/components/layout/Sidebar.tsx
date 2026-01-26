@@ -38,8 +38,8 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     ? [...baseNavItems.slice(0, -1), managerNavItem, revenueIntelligenceItem, baseNavItems[baseNavItems.length - 1]]
     : baseNavItems;
   
-  // Add Enterprise nav item for enterprise users
-  if (isEnterprise) {
+  // Add Enterprise nav item for enterprise users OR admins
+  if (isEnterprise || isAdmin) {
     navItems = [...navItems.slice(0, -1), enterpriseItem, navItems[navItems.length - 1]];
   }
   

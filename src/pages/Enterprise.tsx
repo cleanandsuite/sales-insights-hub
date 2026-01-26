@@ -2,6 +2,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import { Navigate } from 'react-router-dom';
 import { Loader2, Building2, Crown, Calendar, FileText, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +14,9 @@ export default function Enterprise() {
   const { user, loading: authLoading } = useAuth();
   const { isEnterprise, tier, loading: enterpriseLoading } = useEnterpriseSubscription();
   const { teamId, loading: roleLoading } = useUserRole();
+  const { isAdmin, loading: adminLoading } = useAdminRole();
 
-  const loading = authLoading || enterpriseLoading || roleLoading;
+  const loading = authLoading || enterpriseLoading || roleLoading || adminLoading;
 
   if (loading) {
     return (
@@ -28,8 +30,8 @@ export default function Enterprise() {
     return <Navigate to="/auth" replace />;
   }
 
-  // Require enterprise subscription
-  if (!isEnterprise) {
+  // Require enterprise subscription OR admin role
+  if (!isEnterprise && !isAdmin) {
     return <Navigate to="/upgrade" replace />;
   }
 
