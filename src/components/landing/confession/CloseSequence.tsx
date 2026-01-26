@@ -6,21 +6,21 @@ import { gsap } from 'gsap';
 
 const testimonials = [
   {
-    quote: "Coaching turned my calls from disasters into dominance. Last month I closed $287K in sales — more than the previous quarter combined.",
+    quote: "AI coaching turned my sales calls from disasters into dominance. Last month I closed $287K — more than the previous quarter combined.",
     author: "Marcus T.",
     role: "Enterprise AE",
     avatar: "MT",
     revenue: "+$287K",
   },
   {
-    quote: "The coaching caught an objection I would've fumbled. That single whisper saved a $45K deal.",
+    quote: "The AI coaching caught an objection on my calls I would've fumbled. That single whisper saved a $45K deal.",
     author: "Sarah L.",
     role: "SDR Team Lead",
     avatar: "SL",
     revenue: "+$45K saved",
   },
   {
-    quote: "I was terrified of calls. Now I look forward to them. Coaching rewired my brain for sales.",
+    quote: "I was terrified of sales calls. Now I look forward to them. AI coaching rewired my brain for sales.",
     author: "David K.",
     role: "Startup Founder",
     avatar: "DK",
@@ -29,10 +29,10 @@ const testimonials = [
 ];
 
 const beforeAfter = [
-  { before: "Fumbling objections", after: "Destroying objections with coaching" },
+  { before: "Fumbling objections on calls", after: "Destroying objections with AI coaching" },
   { before: "Losing deals to 'I'll think about it'", after: "Closing sales on the first call" },
-  { before: "Praying for luck on calls", after: "Commanding every conversation" },
-  { before: "Guessing what to say next", after: "Coaching feeds you perfect responses" },
+  { before: "Praying for luck on sales calls", after: "AI coaching commands every conversation" },
+  { before: "Guessing what to say next", after: "AI coaching feeds you perfect responses" },
 ];
 
 interface CloseSequenceProps {
@@ -75,16 +75,16 @@ export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
           <div data-reveal className="text-center mb-20">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-semibold mb-6">
               <AlertTriangle className="w-4 h-4" />
-              Final Question
+              Final Question About Your Sales Calls
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-6">
               How Many More{' '}
-              <span className="text-red-400">Calls</span>{' '}
+              <span className="text-red-400">Sales Calls</span>{' '}
               Will You Fumble Before You Act?
             </h2>
             <p className="text-xl text-white/60 max-w-2xl mx-auto">
-              Every day without coaching costs you sales deals. Every week without guidance 
-              costs you thousands. The confession is over. The choice is now.
+              Every day without AI coaching costs you sales deals. Every week without guidance 
+              costs you thousands. The confession is over. The choice for AI coaching is now.
             </p>
           </div>
 
@@ -156,13 +156,13 @@ export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
           <div data-reveal className="text-center mb-16 p-8 rounded-3xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
             <Shield className="w-16 h-16 mx-auto mb-4 text-emerald-400" />
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-              100% Absolution Guarantee
+              100% AI Coaching Guarantee
             </h3>
             <p className="text-lg text-white/70 max-w-xl mx-auto">
-              If coaching doesn't transform your calls in 30 days — 
+              If AI coaching doesn't transform your sales calls in 30 days — 
               we refund every penny AND pay you $100 for wasting your time.
               <br />
-              <span className="text-emerald-400 font-semibold">Zero risk. Total redemption for your sales.</span>
+              <span className="text-emerald-400 font-semibold">Zero risk. Total redemption for your sales calls.</span>
             </p>
           </div>
 
@@ -206,18 +206,18 @@ export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
               </span>
               <span className="flex items-center gap-1.5">
                 <Check className="w-4 h-4 text-emerald-400" />
-                Coaching starts immediately
+                AI Coaching starts immediately
               </span>
               <span className="flex items-center gap-1.5">
                 <Check className="w-4 h-4 text-emerald-400" />
-                Ready in 60 seconds for sales
+                Ready in 60 seconds for sales calls
               </span>
             </div>
 
             <p className="mt-8 text-white/40 text-sm max-w-lg mx-auto">
-              Every call you make without coaching is a confession you're not ready to win sales.
+              Every sales call you make without AI coaching is a confession you're not ready to win.
               <br />
-              <span className="text-emerald-400">Choose redemption. Choose revenue. Choose now.</span>
+              <span className="text-emerald-400">Choose AI coaching. Choose revenue. Choose now.</span>
             </p>
           </div>
         </div>

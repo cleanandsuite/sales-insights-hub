@@ -28,9 +28,10 @@ export function ConfessionFooter() {
         {/* SEO footer text */}
         <div className="mt-8 pt-8 border-t border-white/5 text-center">
           <p className="text-xs text-white/30 max-w-3xl mx-auto leading-relaxed">
-            SellSig provides AI Coaching for sales calls, powered by intelligent AI Agents 
-            that listen, coach, and help you close more deals. Transform your sales calls 
-            with real-time AI Coaching and autonomous AI Agents.
+            SellSig provides AI coaching for sales calls, powered by intelligent AI 
+            that listens during calls, provides real-time coaching, and helps you close more sales. 
+            Transform your sales calls with AI coaching that whispers perfect responses. 
+            Real-time AI coaching for every call. Win more sales with coaching.
           </p>
         </div>
       </div>
