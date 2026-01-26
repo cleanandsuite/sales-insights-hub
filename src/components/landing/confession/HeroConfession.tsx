@@ -125,7 +125,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
             <span className="hero-word inline-block">Money.</span>
             <br />
             <span className="hero-word inline-block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              Coaching
+              AI Coaching
             </span>{' '}
             <span className="hero-word inline-block text-white/90">Stops</span>{' '}
             <span className="hero-word inline-block text-white/90">The</span>{' '}
@@ -134,10 +134,10 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
 
           {/* Subheadline - Shame exposure */}
           <p className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-            Every objection you fumble. Every deal you lose. Every "I'll think about it" that haunts you at 2AM.
+            Every objection you fumble on sales calls. Every deal you lose. Every "I'll think about it" that haunts you at 2AM.
             <br />
             <span className="text-white font-semibold">
-              AI-powered coaching hears it all — and fixes it in real-time.
+              AI coaching hears it all — and fixes it in real-time during your calls.
             </span>
           </p>
 
@@ -169,7 +169,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/50">
               <span className="flex items-center gap-1.5">
                 <Shield className="w-4 h-4 text-emerald-400" />
-                100% Absolution Guarantee
+                AI Coaching Guarantee
               </span>
               <span>•</span>
               <span>Cancel anytime</span>
@@ -182,17 +182,17 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
           <div className="pt-8 flex flex-wrap items-center justify-center gap-8 text-white/60">
             <div className="text-center">
               <p className="text-3xl font-bold text-white">2,847+</p>
-              <p className="text-xs uppercase tracking-wider">Calls Saved</p>
+              <p className="text-xs uppercase tracking-wider">Sales Calls Coached</p>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div className="text-center">
               <p className="text-3xl font-bold text-emerald-400">$4.2M</p>
-              <p className="text-xs uppercase tracking-wider">Revenue Recovered</p>
+              <p className="text-xs uppercase tracking-wider">Sales Revenue Recovered</p>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div className="text-center">
               <p className="text-3xl font-bold text-white">38%</p>
-              <p className="text-xs uppercase tracking-wider">More Closes</p>
+              <p className="text-xs uppercase tracking-wider">More Sales Closes</p>
             </div>
           </div>
         </div>
