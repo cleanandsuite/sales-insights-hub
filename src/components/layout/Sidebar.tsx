@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -25,15 +26,22 @@ const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
 const revenueIntelligenceItem = { to: '/revenue-intelligence', icon: TrendingUp, label: 'Revenue Intel' };
 const adminNavItem = { to: '/experiments', icon: FlaskConical, label: 'Experiments' };
 const adminPanelItem = { to: '/admin', icon: Shield, label: 'Admin Panel' };
+const enterpriseItem = { to: '/enterprise', icon: Building2, label: 'Enterprise' };
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { signOut } = useAuth();
   const { isManager } = useUserRole();
   const { isAdmin } = useAdminRole();
+  const { isEnterprise } = useEnterpriseSubscription();
   
   let navItems = isManager 
     ? [...baseNavItems.slice(0, -1), managerNavItem, revenueIntelligenceItem, baseNavItems[baseNavItems.length - 1]]
     : baseNavItems;
+  
+  // Add Enterprise nav item for enterprise users
+  if (isEnterprise) {
+    navItems = [...navItems.slice(0, -1), enterpriseItem, navItems[navItems.length - 1]];
+  }
   
   if (isAdmin) {
     // Add both Experiments and Admin Panel for admins
