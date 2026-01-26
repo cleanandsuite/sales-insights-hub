@@ -5,28 +5,28 @@ const conductorPoints = [
   {
     icon: Headphones,
     title: 'AI Coaching That Listens',
-    description: 'AI coaching hears every word on your sales calls, every pause, every hesitation. It decodes what your prospect really means — not what they say.',
+    description: 'AI coaching hears every word, every pause, every hesitation. It decodes what your prospect really means — not what they say.',
   },
   {
     icon: Zap,
-    title: 'Real-Time AI Coaching Whispers',
-    description: 'Feel the pull you cannot resist. As objections surface on calls, AI coaching whispers the exact response that converts your sales.',
+    title: 'Real-Time Whispers',
+    description: 'Feel the pull you cannot resist. As objections surface, coaching whispers the exact response that converts.',
   },
   {
     icon: Target,
     title: 'Objections Dissolve On Command',
-    description: 'Surrender to the sequence. When they say "too expensive" on sales calls, AI coaching feeds you the reframe that makes price irrelevant.',
+    description: 'Surrender to the sequence. When they say "too expensive", AI coaching feeds you the reframe that makes price irrelevant.',
   },
   {
     icon: TrendingUp,
     title: 'Closes Happen In Rhythm',
-    description: 'One nod and the entire sales pipeline obeys. The room bends to your baton when you have AI coaching in your ear for every call.',
+    description: 'One nod and the entire pipeline obeys. The room bends to your baton when you have coaching in your ear.',
   },
 ];
 
 const trustSignals = [
   { icon: Users, stat: '7-Figure Closers', label: 'Trust AI Coaching' },
-  { icon: Shield, stat: '$12,400/Day', label: 'Avg. Lost Without AI Coaching' },
+  { icon: Shield, stat: '$12,400/Day', label: 'Avg. Lost Without Coaching' },
   { icon: Clock, stat: '97 Spots', label: 'At $97/mo — Then Price Doubles' },
 ];
 
@@ -66,7 +66,7 @@ export function ConductorSection() {
               Like a Symphony
             </h2>
             <p className="text-xl text-white/60 max-w-2xl mx-auto">
-              With AI coaching orchestrating every moment of your calls, you don't just close sales — you conduct. 
+              With AI coaching orchestrating every moment, you don't just close — you conduct. 
               Prospects bend. Objections dissolve. Revenue flows.
             </p>
           </div>
@@ -116,7 +116,7 @@ export function ConductorSection() {
             <p className="text-xl md:text-2xl text-purple-300/80 font-light italic">
               "The room bends to your baton when{' '}
               <span className="text-white font-semibold">AI coaching</span>{' '}
-              guides your every word on sales calls."
+              guides your every word."
             </p>
           </div>
         </div>
