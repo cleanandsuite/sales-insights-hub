@@ -36,14 +36,46 @@ serve(async (req) => {
     });
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader) {
+      // Return default response for unauthenticated requests
+      logStep("No auth header - returning default response");
+      return new Response(JSON.stringify({ 
+        isEnterprise: false,
+        tier: null,
+        subscriptionEnd: null,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError || !userData.user) {
+      // Return default response for invalid/expired sessions
+      logStep("Invalid session - returning default response", { error: userError?.message });
+      return new Response(JSON.stringify({ 
+        isEnterprise: false,
+        tier: null,
+        subscriptionEnd: null,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
     
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
+    if (!user?.email) {
+      logStep("No user email - returning default response");
+      return new Response(JSON.stringify({ 
+        isEnterprise: false,
+        tier: null,
+        subscriptionEnd: null,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
