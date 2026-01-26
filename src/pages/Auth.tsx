@@ -116,16 +116,16 @@ export default function Auth() {
       {/* Left Side - Prestige Branding */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center relative">
         <div className="relative z-10 text-center px-12 max-w-lg">
+          {/* Logo */}
+          <Link to="/" className="inline-block mb-6 hover:opacity-90 transition-opacity">
+            <SellSigLogo size="lg" variant="light" showTagline={false} linkTo="" />
+          </Link>
+
           {/* Exclusive Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-8 backdrop-blur-sm">
             <Crown className="h-4 w-4 text-cyan-400" />
             <span className="text-sm font-medium text-cyan-300 tracking-wide uppercase">Members Only</span>
           </div>
-
-          {/* Logo */}
-          <Link to="/" className="inline-block mb-10 hover:opacity-90 transition-opacity">
-            <SellSigLogo size="lg" variant="light" showTagline={false} linkTo="" />
-          </Link>
 
           {/* Prestige Headline */}
           <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
