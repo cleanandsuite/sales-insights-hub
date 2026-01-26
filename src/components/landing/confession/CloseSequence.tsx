@@ -1,7 +1,8 @@
 import { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useScrollReveal, usePulsingGlow, useCountUp } from '../gsap/useGSAPAnimations';
+import { useScrollReveal, useCountUp } from '../gsap/useGSAPAnimations';
 import { ArrowRight, Check, Star, Shield, Clock, AlertTriangle, Users, TrendingUp, Zap, Quote } from 'lucide-react';
+import { gsap } from 'gsap';
 
 const testimonials = [
   {
@@ -40,10 +41,27 @@ interface CloseSequenceProps {
 
 export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
   const revealRef = useScrollReveal();
-  const ctaRef = usePulsingGlow();
+  const ctaWrapperRef = useRef<HTMLDivElement>(null);
   const revenueRef = useCountUp(4200000, 2.5);
   const callsRef = useCountUp(2847, 2);
   const spotsRef = useCountUp(97, 1.5);
+
+  // Pulsing glow effect on wrapper div instead of button
+  useEffect(() => {
+    if (!ctaWrapperRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.to(ctaWrapperRef.current, {
+        boxShadow: '0 0 60px 10px rgba(16, 185, 129, 0.5)',
+        duration: 1.5,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      });
+    }, ctaWrapperRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section className="relative py-24 md:py-32 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
@@ -161,20 +179,21 @@ export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
 
           {/* STEP 5: Absolution CTA Climax */}
           <div data-reveal className="text-center">
-            <Button
-              ref={ctaRef}
-              size="lg"
-              onClick={onClaimRedemption}
-              className="group relative gap-4 font-black text-xl md:text-2xl px-12 py-10 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white rounded-2xl border-0 transition-all duration-300"
-            >
-              {/* Particle glow effect */}
-              <span className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
-              
-              <span className="relative flex items-center gap-4">
-                ✝️ Claim Your Redemption Now — $97/mo
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-              </span>
-            </Button>
+            <div ref={ctaWrapperRef} className="inline-block rounded-2xl">
+              <Button
+                size="lg"
+                onClick={onClaimRedemption}
+                className="group relative gap-4 font-black text-xl md:text-2xl px-12 py-10 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white rounded-2xl border-0 transition-all duration-300"
+              >
+                {/* Particle glow effect */}
+                <span className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
+                
+                <span className="relative flex items-center gap-4">
+                  ✝️ Claim Your Redemption Now — $97/mo
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </span>
+              </Button>
+            </div>
 
             {/* CTA Variant B */}
             {/* "I'm Ready To Win — Give Me AI Coaching" */}
