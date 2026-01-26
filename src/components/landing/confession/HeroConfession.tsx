@@ -118,13 +118,14 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight"
           >
             <span className="hero-word inline-block">Your</span>{' '}
-            <span className="hero-word inline-block text-red-400">Sales Calls</span>{' '}
+            <span className="hero-word inline-block text-red-400">Sales</span>{' '}
+            <span className="hero-word inline-block text-red-400">Calls</span>{' '}
             <span className="hero-word inline-block">Are</span>{' '}
             <span className="hero-word inline-block">Bleeding</span>{' '}
             <span className="hero-word inline-block">Money.</span>
             <br />
             <span className="hero-word inline-block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              AI Coaching
+              Coaching
             </span>{' '}
             <span className="hero-word inline-block text-white/90">Stops</span>{' '}
             <span className="hero-word inline-block text-white/90">The</span>{' '}
@@ -136,7 +137,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
             Every objection you fumble. Every deal you lose. Every "I'll think about it" that haunts you at 2AM.
             <br />
             <span className="text-white font-semibold">
-              Our AI Agents hear it all — and fix it in real-time.
+              AI-powered coaching hears it all — and fixes it in real-time.
             </span>
           </p>
 
@@ -181,7 +182,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
           <div className="pt-8 flex flex-wrap items-center justify-center gap-8 text-white/60">
             <div className="text-center">
               <p className="text-3xl font-bold text-white">2,847+</p>
-              <p className="text-xs uppercase tracking-wider">Sales Calls Saved</p>
+              <p className="text-xs uppercase tracking-wider">Calls Saved</p>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div className="text-center">

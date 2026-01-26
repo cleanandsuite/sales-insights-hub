@@ -4,29 +4,29 @@ import { Sparkles, Users, Shield, Clock, Zap, Target, TrendingUp, Headphones } f
 const conductorPoints = [
   {
     icon: Headphones,
-    title: 'AI Agents That Listen',
-    description: 'Our AI Agents hear every word, every pause, every hesitation. They decode what your prospect really means — not what they say.',
+    title: 'AI That Listens',
+    description: 'Intelligent coaching hears every word, every pause, every hesitation. It decodes what your prospect really means — not what they say.',
   },
   {
     icon: Zap,
-    title: 'Real-Time AI Coaching Whispers',
-    description: 'Feel the pull you cannot resist. As objections surface, AI Coaching whispers the exact response that converts.',
+    title: 'Real-Time Coaching Whispers',
+    description: 'Feel the pull you cannot resist. As objections surface, coaching whispers the exact response that converts your sales.',
   },
   {
     icon: Target,
     title: 'Objections Dissolve On Command',
-    description: 'Surrender to the sequence. When they say "too expensive," your AI Agents feed you the reframe that makes price irrelevant.',
+    description: 'Surrender to the sequence. When they say "too expensive," coaching feeds you the reframe that makes price irrelevant.',
   },
   {
     icon: TrendingUp,
     title: 'Closes Happen In Rhythm',
-    description: 'One nod and the entire pipeline obeys. The room bends to your baton when you have AI Coaching in your ear.',
+    description: 'One nod and the entire pipeline obeys. The room bends to your baton when you have coaching in your ear for every call.',
   },
 ];
 
 const trustSignals = [
-  { icon: Users, stat: '7-Figure Closers', label: 'Trust Our AI Agents' },
-  { icon: Shield, stat: '$12,400/Day', label: 'Avg. Lost Without AI Coaching' },
+  { icon: Users, stat: '7-Figure Closers', label: 'Trust Our Coaching' },
+  { icon: Shield, stat: '$12,400/Day', label: 'Avg. Lost Without Coaching' },
   { icon: Clock, stat: '97 Spots', label: 'At $97/mo — Then Price Doubles' },
 ];
 
@@ -61,12 +61,12 @@ export function ConductorSection() {
             <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
               Conduct Every{' '}
               <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                Sales Call
+                Call
               </span>{' '}
               Like a Symphony
             </h2>
             <p className="text-xl text-white/60 max-w-2xl mx-auto">
-              With AI Agents orchestrating every moment, you don't just close — you conduct. 
+              With coaching orchestrating every moment, you don't just close sales — you conduct. 
               Prospects bend. Objections dissolve. Revenue flows.
             </p>
           </div>
@@ -115,8 +115,8 @@ export function ConductorSection() {
           <div data-reveal className="mt-16 text-center">
             <p className="text-xl md:text-2xl text-purple-300/80 font-light italic">
               "The room bends to your baton when{' '}
-              <span className="text-white font-semibold">AI Coaching</span>{' '}
-              guides your every word."
+              <span className="text-white font-semibold">coaching</span>{' '}
+              guides your every word in sales."
             </p>
           </div>
         </div>

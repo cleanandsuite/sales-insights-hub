@@ -4,7 +4,7 @@ import { AlertTriangle, Clock, DollarSign, Users, Brain, Target, TrendingDown, F
 const confessions = [
   {
     icon: Frown,
-    text: "I confess: I've hung up sales calls knowing I could've done better — and said nothing.",
+    text: "I confess: I've hung up calls knowing I could've done better — and said nothing.",
     color: 'text-red-400',
   },
   {
@@ -14,7 +14,7 @@ const confessions = [
   },
   {
     icon: Clock,
-    text: "I admit: I pray my manager doesn't listen to my recorded sales calls.",
+    text: "I admit: I pray my manager doesn't listen to my recorded sales conversations.",
     color: 'text-orange-400',
   },
   {
@@ -24,12 +24,12 @@ const confessions = [
   },
   {
     icon: Brain,
-    text: "I confess: I need AI Coaching because my gut instincts keep failing me.",
+    text: "I confess: I need coaching because my gut instincts keep failing me on sales.",
     color: 'text-blue-400',
   },
   {
     icon: Target,
-    text: "My hidden fear: Without AI Agents whispering the right words, I'm just guessing.",
+    text: "My hidden fear: Without real-time coaching whispers, I'm just guessing.",
     color: 'text-pink-400',
   },
   {
@@ -39,7 +39,7 @@ const confessions = [
   },
   {
     icon: AlertTriangle,
-    text: "The truth I hide: I'm terrified that sales calls will expose me as a fraud.",
+    text: "The truth I hide: I'm terrified that calls will expose me as a fraud.",
     color: 'text-yellow-400',
   },
 ];
@@ -68,10 +68,10 @@ export function ConfessionSection() {
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
               If You've Ever Felt This Way About{' '}
-              <span className="text-red-400">Sales Calls</span>...
+              <span className="text-red-400">Sales</span>...
               <br />
               <span className="text-white/60 text-2xl md:text-3xl font-medium">
-                You're not alone. But you can be free.
+                You're not alone. But coaching can set you free.
               </span>
             </h2>
           </div>
@@ -110,7 +110,7 @@ export function ConfessionSection() {
               "Every confession you nodded to...
               <br />
               <span className="text-emerald-400 font-semibold not-italic">
-                is a wound that AI Coaching can heal.
+                is a wound that coaching can heal.
               </span>"
             </p>
           </div>
