@@ -1,23 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { StatCard } from '@/components/ui/stat-card';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
+import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+// New Salesforce-style components
+import { RevenueGauge } from '@/components/dashboard/RevenueGauge';
+import { PipelineFunnel } from '@/components/dashboard/PipelineFunnel';
+import { MonthlyRevenueChart } from '@/components/dashboard/MonthlyRevenueChart';
+import { QuarterlyRevenueChart } from '@/components/dashboard/QuarterlyRevenueChart';
+import { WinRateCircle } from '@/components/dashboard/WinRateCircle';
+import { TopOpportunitiesTable } from '@/components/dashboard/TopOpportunitiesTable';
+import { TopAccountsChart } from '@/components/dashboard/TopAccountsChart';
+import { LogClosedDealForm } from '@/components/dashboard/LogClosedDealForm';
+import { KPICard } from '@/components/dashboard/KPICard';
+
+// Existing components
 import { AILeadStatus } from '@/components/leads/AILeadStatus';
-import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
-import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
-import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { ProfileSetupBanner } from '@/components/recording/ProfileSetupBanner';
-import { Phone, Clock, ThumbsUp, Mic, Users, Headphones, Crown } from 'lucide-react';
+import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
+import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useUserRole } from '@/hooks/useUserRole';
-import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
-import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
+import { 
+  Mic, Headphones, Crown, DollarSign, Target, 
+  Users, TrendingUp, Zap, Phone 
+} from 'lucide-react';
 
 // Enterprise Components
 import { PipelineKPICards } from '@/components/enterprise/PipelineKPICards';
@@ -51,6 +64,15 @@ interface Lead {
   recording_id: string | null;
 }
 
+interface ClosedDeal {
+  id: string;
+  amount: number;
+  closeDate: string;
+  accountName: string;
+  notes: string;
+  createdAt: string;
+}
+
 interface TeamKPIs {
   teamWinRate: number;
   avgCallsPerRep: number;
@@ -59,19 +81,6 @@ interface TeamKPIs {
   avgCloserScore: number;
   forecastRiskPct: number;
   totalReps: number;
-}
-
-interface PipelineKPIs {
-  bookingAttainment: number;
-  bookingTarget: number;
-  gapToTarget: number;
-  coverage: number;
-  openPipeline: number;
-  totalPipelineCreated: number;
-  pipelineTarget: number;
-  productsSold: number;
-  appointmentsSet: number;
-  appointmentTarget: number;
 }
 
 export default function Dashboard() {
@@ -87,7 +96,10 @@ export default function Dashboard() {
   const [aiActive, setAiActive] = useState(true);
   const [headphoneMode, setHeadphoneMode] = useState(false);
   const [kpis, setKpis] = useState<TeamKPIs | null>(null);
-  const [pipelineKpis, setPipelineKpis] = useState<PipelineKPIs>({
+  const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
+  const [selectedDeal, setSelectedDeal] = useState<{ id: string; name: string; company: string } | null>(null);
+
+  const [pipelineKpis] = useState({
     bookingAttainment: 4150000,
     bookingTarget: 15000000,
     gapToTarget: 10850000,
@@ -99,9 +111,57 @@ export default function Dashboard() {
     appointmentsSet: 28,
     appointmentTarget: 50,
   });
-  const [selectedDeal, setSelectedDeal] = useState<{ id: string; name: string; company: string } | null>(null);
 
   const isExecutive = isEnterprise && tier === 'executive';
+
+  // Mock data for charts - in production, fetch from Supabase
+  const [monthlyData] = useState([
+    { month: 'Jul', revenue: 45000, target: 50000 },
+    { month: 'Aug', revenue: 62000, target: 55000 },
+    { month: 'Sep', revenue: 58000, target: 60000 },
+    { month: 'Oct', revenue: 71000, target: 65000 },
+    { month: 'Nov', revenue: 85000, target: 70000 },
+    { month: 'Dec', revenue: 92000, target: 80000 },
+  ]);
+
+  const [quarterlyData] = useState([
+    { quarter: 'Q1', revenue: 180000, target: 200000 },
+    { quarter: 'Q2', revenue: 245000, target: 250000 },
+    { quarter: 'Q3', revenue: 165000, target: 200000 },
+    { quarter: 'Q4', revenue: 0, target: 250000 },
+  ]);
+
+  const [pipelineStages] = useState([
+    { name: 'Lead', value: 850000, count: 45, color: '#06b6d4' },
+    { name: 'Qualified', value: 620000, count: 28, color: '#8b5cf6' },
+    { name: 'Proposal', value: 380000, count: 15, color: '#f59e0b' },
+    { name: 'Negotiation', value: 180000, count: 8, color: '#ec4899' },
+    { name: 'Closed Won', value: 95000, count: 4, color: '#10b981' },
+  ]);
+
+  const [opportunities] = useState([
+    { id: '1', name: 'Enterprise License', account: 'Acme Corp', amount: 125000, probability: 75, stage: 'Proposal', closeDate: '2026-02-15' },
+    { id: '2', name: 'Platform Migration', account: 'TechStart Inc', amount: 89000, probability: 60, stage: 'Qualification', closeDate: '2026-03-01' },
+    { id: '3', name: 'Annual Renewal', account: 'Global Systems', amount: 67000, probability: 90, stage: 'Negotiation', closeDate: '2026-01-31' },
+    { id: '4', name: 'New Implementation', account: 'FastGrow LLC', amount: 45000, probability: 40, stage: 'Prospecting', closeDate: '2026-03-15' },
+    { id: '5', name: 'Expansion Deal', account: 'MegaCorp', amount: 156000, probability: 55, stage: 'Proposal', closeDate: '2026-02-28' },
+  ]);
+
+  const [topAccounts] = useState([
+    { name: 'Acme Corp', won: 245000, potential: 180000 },
+    { name: 'TechStart', won: 189000, potential: 120000 },
+    { name: 'Global Sys', won: 156000, potential: 95000 },
+    { name: 'FastGrow', won: 98000, potential: 150000 },
+    { name: 'MegaCorp', won: 78000, potential: 220000 },
+  ]);
+
+  // Calculate totals from closed deals
+  const totalRevenue = closedDeals.reduce((sum, deal) => sum + deal.amount, 0) + 301000; // Base + new deals
+  const revenueGoal = 3000000;
+  const winRate = 68;
+  const totalWon = 24 + closedDeals.length;
+  const totalLost = 11;
+  const avgDealSize = totalRevenue / (totalWon || 1);
 
   // Handle subscription success message
   useEffect(() => {
@@ -175,12 +235,14 @@ export default function Dashboard() {
     }
   };
 
-  const totalCalls = recordings.length;
-  const analyzedCalls = recordings.filter(r => r.status === 'analyzed').length;
-  const avgSentiment = recordings
-    .filter(r => r.sentiment_score !== null)
-    .reduce((acc, r) => acc + (r.sentiment_score || 0), 0) / (analyzedCalls || 1);
-  const totalDuration = recordings.reduce((acc, r) => acc + (r.duration_seconds || 0), 0);
+  const handleDealLogged = (deal: { amount: number; closeDate: string; accountName: string; notes: string }) => {
+    const newDeal: ClosedDeal = {
+      id: crypto.randomUUID(),
+      ...deal,
+      createdAt: new Date().toISOString(),
+    };
+    setClosedDeals(prev => [newDeal, ...prev]);
+  };
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -194,12 +256,6 @@ export default function Dashboard() {
     return callDate >= dayAgo;
   }).length;
 
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  };
-
   const recentActivities = leads.slice(0, 5).map(lead => ({
     id: lead.id,
     type: lead.is_hot_lead ? 'ai_scored' as const : 'new_lead' as const,
@@ -210,22 +266,11 @@ export default function Dashboard() {
     confidence: lead.ai_confidence || undefined
   }));
 
-  const alerts = [
-    ...(pendingFollowups > 0 ? [{
-      id: '1',
-      type: 'urgent_followup' as const,
-      title: 'Urgent Follow-ups',
-      count: pendingFollowups,
-      description: 'Waiting for response'
-    }] : []),
-    ...(hotLeads > 0 ? [{
-      id: '2',
-      type: 'high_score' as const,
-      title: 'High-Score Leads',
-      count: hotLeads,
-      description: '>90% confidence'
-    }] : []),
-  ];
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value}`;
+  };
 
   // Enterprise Dashboard for Executive users
   if (isExecutive && teamId) {
@@ -317,7 +362,7 @@ export default function Dashboard() {
     );
   }
 
-  // Standard Dashboard for non-enterprise users
+  // Standard Salesforce-Style Dashboard for non-enterprise users
   return (
     <>
       {isRecording && (
@@ -329,14 +374,14 @@ export default function Dashboard() {
           {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-muted-foreground mt-1">AI-powered sales call analytics and lead generation</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Sales Dashboard</h1>
+              <p className="text-muted-foreground mt-1">AI-powered sales intelligence & revenue tracking</p>
             </div>
             <div className="flex flex-col items-end gap-3">
               <Button
                 onClick={() => setIsRecording(true)}
                 size="lg"
-                className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow"
+                className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow bg-gradient-to-r from-cyan-500 to-cyan-400 text-slate-900"
               >
                 <Mic className="h-5 w-5" />
                 Start Recording
@@ -357,6 +402,7 @@ export default function Dashboard() {
 
           <ProfileSetupBanner variant="full" />
 
+          {/* AI Lead Status */}
           <AILeadStatus
             isActive={aiActive}
             todaysLeads={todaysLeads}
@@ -366,33 +412,78 @@ export default function Dashboard() {
             onToggleAI={() => setAiActive(!aiActive)}
           />
 
-          <QuickOverviewCards
-            newLeadsToday={todaysLeads}
-            pendingFollowups={pendingFollowups}
-            hotLeads={hotLeads}
-            recentCalls={last24hCalls}
-          />
-
-          {alerts.length > 0 && (
-            <PriorityAlerts
-              alerts={alerts}
-              onAlertClick={(alert) => {
-                if (alert.type === 'high_score' || alert.type === 'urgent_followup') {
-                  navigate('/leads');
-                } else {
-                  navigate('/call-history');
-                }
-              }}
+          {/* Top KPI Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <KPICard
+              title="Total Revenue"
+              value={formatCurrency(totalRevenue)}
+              subtitle="FYTD Closed Won"
+              icon={DollarSign}
+              iconColor="text-emerald-400"
+              trend={{ value: 12.5, isPositive: true }}
             />
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="Total Calls" value={totalCalls} icon={Phone} trend={{ value: 12, isPositive: true }} />
-            <StatCard title="Leads Generated" value={leads.length} icon={Users} trend={{ value: 8, isPositive: true }} />
-            <StatCard title="Total Duration" value={formatDuration(totalDuration)} icon={Clock} />
-            <StatCard title="Avg Sentiment" value={avgSentiment ? `${(avgSentiment * 100).toFixed(0)}%` : 'N/A'} icon={ThumbsUp} />
+            <KPICard
+              title="Avg Deal Size"
+              value={formatCurrency(avgDealSize)}
+              subtitle="Per closed deal"
+              icon={Target}
+              iconColor="text-purple-400"
+              trend={{ value: 8.2, isPositive: true }}
+            />
+            <KPICard
+              title="Active Pipeline"
+              value={formatCurrency(2125000)}
+              subtitle="Open opportunities"
+              icon={TrendingUp}
+              iconColor="text-cyan-400"
+              trend={{ value: 5.8, isPositive: true }}
+            />
+            <KPICard
+              title="Calls Today"
+              value={last24hCalls}
+              subtitle={`${hotLeads} hot leads 🔥`}
+              icon={Phone}
+              iconColor="text-amber-400"
+            />
           </div>
 
+          {/* Main Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Revenue Gauge - Large */}
+            <div className="lg:col-span-1">
+              <RevenueGauge current={totalRevenue} goal={revenueGoal} />
+            </div>
+            
+            {/* Win Rate & Pipeline */}
+            <div className="lg:col-span-1 space-y-6">
+              <WinRateCircle rate={winRate} totalWon={totalWon} totalLost={totalLost} />
+            </div>
+
+            {/* Log Closed Deal Form */}
+            <div className="lg:col-span-1">
+              <LogClosedDealForm onDealLogged={handleDealLogged} />
+            </div>
+          </div>
+
+          {/* Charts Row 2 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MonthlyRevenueChart data={monthlyData} />
+            <QuarterlyRevenueChart data={quarterlyData} />
+          </div>
+
+          {/* Pipeline Funnel & Top Accounts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <PipelineFunnel stages={pipelineStages} />
+            <TopAccountsChart data={topAccounts} />
+          </div>
+
+          {/* Top Opportunities Table */}
+          <TopOpportunitiesTable 
+            opportunities={opportunities}
+            onViewDetails={(id) => toast.info(`Opening opportunity ${id}`)}
+          />
+
+          {/* Recent Activity */}
           <RecentActivityFeed
             activities={recentActivities}
             onViewLead={() => navigate('/leads')}
