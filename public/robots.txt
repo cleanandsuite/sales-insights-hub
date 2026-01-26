@@ -13,6 +13,9 @@ Disallow: /profile
 Disallow: /team
 Disallow: /manager
 Disallow: /upload
+Disallow: /schedule
+Disallow: /call-history
+Disallow: /revenue-intelligence
 
 User-agent: Bingbot
 Allow: /
@@ -26,6 +29,9 @@ Disallow: /profile
 Disallow: /team
 Disallow: /manager
 Disallow: /upload
+Disallow: /schedule
+Disallow: /call-history
+Disallow: /revenue-intelligence
 
 User-agent: Twitterbot
 Allow: /
@@ -45,6 +51,9 @@ Disallow: /profile
 Disallow: /team
 Disallow: /manager
 Disallow: /upload
+Disallow: /schedule
+Disallow: /call-history
+Disallow: /revenue-intelligence
 
 # Sitemap location
 Sitemap: https://sellsig.com/sitemap.xml

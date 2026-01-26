@@ -5,32 +5,32 @@ const salvationGifts = [
   {
     icon: Mic,
     title: 'Real-Time AI Coaching Whispers',
-    description: 'During live sales calls, AI coaching whispers the perfect response into your ear. Never freeze on sales again.',
+    description: 'During live sales calls, AI coaching whispers the perfect response into your ear. Never freeze again.',
   },
   {
     icon: Brain,
     title: 'Autonomous AI Intelligence',
-    description: 'AI that listens to your calls, analyzes, and provides coaching — all in real-time. Handle objections while focusing on connecting.',
+    description: 'AI that listens, analyzes, and provides coaching — all in real-time. Handle objections while focusing on connecting.',
   },
   {
     icon: BarChart3,
     title: 'Post-Call Breakdown & Scoring',
-    description: 'Every sales call analyzed. Every weakness exposed. Every strength amplified. AI coaching never stops improving your sales.',
+    description: 'Every sales call analyzed. Every weakness exposed. Every strength amplified. Coaching never stops improving you.',
   },
   {
     icon: MessageSquare,
     title: 'Objection Scripts That Convert',
-    description: 'When they say "no" on calls, AI coaching knows exactly what to say. Battle-tested responses for every objection in sales.',
+    description: 'When they say "no", AI coaching knows exactly what to say. Battle-tested responses for every objection.',
   },
   {
     icon: Zap,
     title: 'Instant Deal Intelligence',
-    description: 'AI coaching surfaces buying signals you missed on calls. Track competitor mentions. Nothing escapes during sales calls.',
+    description: 'AI coaching surfaces buying signals you missed. Track competitor mentions. Nothing escapes.',
   },
   {
     icon: Shield,
     title: 'Never Miss Another Close',
-    description: 'AI coaching prompts your next move on calls. Ensures every sales call ends with clarity, commitment, and momentum.',
+    description: 'AI coaching prompts your next move. Ensures every sales call ends with clarity, commitment, and momentum.',
   },
 ];
 
@@ -76,12 +76,12 @@ export function RedemptionSection() {
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
               Receive Forgiveness For{' '}
-              <span className="text-emerald-300">Every Lost Sales Deal</span>
+              <span className="text-emerald-300">Every Lost Deal</span>
             </h2>
             <p className="text-xl text-white/70 max-w-3xl mx-auto">
               Rise redeemed — unbreakable on every sales call. 
               With AI coaching in your ear and intelligence at your side, 
-              every sales call becomes a conversion.
+              every call becomes a conversion.
             </p>
           </div>
 
@@ -114,14 +114,14 @@ export function RedemptionSection() {
           <div data-reveal className="text-center p-8 md:p-12 rounded-3xl bg-white/5 backdrop-blur-sm border border-emerald-500/20">
             <Sparkles className="w-12 h-12 mx-auto mb-6 text-emerald-400" />
             <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
-              This is NOT software. This is <span className="text-emerald-300">AI coaching salvation</span>.
+              This is NOT software. This is <span className="text-emerald-300">salvation</span>.
             </h3>
             <p className="text-lg text-white/70 max-w-2xl mx-auto mb-6">
               AI coaching doesn't just help you sell — it transforms who you are on sales calls.
-              It doesn't just listen — it redeems every moment you would've wasted on calls.
+              It doesn't just listen — it redeems every moment you would've wasted.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              {['Absolution from sales failure', 'Freedom from call fear', 'Dominion over deals'].map((item) => (
+              {['Absolution from failure', 'Freedom from fear', 'Dominion over deals'].map((item) => (
                 <span key={item} className="flex items-center gap-2 text-emerald-300 font-medium">
                   <Check className="w-5 h-5" />
                   {item}

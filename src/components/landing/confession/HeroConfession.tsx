@@ -118,8 +118,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight"
           >
             <span className="hero-word inline-block">Your</span>{' '}
-            <span className="hero-word inline-block text-red-400">Sales</span>{' '}
-            <span className="hero-word inline-block text-red-400">Calls</span>{' '}
+            <span className="hero-word inline-block text-red-400">Sales Calls</span>{' '}
             <span className="hero-word inline-block">Are</span>{' '}
             <span className="hero-word inline-block">Bleeding</span>{' '}
             <span className="hero-word inline-block">Money.</span>
@@ -134,18 +133,12 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
 
           {/* Subheadline - Shame exposure */}
           <p className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-            Every objection you fumble on sales calls. Every deal you lose. Every "I'll think about it" that haunts you at 2AM.
+            Every objection you fumble. Every deal you lose. Every "I'll think about it" that haunts you at 2AM.
             <br />
             <span className="text-white font-semibold">
-              AI coaching hears it all — and fixes it in real-time during your calls.
+              AI coaching hears it all — and fixes it in real-time.
             </span>
           </p>
-
-          {/* A/B Variant Headlines */}
-          {/* 
-          VARIANT A (Current): "Your Sales Calls Are Bleeding Money"
-          VARIANT B: "I Know Why You're Losing Deals (And It's Not What You Think)"
-          */}
 
           {/* CTA Section */}
           <div className="pt-6 space-y-4">
@@ -161,15 +154,12 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
                 <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </span>
             </Button>
-            
-            {/* CTA Variant B */}
-            {/* "Stop The Pain — Start Your Trial Now" */}
 
             {/* Trust signals */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/50">
               <span className="flex items-center gap-1.5">
                 <Shield className="w-4 h-4 text-emerald-400" />
-                AI Coaching Guarantee
+                Coaching Guarantee
               </span>
               <span>•</span>
               <span>Cancel anytime</span>
@@ -182,17 +172,17 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
           <div className="pt-8 flex flex-wrap items-center justify-center gap-8 text-white/60">
             <div className="text-center">
               <p className="text-3xl font-bold text-white">2,847+</p>
-              <p className="text-xs uppercase tracking-wider">Sales Calls Coached</p>
+              <p className="text-xs uppercase tracking-wider">Calls Coached</p>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div className="text-center">
               <p className="text-3xl font-bold text-emerald-400">$4.2M</p>
-              <p className="text-xs uppercase tracking-wider">Sales Revenue Recovered</p>
+              <p className="text-xs uppercase tracking-wider">Revenue Recovered</p>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div className="text-center">
               <p className="text-3xl font-bold text-white">38%</p>
-              <p className="text-xs uppercase tracking-wider">More Sales Closes</p>
+              <p className="text-xs uppercase tracking-wider">More Closes</p>
             </div>
           </div>
         </div>

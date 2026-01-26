@@ -4,42 +4,42 @@ import { AlertTriangle, Clock, DollarSign, Users, Brain, Target, TrendingDown, F
 const confessions = [
   {
     icon: Frown,
-    text: "I confess: I've hung up sales calls knowing I could've done better — and said nothing.",
+    text: "I confess: I've hung up knowing I could've done better — and said nothing.",
     color: 'text-red-400',
   },
   {
     icon: DollarSign,
-    text: "My secret shame: I've lost six-figure deals because I froze when they said 'it's too expensive' on calls.",
+    text: "My secret shame: I've lost six-figure deals because I froze when they said 'it's too expensive'.",
     color: 'text-amber-400',
   },
   {
     icon: Clock,
-    text: "I admit: I pray my manager doesn't listen to my recorded sales calls.",
+    text: "I admit: I pray my manager doesn't listen to my recorded sessions.",
     color: 'text-orange-400',
   },
   {
     icon: Users,
-    text: "The truth: I watch top performers close deals on calls I could never win — AI coaching could change that.",
+    text: "The truth: I watch top performers close deals I could never win.",
     color: 'text-purple-400',
   },
   {
     icon: Brain,
-    text: "I confess: I need AI coaching because my gut instincts keep failing me on sales calls.",
+    text: "I confess: My gut instincts keep failing me during conversations.",
     color: 'text-blue-400',
   },
   {
     icon: Target,
-    text: "My hidden fear: Without real-time AI coaching whispers during calls, I'm just guessing.",
+    text: "My hidden fear: Without real-time whispers, I'm just guessing.",
     color: 'text-pink-400',
   },
   {
     icon: TrendingDown,
-    text: "I admit: Every month I miss quota on sales, I die a little inside — coaching could fix this.",
+    text: "I admit: Every month I miss quota, I die a little inside.",
     color: 'text-red-500',
   },
   {
     icon: AlertTriangle,
-    text: "The truth I hide: I'm terrified that sales calls will expose me as a fraud without AI coaching.",
+    text: "The truth I hide: I'm terrified of being exposed as a fraud.",
     color: 'text-yellow-400',
   },
 ];
@@ -64,14 +64,13 @@ export function ConfessionSection() {
           {/* Section Header */}
           <div className="text-center mb-16 space-y-4">
             <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-semibold uppercase tracking-wider">
-              🪞 The Mirror of Truth for Sales Calls
+              🪞 The Mirror of Truth
             </span>
             <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
-              If You've Ever Felt This Way About{' '}
-              <span className="text-red-400">Sales Calls</span>...
+              If You've Ever Felt This Way...
               <br />
               <span className="text-white/60 text-2xl md:text-3xl font-medium">
-                You're not alone. But AI coaching can set you free.
+                You're not alone. AI coaching can set you free.
               </span>
             </h2>
           </div>
@@ -107,7 +106,7 @@ export function ConfessionSection() {
           {/* Transition text */}
           <div className="mt-16 text-center">
             <p className="text-2xl md:text-3xl text-white/80 font-light italic">
-              "Every confession you nodded to about your sales calls...
+              "Every confession you nodded to...
               <br />
               <span className="text-emerald-400 font-semibold not-italic">
                 is a wound that AI coaching can heal.
