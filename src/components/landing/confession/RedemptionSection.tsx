@@ -4,33 +4,33 @@ import { Check, Gift, Sparkles, Mic, Brain, BarChart3, MessageSquare, Shield, Za
 const salvationGifts = [
   {
     icon: Mic,
-    title: 'Real-Time AI Coaching Whispers',
-    description: 'During live sales calls, AI Coaching whispers the perfect response into your ear. Never freeze again.',
+    title: 'Real-Time Coaching Whispers',
+    description: 'During live calls, coaching whispers the perfect response into your ear. Never freeze on sales again.',
   },
   {
     icon: Brain,
-    title: 'Autonomous AI Agents',
-    description: 'AI Agents that listen, analyze, and coach — all in real-time. They handle objections so you can focus on connecting.',
+    title: 'Autonomous Intelligence',
+    description: 'AI that listens, analyzes, and provides coaching — all in real-time. Handle objections while focusing on connecting.',
   },
   {
     icon: BarChart3,
     title: 'Post-Call Breakdown & Scoring',
-    description: 'Every sales call analyzed. Every weakness exposed. Every strength amplified. AI Coaching never stops improving you.',
+    description: 'Every call analyzed. Every weakness exposed. Every strength amplified. Coaching never stops improving your sales.',
   },
   {
     icon: MessageSquare,
     title: 'Objection Scripts That Convert',
-    description: 'When they say "no," your AI Agents know exactly what to say. Battle-tested responses for every objection.',
+    description: 'When they say "no," coaching knows exactly what to say. Battle-tested responses for every objection in sales.',
   },
   {
     icon: Zap,
     title: 'Instant Deal Intelligence',
-    description: 'AI Coaching surfaces buying signals you missed. AI Agents track competitor mentions. Nothing escapes.',
+    description: 'Coaching surfaces buying signals you missed. Track competitor mentions. Nothing escapes during calls.',
   },
   {
     icon: Shield,
     title: 'Never Miss Another Close',
-    description: 'AI Agents prompt your next move. AI Coaching ensures every sales call ends with clarity and commitment.',
+    description: 'Coaching prompts your next move. Ensures every call ends with clarity, commitment, and sales momentum.',
   },
 ];
 
@@ -79,9 +79,9 @@ export function RedemptionSection() {
               <span className="text-emerald-300">Every Lost Deal</span>
             </h2>
             <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Rise redeemed — unbreakable on every sales call. 
-              With AI Coaching in your ear and AI Agents at your side, 
-              every conversation becomes a conversion.
+              Rise redeemed — unbreakable on every call. 
+              With coaching in your ear and intelligence at your side, 
+              every sales conversation becomes a conversion.
             </p>
           </div>
 
@@ -117,8 +117,8 @@ export function RedemptionSection() {
               This is NOT software. This is <span className="text-emerald-300">salvation</span>.
             </h3>
             <p className="text-lg text-white/70 max-w-2xl mx-auto mb-6">
-              AI Coaching doesn't just help you sell — it transforms who you are on sales calls.
-              AI Agents don't just listen — they redeem every moment you would've wasted.
+              Coaching doesn't just help you sell — it transforms who you are on calls.
+              It doesn't just listen — it redeems every moment you would've wasted in sales.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               {['Absolution from failure', 'Freedom from fear', 'Dominion over deals'].map((item) => (
