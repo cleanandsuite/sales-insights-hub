@@ -42,6 +42,7 @@ import { TeamLeadManagement } from '@/components/enterprise/TeamLeadManagement';
 import { EnterpriseActivityFeed } from '@/components/enterprise/EnterpriseActivityFeed';
 import { ProductsAppointmentsCard } from '@/components/enterprise/ProductsAppointmentsCard';
 import { DealBriefPanel } from '@/components/enterprise/DealBriefPanel';
+import { EnterpriseSeatManagement } from '@/components/enterprise/EnterpriseSeatManagement';
 
 interface CallRecording {
   id: string;
@@ -342,6 +343,9 @@ export default function Dashboard() {
               <CompanyGoalsWidget teamId={teamId} kpis={kpis} />
               <TeamLeadManagement teamId={teamId} />
             </div>
+
+            {/* Enterprise Seat Management */}
+            <EnterpriseSeatManagement teamId={teamId} />
 
             {/* Activity Feed */}
             <EnterpriseActivityFeed teamId={teamId} />
