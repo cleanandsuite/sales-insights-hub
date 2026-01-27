@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -50,7 +50,8 @@ export const PRICING_TIERS: Record<string, {
 };
 
 export function useSubscription() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const isCheckingRef = useRef(false);
   const [state, setState] = useState<SubscriptionState>({
     subscribed: false,
     plan: null,
@@ -61,25 +62,21 @@ export function useSubscription() {
   });
 
   const checkSubscription = useCallback(async () => {
+    // Wait for auth to stabilize and prevent concurrent checks
+    if (authLoading || isCheckingRef.current) return;
+    
     if (!user) {
       setState(prev => ({ ...prev, loading: false, subscribed: false, plan: null }));
       return;
     }
 
+    isCheckingRef.current = true;
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) {
-        setState(prev => ({ ...prev, loading: false, subscribed: false }));
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
-        headers: {
-          Authorization: `Bearer ${session.session.access_token}`,
-        },
-      });
+      // Let the Supabase client attach the auth header automatically
+      // instead of manually fetching and passing the token
+      const { data, error } = await supabase.functions.invoke('check-subscription');
 
       if (error) throw error;
 
@@ -98,32 +95,29 @@ export function useSubscription() {
         loading: false,
         error: error instanceof Error ? error.message : 'Failed to check subscription',
       }));
+    } finally {
+      isCheckingRef.current = false;
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     checkSubscription();
   }, [checkSubscription]);
 
-  // Auto-refresh every minute
+  // Auto-refresh every 5 minutes (reduced from 1 minute to lower pressure)
   useEffect(() => {
-    if (!user) return;
-    const interval = setInterval(checkSubscription, 60000);
+    if (!user || authLoading) return;
+    const interval = setInterval(checkSubscription, 300000); // 5 minutes
     return () => clearInterval(interval);
-  }, [user, checkSubscription]);
+  }, [user, authLoading, checkSubscription]);
 
   const startCheckout = async (planKey: 'single_user' | 'team', quantity = 1) => {
     try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) throw new Error('Not authenticated');
-
       const priceId = PRICING_TIERS[planKey].priceId;
       
+      // Let Supabase client handle auth header automatically
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId, quantity },
-        headers: {
-          Authorization: `Bearer ${session.session.access_token}`,
-        },
       });
 
       if (error) throw error;
@@ -138,14 +132,8 @@ export function useSubscription() {
 
   const openCustomerPortal = async () => {
     try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session.session) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
-        headers: {
-          Authorization: `Bearer ${session.session.access_token}`,
-        },
-      });
+      // Let Supabase client handle auth header automatically
+      const { data, error } = await supabase.functions.invoke('customer-portal');
 
       if (error) throw error;
       if (data.url) {

@@ -120,7 +120,9 @@ export default function Dashboard() {
         duration: 5000,
         description: 'Your premium features are now available.',
       });
-      supabase.auth.getSession().then(() => supabase.auth.refreshSession()).catch(() => {});
+      // Note: Removed manual refreshSession() call - the AuthProvider's 
+      // coordinated refresh handles session updates automatically.
+      // Manual refreshes can cause token rotation conflicts in multi-tab scenarios.
       const nextParams = new URLSearchParams(searchParams);
       nextParams.delete('subscription');
       nextParams.delete('from_checkout');
