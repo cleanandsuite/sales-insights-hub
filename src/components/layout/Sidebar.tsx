@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2 } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
@@ -9,15 +9,21 @@ import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { SellSigLogo } from '@/components/ui/SellSigLogo';
+import { Separator } from '@/components/ui/separator';
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/enterprise', icon: Target, label: 'Deals' },
+  { to: '/recordings', icon: Phone, label: 'Call Activity' },
   { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leads', icon: Target, label: 'Leads' },
-  { to: '/recordings', icon: FileAudio, label: 'Recordings' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/coaching', icon: Trophy, label: 'Coaching' },
+];
+
+const bottomNavItems = [
+  { to: '/integrations', icon: Link2, label: 'Integrations' },
   { to: '/profile', icon: UserCircle, label: 'Your Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
@@ -26,26 +32,20 @@ const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
 const revenueIntelligenceItem = { to: '/revenue-intelligence', icon: TrendingUp, label: 'Revenue Intel' };
 const adminNavItem = { to: '/experiments', icon: FlaskConical, label: 'Experiments' };
 const adminPanelItem = { to: '/admin', icon: Shield, label: 'Admin Panel' };
-const enterpriseItem = { to: '/enterprise', icon: Building2, label: 'Enterprise' };
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { signOut } = useAuth();
   const { isManager } = useUserRole();
   const { isAdmin } = useAdminRole();
-  const { isEnterprise } = useEnterpriseSubscription();
   
   let navItems = isManager 
-    ? [...baseNavItems.slice(0, -1), managerNavItem, revenueIntelligenceItem, baseNavItems[baseNavItems.length - 1]]
+    ? [...baseNavItems, managerNavItem, revenueIntelligenceItem]
     : baseNavItems;
   
-  // Add Enterprise nav item for enterprise users OR admins
-  if (isEnterprise || isAdmin) {
-    navItems = [...navItems.slice(0, -1), enterpriseItem, navItems[navItems.length - 1]];
-  }
+  let bottomItems = [...bottomNavItems];
   
   if (isAdmin) {
-    // Add both Experiments and Admin Panel for admins
-    navItems = [...navItems.slice(0, -1), adminNavItem, adminPanelItem, navItems[navItems.length - 1]];
+    bottomItems = [...bottomItems.slice(0, -1), adminNavItem, adminPanelItem, bottomItems[bottomItems.length - 1]];
   }
 
   return (
@@ -55,9 +55,30 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         <SellSigLogo size="sm" linkTo="/dashboard" />
       </div>
 
-      {/* Navigation */}
+      {/* Main Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
         {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={onNavClick}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                isActive
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+              )
+            }
+          >
+            <item.icon className="h-5 w-5" />
+            {item.label}
+          </NavLink>
+        ))}
+        
+        <Separator className="my-3 bg-sidebar-border" />
+        
+        {bottomItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

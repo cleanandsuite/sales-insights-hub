@@ -2,6 +2,8 @@ import { CallActivity } from '@/types/deals';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import {
   Phone,
   Clock,
@@ -13,6 +15,10 @@ import {
   User,
   Building2,
   Zap,
+  FileText,
+  Headphones,
+  Calendar,
+  Link2,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -20,20 +26,21 @@ interface CallActivityCardProps {
   activity: CallActivity;
   onViewAnalysis?: (id: string) => void;
   onLinkToDeal?: (id: string) => void;
+  onCallBack?: (id: string) => void;
+  onSchedule?: (id: string) => void;
 }
 
 const formatDuration = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins} min`;
 };
 
 const outcomeConfig = {
   positive: {
     icon: CheckCircle,
-    color: 'text-green-600 dark:text-green-500',
-    bg: 'bg-green-500/10',
-    label: 'Positive',
+    color: 'text-success',
+    bg: 'bg-success/10',
+    label: 'Engaged',
   },
   neutral: {
     icon: Minus,
@@ -49,119 +56,192 @@ const outcomeConfig = {
   },
 };
 
-export function CallActivityCard({ activity, onViewAnalysis, onLinkToDeal }: CallActivityCardProps) {
+export function CallActivityCard({ 
+  activity, 
+  onViewAnalysis, 
+  onLinkToDeal,
+  onCallBack,
+  onSchedule 
+}: CallActivityCardProps) {
   const outcomeStyle = outcomeConfig[activity.outcome];
-  const OutcomeIcon = outcomeStyle.icon;
+  const scoreColor = activity.score >= 80 
+    ? 'bg-success' 
+    : activity.score >= 60 
+    ? 'bg-warning' 
+    : 'bg-destructive';
 
   return (
-    <div className="bg-card rounded-lg border p-4 hover:shadow-md transition-shadow">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="rounded-full bg-primary/10 p-2">
-            <Phone className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold">Call with {activity.contactName}</span>
-              <span className="text-muted-foreground">@</span>
-              <span className="flex items-center gap-1 text-muted-foreground">
-                <Building2 className="h-3.5 w-3.5" />
-                {activity.company}
-              </span>
+    <Card className="bg-card border-border hover:border-primary/30 transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
+      <CardContent className="p-0">
+        {/* Main Content */}
+        <div className="p-5">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5 border border-primary/20">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground text-lg">
+                  {activity.company}
+                </h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
+                  <User className="h-3.5 w-3.5" />
+                  <span>{activity.contactName}</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-              <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" />
-                {formatDuration(activity.duration)}
-              </span>
-              <span>•</span>
-              <Badge
-                variant="secondary"
-                className={cn(
-                  activity.score >= 80
-                    ? 'bg-green-500/10 text-green-600'
-                    : activity.score >= 60
-                    ? 'bg-yellow-500/10 text-yellow-600'
-                    : 'bg-destructive/10 text-destructive'
-                )}
-              >
-                Score: {activity.score}/100
-              </Badge>
-              {activity.dealName && (
-                <>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Zap className="h-3.5 w-3.5" />
-                    {activity.dealName}
-                  </span>
-                </>
+
+            <div className="text-right shrink-0">
+              <p className="text-sm text-muted-foreground">
+                {formatDistanceToNow(activity.date, { addSuffix: true })}
+              </p>
+              <p className="text-xs text-muted-foreground/70">
+                {format(activity.date, 'h:mm a')}
+              </p>
+            </div>
+          </div>
+
+          {/* Call Info Row */}
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>{formatDuration(activity.duration)}</span>
+            </div>
+            {activity.dealName && (
+              <div className="flex items-center gap-1.5 text-sm">
+                <Zap className="h-4 w-4 text-warning" />
+                <span className="text-foreground">Deal: {activity.dealName}</span>
+              </div>
+            )}
+          </div>
+
+          {/* AI Summary */}
+          <div className="p-3 rounded-lg bg-muted/30 border border-border/50 mb-4">
+            <p className="text-sm text-foreground leading-relaxed line-clamp-2">
+              "{activity.summary}"
+            </p>
+          </div>
+
+          {/* Score Bar */}
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-muted-foreground">Call Score</span>
+                <span className={cn(
+                  "text-sm font-bold",
+                  activity.score >= 80 ? "text-success" :
+                  activity.score >= 60 ? "text-warning" :
+                  "text-destructive"
+                )}>
+                  {activity.score}/100
+                </span>
+              </div>
+              <Progress 
+                value={activity.score} 
+                className={cn("h-2", `[&>div]:${scoreColor}`)}
+              />
+            </div>
+            <div className="text-xs text-muted-foreground border-l border-border pl-4">
+              <div>Talk: <span className="text-foreground">42%</span> · <span className="text-foreground">58%</span></div>
+              <div className={cn("mt-0.5", outcomeStyle.color)}>
+                Energy: {outcomeStyle.label}
+              </div>
+            </div>
+          </div>
+
+          {/* Signals & Objections */}
+          {(activity.buyingSignals.length > 0 || activity.objections.length > 0) && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {activity.buyingSignals.map((signal, i) => (
+                <Badge 
+                  key={i} 
+                  className="bg-primary/10 text-primary border-primary/20 gap-1"
+                >
+                  💰 {signal}
+                </Badge>
+              ))}
+              {activity.objections.map((objection, i) => (
+                <Badge 
+                  key={i} 
+                  className="bg-warning/10 text-warning border-warning/20 gap-1"
+                >
+                  ⚠️ {objection.text}
+                </Badge>
+              ))}
+              {activity.competitorMentions.length > 0 && (
+                <Badge variant="outline" className="border-secondary/30 text-secondary">
+                  ⚔️ {activity.competitorMentions.join(', ')}
+                </Badge>
               )}
             </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {onViewAnalysis && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onViewAnalysis(activity.id)}
+                className="border-border hover:bg-muted gap-1.5"
+              >
+                <FileText className="h-4 w-4" />
+                Full Summary
+              </Button>
+            )}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onCallBack?.(activity.id)}
+              className="border-border hover:bg-muted gap-1.5"
+            >
+              <Headphones className="h-4 w-4" />
+              Listen
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onCallBack?.(activity.id)}
+              className="border-border hover:bg-muted gap-1.5"
+            >
+              <Phone className="h-4 w-4" />
+              Call Back
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onSchedule?.(activity.id)}
+              className="border-border hover:bg-muted gap-1.5"
+            >
+              <Calendar className="h-4 w-4" />
+              Schedule
+            </Button>
+            {!activity.dealId && onLinkToDeal && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => onLinkToDeal(activity.id)}
+                className="text-muted-foreground hover:text-foreground gap-1.5"
+              >
+                <Link2 className="h-4 w-4" />
+                Link to Deal
+              </Button>
+            )}
           </div>
         </div>
 
-        <div className="text-right shrink-0">
-          <div className="text-sm text-muted-foreground">
-            {formatDistanceToNow(activity.date, { addSuffix: true })}
+        {/* CRM Sync Status Footer */}
+        <div className="px-5 py-3 bg-success/5 border-t border-success/20 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-success" />
+            <span className="text-sm text-foreground">Synced to HubSpot as activity</span>
           </div>
-          <div className={cn('flex items-center gap-1 text-xs mt-1', outcomeStyle.color)}>
-            <OutcomeIcon className="h-3.5 w-3.5" />
-            {outcomeStyle.label}
-          </div>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <p className="text-sm text-muted-foreground mt-3 line-clamp-2">{activity.summary}</p>
-
-      {/* Signals & Objections */}
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        {activity.buyingSignals.map((signal, i) => (
-          <Badge key={i} variant="secondary" className="bg-primary/10 text-primary">
-            🟢 {signal}
-          </Badge>
-        ))}
-        {activity.objections.map((objection, i) => (
-          <Badge key={i} variant="secondary" className="bg-destructive/10 text-destructive">
-            ⚠️ {objection.text}
-          </Badge>
-        ))}
-        {activity.competitorMentions.length > 0 && (
-          <Badge variant="outline" className="border-orange-500/30 text-orange-600">
-            ⚔️ {activity.competitorMentions.join(', ')}
-          </Badge>
-        )}
-      </div>
-
-      {/* Next Steps */}
-      {activity.nextSteps && (
-        <div className="mt-3 flex items-center gap-2 text-sm">
-          <ArrowRight className="h-4 w-4 text-primary" />
-          <span className="text-muted-foreground">Next:</span>
-          <span>{activity.nextSteps}</span>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 mt-4 pt-3 border-t">
-        {onViewAnalysis && (
-          <Button variant="outline" size="sm" onClick={() => onViewAnalysis(activity.id)}>
-            <ExternalLink className="h-4 w-4 mr-2" />
-            View Full Analysis
+          <Button variant="ghost" size="sm" className="text-primary h-auto p-0 text-sm">
+            View →
           </Button>
-        )}
-        {!activity.dealId && onLinkToDeal && (
-          <Button variant="ghost" size="sm" onClick={() => onLinkToDeal(activity.id)}>
-            <Zap className="h-4 w-4 mr-2" />
-            Link to Deal
-          </Button>
-        )}
-        <div className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
-          <User className="h-3.5 w-3.5" />
-          {activity.userName}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
