@@ -1,151 +1,111 @@
 
-
-# Fix: Authentication Race Condition & Login Redirect Loop
-
-## Problem Analysis
-
-After investigating the codebase and logs, I've identified the root cause of the logout loop:
-
-### What's Happening
-
-1. **Race Condition at Login**: When you log in, multiple hooks fire simultaneously:
-   - `useAuth` - sets user state
-   - `useAccountStatus` - queries `profiles` table
-   - `useEnterpriseSubscription` - calls edge function
-   - `useUserRole` - queries `team_members` table
-   - `useAdminRole` - queries `user_roles` table
-
-2. **Rate Limiting**: The auth logs show `429: Request rate limit reached` errors. Multiple concurrent token refresh attempts are causing tokens to be revoked.
-
-3. **Token Refresh Storms**: When the edge function `check-enterprise-subscription` is called immediately after login, the session token may not be fully propagated. This triggers token refresh, which races with other requests.
-
-4. **Premature Navigation**: The `ProtectedRoute` checks `useAccountStatus` which may return loading/error states that cause redirect to `/auth` before the session is fully established.
+## Goal
+Stop the “log in → briefly works → kicked back to /auth” loop in a way that doesn’t require repeated trial-and-error (credits), and make the app resilient even when multiple tabs are open.
 
 ---
 
-## Solution
+## What I now believe is happening (based on evidence)
+### Key evidence
+- You confirmed the issue happens on **both** the preview and published sites, and you’re testing with **multiple tabs** open.
+- The auth logs show repeated **refresh_token** calls and **429 rate limit** events, plus **token_revoked** events.
+- The latest network snapshot shows a mix of:
+  - Requests made with an **authenticated JWT** (e.g. `check-enterprise-subscription`),
+  - And other requests made with the **anon/publishable key as the Authorization header** (meaning the client considered itself **signed out** at that moment).
 
-### 1. Delay Dependent Hook Execution Until Auth is Stable
+### Likely root cause
+**Multi-tab refresh-token “storms” + refresh token rotation conflicts.**
+When multiple tabs are open, each tab’s auto-refresh timer can try to refresh the session around the same time. Because refresh tokens rotate, one refresh can invalidate the other tab’s refresh token, causing the session to be dropped → `user` becomes null → `ProtectedRoute` immediately sends you to `/auth`.
 
-**File: `src/hooks/useEnterpriseSubscription.ts`**
+This is consistent with:
+- the 429s and token revocations,
+- you testing with multiple tabs,
+- and the “already logged in but still gets redirected” symptom.
 
-Add a check to wait for auth loading to complete before making API calls:
-
-```typescript
-export function useEnterpriseSubscription() {
-  const { user, loading: authLoading } = useAuth();
-  // ...
-  
-  const checkEnterprise = useCallback(async () => {
-    // Wait for auth to be ready before making API calls
-    if (authLoading) return;
-    
-    if (!user) {
-      setStatus(prev => ({ ...prev, loading: false, isEnterprise: false }));
-      return;
-    }
-    // ... rest of function
-  }, [user, authLoading]);
-  
-  useEffect(() => {
-    checkEnterprise();
-  }, [checkEnterprise]);
-}
-```
-
-### 2. Fix useAdminRole to Use maybeSingle()
-
-**File: `src/hooks/useAdminRole.ts`**
-
-Change `.single()` to `.maybeSingle()` to prevent 406 errors when no admin role exists:
-
-```typescript
-const { data, error } = await supabase
-  .from('user_roles')
-  .select('role')
-  .eq('user_id', user.id)
-  .eq('role', 'admin')
-  .maybeSingle();  // Changed from .single()
-
-setIsAdmin(!!data);  // Simplified since maybeSingle won't throw on 0 rows
-```
-
-### 3. Add Auth Loading Check to useUserRole
-
-**File: `src/hooks/useUserRole.ts`**
-
-Similar pattern - wait for auth to stabilize:
-
-```typescript
-export function useUserRole() {
-  const { user, loading: authLoading } = useAuth();
-  // ...
-  
-  const fetchRole = useCallback(async () => {
-    if (authLoading) return;  // Wait for auth
-    
-    if (!user) {
-      setState({ role: 'user', loading: false, teamId: null });
-      return;
-    }
-    // ... rest
-  }, [user, authLoading]);
-}
-```
-
-### 4. Add Debounce Protection to Prevent Concurrent API Calls
-
-**File: `src/hooks/useEnterpriseSubscription.ts`**
-
-Add a flag to prevent concurrent API calls (similar to what we did for `useAccountStatus`):
-
-```typescript
-const isCheckingRef = useRef(false);
-
-const checkEnterprise = useCallback(async () => {
-  if (isCheckingRef.current || authLoading) return;
-  if (!user) {
-    setStatus(prev => ({ ...prev, loading: false, isEnterprise: false }));
-    return;
-  }
-  
-  isCheckingRef.current = true;
-  try {
-    // ... API call
-  } finally {
-    isCheckingRef.current = false;
-  }
-}, [user, authLoading]);
-```
+Enterprise changes likely **amplified** the problem because they add more early requests after login (more chances to collide), but the underlying issue is the refresh behavior.
 
 ---
 
-## Files to Modify
+## “Don’t waste credits” immediate resolution (no code changes)
+This is the fastest way to confirm the hypothesis before we change anything:
 
-| File | Change |
-|------|--------|
-| `src/hooks/useEnterpriseSubscription.ts` | Add `authLoading` check and `isCheckingRef` guard |
-| `src/hooks/useAdminRole.ts` | Change `.single()` to `.maybeSingle()`, add `authLoading` check |
-| `src/hooks/useUserRole.ts` | Add `authLoading` check to prevent premature queries |
+1) **Close every SellSig tab/window** (preview + published).
+2) **Wait 60–90 seconds** (lets backend rate limits cool down).
+3) Open **only one tab** (pick Preview *or* Published) and log in.
+4) If it stays logged in reliably with one tab, we’ve confirmed multi-tab refresh collisions as the cause.
 
----
-
-## Why This Fixes the Issue
-
-1. **No more premature API calls**: Hooks wait for `authLoading: false` before hitting the database or edge functions
-2. **No more 406 errors**: Using `.maybeSingle()` handles missing rows gracefully
-3. **No concurrent request storms**: The `isCheckingRef` pattern prevents duplicate API calls
-4. **Stable auth state**: The session is fully established before dependent hooks execute
+If you want the cleanest test: use an incognito window (single tab).
 
 ---
 
-## Technical Details
+## Permanent fix (code changes) — make auth stable across multiple tabs
+### A) Implement a cross-tab session refresh coordinator (core fix)
+In the AuthProvider (and/or a small auth utility), we will:
+1) **Stop built-in auto refresh** (`supabase.auth.stopAutoRefresh()`), so every tab doesn’t run its own refresh timer.
+2) Replace it with **our own refresh scheduler** that:
+   - refreshes only when the session is near expiry, and
+   - uses a **cross-tab lock** so only one tab is allowed to refresh at a time.
+3) Cross-tab locking approach (robust):
+   - Prefer `navigator.locks` when available (best for multi-tab coordination).
+   - Fallback to a `localStorage`-based mutex with short TTL when locks aren’t available.
 
-The key insight is that Supabase's `onAuthStateChange` fires **before** the session is fully propagated to all endpoints. By adding the `authLoading` check, we ensure:
+Result: multiple tabs can stay open without “refresh token rotation conflicts” knocking you out.
 
-1. The initial `getSession()` call has completed
-2. The user object is fully populated
-3. The access token is valid and can be used for API calls
+### B) Remove/guard manual refreshSession calls that can trigger collisions
+We found at least one explicit refresh:
+- `src/pages/Dashboard.tsx` calls `supabase.auth.refreshSession()` after checkout success.
 
-This prevents the cascade of 401s -> token refreshes -> rate limits -> more 401s that was causing the logout loop.
+We’ll change that to either:
+- use the new coordinator’s “safe refresh” (locked), or
+- avoid refreshSession entirely unless strictly needed.
 
+### C) Reduce extra auth-adjacent requests right after login (secondary stabilization)
+Even if the refresh coordinator fixes the core issue, we should reduce pressure:
+- Update `useSubscription` to:
+  - wait for auth to be stable (use `authLoading`),
+  - add an `isCheckingRef` concurrency guard (like other hooks),
+  - and stop manually passing `Authorization` headers (let the client attach the current token).
+- Consider increasing subscription polling from 60s to something gentler (e.g., 5 minutes) or making it event-driven.
+
+---
+
+## Verification plan (single test pass, minimal iteration)
+After implementing the permanent fix:
+
+1) Hard refresh the app once.
+2) Open **two tabs** to the same site (preview) and verify:
+   - login stays stable for 2–3 minutes,
+   - no bounce to `/auth`.
+3) Then open **multiple tabs** and verify it remains stable.
+4) Optional: verify both preview and published behave normally.
+
+Success criteria:
+- No repeated forced redirects to `/auth`
+- No “refresh storm” behavior (dramatically fewer /token refresh calls)
+
+---
+
+## If it still fails after this (fallback, still low-credit)
+If the above doesn’t fully resolve it, the next best low-iteration step is to add a temporary “Auth Debug Panel” (dev-only) that shows:
+- last auth event (SIGNED_IN / TOKEN_REFRESHED / SIGNED_OUT),
+- session expiry time,
+- whether the refresh lock is held,
+- last refresh attempt result.
+
+That makes the next fix highly targeted instead of guessing.
+
+---
+
+## Files we’ll likely touch
+- `src/hooks/useAuth.tsx` (add refresh coordinator + stop auto refresh)
+- `src/pages/Dashboard.tsx` (remove/lock the manual refreshSession call)
+- `src/hooks/useSubscription.ts` (authLoading guard, concurrency guard, reduce manual token handling)
+
+---
+
+## Why this is the “best way” right now
+- Your own answer (“multiple tabs”) + logs strongly point to refresh token rotation collisions.
+- This approach fixes the underlying class of issues rather than whack-a-mole in individual hooks.
+- It avoids further credit burn by:
+  - doing a single confirmatory test (single-tab),
+  - then implementing one high-confidence change set,
+  - then validating with a clear success criteria.
