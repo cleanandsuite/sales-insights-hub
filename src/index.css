@@ -77,48 +77,53 @@
   }
 
   .dark {
-    /* 2026 Professional Dark Mode - Revenue Intelligence */
-    --background: 225 30% 6%; /* #0F1419 Deep Navy */
-    --foreground: 240 20% 98%; /* #FAFAFF Pure white text */
+    /* SellSig 2026 Dark Mode - Revenue Intelligence */
+    --background: 220 30% 4%; /* #0A0D14 Deep Navy */
+    --foreground: 0 0% 100%; /* #FFFFFF Pure white */
+    
+    --bg-secondary: 212 25% 8%; /* #0F1419 */
+    --bg-hover: 215 25% 15%; /* #232D3F */
+    --border-subtle: 213 25% 17%; /* #1E2A3B */
+    --border-default: 213 25% 24%; /* #2A3A50 */
 
-    --card: 222 25% 11%; /* #1A1D26 Elevated dark */
-    --card-foreground: 240 20% 98%;
+    --card: 215 25% 10%; /* #161B26 Elevated dark */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 222 25% 11%;
-    --popover-foreground: 240 20% 98%;
+    --popover: 215 25% 10%;
+    --popover-foreground: 0 0% 100%;
 
     --primary: 166 100% 42%; /* #00D4AA Electric Teal */
-    --primary-foreground: 225 30% 6%;
+    --primary-foreground: 220 30% 4%;
 
     --secondary: 263 70% 58%; /* #8B5CF6 Soft Purple */
-    --secondary-foreground: 240 20% 98%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 222 20% 16%; /* #232836 Elevated hover */
-    --muted-foreground: 220 10% 60%; /* #9CA3AF Muted gray */
+    --muted: 215 20% 20%; /* Elevated hover */
+    --muted-foreground: 213 15% 68%; /* #A1AEBF Muted gray */
 
     --accent: 217 91% 60%; /* #3B82F6 Info Blue */
-    --accent-foreground: 240 20% 98%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%; /* #EF4444 Coral Red */
-    --destructive-foreground: 240 20% 98%;
+    --destructive-foreground: 0 0% 100%;
 
     --success: 160 84% 39%; /* #10B981 Success Green */
-    --success-foreground: 240 20% 98%;
+    --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%; /* #F59E0B Amber */
-    --warning-foreground: 225 30% 6%;
+    --warning-foreground: 220 30% 4%;
 
-    --border: 222 20% 20%; /* #2A3142 Subtle border */
-    --input: 222 20% 16%;
+    --border: 213 25% 20%; /* Subtle border */
+    --input: 215 20% 16%;
     --ring: 166 100% 42%;
 
-    --sidebar-background: 225 30% 5%;
-    --sidebar-foreground: 240 20% 98%;
+    --sidebar-background: 220 30% 4%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 166 100% 42%;
-    --sidebar-primary-foreground: 225 30% 6%;
-    --sidebar-accent: 222 20% 14%;
-    --sidebar-accent-foreground: 240 20% 98%;
-    --sidebar-border: 222 20% 18%;
+    --sidebar-primary-foreground: 220 30% 4%;
+    --sidebar-accent: 215 20% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 213 25% 15%;
     --sidebar-ring: 166 100% 42%;
 
     /* Chart Colors - Professional palette */
@@ -127,6 +132,10 @@
     --chart-3: 217 91% 60%; /* Blue */
     --chart-4: 38 92% 50%; /* Amber */
     --chart-5: 0 84% 60%; /* Red */
+    
+    /* Text colors */
+    --text-secondary: 213 15% 68%; /* #A1AEBF */
+    --text-muted: 215 15% 55%; /* #6B7A8F */
   }
 }
 

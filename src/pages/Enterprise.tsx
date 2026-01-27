@@ -5,7 +5,7 @@ import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
 import { Navigate } from 'react-router-dom';
-import { Loader2, Building2, Crown, Calendar, FileText, Shield, Users, TrendingUp, Phone, LayoutGrid, List } from 'lucide-react';
+import { Loader2, Building2, Crown, Calendar, FileText, Shield, Users, TrendingUp, Phone, LayoutGrid, List, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ import { PipelineSummaryBar } from '@/components/deals/PipelineSummaryBar';
 import { DealsTable } from '@/components/deals/DealsTable';
 import { DealsKanban } from '@/components/deals/DealsKanban';
 import { DealModal } from '@/components/deals/DealModal';
+import { DealDetailDrawer } from '@/components/deals/DealDetailDrawer';
 import { Deal, HealthStatus, DealStage } from '@/types/deals';
 import { mockDeals, mockCallActivities, calculatePipelineSummary } from '@/data/mockDeals';
 
@@ -42,6 +43,8 @@ export default function Enterprise() {
   const [dealsViewMode, setDealsViewMode] = useState<'table' | 'kanban'>('table');
   const [dealModalOpen, setDealModalOpen] = useState(false);
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const loading = authLoading || enterpriseLoading || roleLoading || adminLoading;
 
@@ -83,6 +86,11 @@ export default function Enterprise() {
   const pipelineSummary = calculatePipelineSummary(deals);
 
   // Deal handlers
+  const handleViewDeal = (deal: Deal) => {
+    setSelectedDeal(deal);
+    setDrawerOpen(true);
+  };
+
   const handleEditDeal = (deal: Deal) => {
     setEditingDeal(deal);
     setDealModalOpen(true);
@@ -264,17 +272,24 @@ export default function Enterprise() {
               <DealsTable
                 deals={deals}
                 healthFilter={healthFilter}
-                onEditDeal={handleEditDeal}
+                onEditDeal={handleViewDeal}
               />
             ) : (
               <DealsKanban
                 deals={deals.filter(
                   (d) => healthFilter === 'all' || d.healthStatus === healthFilter
                 )}
-                onDealClick={handleEditDeal}
+                onDealClick={handleViewDeal}
                 onStageChange={handleStageChange}
               />
             )}
+
+            {/* Deal Detail Drawer */}
+            <DealDetailDrawer
+              deal={selectedDeal}
+              open={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+            />
 
             {/* Deal Modal */}
             <DealModal
