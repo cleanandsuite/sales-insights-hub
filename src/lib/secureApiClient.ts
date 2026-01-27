@@ -1,6 +1,24 @@
 // Secure API client for all backend calls with JWT authentication
 import { supabase } from '@/integrations/supabase/client';
 
+type RefreshSessionResult = Awaited<ReturnType<typeof supabase.auth.refreshSession>>;
+
+// Supabase refresh tokens are rotated; if multiple callers refresh concurrently,
+// one refresh can revoke the other's token, leading to a cascade of auth failures.
+// We guard refreshSession() with a single in-flight promise.
+let refreshInFlight: Promise<RefreshSessionResult> | null = null;
+
+async function refreshSessionWithLock(): Promise<RefreshSessionResult> {
+  if (!refreshInFlight) {
+    refreshInFlight = supabase.auth
+      .refreshSession()
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+}
+
 export class SecureApiClient {
   private baseUrl: string;
   
@@ -8,7 +26,7 @@ export class SecureApiClient {
     this.baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
   }
   
-  async request<T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  async request<T = unknown>(endpoint: string, options: RequestInit = {}, attempt: number = 0): Promise<T> {
     try {
       // Get current session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -40,14 +58,39 @@ export class SecureApiClient {
       
       // Handle 401 unauthorized
       if (response.status === 401) {
-        // Try to refresh token
-        const { error: refreshError } = await supabase.auth.refreshSession();
+        // Prevent infinite refresh loops
+        if (attempt >= 1) {
+          throw new AuthenticationError('Session expired. Please login again.');
+        }
+
+        // Try to refresh token (guarded to avoid concurrent refresh storms)
+        const { error: refreshError } = await refreshSessionWithLock();
+
         if (refreshError) {
+          const status = (refreshError as any)?.status as number | undefined;
+
+          // IMPORTANT: Do NOT sign the user out on transient refresh failures
+          // (rate limits, temporary network issues). Signing out here causes
+          // users to get bounced back to /auth even though they just logged in.
+          if (status === 429) {
+            throw new RateLimitError(
+              'Authentication is temporarily rate limited. Please wait a moment and retry.',
+              60
+            );
+          }
+
+          // For other non-auth transient failures, bubble up without nuking session
+          if (!status || status >= 500) {
+            throw new ApiError('Temporary authentication error. Please try again.', status ?? 500);
+          }
+
+          // For true auth failures (invalid/expired refresh token), sign out
           await supabase.auth.signOut();
           throw new AuthenticationError('Session expired. Please login again.');
         }
+
         // Retry with new token
-        return this.request<T>(endpoint, options);
+        return this.request<T>(endpoint, options, attempt + 1);
       }
       
       // Handle 403 forbidden
