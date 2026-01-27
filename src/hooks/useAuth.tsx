@@ -1,6 +1,12 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, useRef, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  coordinatedRefresh, 
+  shouldRefreshSession, 
+  onCrossTabSessionChange,
+  cleanupStaleLocks 
+} from '@/lib/sessionRefreshCoordinator';
 
 interface AuthContextType {
   user: User | null;
@@ -18,13 +24,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isRefreshingRef = useRef(false);
+
+  // Coordinated refresh that prevents multi-tab storms
+  const safeRefresh = async () => {
+    if (isRefreshingRef.current) return;
+    isRefreshingRef.current = true;
+    
+    try {
+      await coordinatedRefresh(async () => {
+        const { error } = await supabase.auth.refreshSession();
+        return { error };
+      });
+    } finally {
+      isRefreshingRef.current = false;
+    }
+  };
+
+  // Schedule next refresh based on session expiry
+  const scheduleRefresh = (sess: Session | null) => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+    
+    if (!sess?.expires_at) return;
+    
+    const expiresAt = sess.expires_at;
+    const now = Math.floor(Date.now() / 1000);
+    const timeUntilRefresh = Math.max(0, (expiresAt - now - 60) * 1000); // Refresh 1 min before expiry
+    
+    if (timeUntilRefresh > 0 && timeUntilRefresh < 3600000) { // Only schedule if within 1 hour
+      refreshTimerRef.current = setTimeout(safeRefresh, timeUntilRefresh);
+    }
+  };
 
   useEffect(() => {
+    // Clean up any stale locks from crashed tabs
+    cleanupStaleLocks();
+    
+    // Stop Supabase's built-in auto-refresh to prevent multi-tab storms
+    supabase.auth.stopAutoRefresh();
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Schedule our coordinated refresh
+        scheduleRefresh(session);
 
         // Capture calendar tokens when user signs in with Google
         if (event === 'SIGNED_IN' && session?.user) {
@@ -50,9 +100,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      scheduleRefresh(session);
+    });
+    
+    // Listen for cross-tab session changes so we pick up refreshes from other tabs
+    const unsubscribeCrossTab = onCrossTabSessionChange(() => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        scheduleRefresh(session);
+      });
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      unsubscribeCrossTab();
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
