@@ -77,39 +77,56 @@
   }
 
   .dark {
-    --background: 222 47% 7%;
-    --foreground: 210 20% 98%;
+    /* 2026 Professional Dark Mode - Revenue Intelligence */
+    --background: 225 30% 6%; /* #0F1419 Deep Navy */
+    --foreground: 240 20% 98%; /* #FAFAFF Pure white text */
 
-    --card: 222 47% 10%;
-    --card-foreground: 210 20% 98%;
+    --card: 222 25% 11%; /* #1A1D26 Elevated dark */
+    --card-foreground: 240 20% 98%;
 
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 222 25% 11%;
+    --popover-foreground: 240 20% 98%;
 
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 166 100% 42%; /* #00D4AA Electric Teal */
+    --primary-foreground: 225 30% 6%;
 
-    --secondary: 222 47% 15%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 263 70% 58%; /* #8B5CF6 Soft Purple */
+    --secondary-foreground: 240 20% 98%;
 
-    --muted: 222 47% 15%;
-    --muted-foreground: 215 16% 55%;
+    --muted: 222 20% 16%; /* #232836 Elevated hover */
+    --muted-foreground: 220 10% 60%; /* #9CA3AF Muted gray */
 
-    --accent: 177 70% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 217 91% 60%; /* #3B82F6 Info Blue */
+    --accent-foreground: 240 20% 98%;
 
-    --border: 222 47% 18%;
-    --input: 222 47% 15%;
-    --ring: 210 100% 50%;
+    --destructive: 0 84% 60%; /* #EF4444 Coral Red */
+    --destructive-foreground: 240 20% 98%;
 
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 210 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 12%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 222 47% 15%;
-    --sidebar-ring: 210 100% 50%;
+    --success: 160 84% 39%; /* #10B981 Success Green */
+    --success-foreground: 240 20% 98%;
+
+    --warning: 38 92% 50%; /* #F59E0B Amber */
+    --warning-foreground: 225 30% 6%;
+
+    --border: 222 20% 20%; /* #2A3142 Subtle border */
+    --input: 222 20% 16%;
+    --ring: 166 100% 42%;
+
+    --sidebar-background: 225 30% 5%;
+    --sidebar-foreground: 240 20% 98%;
+    --sidebar-primary: 166 100% 42%;
+    --sidebar-primary-foreground: 225 30% 6%;
+    --sidebar-accent: 222 20% 14%;
+    --sidebar-accent-foreground: 240 20% 98%;
+    --sidebar-border: 222 20% 18%;
+    --sidebar-ring: 166 100% 42%;
+
+    /* Chart Colors - Professional palette */
+    --chart-1: 166 100% 42%; /* Teal */
+    --chart-2: 263 70% 58%; /* Purple */
+    --chart-3: 217 91% 60%; /* Blue */
+    --chart-4: 38 92% 50%; /* Amber */
+    --chart-5: 0 84% 60%; /* Red */
   }
 }
 

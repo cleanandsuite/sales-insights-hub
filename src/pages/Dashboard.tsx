@@ -7,30 +7,30 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-// New Salesforce-style components
-import { RevenueGauge } from '@/components/dashboard/RevenueGauge';
-import { PipelineFunnel } from '@/components/dashboard/PipelineFunnel';
-import { MonthlyRevenueChart } from '@/components/dashboard/MonthlyRevenueChart';
-import { QuarterlyRevenueChart } from '@/components/dashboard/QuarterlyRevenueChart';
-import { WinRateCircle } from '@/components/dashboard/WinRateCircle';
-import { TopOpportunitiesTable } from '@/components/dashboard/TopOpportunitiesTable';
-import { TopAccountsChart } from '@/components/dashboard/TopAccountsChart';
-import { LogClosedDealForm } from '@/components/dashboard/LogClosedDealForm';
-import { KPICard } from '@/components/dashboard/KPICard';
+// New Redesigned Components
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { AIStatusBar } from '@/components/dashboard/AIStatusBar';
+import { MetricCard } from '@/components/dashboard/MetricCard';
+import { RevenueTrendChart } from '@/components/dashboard/RevenueTrendChart';
+import { DealPriorityCard } from '@/components/dashboard/DealPriorityCard';
+import { RecentCallCard } from '@/components/dashboard/RecentCallCard';
 
-// Existing components
-import { AILeadStatus } from '@/components/leads/AILeadStatus';
+// Mock Data
+import {
+  mockMetrics,
+  mockRevenueData,
+  mockPriorityDeals,
+  mockRecentCalls,
+  mockAIStatus,
+} from '@/data/dashboardMockData';
+
+// Existing Components
 import { ProfileSetupBanner } from '@/components/recording/ProfileSetupBanner';
-import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { 
-  Mic, Headphones, Crown, DollarSign, Target, 
-  Users, TrendingUp, Zap, Phone 
-} from 'lucide-react';
+import { DollarSign, Target, TrendingUp, Phone, ArrowRight, Crown } from 'lucide-react';
 
 // Enterprise Components
 import { PipelineKPICards } from '@/components/enterprise/PipelineKPICards';
@@ -64,15 +64,6 @@ interface Lead {
   recording_id: string | null;
 }
 
-interface ClosedDeal {
-  id: string;
-  amount: number;
-  closeDate: string;
-  accountName: string;
-  notes: string;
-  createdAt: string;
-}
-
 interface TeamKPIs {
   teamWinRate: number;
   avgCallsPerRep: number;
@@ -82,6 +73,12 @@ interface TeamKPIs {
   forecastRiskPct: number;
   totalReps: number;
 }
+
+const formatCurrency = (value: number) => {
+  if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `$${Math.round(value / 1000)}K`;
+  return `$${value}`;
+};
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -96,7 +93,6 @@ export default function Dashboard() {
   const [aiActive, setAiActive] = useState(true);
   const [headphoneMode, setHeadphoneMode] = useState(false);
   const [kpis, setKpis] = useState<TeamKPIs | null>(null);
-  const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<{ id: string; name: string; company: string } | null>(null);
 
   const [pipelineKpis] = useState({
@@ -113,55 +109,6 @@ export default function Dashboard() {
   });
 
   const isExecutive = isEnterprise && tier === 'executive';
-
-  // Mock data for charts - in production, fetch from Supabase
-  const [monthlyData] = useState([
-    { month: 'Jul', revenue: 45000, target: 50000 },
-    { month: 'Aug', revenue: 62000, target: 55000 },
-    { month: 'Sep', revenue: 58000, target: 60000 },
-    { month: 'Oct', revenue: 71000, target: 65000 },
-    { month: 'Nov', revenue: 85000, target: 70000 },
-    { month: 'Dec', revenue: 92000, target: 80000 },
-  ]);
-
-  const [quarterlyData] = useState([
-    { quarter: 'Q1', revenue: 180000, target: 200000 },
-    { quarter: 'Q2', revenue: 245000, target: 250000 },
-    { quarter: 'Q3', revenue: 165000, target: 200000 },
-    { quarter: 'Q4', revenue: 0, target: 250000 },
-  ]);
-
-  const [pipelineStages] = useState([
-    { name: 'Lead', value: 850000, count: 45, color: '#06b6d4' },
-    { name: 'Qualified', value: 620000, count: 28, color: '#8b5cf6' },
-    { name: 'Proposal', value: 380000, count: 15, color: '#f59e0b' },
-    { name: 'Negotiation', value: 180000, count: 8, color: '#ec4899' },
-    { name: 'Closed Won', value: 95000, count: 4, color: '#10b981' },
-  ]);
-
-  const [opportunities] = useState([
-    { id: '1', name: 'Enterprise License', account: 'Acme Corp', amount: 125000, probability: 75, stage: 'Proposal', closeDate: '2026-02-15' },
-    { id: '2', name: 'Platform Migration', account: 'TechStart Inc', amount: 89000, probability: 60, stage: 'Qualification', closeDate: '2026-03-01' },
-    { id: '3', name: 'Annual Renewal', account: 'Global Systems', amount: 67000, probability: 90, stage: 'Negotiation', closeDate: '2026-01-31' },
-    { id: '4', name: 'New Implementation', account: 'FastGrow LLC', amount: 45000, probability: 40, stage: 'Prospecting', closeDate: '2026-03-15' },
-    { id: '5', name: 'Expansion Deal', account: 'MegaCorp', amount: 156000, probability: 55, stage: 'Proposal', closeDate: '2026-02-28' },
-  ]);
-
-  const [topAccounts] = useState([
-    { name: 'Acme Corp', won: 245000, potential: 180000 },
-    { name: 'TechStart', won: 189000, potential: 120000 },
-    { name: 'Global Sys', won: 156000, potential: 95000 },
-    { name: 'FastGrow', won: 98000, potential: 150000 },
-    { name: 'MegaCorp', won: 78000, potential: 220000 },
-  ]);
-
-  // Calculate totals from closed deals
-  const totalRevenue = closedDeals.reduce((sum, deal) => sum + deal.amount, 0) + 301000; // Base + new deals
-  const revenueGoal = 3000000;
-  const winRate = 68;
-  const totalWon = 24 + closedDeals.length;
-  const totalLost = 11;
-  const avgDealSize = totalRevenue / (totalWon || 1);
 
   // Handle subscription success message
   useEffect(() => {
@@ -235,42 +182,16 @@ export default function Dashboard() {
     }
   };
 
-  const handleDealLogged = (deal: { amount: number; closeDate: string; accountName: string; notes: string }) => {
-    const newDeal: ClosedDeal = {
-      id: crypto.randomUUID(),
-      ...deal,
-      createdAt: new Date().toISOString(),
-    };
-    setClosedDeals(prev => [newDeal, ...prev]);
-  };
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todaysLeads = leads.filter(l => new Date(l.created_at) >= today).length;
   const hotLeads = leads.filter(l => l.is_hot_lead).length;
-  const pendingFollowups = leads.filter(l => l.next_action_due && new Date(l.next_action_due) <= new Date()).length;
   const last24hCalls = recordings.filter(r => {
     const callDate = new Date(r.created_at);
     const dayAgo = new Date();
     dayAgo.setDate(dayAgo.getDate() - 1);
     return callDate >= dayAgo;
   }).length;
-
-  const recentActivities = leads.slice(0, 5).map(lead => ({
-    id: lead.id,
-    type: lead.is_hot_lead ? 'ai_scored' as const : 'new_lead' as const,
-    title: `${lead.is_hot_lead ? 'AI scored lead:' : 'New lead:'} ${lead.contact_name}${lead.company ? ` (${lead.company})` : ''}`,
-    description: lead.primary_pain_point || 'Contact captured from call',
-    timestamp: lead.created_at,
-    leadId: lead.id,
-    confidence: lead.ai_confidence || undefined
-  }));
-
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
-    return `$${value}`;
-  };
 
   // Enterprise Dashboard for Executive users
   if (isExecutive && teamId) {
@@ -282,48 +203,19 @@ export default function Dashboard() {
         
         <DashboardLayout>
           <div className="space-y-6 animate-fade-in">
-            {/* Enterprise Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Executive Dashboard</h1>
-                  <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium gap-1">
-                    <Crown className="h-3 w-3" />
-                    Enterprise
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground mt-1">Team performance, goals, and revenue intelligence</p>
-              </div>
-              <div className="flex flex-col items-end gap-3">
-                <Button
-                  onClick={() => setIsRecording(true)}
-                  size="lg"
-                  className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow"
-                >
-                  <Mic className="h-5 w-5" />
-                  Start Recording
-                </Button>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="headphone-mode"
-                    checked={headphoneMode}
-                    onCheckedChange={setHeadphoneMode}
-                  />
-                  <Label htmlFor="headphone-mode" className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
-                    <Headphones className="h-4 w-4" />
-                    Headphone Mode
-                  </Label>
-                </div>
-              </div>
-            </div>
+            <DashboardHeader
+              title="Executive Dashboard"
+              subtitle="Team performance, goals, and revenue intelligence"
+              isRecording={isRecording}
+              headphoneMode={headphoneMode}
+              onStartRecording={() => setIsRecording(true)}
+              onHeadphoneModeChange={setHeadphoneMode}
+              showEnterpriseBadge
+            />
 
-            {/* Pipeline KPI Cards */}
             <PipelineKPICards kpis={pipelineKpis} />
-
-            {/* Pipeline Trend Chart */}
             <PipelineTrendChart teamId={teamId} />
 
-            {/* Staff Overview & Targets */}
             <div className="grid gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">
                 <StaffCallOverview teamId={teamId} />
@@ -331,21 +223,18 @@ export default function Dashboard() {
               <ProductsAppointmentsCard teamId={teamId} />
             </div>
 
-            {/* Staff Performance Grid */}
             <StaffPerformanceGrid 
               teamId={teamId} 
               onSelectStaff={(userId, name) => setSelectedDeal({ id: userId, name, company: 'View Details' })}
             />
 
-            {/* Goals & Lead Management */}
             <div className="grid gap-6 lg:grid-cols-2">
               <CompanyGoalsWidget teamId={teamId} kpis={kpis} />
               <TeamLeadManagement teamId={teamId} />
             </div>
-            {/* Activity Feed */}
+
             <EnterpriseActivityFeed teamId={teamId} />
 
-            {/* Deal Brief Panel */}
             {selectedDeal && (
               <DealBriefPanel
                 dealId={selectedDeal.id}
@@ -361,7 +250,9 @@ export default function Dashboard() {
     );
   }
 
-  // Standard Salesforce-Style Dashboard for non-enterprise users
+  // ============================================
+  // REDESIGNED SALES DASHBOARD
+  // ============================================
   return (
     <>
       {isRecording && (
@@ -371,135 +262,181 @@ export default function Dashboard() {
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
           {/* Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Sales Dashboard</h1>
-              <p className="text-muted-foreground mt-1">AI-powered sales intelligence & revenue tracking</p>
-            </div>
-            <div className="flex flex-col items-end gap-3">
-              <Button
-                onClick={() => setIsRecording(true)}
-                size="lg"
-                className="gap-2 font-semibold shadow-md hover:shadow-lg transition-shadow bg-gradient-to-r from-cyan-500 to-cyan-400 text-slate-900"
-              >
-                <Mic className="h-5 w-5" />
-                Start Recording
-              </Button>
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="headphone-mode"
-                  checked={headphoneMode}
-                  onCheckedChange={setHeadphoneMode}
-                />
-                <Label htmlFor="headphone-mode" className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer">
-                  <Headphones className="h-4 w-4" />
-                  Headphone Mode
-                </Label>
-              </div>
-            </div>
-          </div>
+          <DashboardHeader
+            title="Sales Dashboard"
+            subtitle="AI-powered revenue intelligence"
+            isRecording={isRecording}
+            headphoneMode={headphoneMode}
+            onStartRecording={() => setIsRecording(true)}
+            onHeadphoneModeChange={setHeadphoneMode}
+          />
 
           <ProfileSetupBanner variant="full" />
 
-          {/* AI Lead Status */}
-          <AILeadStatus
+          {/* AI Status Bar */}
+          <AIStatusBar
             isActive={aiActive}
-            todaysLeads={todaysLeads}
-            weeklyLeads={leads.length}
-            conversionRate={28}
-            avgResponseTime="1.2 hrs"
-            onToggleAI={() => setAiActive(!aiActive)}
+            todayLeads={todaysLeads || mockAIStatus.todayLeads}
+            weekLeads={leads.length || mockAIStatus.weekLeads}
+            conversionRate={mockAIStatus.conversionRate}
+            avgResponseTime={mockAIStatus.avgResponseTime}
           />
 
-          {/* Top KPI Row */}
+          {/* 4 KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KPICard
-              title="Total Revenue"
-              value={formatCurrency(totalRevenue)}
-              subtitle="FYTD Closed Won"
+            <MetricCard
+              label="Total Revenue"
+              value={formatCurrency(mockMetrics.totalRevenue)}
               icon={DollarSign}
-              iconColor="text-emerald-400"
-              trend={{ value: 12.5, isPositive: true }}
+              iconColor="text-success"
+              progress={{
+                current: mockMetrics.totalRevenue,
+                goal: mockMetrics.revenueGoal,
+                label: `${Math.round((mockMetrics.totalRevenue / mockMetrics.revenueGoal) * 100)}% to ${formatCurrency(mockMetrics.revenueGoal)} goal`,
+              }}
+              trend={{
+                value: mockMetrics.revenueTrend,
+                direction: 'up',
+              }}
             />
-            <KPICard
-              title="Avg Deal Size"
-              value={formatCurrency(avgDealSize)}
-              subtitle="Per closed deal"
-              icon={Target}
-              iconColor="text-purple-400"
-              trend={{ value: 8.2, isPositive: true }}
-            />
-            <KPICard
-              title="Active Pipeline"
-              value={formatCurrency(2125000)}
-              subtitle="Open opportunities"
+
+            <MetricCard
+              label="Active Pipeline"
+              value={formatCurrency(mockMetrics.activePipeline)}
               icon={TrendingUp}
-              iconColor="text-cyan-400"
-              trend={{ value: 5.8, isPositive: true }}
+              iconColor="text-secondary"
+              subtitle={`${mockMetrics.pipelineDeals} open deals`}
+              trend={{
+                value: mockMetrics.pipelineTrend,
+                direction: 'up',
+              }}
             />
-            <KPICard
-              title="Calls Today"
-              value={last24hCalls}
-              subtitle={`${hotLeads} hot leads 🔥`}
+
+            <MetricCard
+              label="Win Rate"
+              value={`${mockMetrics.winRate}%`}
+              icon={Target}
+              iconColor="text-primary"
+              subtitle={`${mockMetrics.wonDeals} Won / ${mockMetrics.lostDeals} Lost`}
+              trend={{
+                value: mockMetrics.winRateTrend,
+                direction: 'up',
+              }}
+            />
+
+            <MetricCard
+              label="Calls Today"
+              value={last24hCalls || mockMetrics.callsToday}
               icon={Phone}
-              iconColor="text-amber-400"
+              iconColor="text-warning"
+              highlight={`${hotLeads || mockMetrics.hotLeads} hot leads 🔥`}
+              highlightColor="warning"
+              action={{
+                label: 'View Queue',
+                onClick: () => navigate('/leads'),
+              }}
             />
           </div>
 
-          {/* Main Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Revenue Gauge - Large */}
-            <div className="lg:col-span-1">
-              <RevenueGauge current={totalRevenue} goal={revenueGoal} />
-            </div>
-            
-            {/* Win Rate & Pipeline */}
-            <div className="lg:col-span-1 space-y-6">
-              <WinRateCircle rate={winRate} totalWon={totalWon} totalLost={totalLost} />
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Revenue Trend Chart - 60% */}
+            <div className="lg:col-span-3">
+              <RevenueTrendChart data={mockRevenueData} goal={100000} />
             </div>
 
-            {/* Log Closed Deal Form */}
-            <div className="lg:col-span-1">
-              <LogClosedDealForm onDealLogged={handleDealLogged} />
+            {/* Priority Deals - 40% */}
+            <div className="lg:col-span-2">
+              <Card className="border-border/50 bg-card h-full">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-warning/10">
+                        <Target className="h-5 w-5 text-warning" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg font-semibold text-foreground">
+                          My Deals
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">Priority actions needed</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate('/enterprise')}
+                      className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                    >
+                      View All
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockPriorityDeals.slice(0, 4).map((deal) => (
+                    <DealPriorityCard
+                      key={deal.id}
+                      name={deal.name}
+                      company={deal.company}
+                      value={deal.value}
+                      stage={deal.stage}
+                      health={deal.health}
+                      alert={deal.alert}
+                      nextAction={deal.nextAction}
+                      onClick={() => toast.info(`Opening deal: ${deal.name}`)}
+                    />
+                  ))}
+                </CardContent>
+              </Card>
             </div>
           </div>
 
-          {/* Charts Row 2 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <MonthlyRevenueChart data={monthlyData} />
-            <QuarterlyRevenueChart data={quarterlyData} />
-          </div>
-
-          {/* Pipeline Funnel & Top Accounts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PipelineFunnel stages={pipelineStages} />
-            <TopAccountsChart data={topAccounts} />
-          </div>
-
-          {/* Top Opportunities Table */}
-          <TopOpportunitiesTable 
-            opportunities={opportunities}
-            onViewDetails={(id) => toast.info(`Opening opportunity ${id}`)}
-          />
-
-          {/* Recent Activity */}
-          <RecentActivityFeed
-            activities={recentActivities}
-            onViewLead={() => navigate('/leads')}
-            onViewSummary={(id) => {
-              const lead = leads.find(l => l.id === id);
-              if (lead?.recording_id) navigate(`/recording/${lead.recording_id}`);
-            }}
-            onCallNow={(id) => {
-              const lead = leads.find(l => l.id === id);
-              toast.info(`Calling ${lead?.contact_name || 'lead'}...`);
-            }}
-            onSchedule={() => navigate('/schedule')}
-            onEmail={(id) => {
-              const lead = leads.find(l => l.id === id);
-              toast.info(`Emailing ${lead?.contact_name || 'lead'}...`);
-            }}
-          />
+          {/* Recent Calls Section */}
+          <Card className="border-border/50 bg-card">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-foreground">
+                      Recent Calls
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">AI-analyzed call activity</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/recordings')}
+                  className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                >
+                  View All
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {mockRecentCalls.slice(0, 4).map((call) => (
+                  <RecentCallCard
+                    key={call.id}
+                    contactName={call.contactName}
+                    company={call.company}
+                    score={call.score}
+                    summary={call.summary}
+                    timestamp={call.timestamp}
+                    buyingSignals={call.buyingSignals}
+                    onViewSummary={() => toast.info(`Opening summary for ${call.company}`)}
+                    onViewLead={() => navigate('/leads')}
+                    onSchedule={() => navigate('/schedule')}
+                    onCall={() => toast.info(`Calling ${call.contactName}...`)}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DashboardLayout>
     </>
