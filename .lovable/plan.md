@@ -1,145 +1,151 @@
 
-# Plan: Create Standalone Enterprise Management Dashboard
 
-## Overview
-Create a completely new, dedicated Enterprise Management Dashboard page (`/enterprise`) that is separate from the individual rep's Sales Dashboard. This will be a **management-focused command center** for Enterprise Membership administration, seat management, and organization oversight.
+# Fix: Authentication Race Condition & Login Redirect Loop
 
-## Current Problem
-The seat management component was incorrectly embedded into the existing `/dashboard` route, which is designed for individual sales reps. You need a **separate page** specifically for enterprise management tasks.
+## Problem Analysis
 
-## Architecture
+After investigating the codebase and logs, I've identified the root cause of the logout loop:
 
-### New Route
-- **Path**: `/enterprise`
-- **Purpose**: Enterprise Membership management dashboard
-- **Access**: Protected route, requires Enterprise subscription + Admin/Manager role
+### What's Happening
 
-### New Page File
-**`src/pages/Enterprise.tsx`** - A standalone page containing:
+1. **Race Condition at Login**: When you log in, multiple hooks fire simultaneously:
+   - `useAuth` - sets user state
+   - `useAccountStatus` - queries `profiles` table
+   - `useEnterpriseSubscription` - calls edge function
+   - `useUserRole` - queries `team_members` table
+   - `useAdminRole` - queries `user_roles` table
 
-1. **Header Section**
-   - "Enterprise Management" title with Crown/Building icon
-   - Organization name and contract details
-   - Enterprise tier badge
+2. **Rate Limiting**: The auth logs show `429: Request rate limit reached` errors. Multiple concurrent token refresh attempts are causing tokens to be revoked.
 
-2. **Seat Overview Panel** (from EnterpriseSeatManagement)
-   - Contracted Seats: 50 / Used: 45 / Remaining: 5
-   - Custom vs. default pricing ($79 vs $99/seat)
-   - Contract dates and renewal alerts
-   - Progress bar for seat utilization
+3. **Token Refresh Storms**: When the edge function `check-enterprise-subscription` is called immediately after login, the session token may not be fully propagated. This triggers token refresh, which races with other requests.
 
-3. **Manage Seats & Users Section**
-   - "Invite User" button/form
-   - Users table (Name, Email, Role, Join Date, Status)
-   - Actions: Remove user, Edit role
-   - Seat capacity alerts (<10% warning, over-limit block)
+4. **Premature Navigation**: The `ProtectedRoute` checks `useAccountStatus` which may return loading/error states that cause redirect to `/auth` before the session is fully established.
 
-4. **Organization Settings** (future expansion)
-   - Billing overview
-   - Contract details
-   - SSO/SAML configuration placeholder
+---
 
-5. **Activity & Audit Log**
-   - Recent user additions/removals
-   - Role changes
-   - Invitation history
+## Solution
 
-## Technical Changes
+### 1. Delay Dependent Hook Execution Until Auth is Stable
 
-### 1. Create New Page
-**File: `src/pages/Enterprise.tsx`**
-- Standalone enterprise management page
-- Uses `DashboardLayout` for consistent navigation
-- Imports `EnterpriseSeatManagement` component
-- Adds access control (Enterprise subscription check)
-- Clean, management-focused UI (no sales metrics)
+**File: `src/hooks/useEnterpriseSubscription.ts`**
 
-### 2. Update Routing
-**File: `src/App.tsx`**
-- Add lazy import for Enterprise page
-- Add protected route: `/enterprise`
-- Optionally add Enterprise-specific route guard
+Add a check to wait for auth loading to complete before making API calls:
 
-### 3. Update Sidebar Navigation
-**File: `src/components/layout/Sidebar.tsx`**
-- Add "Enterprise" menu item for enterprise users
-- Icon: Building2 or Crown
-- Only visible to Enterprise tier users
-
-### 4. Clean Up Dashboard.tsx
-- Remove `EnterpriseSeatManagement` from the Executive Dashboard view
-- Keep the Executive Dashboard focused on revenue/performance (Pipeline, Staff, Goals)
-- The Enterprise Management page handles administrative tasks
-
-## UI/UX Design
-
-### Visual Style
-- Dark mode consistent with rest of app
-- Enterprise/premium feel (subtle gradients, gold/primary accents)
-- Cards with top-border accents for section organization
-- Clear visual hierarchy for seat metrics
-
-### Layout
-```text
-┌─────────────────────────────────────────────────────────────┐
-│  🏢 Enterprise Management              [Org: Acme Corp]     │
-│  Manage your organization's seats and team members          │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │
-│  │Contracted│ │  Used    │ │Remaining │ │ Per Seat │       │
-│  │   50     │ │   45     │ │    5     │ │   $79    │       │
-│  │Enterprise│ │  /50     │ │Available │ │  ~~$99~~ │       │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
-│                                                             │
-│  ⚠️ Low Seats Warning: Only 5 seats remaining (10%)        │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ 👑 Manage Seats & Users           [+ Invite User]       ││
-│  ├─────────────────────────────────────────────────────────┤│
-│  │ [Search: ____________]                                  ││
-│  │                                                         ││
-│  │ Name          │ Email              │ Role   │ Status    ││
-│  │ John Smith    │ john@acme.com      │ Admin  │ Active    ││
-│  │ Sarah Johnson │ sarah@acme.com     │ Manager│ Active    ││
-│  │ Mike Chen     │ mike@acme.com      │ Member │ Active    ││
-│  │ ...           │ ...                │ ...    │ ...       ││
-│  └─────────────────────────────────────────────────────────┘│
-│                                                             │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │ 📋 Recent Activity                                      ││
-│  │ • Emily Davis invited (pending) - 2 hours ago          ││
-│  │ • Mike Chen role changed to Member - 1 day ago         ││
-│  │ • Contract renewed until Dec 2026 - 5 days ago         ││
-│  └─────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Files to Create/Modify
-
-| File | Action | Purpose |
-|------|--------|---------|
-| `src/pages/Enterprise.tsx` | Create | New standalone enterprise management page |
-| `src/App.tsx` | Modify | Add route for `/enterprise` |
-| `src/components/layout/Sidebar.tsx` | Modify | Add Enterprise nav item |
-| `src/pages/Dashboard.tsx` | Modify | Remove EnterpriseSeatManagement import |
-
-## Access Control Logic
 ```typescript
-// Only show Enterprise page to users with:
-// 1. Active Enterprise subscription (isEnterprise = true)
-// 2. Admin or Manager role within their organization
+export function useEnterpriseSubscription() {
+  const { user, loading: authLoading } = useAuth();
+  // ...
+  
+  const checkEnterprise = useCallback(async () => {
+    // Wait for auth to be ready before making API calls
+    if (authLoading) return;
+    
+    if (!user) {
+      setStatus(prev => ({ ...prev, loading: false, isEnterprise: false }));
+      return;
+    }
+    // ... rest of function
+  }, [user, authLoading]);
+  
+  useEffect(() => {
+    checkEnterprise();
+  }, [checkEnterprise]);
+}
 ```
 
-## Mock Data (Initial Implementation)
-Same as currently in EnterpriseSeatManagement:
-- Organization: max_seats: 50, used: 45, price: $79
-- Members: 5 mock users with various roles/statuses
-- DB integration notes included for production queries
+### 2. Fix useAdminRole to Use maybeSingle()
 
-## Summary
-This plan creates a **completely separate Enterprise Management Dashboard** at `/enterprise` that is:
-- Dedicated to organization administration (not sales metrics)
-- Focused on seat management and user control
-- Accessible via sidebar navigation for enterprise users
-- Properly separated from the individual rep's Sales Dashboard
+**File: `src/hooks/useAdminRole.ts`**
+
+Change `.single()` to `.maybeSingle()` to prevent 406 errors when no admin role exists:
+
+```typescript
+const { data, error } = await supabase
+  .from('user_roles')
+  .select('role')
+  .eq('user_id', user.id)
+  .eq('role', 'admin')
+  .maybeSingle();  // Changed from .single()
+
+setIsAdmin(!!data);  // Simplified since maybeSingle won't throw on 0 rows
+```
+
+### 3. Add Auth Loading Check to useUserRole
+
+**File: `src/hooks/useUserRole.ts`**
+
+Similar pattern - wait for auth to stabilize:
+
+```typescript
+export function useUserRole() {
+  const { user, loading: authLoading } = useAuth();
+  // ...
+  
+  const fetchRole = useCallback(async () => {
+    if (authLoading) return;  // Wait for auth
+    
+    if (!user) {
+      setState({ role: 'user', loading: false, teamId: null });
+      return;
+    }
+    // ... rest
+  }, [user, authLoading]);
+}
+```
+
+### 4. Add Debounce Protection to Prevent Concurrent API Calls
+
+**File: `src/hooks/useEnterpriseSubscription.ts`**
+
+Add a flag to prevent concurrent API calls (similar to what we did for `useAccountStatus`):
+
+```typescript
+const isCheckingRef = useRef(false);
+
+const checkEnterprise = useCallback(async () => {
+  if (isCheckingRef.current || authLoading) return;
+  if (!user) {
+    setStatus(prev => ({ ...prev, loading: false, isEnterprise: false }));
+    return;
+  }
+  
+  isCheckingRef.current = true;
+  try {
+    // ... API call
+  } finally {
+    isCheckingRef.current = false;
+  }
+}, [user, authLoading]);
+```
+
+---
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/hooks/useEnterpriseSubscription.ts` | Add `authLoading` check and `isCheckingRef` guard |
+| `src/hooks/useAdminRole.ts` | Change `.single()` to `.maybeSingle()`, add `authLoading` check |
+| `src/hooks/useUserRole.ts` | Add `authLoading` check to prevent premature queries |
+
+---
+
+## Why This Fixes the Issue
+
+1. **No more premature API calls**: Hooks wait for `authLoading: false` before hitting the database or edge functions
+2. **No more 406 errors**: Using `.maybeSingle()` handles missing rows gracefully
+3. **No concurrent request storms**: The `isCheckingRef` pattern prevents duplicate API calls
+4. **Stable auth state**: The session is fully established before dependent hooks execute
+
+---
+
+## Technical Details
+
+The key insight is that Supabase's `onAuthStateChange` fires **before** the session is fully propagated to all endpoints. By adding the `authLoading` check, we ensure:
+
+1. The initial `getSession()` call has completed
+2. The user object is fully populated
+3. The access token is valid and can be used for API calls
+
+This prevents the cascade of 401s -> token refreshes -> rate limits -> more 401s that was causing the logout loop.
+
