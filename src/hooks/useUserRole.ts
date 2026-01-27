@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -11,7 +11,8 @@ interface UserRoleState {
 }
 
 export function useUserRole() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const isCheckingRef = useRef(false);
   const [state, setState] = useState<UserRoleState>({
     role: 'user',
     loading: true,
@@ -19,11 +20,15 @@ export function useUserRole() {
   });
 
   const fetchRole = useCallback(async () => {
+    // Prevent concurrent checks and wait for auth to be ready
+    if (isCheckingRef.current || authLoading) return;
+    
     if (!user) {
       setState({ role: 'user', loading: false, teamId: null });
       return;
     }
 
+    isCheckingRef.current = true;
     try {
       // Get user's team membership to check role
       const { data: teamMember, error: teamError } = await supabase
@@ -50,8 +55,10 @@ export function useUserRole() {
     } catch (error) {
       console.error('Error fetching user role:', error);
       setState(prev => ({ ...prev, loading: false }));
+    } finally {
+      isCheckingRef.current = false;
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     fetchRole();

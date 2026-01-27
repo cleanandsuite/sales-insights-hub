@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -12,7 +12,8 @@ interface EnterpriseStatus {
 }
 
 export function useEnterpriseSubscription() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const isCheckingRef = useRef(false);
   const [status, setStatus] = useState<EnterpriseStatus>({
     isEnterprise: false,
     tier: null,
@@ -23,11 +24,15 @@ export function useEnterpriseSubscription() {
   });
 
   const checkEnterprise = useCallback(async () => {
+    // Prevent concurrent checks and wait for auth to be ready
+    if (isCheckingRef.current || authLoading) return;
+    
     if (!user) {
       setStatus(prev => ({ ...prev, loading: false, isEnterprise: false }));
       return;
     }
 
+    isCheckingRef.current = true;
     try {
       const { data, error } = await supabase.functions.invoke('check-enterprise-subscription');
       
@@ -48,8 +53,10 @@ export function useEnterpriseSubscription() {
         loading: false,
         error: err instanceof Error ? err.message : 'Failed to check subscription',
       }));
+    } finally {
+      isCheckingRef.current = false;
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     checkEnterprise();
