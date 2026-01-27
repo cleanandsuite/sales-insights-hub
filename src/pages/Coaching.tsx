@@ -22,6 +22,7 @@ import { CoachingROIDashboard } from '@/components/coaching/CoachingROIDashboard
 import { CoachingQueueCard } from '@/components/coaching/CoachingQueueCard';
 import { CompletedCoachingList } from '@/components/coaching/CompletedCoachingList';
 import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
+import { EnhancedSkillsTab } from '@/components/coaching/EnhancedSkillsTab';
 
 interface SkillData {
   name: string;
@@ -242,109 +243,11 @@ export default function Coaching() {
           </TabsContent>
 
           <TabsContent value="skills" className="mt-0">
-            <div className="space-y-6">
-              {/* Overall Score */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="card-gradient rounded-xl border border-border/50 p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Trophy className={`h-8 w-8 ${getScoreColor(overallScore)}`} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Overall Score</p>
-                      <p className={`text-4xl font-bold ${getScoreColor(overallScore)}`}>
-                        {overallScore}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card-gradient rounded-xl border border-border/50 p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <BarChart3 className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Calls Analyzed</p>
-                      <p className="text-4xl font-bold text-foreground">{callsAnalyzed}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card-gradient rounded-xl border border-border/50 p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Zap className="h-8 w-8 text-warning" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Current Streak</p>
-                      <p className="text-4xl font-bold text-foreground">7 days</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Skills Breakdown */}
-              <div className="card-gradient rounded-xl border border-border/50 p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  Skill Breakdown
-                </h2>
-                
-                <div className="space-y-5">
-                  {skills.map((skill) => (
-                    <div key={skill.name} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">{skill.name}</span>
-                        <div className="flex items-center gap-2">
-                          {getTrendIcon(skill.trend)}
-                          <span className={`text-sm font-semibold ${getScoreColor(skill.current)}`}>
-                            {skill.current}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className={`absolute inset-y-0 left-0 rounded-full transition-all ${getProgressColor(skill.current)}`}
-                          style={{ width: `${skill.current}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Performance Trend */}
-              <div className="card-gradient rounded-xl border border-border/50 p-6">
-                <h2 className="text-lg font-semibold text-foreground mb-6">Performance Trend</h2>
-                
-                <div className="h-48 flex items-end justify-between gap-2">
-                  {Array.from({ length: 14 }).map((_, i) => {
-                    const height = 30 + Math.random() * 60;
-                    const isGood = height >= 70;
-                    
-                    return (
-                      <div
-                        key={i}
-                        className="flex-1 rounded-t-sm transition-all hover:opacity-80"
-                        style={{ 
-                          height: `${height}%`,
-                          backgroundColor: isGood 
-                            ? 'hsl(var(--success) / 0.6)' 
-                            : height >= 50 
-                              ? 'hsl(var(--warning) / 0.6)' 
-                              : 'hsl(var(--destructive) / 0.4)'
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>2 weeks ago</span>
-                  <span>Today</span>
-                </div>
-              </div>
-            </div>
+            <EnhancedSkillsTab 
+              overallScore={overallScore}
+              callsAnalyzed={callsAnalyzed}
+              skills={skills}
+            />
           </TabsContent>
 
           <TabsContent value="training" className="mt-0">
