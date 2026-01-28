@@ -195,6 +195,17 @@ export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
               </Button>
             </div>
 
+            {/* Call for Demo Button */}
+            <div className="mt-6">
+              <Button
+                size="lg"
+                onClick={() => window.location.href = 'tel:+18555030497'}
+                className="gap-3 font-bold text-lg px-8 py-6 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl transition-all duration-300"
+              >
+                📞 Call for Demo: +1 (855) 503-0497
+              </Button>
+            </div>
+
             {/* Final trust signals */}
             <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-white/50">
               <span className="flex items-center gap-1.5">

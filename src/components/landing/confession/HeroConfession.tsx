@@ -8,6 +8,9 @@ interface HeroConfessionProps {
   onClaimRedemption: () => void;
 }
 
+// Phone number for the business
+const PHONE_NUMBER = '+1 (855) 503-0497';
+
 // Floating 3D-style orb component
 const FloatingOrb = ({ 
   className, 
@@ -142,6 +145,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
 
           {/* CTA Section */}
           <div className="pt-6 space-y-4">
+            {/* Primary CTA */}
             <Button
               size="lg"
               onClick={onClaimRedemption}
@@ -154,6 +158,18 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
                 <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </span>
             </Button>
+
+            {/* Call Now Button */}
+            <div className="flex justify-center">
+              <Button
+                size="lg"
+                onClick={() => window.location.href = 'tel:+18555030497'}
+                className="gap-3 font-bold text-lg px-8 py-6 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl transition-all duration-300"
+              >
+                <PhoneCall className="h-5 w-5 text-emerald-400" />
+                Call for Demo: {PHONE_NUMBER}
+              </Button>
+            </div>
 
             {/* Trust signals */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/50">
