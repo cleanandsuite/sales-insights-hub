@@ -161,7 +161,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     }
   }, []);
 
-  // Start bidirectional transcription using AssemblyAI
+  // Start bidirectional transcription using AssemblyAI Universal Streaming v3
   const startBidirectionalTranscription = useCallback(async (call: any) => {
     try {
       setIsTranscribing(true);
@@ -198,7 +198,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       merger.connect(destination);
       mediaStreamRef.current = destination.stream;
 
-      // Connect to AssemblyAI real-time API
+      // Connect to AssemblyAI Universal Streaming v3 API
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
@@ -209,46 +209,65 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       });
 
       if (tokenResponse.error || !tokenResponse.data?.token) {
-        console.error('[TELNYX] Failed to get transcription token');
+        console.error('[TELNYX] Failed to get transcription token:', tokenResponse.error);
+        setIsTranscribing(false);
         return;
       }
 
-      const ws = new WebSocket(`wss://api.assemblyai.com/v2/realtime/ws?sample_rate=16000&token=${tokenResponse.data.token}`);
+      // Use the new v3 WebSocket endpoint with required params
+      const wsUrl = new URL(tokenResponse.data.wsUrl || 'wss://streaming.assemblyai.com/v3/ws');
+      wsUrl.searchParams.set('token', tokenResponse.data.token);
+      wsUrl.searchParams.set('sample_rate', '16000');
+      wsUrl.searchParams.set('encoding', 'pcm_s16le');
+      wsUrl.searchParams.set('format_turns', 'true');
+      
+      const ws = new WebSocket(wsUrl.toString());
       assemblyWsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('[ASSEMBLYAI] Connected for real-time transcription');
+        console.log('[ASSEMBLYAI v3] Connected for Universal Streaming transcription');
         startAudioStreaming(destination.stream, ws);
       };
 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.text) {
+        
+        // Handle v3 message types
+        if (data.type === 'Begin') {
+          console.log('[ASSEMBLYAI v3] Session started:', data.id);
+          return;
+        }
+        
+        if (data.type === 'Turn' && data.transcript) {
           setTranscripts(prev => {
-            // Update or add transcript segment
             const newSegment: TranscriptSegment = {
-              text: data.text,
-              speaker: 'remote', // We'll enhance speaker detection later
+              text: data.transcript,
+              speaker: 'remote',
               timestamp: Date.now(),
-              isFinal: data.message_type === 'FinalTranscript'
+              isFinal: data.end_of_turn === true
             };
 
-            if (data.message_type === 'FinalTranscript') {
+            if (data.end_of_turn) {
+              // Add finalized turn
               return [...prev.filter(t => t.isFinal), newSegment];
             } else {
-              // Replace partial transcript
+              // Replace partial transcript with latest
               return [...prev.filter(t => t.isFinal), newSegment];
             }
           });
         }
+        
+        if (data.type === 'Termination') {
+          console.log('[ASSEMBLYAI v3] Session terminated:', data.audio_duration_seconds, 'seconds processed');
+        }
       };
 
       ws.onerror = (err) => {
-        console.error('[ASSEMBLYAI] WebSocket error:', err);
+        console.error('[ASSEMBLYAI v3] WebSocket error:', err);
       };
 
-      ws.onclose = () => {
-        console.log('[ASSEMBLYAI] WebSocket closed');
+      ws.onclose = (event) => {
+        console.log('[ASSEMBLYAI v3] WebSocket closed:', event.code, event.reason);
         setIsTranscribing(false);
       };
     } catch (err) {
