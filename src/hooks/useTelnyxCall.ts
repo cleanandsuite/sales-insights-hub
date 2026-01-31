@@ -30,6 +30,7 @@ interface UseTelnyxCallReturn {
   // Call info
   duration: number;
   callId: string | null;
+  remoteStream: MediaStream | null;
 }
 
 export function useTelnyxCall(): UseTelnyxCallReturn {
@@ -41,6 +42,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [duration, setDuration] = useState(0);
   const [callId, setCallId] = useState<string | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   const clientRef = useRef<TelnyxRTC | null>(null);
   const callRef = useRef<any>(null);
@@ -156,9 +158,14 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       
       // Get local and remote audio streams
       const localStream = call.localStream;
-      const remoteStream = call.remoteStream;
+      const remoteStreamFromCall = call.remoteStream;
 
-      if (!localStream || !remoteStream) {
+      // Expose remote stream for audio playback
+      if (remoteStreamFromCall) {
+        setRemoteStream(remoteStreamFromCall);
+      }
+
+      if (!localStream || !remoteStreamFromCall) {
         console.warn('[TELNYX] Streams not available yet');
         return;
       }
@@ -169,7 +176,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
 
       // Create sources for both streams
       const localSource = audioContext.createMediaStreamSource(localStream);
-      const remoteSource = audioContext.createMediaStreamSource(remoteStream);
+      const remoteSource = audioContext.createMediaStreamSource(remoteStreamFromCall);
 
       // Create a merger to combine both streams
       const merger = audioContext.createChannelMerger(2);
@@ -365,5 +372,6 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     isTranscribing,
     duration,
     callId,
+    remoteStream,
   };
 }

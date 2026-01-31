@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,9 +35,19 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     transcripts,
     isTranscribing,
     duration,
+    remoteStream,
   } = useTelnyxCall();
 
   const [hasStartedCall, setHasStartedCall] = useState(false);
+  const remoteAudioRef = useRef<HTMLAudioElement>(null);
+
+  // Attach remote stream to audio element for playback
+  useEffect(() => {
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
+      remoteAudioRef.current.play().catch(console.error);
+    }
+  }, [remoteStream]);
 
   // Start the call when component mounts
   useEffect(() => {
@@ -258,6 +268,9 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
           <span className="text-sm">{error}</span>
         </div>
       )}
+
+      {/* Hidden audio element for remote audio playback */}
+      <audio ref={remoteAudioRef} autoPlay playsInline />
     </div>
   );
 }
