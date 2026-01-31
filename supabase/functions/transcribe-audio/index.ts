@@ -58,14 +58,15 @@ serve(async (req) => {
       
       console.log('Generating AssemblyAI temporary token for Universal Streaming v3...');
       
-      // Get a temporary token from AssemblyAI (max 600 seconds per docs)
+      // AssemblyAI v3 token endpoint - GET request with query params
+      const expiresInSeconds = 600; // max allowed
       const tokenUrl = new URL('https://streaming.assemblyai.com/v3/token');
-      tokenUrl.searchParams.set('expires_in_seconds', '600'); // max allowed
+      tokenUrl.searchParams.set('expires_in_seconds', String(expiresInSeconds));
       
       const tokenResponse = await fetch(tokenUrl.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': assemblyAIKey,
+          'Authorization': assemblyAIKey, // Note: no "Bearer" prefix for AssemblyAI
         },
       });
       
@@ -79,21 +80,23 @@ serve(async (req) => {
       }
       
       const tokenData = await tokenResponse.json();
-      console.log('Got AssemblyAI temp token response:', JSON.stringify(tokenData));
+      console.log('Got AssemblyAI temp token, has token:', !!tokenData.token);
       
-      // The token endpoint returns { token: "...", expires_at: timestamp }
       if (!tokenData.token) {
-        console.error('No token in response:', tokenData);
+        console.error('No token in response:', JSON.stringify(tokenData));
         return new Response(
           JSON.stringify({ error: 'Invalid token response from AssemblyAI' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
+      // Compute expiresAt manually (v3 returns token only, no expires_at)
+      const expiresAt = Math.floor(Date.now() / 1000) + expiresInSeconds;
+      
       return new Response(
         JSON.stringify({ 
           token: tokenData.token,
-          expiresAt: tokenData.expires_at,
+          expiresAt,
           wsUrl: 'wss://streaming.assemblyai.com/v3/ws'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

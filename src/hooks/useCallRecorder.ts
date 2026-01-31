@@ -119,11 +119,16 @@ export function useCallRecorder(): UseCallRecorderReturn {
       console.log('[CALL_RECORDER] Got temp token, expires:', response.data.expiresAt);
 
       // Connect to AssemblyAI Universal Streaming v3
+      // CRITICAL: Must use 16000 sample_rate - AssemblyAI expects 16kHz PCM
       const wsUrl = new URL(response.data.wsUrl || 'wss://streaming.assemblyai.com/v3/ws');
-      wsUrl.searchParams.set('sample_rate', String(audioContext.sampleRate));
+      wsUrl.searchParams.set('token', response.data.token);
+      wsUrl.searchParams.set('sample_rate', '16000'); // Must be 16kHz
       wsUrl.searchParams.set('encoding', 'pcm_s16le');
       wsUrl.searchParams.set('format_turns', 'true');
-      wsUrl.searchParams.set('token', response.data.token);
+      // Tune end-of-turn detection for phone calls with overlapping speakers
+      wsUrl.searchParams.set('end_of_turn_confidence_threshold', '0.5');
+      wsUrl.searchParams.set('min_end_of_turn_silence_when_confident', '480');
+      wsUrl.searchParams.set('max_turn_silence', '1500');
 
       console.log('[CALL_RECORDER] Connecting to:', wsUrl.toString().replace(/token=[^&]+/, 'token=REDACTED'));
       
@@ -151,6 +156,10 @@ export function useCallRecorder(): UseCallRecorderReturn {
         silentGain.connect(audioContext.destination);
 
         let audioChunksSent = 0;
+        // Store native sample rate for resampling
+        const nativeSampleRate = audioContext.sampleRate;
+        const targetSampleRate = 16000;
+        
         processor.onaudioprocess = (e) => {
           if (ws.readyState !== WebSocket.OPEN) return;
 
@@ -166,20 +175,37 @@ export function useCallRecorder(): UseCallRecorderReturn {
             monoData[i] = (leftChannel[i] + rightChannel[i]) / 2;
           }
 
-          // Convert to 16-bit PCM
-          const pcmData = new Int16Array(monoData.length);
-          for (let i = 0; i < monoData.length; i++) {
-            const s = Math.max(-1, Math.min(1, monoData[i]));
+          // Resample to 16kHz if needed (AssemblyAI requires 16kHz)
+          let resampledData: Float32Array;
+          if (nativeSampleRate !== targetSampleRate) {
+            const ratio = targetSampleRate / nativeSampleRate;
+            const newLength = Math.round(monoData.length * ratio);
+            resampledData = new Float32Array(newLength);
+            for (let i = 0; i < newLength; i++) {
+              const srcIndex = i / ratio;
+              const srcIndexFloor = Math.floor(srcIndex);
+              const srcIndexCeil = Math.min(srcIndexFloor + 1, monoData.length - 1);
+              const t = srcIndex - srcIndexFloor;
+              resampledData[i] = monoData[srcIndexFloor] * (1 - t) + monoData[srcIndexCeil] * t;
+            }
+          } else {
+            resampledData = monoData;
+          }
+
+          // Convert to 16-bit PCM (little-endian signed integers)
+          const pcmData = new Int16Array(resampledData.length);
+          for (let i = 0; i < resampledData.length; i++) {
+            const s = Math.max(-1, Math.min(1, resampledData[i]));
             pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
           }
 
-          // AssemblyAI v3 expects *binary audio frames* (not JSON/base64)
+          // AssemblyAI v3 expects raw binary PCM frames (not JSON/base64)
           ws.send(pcmData.buffer);
           audioChunksSent++;
           
           // Log every 100 chunks to confirm audio is flowing
           if (audioChunksSent % 100 === 0) {
-            console.log('[CALL_RECORDER] Audio chunks sent:', audioChunksSent);
+            console.log('[CALL_RECORDER] Audio chunks sent:', audioChunksSent, 'resampled:', nativeSampleRate !== targetSampleRate);
           }
         };
       };
