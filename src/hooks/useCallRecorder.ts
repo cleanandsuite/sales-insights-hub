@@ -28,6 +28,16 @@ export function useCallRecorder(): UseCallRecorderReturn {
   const chunksRef = useRef<Blob[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const silentGainRef = useRef<GainNode | null>(null);
+
+  const pickScriptProcessorBufferSize = (sampleRate: number) => {
+    // AssemblyAI recommends ~50ms per message.
+    const targetSamples = Math.round(sampleRate * 0.05);
+    const sizes = [256, 512, 1024, 2048, 4096, 8192] as const;
+    return sizes.reduce((best, size) => {
+      return Math.abs(size - targetSamples) < Math.abs(best - targetSamples) ? size : best;
+    }, 2048);
+  };
 
   const startRecording = useCallback(async (localStream: MediaStream, remoteStream: MediaStream) => {
     try {
@@ -35,8 +45,10 @@ export function useCallRecorder(): UseCallRecorderReturn {
       setTranscripts([]);
       chunksRef.current = [];
 
-      // Create audio context for mixing streams
-      const audioContext = new AudioContext({ sampleRate: 16000 });
+      // Create audio context for mixing streams.
+      // Note: browsers may ignore a requested sampleRate; we always use the *actual* audioContext.sampleRate
+      // when configuring AssemblyAI.
+      const audioContext = new AudioContext();
       audioContextRef.current = audioContext;
 
       // Create sources for both streams
@@ -99,7 +111,9 @@ export function useCallRecorder(): UseCallRecorderReturn {
 
       // Connect to AssemblyAI Universal Streaming v3
       const wsUrl = new URL(response.data.wsUrl || 'wss://streaming.assemblyai.com/v3/ws');
-      wsUrl.searchParams.set('sample_rate', '16000');
+      wsUrl.searchParams.set('sample_rate', String(audioContext.sampleRate));
+      wsUrl.searchParams.set('encoding', 'pcm_s16le');
+      wsUrl.searchParams.set('format_turns', 'true');
       wsUrl.searchParams.set('api_key', response.data.apiKey);
 
       const ws = new WebSocket(wsUrl.toString());
@@ -110,14 +124,25 @@ export function useCallRecorder(): UseCallRecorderReturn {
         setIsTranscribing(true);
 
         // Create ScriptProcessor for streaming audio data
-        const processor = audioContext.createScriptProcessor(4096, 2, 2);
+        const bufferSize = pickScriptProcessorBufferSize(audioContext.sampleRate);
+        const processor = audioContext.createScriptProcessor(bufferSize, 2, 1);
         processorRef.current = processor;
 
         sourceNode.connect(processor);
-        processor.connect(audioContext.destination);
+
+        // ScriptProcessor must be connected to an output to fire onaudioprocess in some browsers.
+        // Route through a silent gain to avoid audible output.
+        const silentGain = audioContext.createGain();
+        silentGain.gain.value = 0;
+        silentGainRef.current = silentGain;
+        processor.connect(silentGain);
+        silentGain.connect(audioContext.destination);
 
         processor.onaudioprocess = (e) => {
           if (ws.readyState !== WebSocket.OPEN) return;
+
+          // Backpressure guard to avoid runaway buffering
+          if (ws.bufferedAmount > 2_000_000) return;
 
           // Get both channels and mix to mono
           const leftChannel = e.inputBuffer.getChannelData(0);
@@ -135,12 +160,8 @@ export function useCallRecorder(): UseCallRecorderReturn {
             pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
           }
 
-          // Convert to base64 and send
-          const uint8Array = new Uint8Array(pcmData.buffer);
-          const base64 = btoa(String.fromCharCode(...uint8Array));
-          
-          // AssemblyAI v3 expects { audio: base64_string }
-          ws.send(JSON.stringify({ audio: base64 }));
+          // AssemblyAI v3 expects *binary audio frames* (not JSON/base64)
+          ws.send(pcmData.buffer);
         };
       };
 
@@ -205,20 +226,27 @@ export function useCallRecorder(): UseCallRecorderReturn {
         processorRef.current = null;
       }
 
-      // Close WebSocket
-      if (wsRef.current) {
-        // Send end of stream signal
-        if (wsRef.current.readyState === WebSocket.OPEN) {
-          wsRef.current.send(JSON.stringify({ terminate: true }));
-        }
-        wsRef.current.close();
-        wsRef.current = null;
+      if (silentGainRef.current) {
+        silentGainRef.current.disconnect();
+        silentGainRef.current = null;
       }
 
-      // Close audio context
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
+      // Close WebSocket
+      if (wsRef.current) {
+        // Send end of stream signal (AssemblyAI v3)
+        if (wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: 'Terminate' }));
+        }
+
+        // Give the server a moment to emit any final Turn/Termination messages
+        setTimeout(() => {
+          try {
+            wsRef.current?.close();
+          } catch {
+            // ignore
+          }
+        }, 250);
+        wsRef.current = null;
       }
 
       // Stop and collect recording
@@ -228,12 +256,25 @@ export function useCallRecorder(): UseCallRecorderReturn {
           const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
           setIsRecording(false);
           setIsTranscribing(false);
+
+          // Close audio context after MediaRecorder is done
+          if (audioContextRef.current) {
+            audioContextRef.current.close();
+            audioContextRef.current = null;
+          }
+
           resolve(blob);
         };
         mediaRecorder.stop();
       } else {
         setIsRecording(false);
         setIsTranscribing(false);
+
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+          audioContextRef.current = null;
+        }
+
         resolve(chunksRef.current.length > 0 
           ? new Blob(chunksRef.current, { type: 'audio/webm' })
           : null
