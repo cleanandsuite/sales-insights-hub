@@ -58,9 +58,9 @@ serve(async (req) => {
       
       console.log('Generating AssemblyAI temporary token for Universal Streaming v3...');
       
-      // Get a temporary token from AssemblyAI (valid for 60 seconds, one-time use)
+      // Get a temporary token from AssemblyAI (max 600 seconds per docs)
       const tokenUrl = new URL('https://streaming.assemblyai.com/v3/token');
-      tokenUrl.searchParams.set('expires_in_seconds', '480'); // 8 minutes
+      tokenUrl.searchParams.set('expires_in_seconds', '600'); // max allowed
       
       const tokenResponse = await fetch(tokenUrl.toString(), {
         method: 'GET',
@@ -73,13 +73,22 @@ serve(async (req) => {
         const errorText = await tokenResponse.text();
         console.error('Failed to get AssemblyAI temp token:', tokenResponse.status, errorText);
         return new Response(
-          JSON.stringify({ error: 'Failed to generate streaming token' }),
+          JSON.stringify({ error: 'Failed to generate streaming token', details: errorText }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       const tokenData = await tokenResponse.json();
-      console.log('Got AssemblyAI temp token, expires_at:', tokenData.expires_at);
+      console.log('Got AssemblyAI temp token response:', JSON.stringify(tokenData));
+      
+      // The token endpoint returns { token: "...", expires_at: timestamp }
+      if (!tokenData.token) {
+        console.error('No token in response:', tokenData);
+        return new Response(
+          JSON.stringify({ error: 'Invalid token response from AssemblyAI' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       return new Response(
         JSON.stringify({ 
