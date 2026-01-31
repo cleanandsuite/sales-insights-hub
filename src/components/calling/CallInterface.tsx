@@ -6,8 +6,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Phone, 
   PhoneOff, 
-  Mic, 
-  MicOff, 
   Clock, 
   MessageSquare,
   Sparkles,
@@ -16,7 +14,12 @@ import {
   Users
 } from 'lucide-react';
 import { useTelnyxCall, CallStatus } from '@/hooks/useTelnyxCall';
+import { useCallLimits } from '@/hooks/useCallLimits';
 import { cn } from '@/lib/utils';
+import { CallerIdBadge } from './CallerIdBadge';
+import { CallControls } from './CallControls';
+import { CallNotes } from './CallNotes';
+import { CallLimitIndicator } from './CallLimitIndicator';
 
 interface CallInterfaceProps {
   phoneNumber: string;
@@ -29,14 +32,29 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     isReady,
     error,
     isMuted,
+    isOnHold,
     startCall,
     endCall,
     muteAudio,
+    holdCall,
+    unholdCall,
+    sendDTMF,
     transcripts,
     isTranscribing,
     duration,
+    callId,
     remoteStream,
+    volume,
+    setVolume,
   } = useTelnyxCall();
+
+  const {
+    callsToday,
+    dailyLimit,
+    warmupDay,
+    limitEnforced,
+    incrementCallCount,
+  } = useCallLimits();
 
   const [hasStartedCall, setHasStartedCall] = useState(false);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
@@ -45,17 +63,26 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
   useEffect(() => {
     if (remoteAudioRef.current && remoteStream) {
       remoteAudioRef.current.srcObject = remoteStream;
+      remoteAudioRef.current.volume = volume / 100;
       remoteAudioRef.current.play().catch(console.error);
     }
-  }, [remoteStream]);
+  }, [remoteStream, volume]);
+
+  // Update audio volume when changed
+  useEffect(() => {
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.volume = volume / 100;
+    }
+  }, [volume]);
 
   // Start the call when component mounts
   useEffect(() => {
     if (isReady && !hasStartedCall && phoneNumber) {
       setHasStartedCall(true);
       startCall(phoneNumber);
+      incrementCallCount();
     }
-  }, [isReady, hasStartedCall, phoneNumber, startCall]);
+  }, [isReady, hasStartedCall, phoneNumber, startCall, incrementCallCount]);
 
   // Handle close when call ends
   useEffect(() => {
@@ -105,6 +132,14 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     }
   };
 
+  const handleToggleHold = () => {
+    if (isOnHold) {
+      unholdCall();
+    } else {
+      holdCall();
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
       {/* Header */}
@@ -116,29 +151,39 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
             </div>
             <div>
               <h2 className="text-lg font-semibold">{phoneNumber}</h2>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge className={cn('text-xs', getStatusColor(callStatus))}>
                   {getStatusText(callStatus)}
                 </Badge>
                 {callStatus === 'connected' && (
-                  <span className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatDuration(duration)}
-                  </span>
+                  <>
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatDuration(duration)}
+                    </span>
+                    <CallerIdBadge attestationLevel="A" />
+                  </>
+                )}
+                {isOnHold && (
+                  <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
+                    On Hold
+                  </Badge>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {callStatus === 'connected' && (
-              <Button
-                variant={isMuted ? 'destructive' : 'outline'}
-                size="icon"
-                onClick={() => muteAudio(!isMuted)}
-              >
-                {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-              </Button>
+              <CallControls
+                isMuted={isMuted}
+                isOnHold={isOnHold}
+                onToggleMute={() => muteAudio(!isMuted)}
+                onToggleHold={handleToggleHold}
+                onSendDTMF={sendDTMF}
+                volume={volume}
+                onVolumeChange={setVolume}
+              />
             )}
             <Button
               variant="destructive"
@@ -261,9 +306,26 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
         </div>
       </div>
 
+      {/* Call Notes */}
+      {callStatus === 'connected' && callId && (
+        <CallNotes recordingId={callId} />
+      )}
+
+      {/* Footer with Call Limit */}
+      <div className="border-t border-border bg-card p-4">
+        <div className="max-w-4xl mx-auto">
+          <CallLimitIndicator
+            callsToday={callsToday}
+            dailyLimit={dailyLimit}
+            warmupDay={warmupDay}
+            enforced={limitEnforced}
+          />
+        </div>
+      </div>
+
       {/* Error Display */}
       {error && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg flex items-center gap-2">
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
           <span className="text-sm">{error}</span>
         </div>

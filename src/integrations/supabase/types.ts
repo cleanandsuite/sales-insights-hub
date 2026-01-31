@@ -381,6 +381,36 @@ export type Database = {
         }
         Relationships: []
       }
+      call_limits: {
+        Row: {
+          created_at: string | null
+          daily_limit: number | null
+          enforce_limit: boolean | null
+          id: string
+          updated_at: string | null
+          user_id: string
+          warmup_start_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          daily_limit?: number | null
+          enforce_limit?: boolean | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+          warmup_start_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          daily_limit?: number | null
+          enforce_limit?: boolean | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+          warmup_start_date?: string | null
+        }
+        Relationships: []
+      }
       call_recordings: {
         Row: {
           ai_markers: Json | null
