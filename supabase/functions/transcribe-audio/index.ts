@@ -43,7 +43,50 @@ serve(async (req) => {
 
     console.log('Authenticated user:', userData.user.id);
 
-    const { audio, useAssemblyAI = true } = await req.json();
+    const body = await req.json();
+    
+    // Handle real-time token request for WebSocket transcription
+    if (body.action === 'get_realtime_token') {
+      const assemblyAIKey = Deno.env.get('ASSEMBLYAI_API_KEY');
+      if (!assemblyAIKey) {
+        return new Response(
+          JSON.stringify({ error: 'ASSEMBLYAI_API_KEY not configured' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      console.log('Fetching AssemblyAI real-time token...');
+      const tokenResponse = await fetch(
+        'https://api.assemblyai.com/v2/realtime/token',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': assemblyAIKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ expires_in: 3600 }),
+        }
+      );
+
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.error('AssemblyAI token error:', tokenResponse.status, errorText);
+        return new Response(
+          JSON.stringify({ error: `Failed to get token: ${tokenResponse.status}` }),
+          { status: tokenResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const tokenData = await tokenResponse.json();
+      console.log('AssemblyAI real-time token obtained');
+      return new Response(
+        JSON.stringify({ token: tokenData.token }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Standard transcription flow
+    const { audio, useAssemblyAI = true } = body;
     
     if (!audio || audio.length === 0) {
       console.log('Empty audio data received, returning empty result');
