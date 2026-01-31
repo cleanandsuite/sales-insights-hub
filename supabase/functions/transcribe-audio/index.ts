@@ -55,21 +55,23 @@ serve(async (req) => {
         );
       }
       
-      console.log('Fetching AssemblyAI Universal Streaming v3 token...');
-      // Use the API base URL with /v3/token path (not streaming subdomain)
+      console.log('Fetching AssemblyAI streaming token...');
+      // Use v2 token endpoint (works for both v2 and v3 streaming)
       const tokenResponse = await fetch(
-        'https://api.assemblyai.com/v3/token?expires_in_seconds=600',
+        'https://api.assemblyai.com/v2/realtime/token',
         {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'Authorization': assemblyAIKey,
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ expires_in: 3600 }),
         }
       );
 
       if (!tokenResponse.ok) {
         const errorText = await tokenResponse.text();
-        console.error('AssemblyAI v3 token error:', tokenResponse.status, errorText);
+        console.error('AssemblyAI token error:', tokenResponse.status, errorText);
         return new Response(
           JSON.stringify({ error: `Failed to get token: ${tokenResponse.status}`, details: errorText }),
           { status: tokenResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -77,11 +79,11 @@ serve(async (req) => {
       }
 
       const tokenData = await tokenResponse.json();
-      console.log('AssemblyAI Universal Streaming v3 token obtained');
+      console.log('AssemblyAI streaming token obtained');
       return new Response(
         JSON.stringify({ 
           token: tokenData.token,
-          wsUrl: 'wss://streaming.assemblyai.com/v3/ws'
+          wsUrl: 'wss://api.assemblyai.com/v2/realtime/ws'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
