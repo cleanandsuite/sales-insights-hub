@@ -1,11 +1,11 @@
-# Twilio-to-AssemblyAI Phone Transcription Server
+# Telnyx-to-AssemblyAI Phone Transcription Server
 
-Real-time phone call transcription using Twilio Media Streams and AssemblyAI's Real-time API.
+Real-time phone call transcription using Telnyx Media Streams and AssemblyAI's Real-time API.
 
 ## Architecture
 
 ```
-Phone Call → Twilio → This Server (/media WebSocket) → AssemblyAI → Console Transcripts
+Phone Call → Telnyx → This Server (/media WebSocket) → AssemblyAI → Console Transcripts
 ```
 
 ## Quick Start
@@ -42,18 +42,19 @@ In another terminal, expose with ngrok:
 ngrok http 3459
 ```
 
-### 4. Configure Twilio
+### 4. Configure Telnyx
 
-1. Go to [Twilio Console](https://console.twilio.com/) → Phone Numbers
-2. Select your phone number
-3. Under "Voice Configuration":
-   - Set "A call comes in" webhook to: `https://your-ngrok-url.ngrok.io/voice`
-   - Method: `POST`
-4. Save
+1. Go to [Telnyx Mission Control Portal](https://portal.telnyx.com/)
+2. Navigate to **Voice** → **TeXML Applications**
+3. Create a new TeXML Application or edit an existing one
+4. Set the **Voice URL** to: `https://your-ngrok-url.ngrok.io/voice`
+5. Method: `POST`
+6. Save the application
+7. Go to **Numbers** and assign a phone number to this TeXML Application
 
 ### 5. Test
 
-Call your Twilio number and speak. Transcripts will appear in the console.
+Call your Telnyx number and speak. Transcripts will appear in the console.
 
 ---
 
@@ -65,7 +66,7 @@ Call your Twilio number and speak. Transcripts will appear in the console.
 2. Connect to [Railway](https://railway.app/)
 3. Add environment variable: `ASSEMBLYAI_API_KEY`
 4. Deploy - Railway auto-detects Node.js
-5. Use the Railway URL for Twilio webhook
+5. Use the Railway URL for Telnyx webhook
 
 ### Render
 
@@ -90,16 +91,16 @@ git push heroku main
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/` | GET | Health check |
-| `/voice` | POST | Twilio voice webhook (returns TwiML) |
-| `/media` | WebSocket | Twilio Media Stream connection |
+| `/voice` | POST | Telnyx voice webhook (returns TeXML) |
+| `/media` | WebSocket | Telnyx Media Stream connection |
 
 ---
 
 ## How It Works
 
-1. **Incoming Call**: Twilio hits `/voice` webhook
-2. **TwiML Response**: Server returns XML that starts a Media Stream
-3. **Audio Streaming**: Twilio sends μ-law audio over WebSocket to `/media`
+1. **Incoming Call**: Telnyx hits `/voice` webhook
+2. **TeXML Response**: Server returns XML that starts a Media Stream
+3. **Audio Streaming**: Telnyx sends μ-law audio over WebSocket to `/media`
 4. **Transcription**: Server forwards audio to AssemblyAI Real-time API
 5. **Output**: Transcripts printed to console in real-time
 
@@ -110,26 +111,37 @@ git push heroku main
 - Bit Depth: 8-bit
 - Channels: Mono
 
+### Telnyx vs Twilio Differences
+
+| Aspect | Telnyx | Twilio |
+|--------|--------|--------|
+| Voice Response | TeXML | TwiML |
+| Call Identifier | `call_control_id` | `callSid` |
+| Stream Identifier | `stream_id` | `streamSid` |
+| Audio Format | PCMU @ 8kHz | PCMU @ 8kHz |
+
 ---
 
 ## Console Output Example
 
 ```
 ========================================
-  Twilio-AssemblyAI Transcription Server
+  Telnyx-AssemblyAI Transcription Server
 ========================================
 Server running on port 3459
 
 [CALL] Incoming call from +1234567890
-[TWILIO] Media stream connected
-[TWILIO] Stream started - CallSid: CA123...
+[TELNYX] Media stream connected
+[TELNYX] Stream started - CallControlId: v2:abc123...
+[TELNYX] StreamId: 32DE0DEA-...
+[TELNYX] From: +1234567890 To: +0987654321
 [AAI] Connected to AssemblyAI Real-time API
 [AAI] Session started: abc123...
 [PARTIAL] Hello how are
 [FINAL] Hello, how are you doing today?
 [PARTIAL] I'm calling about
 [FINAL] I'm calling about my account.
-[TWILIO] Stream stopped
+[TELNYX] Stream stopped
 [CALL] Call completed: 45 seconds
 ```
 
@@ -141,19 +153,25 @@ Server running on port 3459
 
 - Verify `ASSEMBLYAI_API_KEY` is set correctly
 - Check AssemblyAI dashboard for API usage
-- Ensure Twilio webhook URL is correct and accessible
+- Ensure Telnyx webhook URL is correct and accessible
 
 ### WebSocket connection fails
 
 - Confirm your deployment supports WebSockets
 - Check firewall/proxy settings
-- Verify HTTPS is enabled (required for Twilio)
+- Verify HTTPS is enabled (required for Telnyx)
 
 ### Audio not streaming
 
-- Check Twilio console for Media Stream errors
-- Verify the `/voice` endpoint returns valid TwiML
-- Test with a simple TwiML first (just `<Say>` element)
+- Check Telnyx portal for Media Stream errors
+- Verify the `/voice` endpoint returns valid TeXML
+- Test with a simple TeXML first (just `<Say>` element)
+
+### Telnyx-specific issues
+
+- Ensure your TeXML Application is properly configured
+- Check that your phone number is assigned to the correct application
+- Verify the Voice URL method is set to POST
 
 ---
 
@@ -164,6 +182,7 @@ Server running on port 3459
 - [ ] Speaker diarization
 - [ ] Integration with CRM
 - [ ] Call recording storage
+- [ ] Outbound call support via Telnyx Call Control API
 
 ---
 

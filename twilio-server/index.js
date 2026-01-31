@@ -21,32 +21,32 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({ 
     status: 'ok', 
-    service: 'Twilio-AssemblyAI Transcription Server',
+    service: 'Telnyx-AssemblyAI Transcription Server',
     activeCalls: activeCalls.size 
   });
 });
 
-// Twilio Voice Webhook - returns TwiML
+// Telnyx Voice Webhook - returns TeXML
 app.post('/voice', (req, res) => {
   const host = req.headers.host;
   const protocol = req.headers['x-forwarded-proto'] || 'https';
   
-  console.log(`[CALL] Incoming call from ${req.body.From || 'unknown'}`);
+  // Telnyx sends caller info in different fields
+  const from = req.body.from || req.body.From || 'unknown';
+  console.log(`[CALL] Incoming call from ${from}`);
   
-  // Return TwiML that starts a Media Stream
-  const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+  // Return TeXML that starts a Media Stream
+  const texml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="alice">Connected to transcription service. Your call is being transcribed.</Say>
-  <Connect>
-    <Stream url="wss://${host}/media" />
-  </Connect>
+  <Say voice="female">Connected to transcription service. Your call is being transcribed.</Say>
+  <Stream url="wss://${host}/media" bidirectionalMode="rtp" />
 </Response>`;
 
   res.type('text/xml');
-  res.send(twiml);
+  res.send(texml);
 });
 
-// WebSocket handler for Twilio Media Streams
+// WebSocket handler for Telnyx Media Streams
 wss.on('connection', (ws, req) => {
   // Only handle /media path
   if (req.url !== '/media') {
@@ -54,10 +54,10 @@ wss.on('connection', (ws, req) => {
     return;
   }
 
-  console.log('[WS] New Twilio Media Stream connection');
+  console.log('[WS] New Telnyx Media Stream connection');
   
-  let callSid = null;
-  let streamSid = null;
+  let callControlId = null;
+  let streamId = null;
   let callStartTime = null;
   let assemblyAISocket = null;
   let audioBuffer = Buffer.alloc(0);
@@ -109,28 +109,36 @@ wss.on('connection', (ws, req) => {
     return aaiSocket;
   };
 
-  // Handle messages from Twilio
+  // Handle messages from Telnyx
   ws.on('message', (message) => {
     try {
       const msg = JSON.parse(message.toString());
 
       switch (msg.event) {
         case 'connected':
-          console.log('[TWILIO] Media stream connected');
+          console.log('[TELNYX] Media stream connected');
           break;
 
         case 'start':
-          callSid = msg.start.callSid;
-          streamSid = msg.start.streamSid;
+          // Telnyx uses call_control_id and stream_id
+          callControlId = msg.start?.call_control_id || msg.stream_id;
+          streamId = msg.stream_id;
           callStartTime = Date.now();
           
-          console.log(`[TWILIO] Stream started - CallSid: ${callSid}`);
-          console.log(`[TWILIO] StreamSid: ${streamSid}`);
-          console.log(`[TWILIO] Media format: ${JSON.stringify(msg.start.mediaFormat)}`);
+          const from = msg.start?.from || 'unknown';
+          const to = msg.start?.to || 'unknown';
+          
+          console.log(`[TELNYX] Stream started - CallControlId: ${callControlId}`);
+          console.log(`[TELNYX] StreamId: ${streamId}`);
+          console.log(`[TELNYX] From: ${from} To: ${to}`);
+          
+          if (msg.start?.media_format) {
+            console.log(`[TELNYX] Media format: ${JSON.stringify(msg.start.media_format)}`);
+          }
           
           // Store call info
-          activeCalls.set(callSid, {
-            streamSid,
+          activeCalls.set(callControlId, {
+            streamId,
             startTime: callStartTime,
             transcripts: []
           });
@@ -144,7 +152,7 @@ wss.on('connection', (ws, req) => {
             return;
           }
 
-          // Decode base64 μ-law audio
+          // Decode base64 μ-law audio (same format as Twilio)
           const audioChunk = Buffer.from(msg.media.payload, 'base64');
           
           // Skip silent audio (all 0xFF bytes in μ-law = silence)
@@ -170,7 +178,7 @@ wss.on('connection', (ws, req) => {
             ? Math.round((Date.now() - callStartTime) / 1000) 
             : 0;
           
-          console.log(`\n[TWILIO] Stream stopped - CallSid: ${callSid}`);
+          console.log(`\n[TELNYX] Stream stopped - CallControlId: ${callControlId}`);
           console.log(`[CALL] Call completed: ${duration} seconds`);
           
           // Flush remaining buffer
@@ -192,13 +200,13 @@ wss.on('connection', (ws, req) => {
           }
           
           // Remove from active calls
-          if (callSid) {
-            activeCalls.delete(callSid);
+          if (callControlId) {
+            activeCalls.delete(callControlId);
           }
           break;
 
         default:
-          console.log(`[TWILIO] Unknown event: ${msg.event}`);
+          console.log(`[TELNYX] Unknown event: ${msg.event}`);
       }
     } catch (err) {
       console.error('[WS] Error processing message:', err.message);
@@ -206,7 +214,7 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('close', () => {
-    console.log('[WS] Twilio connection closed');
+    console.log('[WS] Telnyx connection closed');
     
     // Clean up AssemblyAI connection
     if (assemblyAISocket && assemblyAISocket.readyState === WebSocket.OPEN) {
@@ -214,26 +222,26 @@ wss.on('connection', (ws, req) => {
     }
     
     // Remove from active calls
-    if (callSid) {
-      activeCalls.delete(callSid);
+    if (callControlId) {
+      activeCalls.delete(callControlId);
     }
   });
 
   ws.on('error', (err) => {
-    console.error('[WS] Twilio WebSocket error:', err.message);
+    console.error('[WS] Telnyx WebSocket error:', err.message);
   });
 });
 
 // Start server
 server.listen(PORT, () => {
   console.log('========================================');
-  console.log('  Twilio-AssemblyAI Transcription Server');
+  console.log('  Telnyx-AssemblyAI Transcription Server');
   console.log('========================================');
   console.log(`Server running on port ${PORT}`);
   console.log(`Voice webhook: POST /voice`);
   console.log(`Media stream:  WSS /media`);
   console.log('');
-  console.log('Configure your Twilio number webhook to:');
+  console.log('Configure your Telnyx TeXML Application to:');
   console.log(`  https://your-domain.com/voice`);
   console.log('========================================');
   
