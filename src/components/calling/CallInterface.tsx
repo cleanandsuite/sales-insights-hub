@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,18 +8,20 @@ import {
   PhoneOff, 
   Clock, 
   MessageSquare,
-  Sparkles,
   AlertCircle,
   User,
   Users
 } from 'lucide-react';
 import { useTelnyxCall, CallStatus } from '@/hooks/useTelnyxCall';
 import { useCallLimits } from '@/hooks/useCallLimits';
+import { useLiveCoaching } from '@/hooks/useLiveCoaching';
 import { cn } from '@/lib/utils';
 import { CallerIdBadge } from './CallerIdBadge';
 import { CallControls } from './CallControls';
 import { CallNotes } from './CallNotes';
 import { CallLimitIndicator } from './CallLimitIndicator';
+import { LiveCoachingSidebar } from '@/components/recording/LiveCoachingSidebar';
+import { LiveSummaryPanel } from '@/components/recording/LiveSummaryPanel';
 
 interface CallInterfaceProps {
   phoneNumber: string;
@@ -55,6 +57,16 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     limitEnforced,
     incrementCallCount,
   } = useCallLimits();
+
+  const { coachStyle } = useLiveCoaching();
+
+  // Combine transcripts into a single string for analysis
+  const fullTranscript = useMemo(() => {
+    return transcripts
+      .filter(t => t.isFinal)
+      .map(t => `${t.speaker === 'user' ? 'You' : 'Caller'}: ${t.text}`)
+      .join('\n');
+  }, [transcripts]);
 
   const [hasStartedCall, setHasStartedCall] = useState(false);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
@@ -202,7 +214,7 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden p-4">
-        <div className="max-w-4xl mx-auto h-full grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="max-w-6xl mx-auto h-full grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Live Transcription */}
           <Card className="flex flex-col">
             <CardHeader className="pb-2">
@@ -268,47 +280,28 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
             </CardContent>
           </Card>
 
-          {/* AI Insights Panel */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-secondary" />
-                AI Coaching
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                {callStatus === 'connected' ? (
-                  <div className="space-y-4">
-                    <div className="p-3 rounded-lg bg-secondary/20 border border-secondary/30">
-                      <h4 className="text-sm font-medium mb-1">💡 Suggestion</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Listen for pain points and buying signals. Ask open-ended questions to understand their needs.
-                      </p>
-                    </div>
-                    
-                    <div className="p-3 rounded-lg bg-muted">
-                      <h4 className="text-sm font-medium mb-1">📊 Call Quality</h4>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>Talk ratio: Analyzing...</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-                    <Sparkles className="h-8 w-8 mb-2 opacity-50" />
-                    <p className="text-sm">AI insights will appear during the call</p>
-                  </div>
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
+          {/* AI Coaching Panel */}
+          <LiveCoachingSidebar
+            transcript={fullTranscript}
+            coachStyle={coachStyle}
+            isRecording={callStatus === 'connected'}
+            isPaused={false}
+          />
+
+          {/* Live Summary Panel */}
+          <LiveSummaryPanel
+            transcript={fullTranscript}
+            isRecording={callStatus === 'connected'}
+            isPaused={false}
+          />
         </div>
       </div>
 
-      {/* Call Notes */}
+      {/* Call Notes - collapsible at bottom */}
       {callStatus === 'connected' && callId && (
-        <CallNotes recordingId={callId} />
+        <div className="border-t border-border">
+          <CallNotes recordingId={callId} />
+        </div>
       )}
 
       {/* Footer with Call Limit */}
