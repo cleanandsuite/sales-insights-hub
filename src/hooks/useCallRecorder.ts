@@ -160,6 +160,12 @@ export function useCallRecorder(): UseCallRecorderReturn {
         const nativeSampleRate = audioContext.sampleRate;
         const targetSampleRate = 16000;
         
+        // Buffer to accumulate ~100ms of audio before sending (AssemblyAI needs 50-1000ms per message)
+        // At 16kHz, 100ms = 1600 samples
+        const targetBufferSamples = 1600; // 100ms at 16kHz
+        let accumulatedSamples: Int16Array[] = [];
+        let accumulatedLength = 0;
+        
         processor.onaudioprocess = (e) => {
           if (ws.readyState !== WebSocket.OPEN) return;
 
@@ -199,13 +205,32 @@ export function useCallRecorder(): UseCallRecorderReturn {
             pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
           }
 
-          // AssemblyAI v3 expects raw binary PCM frames (not JSON/base64)
-          ws.send(pcmData.buffer);
-          audioChunksSent++;
+          // Accumulate samples until we have ~100ms worth
+          accumulatedSamples.push(pcmData);
+          accumulatedLength += pcmData.length;
           
-          // Log every 100 chunks to confirm audio is flowing
-          if (audioChunksSent % 100 === 0) {
-            console.log('[CALL_RECORDER] Audio chunks sent:', audioChunksSent, 'resampled:', nativeSampleRate !== targetSampleRate);
+          // Send when we have enough samples (100ms = 1600 samples at 16kHz)
+          if (accumulatedLength >= targetBufferSamples) {
+            // Merge all accumulated samples into one buffer
+            const mergedBuffer = new Int16Array(accumulatedLength);
+            let offset = 0;
+            for (const chunk of accumulatedSamples) {
+              mergedBuffer.set(chunk, offset);
+              offset += chunk.length;
+            }
+            
+            // AssemblyAI v3 expects raw binary PCM frames (not JSON/base64)
+            ws.send(mergedBuffer.buffer);
+            audioChunksSent++;
+            
+            // Reset accumulator
+            accumulatedSamples = [];
+            accumulatedLength = 0;
+            
+            // Log every 50 chunks to confirm audio is flowing (~5 seconds)
+            if (audioChunksSent % 50 === 0) {
+              console.log('[CALL_RECORDER] Audio chunks sent:', audioChunksSent, 'samples per chunk:', targetBufferSamples);
+            }
           }
         };
       };
