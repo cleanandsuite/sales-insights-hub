@@ -36,6 +36,11 @@ interface UseTelnyxCallReturn {
   
   // Recording
   recordingBlob: Blob | null;
+
+  // Saving status
+  isSaving: boolean;
+  saveError: string | null;
+  savedRecordingId: string | null;
 }
 
 export function useTelnyxCall(): UseTelnyxCallReturn {
@@ -50,10 +55,20 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
   const [volume, setVolumeState] = useState(100);
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedRecordingId, setSavedRecordingId] = useState<string | null>(null);
+
   const clientRef = useRef<TelnyxRTC | null>(null);
   const callRef = useRef<any>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+
+  // Keep latest values available to the Telnyx event handler (which is registered once)
+  const durationRef = useRef<number>(0);
+  const transcriptsRef = useRef<UseTelnyxCallReturn['transcripts']>([]);
+  const connectedAtRef = useRef<number | null>(null);
+  const finalizePromiseRef = useRef<Promise<void> | null>(null);
 
   // Use the new call recorder hook
   const { 
@@ -63,6 +78,98 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     startRecording, 
     stopRecording 
   } = useCallRecorder();
+
+  useEffect(() => {
+    durationRef.current = duration;
+  }, [duration]);
+
+  useEffect(() => {
+    transcriptsRef.current = transcripts;
+  }, [transcripts]);
+
+  const getFinalTranscriptText = useCallback((segments: UseTelnyxCallReturn['transcripts']) => {
+    return segments
+      .filter(s => s.isFinal)
+      .map(s => s.text)
+      .join(' ')
+      .trim();
+  }, []);
+
+  const finalizeAndSaveRecording = useCallback(async () => {
+    if (finalizePromiseRef.current) return finalizePromiseRef.current;
+
+    finalizePromiseRef.current = (async () => {
+      setIsSaving(true);
+      setSaveError(null);
+
+      try {
+        const blob = await stopRecording();
+        if (!blob || blob.size === 0) {
+          throw new Error('No audio captured');
+        }
+
+        setRecordingBlob(blob);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error('Please log in to save recordings');
+        }
+
+        const fileName = `call_${Date.now()}.webm`;
+        const filePath = `${session.user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('call-recordings')
+          .upload(filePath, blob, {
+            contentType: 'audio/webm',
+            upsert: false,
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const durationSeconds = connectedAtRef.current
+          ? Math.max(0, Math.round((Date.now() - connectedAtRef.current) / 1000))
+          : durationRef.current;
+
+        const liveTranscription = getFinalTranscriptText(transcriptsRef.current);
+
+        const { data: inserted, error: dbError } = await supabase
+          .from('call_recordings')
+          .insert({
+            user_id: session.user.id,
+            file_name: fileName,
+            // Store the storage path for private playback via signed URLs
+            audio_url: filePath,
+            file_url: null,
+            duration_seconds: durationSeconds,
+            file_size: blob.size,
+            status: 'pending',
+            live_transcription: liveTranscription || null,
+          })
+          .select('id')
+          .single();
+
+        if (dbError) {
+          throw dbError;
+        }
+
+        if (inserted?.id) {
+          setSavedRecordingId(inserted.id);
+        }
+
+        console.log('[TELNYX] Recording saved to database');
+      } catch (err: any) {
+        console.error('[TELNYX] Save error:', err);
+        setSaveError(err?.message || 'Failed to save recording');
+      } finally {
+        setIsSaving(false);
+      }
+    })();
+
+    return finalizePromiseRef.current;
+  }, [getFinalTranscriptText, stopRecording]);
 
   // Initialize Telnyx client
   const initializeClient = useCallback(async () => {
@@ -121,6 +228,20 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     }
   }, []);
 
+  const startDurationTimer = useCallback(() => {
+    setDuration(0);
+    durationIntervalRef.current = setInterval(() => {
+      setDuration(prev => prev + 1);
+    }, 1000);
+  }, []);
+
+  const stopDurationTimer = useCallback(() => {
+    if (durationIntervalRef.current) {
+      clearInterval(durationIntervalRef.current);
+      durationIntervalRef.current = null;
+    }
+  }, []);
+
   const handleCallNotification = useCallback((notification: any) => {
     const call = notification.call;
     if (!call) return;
@@ -139,6 +260,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
         } else if (state === 'active') {
           setCallStatus('connected');
           setCallId(call.id);
+          connectedAtRef.current = Date.now();
           startDurationTimer();
           
           // Start recording and transcription when call connects
@@ -160,82 +282,11 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
         } else if (state === 'hangup' || state === 'destroy') {
           setCallStatus('ended');
           stopDurationTimer();
-          // Stop recording and upload to storage
-          stopRecording().then(async (blob) => {
-            if (blob && blob.size > 0) {
-              setRecordingBlob(blob);
-              console.log('[TELNYX] Recording blob created, size:', blob.size);
-              
-              try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                  console.error('[TELNYX] No session for upload');
-                  return;
-                }
-                
-                const fileName = `call_${Date.now()}.webm`;
-                const filePath = `${session.user.id}/${fileName}`;
-                
-                // Upload to storage
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                  .from('call-recordings')
-                  .upload(filePath, blob, {
-                    contentType: 'audio/webm',
-                    upsert: false
-                  });
-                
-                if (uploadError) {
-                  console.error('[TELNYX] Upload error:', uploadError);
-                  return;
-                }
-                
-                // Get public URL
-                const { data: urlData } = supabase.storage
-                  .from('call-recordings')
-                  .getPublicUrl(filePath);
-                
-                // Save to database
-                const { error: dbError } = await supabase
-                  .from('call_recordings')
-                  .insert({
-                    user_id: session.user.id,
-                    file_name: fileName,
-                    file_url: urlData.publicUrl,
-                    audio_url: urlData.publicUrl,
-                    duration_seconds: duration,
-                    file_size: blob.size,
-                    status: 'pending',
-                    live_transcription: transcripts.map(t => t.text).join(' ')
-                  });
-                
-                if (dbError) {
-                  console.error('[TELNYX] DB error:', dbError);
-                } else {
-                  console.log('[TELNYX] Recording saved to database');
-                }
-              } catch (err) {
-                console.error('[TELNYX] Save error:', err);
-              }
-            }
-          });
+          void finalizeAndSaveRecording();
         }
         break;
     }
-  }, [startRecording, stopRecording, duration, transcripts]);
-
-  const startDurationTimer = useCallback(() => {
-    setDuration(0);
-    durationIntervalRef.current = setInterval(() => {
-      setDuration(prev => prev + 1);
-    }, 1000);
-  }, []);
-
-  const stopDurationTimer = useCallback(() => {
-    if (durationIntervalRef.current) {
-      clearInterval(durationIntervalRef.current);
-      durationIntervalRef.current = null;
-    }
-  }, []);
+  }, [finalizeAndSaveRecording, startDurationTimer, stopDurationTimer, startRecording]);
 
   const startCall = useCallback(async (phoneNumber: string) => {
     if (!clientRef.current || !isReady) {
@@ -281,16 +332,11 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       callRef.current.hangup();
       callRef.current = null;
     }
-    
-    // Stop recording and save
-    const blob = await stopRecording();
-    if (blob) {
-      setRecordingBlob(blob);
-    }
-    
+
     stopDurationTimer();
     setCallStatus('ended');
-  }, [stopRecording, stopDurationTimer]);
+    await finalizeAndSaveRecording();
+  }, [finalizeAndSaveRecording, stopDurationTimer]);
 
   const muteAudio = useCallback((muted: boolean) => {
     if (callRef.current) {
@@ -340,7 +386,12 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       if (clientRef.current) {
         clientRef.current.disconnect();
       }
-      stopRecording();
+
+      // Avoid double-stopping while we're finalizing/saving.
+      if (!finalizePromiseRef.current) {
+        stopRecording();
+      }
+
       stopDurationTimer();
     };
   }, [initializeClient, stopRecording, stopDurationTimer]);
@@ -365,5 +416,8 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     volume,
     setVolume,
     recordingBlob,
+    isSaving,
+    saveError,
+    savedRecordingId,
   };
 }

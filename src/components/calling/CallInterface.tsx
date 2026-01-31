@@ -35,6 +35,9 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     error,
     isMuted,
     isOnHold,
+    isSaving,
+    saveError,
+    savedRecordingId,
     startCall,
     endCall,
     muteAudio,
@@ -98,13 +101,14 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
 
   // Handle close when call ends
   useEffect(() => {
-    if (callStatus === 'ended' && hasStartedCall) {
+    // Keep the call UI open until the recording is saved (or we have a save error).
+    if (callStatus === 'ended' && hasStartedCall && !isSaving && !saveError) {
       const timer = setTimeout(() => {
         onClose();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [callStatus, hasStartedCall, onClose]);
+  }, [callStatus, hasStartedCall, isSaving, saveError, onClose]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -201,12 +205,11 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
               variant="destructive"
               onClick={() => {
                 endCall();
-                onClose();
               }}
               className="gap-2"
             >
               <PhoneOff className="h-4 w-4" />
-              End Call
+              {isSaving ? 'Saving…' : 'End Call'}
             </Button>
           </div>
         </div>
@@ -317,10 +320,17 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
       </div>
 
       {/* Error Display */}
-      {error && (
+      {(saveError || error) && (
         <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-destructive text-destructive-foreground px-4 py-2 rounded-lg flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
-          <span className="text-sm">{error}</span>
+          <span className="text-sm">{saveError || error}</span>
+        </div>
+      )}
+
+      {/* Success hint (optional) */}
+      {callStatus === 'ended' && savedRecordingId && !saveError && (
+        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 bg-card text-foreground border border-border px-4 py-2 rounded-lg text-sm">
+          Recording saved.
         </div>
       )}
 
