@@ -13,6 +13,7 @@ const requestSchema = z.object({
   recordingId: z.string().uuid(),
   transcription: z.string().max(100000).optional(),
   audioBase64: z.string().max(50000000).optional(), // ~37MB limit for base64
+  transcribeOnly: z.boolean().optional(),
 });
 
 const ANALYSIS_PROMPT = `You are an expert sales coach analyzing a sales call recording. Provide comprehensive analysis.
@@ -163,16 +164,17 @@ serve(async (req) => {
     }
 
     const { recordingId, transcription, audioBase64 } = parseResult.data;
+    const transcribeOnly = (parseResult.data as any).transcribeOnly === true;
 
     console.log(`Processing recording ${recordingId}`);
 
     // Use service key for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify user owns this recording
+    // Verify user owns this recording, and fetch storage path
     const { data: recording, error: recordingError } = await supabase
       .from('call_recordings')
-      .select('user_id')
+      .select('user_id, audio_url')
       .eq('id', recordingId)
       .single();
 
@@ -184,49 +186,95 @@ serve(async (req) => {
     }
     
     let finalTranscription = transcription;
+
+    // Prefer getting audio bytes from the request, but if none are provided,
+    // fetch the saved file from storage using the recording's audio_url.
+    let audioBytes: Uint8Array | null = null;
     
-    // If no transcription provided but audio is, transcribe it first
-    if (!finalTranscription && audioBase64) {
-      console.log('Transcribing audio with Whisper...');
-      
+    if (audioBase64) {
       const binaryString = atob(audioBase64);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
       }
-      
-      const formData = new FormData();
-      const blob = new Blob([bytes], { type: 'audio/webm' });
-      formData.append('file', blob, 'audio.webm');
-      formData.append('model', 'whisper-1');
-      formData.append('language', 'en');
-      formData.append('response_format', 'verbose_json');
-      formData.append('timestamp_granularities[]', 'word');
-      
-      const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${openAIKey}` },
-        body: formData,
-      });
-      
-      if (!whisperResponse.ok) {
-        const error = await whisperResponse.text();
-        console.error('Whisper error:', error);
+      audioBytes = bytes;
+    } else if (recording?.audio_url) {
+      console.log('Downloading audio from storage for transcription...');
+      const { data: fileBlob, error: downloadError } = await supabase.storage
+        .from('call-recordings')
+        .download(recording.audio_url);
+
+      if (downloadError || !fileBlob) {
+        console.error('Storage download error:', downloadError);
         return new Response(
-          JSON.stringify({ error: 'Transcription failed', success: false }),
+          JSON.stringify({ error: 'Failed to download audio for transcription', success: false }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      const whisperResult = await whisperResponse.json();
-      finalTranscription = whisperResult.text;
-      
-      // Store timestamped words if available
-      if (whisperResult.words) {
-        await supabase
-          .from('call_recordings')
-          .update({ timestamped_transcript: whisperResult.words })
-          .eq('id', recordingId);
+
+      const arrayBuffer = await fileBlob.arrayBuffer();
+      audioBytes = new Uint8Array(arrayBuffer);
+      console.log('Downloaded audio bytes:', audioBytes.byteLength);
+    }
+
+    // If no transcription provided, transcribe the audio (from request or from storage)
+    if (!finalTranscription && audioBytes) {
+      console.log('Transcribing audio with Whisper...');
+
+      // OpenAI Whisper has request size constraints; fall back to AssemblyAI if needed.
+      const assemblyAIKey = Deno.env.get('ASSEMBLYAI_API_KEY');
+      const shouldUseAssemblyAI = audioBytes.byteLength > 24_000_000 && !!assemblyAIKey;
+
+      if (shouldUseAssemblyAI) {
+        console.log('Audio is large; using AssemblyAI upload+poll transcription...');
+        try {
+          const { text } = await transcribeWithAssemblyAI(audioBytes, assemblyAIKey!);
+          finalTranscription = text;
+        } catch (assemblyErr) {
+          console.error('AssemblyAI transcription error:', assemblyErr);
+          return new Response(
+            JSON.stringify({ error: 'Transcription failed', success: false }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      } else {
+        const formData = new FormData();
+        const audioArrayBuffer = audioBytes.buffer.slice(
+          audioBytes.byteOffset,
+          audioBytes.byteOffset + audioBytes.byteLength,
+        ) as ArrayBuffer;
+        const blob = new Blob([audioArrayBuffer], { type: 'audio/webm' });
+        formData.append('file', blob, 'audio.webm');
+        formData.append('model', 'whisper-1');
+        formData.append('language', 'en');
+        formData.append('response_format', 'verbose_json');
+        formData.append('timestamp_granularities[]', 'word');
+
+        const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${openAIKey}` },
+          body: formData,
+        });
+
+        if (!whisperResponse.ok) {
+          const error = await whisperResponse.text();
+          console.error('Whisper error:', error);
+          return new Response(
+            JSON.stringify({ error: 'Transcription failed', success: false }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        const whisperResult = await whisperResponse.json();
+        finalTranscription = whisperResult.text;
+
+        // Store timestamped words if available
+        if (whisperResult.words) {
+          await supabase
+            .from('call_recordings')
+            .update({ timestamped_transcript: whisperResult.words })
+            .eq('id', recordingId);
+        }
       }
     }
     
@@ -244,6 +292,22 @@ serve(async (req) => {
         
       return new Response(
         JSON.stringify({ success: true, message: 'Transcription too short for full analysis' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // If the caller only wants a transcript (for playback), stop here.
+    if (transcribeOnly) {
+      await supabase
+        .from('call_recordings')
+        .update({
+          live_transcription: finalTranscription,
+          // Keep status as-is; analysis can be run later.
+        })
+        .eq('id', recordingId);
+
+      return new Response(
+        JSON.stringify({ success: true, transcription: finalTranscription, recordingId }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -419,4 +483,68 @@ function getMarkerColor(type: string): string {
     case 'negative': return '#ef4444'; // red
     default: return '#3b82f6'; // blue
   }
+}
+
+async function transcribeWithAssemblyAI(audioBytes: Uint8Array, apiKey: string): Promise<{ text: string }> {
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  // Step 1: Upload audio
+  const audioArrayBuffer = audioBytes.buffer.slice(
+    audioBytes.byteOffset,
+    audioBytes.byteOffset + audioBytes.byteLength,
+  ) as ArrayBuffer;
+  const audioBlob = new Blob([audioArrayBuffer], { type: 'audio/webm' });
+  const uploadResponse = await fetch('https://api.assemblyai.com/v2/upload', {
+    method: 'POST',
+    headers: {
+      'Authorization': apiKey,
+      'Content-Type': 'application/octet-stream',
+    },
+    body: audioBlob,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`AssemblyAI upload failed: ${uploadResponse.status}`);
+  }
+
+  const { upload_url } = await uploadResponse.json();
+
+  // Step 2: Start transcription
+  const transcriptResponse = await fetch('https://api.assemblyai.com/v2/transcript', {
+    method: 'POST',
+    headers: {
+      'Authorization': apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      audio_url: upload_url,
+      language_code: 'en',
+      punctuate: true,
+      format_text: true,
+    }),
+  });
+
+  if (!transcriptResponse.ok) {
+    throw new Error(`AssemblyAI transcription request failed: ${transcriptResponse.status}`);
+  }
+
+  const { id } = await transcriptResponse.json();
+
+  // Step 3: Poll for completion (max ~90s)
+  for (let i = 0; i < 30; i++) {
+    await wait(3000);
+    const statusResponse = await fetch(`https://api.assemblyai.com/v2/transcript/${id}`, {
+      headers: { 'Authorization': apiKey },
+    });
+    const result = await statusResponse.json();
+
+    if (result.status === 'completed') {
+      return { text: result.text || '' };
+    }
+    if (result.status === 'error') {
+      throw new Error(`AssemblyAI error: ${result.error}`);
+    }
+  }
+
+  throw new Error('AssemblyAI transcription timeout');
 }

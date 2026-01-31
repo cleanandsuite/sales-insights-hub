@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -109,13 +109,62 @@ export default function RecordingAnalysis() {
   const [newComment, setNewComment] = useState('');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState('');
+  const [isGeneratingTranscript, setIsGeneratingTranscript] = useState(false);
+  const [generateTranscriptError, setGenerateTranscriptError] = useState<string | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const transcriptTriggerRef = useRef(false);
 
   useEffect(() => {
     fetchRecording();
     fetchComments();
   }, [id, user]);
+
+  const generateTranscript = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      setIsGeneratingTranscript(true);
+      setGenerateTranscriptError(null);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Please log in to generate a transcript');
+      }
+
+      const { data, error } = await supabase.functions.invoke('analyze-recording', {
+        body: { recordingId: id, transcribeOnly: true },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to generate transcript');
+      }
+
+      if ((data as any)?.success !== true) {
+        throw new Error((data as any)?.error || 'Failed to generate transcript');
+      }
+
+      await fetchRecording();
+    } catch (e: any) {
+      console.error('Generate transcript error:', e);
+      setGenerateTranscriptError(e?.message || 'Failed to generate transcript');
+      toast({ variant: 'destructive', title: 'Failed to generate transcript' });
+    } finally {
+      setIsGeneratingTranscript(false);
+    }
+  }, [id, toast]);
+
+  // If a recording has audio but no transcript yet, auto-trigger transcription once.
+  useEffect(() => {
+    if (!recording || !id) return;
+    if (recording.live_transcription) return;
+    if (!recording.audio_url) return;
+    if (transcriptTriggerRef.current) return;
+
+    transcriptTriggerRef.current = true;
+    void generateTranscript();
+  }, [recording, id, generateTranscript]);
 
   const fetchRecording = async () => {
     if (!id || !user) return;
@@ -414,14 +463,40 @@ export default function RecordingAnalysis() {
           {/* Transcript */}
           <div className="lg:col-span-2 card-gradient rounded-xl border border-border/50 overflow-hidden">
             <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">Transcription</h2>
-              <span className="text-sm text-muted-foreground">
-                {formatTime(currentTime)}
-              </span>
+              <div className="flex items-center gap-3 min-w-0">
+                <h2 className="text-lg font-semibold text-foreground">Transcription</h2>
+                {isGeneratingTranscript && (
+                  <span className="text-xs text-muted-foreground">Generating…</span>
+                )}
+                {generateTranscriptError && !isGeneratingTranscript && (
+                  <span className="text-xs text-destructive truncate">{generateTranscriptError}</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {!recording.live_transcription && !isGeneratingTranscript && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void generateTranscript()}
+                    disabled={!recording.audio_url}
+                  >
+                    {generateTranscriptError ? 'Retry' : 'Generate'}
+                  </Button>
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {formatTime(currentTime)}
+                </span>
+              </div>
             </div>
             <div className="h-[400px]">
               <TranscriptSync
-                transcription={recording.live_transcription || 'No transcription available'}
+                transcription={
+                  recording.live_transcription ||
+                  (isGeneratingTranscript
+                    ? 'Generating transcript…'
+                    : 'No transcription available')
+                }
                 timestampedWords={recording.timestamped_transcript || undefined}
                 currentTime={currentTime}
                 onWordClick={handleWordClick}
