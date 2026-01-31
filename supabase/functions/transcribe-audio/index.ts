@@ -46,6 +46,7 @@ serve(async (req) => {
     const body = await req.json();
     
     // Handle real-time token request for WebSocket transcription (Universal Streaming v3)
+    // v3 uses API key directly in WebSocket connection - no token endpoint needed
     if (body.action === 'get_realtime_token') {
       const assemblyAIKey = Deno.env.get('ASSEMBLYAI_API_KEY');
       if (!assemblyAIKey) {
@@ -55,35 +56,13 @@ serve(async (req) => {
         );
       }
       
-      console.log('Fetching AssemblyAI streaming token...');
-      // Use v2 token endpoint (works for both v2 and v3 streaming)
-      const tokenResponse = await fetch(
-        'https://api.assemblyai.com/v2/realtime/token',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': assemblyAIKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ expires_in: 3600 }),
-        }
-      );
-
-      if (!tokenResponse.ok) {
-        const errorText = await tokenResponse.text();
-        console.error('AssemblyAI token error:', tokenResponse.status, errorText);
-        return new Response(
-          JSON.stringify({ error: `Failed to get token: ${tokenResponse.status}`, details: errorText }),
-          { status: tokenResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const tokenData = await tokenResponse.json();
-      console.log('AssemblyAI streaming token obtained');
+      console.log('Returning AssemblyAI API key for Universal Streaming v3...');
+      // Universal Streaming v3 uses direct API key authentication via WebSocket
+      // No token endpoint - just pass the API key as a query param
       return new Response(
         JSON.stringify({ 
-          token: tokenData.token,
-          wsUrl: 'wss://api.assemblyai.com/v2/realtime/ws'
+          apiKey: assemblyAIKey,
+          wsUrl: 'wss://streaming.assemblyai.com/v3/ws'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
