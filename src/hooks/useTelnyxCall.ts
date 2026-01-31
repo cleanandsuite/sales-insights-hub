@@ -17,11 +17,15 @@ interface UseTelnyxCallReturn {
   isReady: boolean;
   error: string | null;
   isMuted: boolean;
+  isOnHold: boolean;
   
   // Call controls
   startCall: (phoneNumber: string) => Promise<void>;
   endCall: () => void;
   muteAudio: (muted: boolean) => void;
+  holdCall: () => void;
+  unholdCall: () => void;
+  sendDTMF: (digit: string) => void;
   
   // Transcription
   transcripts: TranscriptSegment[];
@@ -31,6 +35,10 @@ interface UseTelnyxCallReturn {
   duration: number;
   callId: string | null;
   remoteStream: MediaStream | null;
+  
+  // Volume control
+  volume: number;
+  setVolume: (volume: number) => void;
 }
 
 export function useTelnyxCall(): UseTelnyxCallReturn {
@@ -38,11 +46,13 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const [isOnHold, setIsOnHold] = useState(false);
   const [transcripts, setTranscripts] = useState<TranscriptSegment[]>([]);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [duration, setDuration] = useState(0);
   const [callId, setCallId] = useState<string | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [volume, setVolumeState] = useState(100);
 
   const clientRef = useRef<TelnyxRTC | null>(null);
   const callRef = useRef<any>(null);
@@ -344,6 +354,32 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     }
   }, []);
 
+  const holdCall = useCallback(() => {
+    if (callRef.current) {
+      callRef.current.hold();
+      setIsOnHold(true);
+    }
+  }, []);
+
+  const unholdCall = useCallback(() => {
+    if (callRef.current) {
+      callRef.current.unhold();
+      setIsOnHold(false);
+    }
+  }, []);
+
+  const sendDTMF = useCallback((digit: string) => {
+    if (callRef.current) {
+      callRef.current.dtmf(digit);
+    }
+  }, []);
+
+  const setVolume = useCallback((newVolume: number) => {
+    setVolumeState(newVolume);
+    // If we have a remote audio element, we could control it here
+    // For now we'll handle this in the component
+  }, []);
+
   // Initialize on mount
   useEffect(() => {
     initializeClient();
@@ -365,13 +401,19 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     isReady,
     error,
     isMuted,
+    isOnHold,
     startCall,
     endCall,
     muteAudio,
+    holdCall,
+    unholdCall,
+    sendDTMF,
     transcripts,
     isTranscribing,
     duration,
     callId,
     remoteStream,
+    volume,
+    setVolume,
   };
 }

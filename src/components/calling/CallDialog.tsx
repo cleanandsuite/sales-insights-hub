@@ -9,7 +9,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Phone, Loader2 } from 'lucide-react';
+import { Phone, Loader2, AlertTriangle } from 'lucide-react';
+import { useCallLimits } from '@/hooks/useCallLimits';
+import { CallLimitIndicator } from './CallLimitIndicator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface CallDialogProps {
   open: boolean;
@@ -20,10 +23,19 @@ interface CallDialogProps {
 
 export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: CallDialogProps) {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const {
+    callsToday,
+    dailyLimit,
+    warmupDay,
+    canMakeCall,
+    isNearLimit,
+    limitEnforced,
+    isLoading,
+  } = useCallLimits();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (phoneNumber.trim()) {
+    if (phoneNumber.trim() && canMakeCall) {
       onStartCall(phoneNumber.trim());
     }
   };
@@ -64,6 +76,36 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
             </p>
           </div>
 
+          {/* Call Limit Indicator */}
+          {!isLoading && (
+            <CallLimitIndicator
+              callsToday={callsToday}
+              dailyLimit={dailyLimit}
+              warmupDay={warmupDay}
+              enforced={limitEnforced}
+            />
+          )}
+
+          {/* Warning when at limit */}
+          {!canMakeCall && limitEnforced && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                You've reached your daily call limit. This helps maintain your number's reputation during warmup.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Warning when near limit */}
+          {canMakeCall && isNearLimit && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                You're approaching your daily call limit. Consider pacing your calls to maintain number reputation.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex justify-end gap-2">
             <Button
               type="button"
@@ -75,7 +117,7 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
             </Button>
             <Button
               type="submit"
-              disabled={!phoneNumber.trim() || isConnecting}
+              disabled={!phoneNumber.trim() || isConnecting || (!canMakeCall && limitEnforced)}
               className="gap-2"
             >
               {isConnecting ? (
