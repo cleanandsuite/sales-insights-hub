@@ -202,60 +202,59 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Get temporary token from AssemblyAI via edge function
+      // Get API key for AssemblyAI Universal Streaming v3
       const tokenResponse = await supabase.functions.invoke('transcribe-audio', {
         body: { action: 'get_realtime_token' },
         headers: { Authorization: `Bearer ${session.access_token}` }
       });
 
-      if (tokenResponse.error || !tokenResponse.data?.token) {
-        console.error('[TELNYX] Failed to get transcription token:', tokenResponse.error);
+      if (tokenResponse.error || !tokenResponse.data?.apiKey) {
+        console.error('[TELNYX] Failed to get transcription credentials:', tokenResponse.error);
         setIsTranscribing(false);
         return;
       }
 
-      // Use the v2 WebSocket endpoint with token
-      const wsUrl = new URL(tokenResponse.data.wsUrl || 'wss://api.assemblyai.com/v2/realtime/ws');
+      // Universal Streaming v3 WebSocket with API key in query param
+      const wsUrl = new URL(tokenResponse.data.wsUrl || 'wss://streaming.assemblyai.com/v3/ws');
       wsUrl.searchParams.set('sample_rate', '16000');
-      wsUrl.searchParams.set('token', tokenResponse.data.token);
+      wsUrl.searchParams.set('api_key', tokenResponse.data.apiKey);
       
       const ws = new WebSocket(wsUrl.toString());
       assemblyWsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('[ASSEMBLYAI] Connected for real-time transcription');
+        console.log('[ASSEMBLYAI] Connected to Universal Streaming v3');
         startAudioStreaming(destination.stream, ws);
       };
 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
-        // Handle v2 message types
-        if (data.message_type === 'SessionBegins') {
-          console.log('[ASSEMBLYAI] Session started:', data.session_id);
+        // Handle Universal Streaming v3 message types
+        if (data.type === 'Begin') {
+          console.log('[ASSEMBLYAI] Session started:', data.id);
           return;
         }
         
-        if (data.message_type === 'PartialTranscript' || data.message_type === 'FinalTranscript') {
-          if (data.text) {
-            setTranscripts(prev => {
-              const newSegment: TranscriptSegment = {
-                text: data.text,
-                speaker: 'remote',
-                timestamp: Date.now(),
-                isFinal: data.message_type === 'FinalTranscript'
-              };
+        // v3 uses 'Turn' messages with 'transcript' field
+        if (data.type === 'Turn' && data.transcript) {
+          setTranscripts(prev => {
+            const newSegment: TranscriptSegment = {
+              text: data.transcript,
+              speaker: 'remote',
+              timestamp: Date.now(),
+              isFinal: data.end_of_turn === true
+            };
 
-              if (data.message_type === 'FinalTranscript') {
-                return [...prev.filter(t => t.isFinal), newSegment];
-              } else {
-                return [...prev.filter(t => t.isFinal), newSegment];
-              }
-            });
-          }
+            if (data.end_of_turn) {
+              return [...prev.filter(t => t.isFinal), newSegment];
+            } else {
+              return [...prev.filter(t => t.isFinal), newSegment];
+            }
+          });
         }
         
-        if (data.message_type === 'SessionTerminated') {
+        if (data.type === 'Termination') {
           console.log('[ASSEMBLYAI] Session terminated');
         }
       };
