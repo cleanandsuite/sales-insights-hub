@@ -1,166 +1,220 @@
 
 
-# Migrate Twilio Server to Telnyx for Phone Transcription
+# Telnyx Click-to-Call with Bidirectional Transcription
 
 ## Overview
 
-This plan modifies the existing `twilio-server/` to support **Telnyx** as the telephony provider instead of Twilio, while keeping AssemblyAI for transcription.
-
-## Key Differences: Twilio vs Telnyx
-
-| Aspect | Twilio | Telnyx |
-|--------|--------|--------|
-| Voice Response Format | TwiML | TeXML (similar syntax) |
-| Media Stream Events | `connected`, `start`, `media`, `stop` | `start`, `media`, `stop` |
-| Audio Encoding | PCMU (μ-law) @ 8kHz | PCMU (μ-law) @ 8kHz |
-| Call Identifier | `callSid` | `call_control_id` |
-| Stream Identifier | `streamSid` | `stream_id` |
-
-The good news: The audio format is identical, so AssemblyAI integration remains unchanged.
+This plan replaces the "Start Recording" button with a "Start Call" button that initiates outbound phone calls through Telnyx, with real-time bidirectional transcription of both parties (inbound and outbound audio) via AssemblyAI.
 
 ## Architecture
 
 ```text
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Phone Call    │────▶│     Telnyx      │────▶│   Your Server   │
-│   (Caller)      │     │  Media Streams  │     │  (Node.js)      │
-└─────────────────┘     └─────────────────┘     └────────┬────────┘
-                                                         │
-                                                         │ WebSocket
-                                                         ▼
-                                                ┌─────────────────┐
-                                                │   AssemblyAI    │
-                                                │   Real-time     │
-                                                └────────┬────────┘
-                                                         │
-                                                         ▼
-                                                ┌─────────────────┐
-                                                │   Transcripts   │
-                                                │   (Console)     │
-                                                └─────────────────┘
+┌─────────────────┐                    ┌─────────────────┐
+│   Browser App   │───────────────────▶│  Telnyx WebRTC  │
+│   (Dashboard)   │◀───────────────────│     Client      │
+└────────┬────────┘                    └────────┬────────┘
+         │                                      │
+         │ Audio Streams                        │ PSTN Call
+         ▼                                      ▼
+┌─────────────────┐                    ┌─────────────────┐
+│   Local Audio   │                    │  Phone Network  │
+│   Processing    │                    │   (Recipient)   │
+└────────┬────────┘                    └─────────────────┘
+         │
+         │ Mixed Audio (both directions)
+         ▼
+┌─────────────────┐     ┌─────────────────┐
+│  Edge Function  │────▶│   AssemblyAI    │
+│  (transcribe)   │◀────│   Real-time     │
+└─────────────────┘     └─────────────────┘
+         │
+         ▼
+    Transcripts
 ```
 
----
+## Key Components
 
-## Implementation Changes
+### 1. Call Dialog Component (New)
 
-### 1. Update `/voice` Endpoint to Return TeXML
+A modal that allows users to:
+- Enter a phone number to call
+- Or select from recent contacts/leads
+- See call status (connecting, connected, ended)
+- View live transcription during the call
+- End the call
 
-**Current (Twilio TwiML):**
-```xml
-<Response>
-  <Say>Connected to transcription service...</Say>
-  <Connect>
-    <Stream url="wss://host/media" />
-  </Connect>
-</Response>
-```
+### 2. Telnyx WebRTC Integration (New Hook)
 
-**New (Telnyx TeXML):**
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say voice="female">Connected to transcription service. Your call is being transcribed.</Say>
-  <Stream url="wss://host/media" bidirectionalMode="rtp" />
-</Response>
-```
+A custom React hook `useTelnyxCall` that:
+- Initializes the Telnyx WebRTC SDK
+- Handles authentication via a backend function that generates JWT tokens
+- Manages call state (idle, connecting, connected, ended)
+- Captures bidirectional audio streams
+- Streams audio to AssemblyAI for real-time transcription
 
-### 2. Update WebSocket Handler for Telnyx Event Structure
+### 3. Backend Functions (New Edge Functions)
 
-Telnyx media stream events use slightly different field names:
+**`telnyx-auth`** - Generates JWT tokens for WebRTC authentication:
+- Validates user session
+- Creates short-lived JWT for Telnyx WebRTC client
+- Returns token to frontend
 
-**Start Event:**
-```json
-{
-  "event": "start",
-  "sequence_number": "1",
-  "start": {
-    "call_control_id": "v2:xxxxx",
-    "call_session_id": "ff55a038-...",
-    "from": "+13122010094",
-    "to": "+13122123456",
-    "media_format": {
-      "encoding": "PCMU",
-      "sample_rate": 8000,
-      "channels": 1
-    }
-  },
-  "stream_id": "32DE0DEA-..."
-}
-```
+**`telnyx-transcribe`** (Modify existing server or create edge function approach):
+- For the WebRTC approach, audio comes from the browser
+- We can reuse the existing `transcribe-audio` function
+- Or create a new streaming endpoint
 
-**Media Event:**
-```json
-{
-  "event": "media",
-  "sequence_number": "42",
-  "media": {
-    "track": "inbound",
-    "payload": "base64-encoded-audio"
-  },
-  "stream_id": "32DE0DEA-..."
-}
-```
+### 4. UI Changes
 
-**Stop Event:**
-```json
-{
-  "event": "stop",
-  "sequence_number": "100",
-  "stream_id": "32DE0DEA-..."
-}
-```
+**DashboardHeader.tsx:**
+- Replace "Start Recording" button with "Start Call" button
+- Phone icon instead of microphone
+- Remove headphone mode toggle (not needed for calls)
 
-### 3. Files to Modify
+**New CallInterface.tsx:**
+- Similar to LiveRecordingInterface but for phone calls
+- Phone number input field
+- Call/hangup controls
+- Live transcription panel
+- AI coaching during call
+
+## Implementation Details
+
+### Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/hooks/useTelnyxCall.ts` | Telnyx WebRTC SDK integration hook |
+| `src/components/calling/CallInterface.tsx` | Full-screen call interface |
+| `src/components/calling/CallDialog.tsx` | Phone number entry dialog |
+| `src/components/calling/CallStatus.tsx` | Call status indicator |
+| `supabase/functions/telnyx-auth/index.ts` | JWT token generator for WebRTC |
+
+### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `twilio-server/index.js` | Rename to handle both, update event parsing, update TeXML response |
-| `twilio-server/README.md` | Update Telnyx configuration instructions |
-| `twilio-server/.env.example` | Add Telnyx-specific notes |
+| `src/components/dashboard/DashboardHeader.tsx` | Replace recording button with call button |
+| `src/pages/Dashboard.tsx` | Integrate CallInterface instead of LiveRecordingInterface |
+| `src/pages/Leads.tsx` | Update `handleCall` to use Telnyx instead of `tel:` link |
+| `package.json` | Add `@telnyx/webrtc` SDK dependency |
+
+### NPM Dependencies
+
+```json
+{
+  "@telnyx/webrtc": "^2.19.0"
+}
+```
+
+### Telnyx Configuration Requirements
+
+Before this works, the user needs:
+1. A **Telnyx account** with the API key (already configured as `Telnyx_API`)
+2. A **Telnyx SIP Connection** or **Credential Connection** for WebRTC
+3. A **Phone Number** assigned to the connection for caller ID
+4. **WebRTC enabled** on the connection
 
 ---
 
-## Technical Details
+## Technical Specifications
 
-### Updated index.js Changes
+### Audio Capture Strategy
 
-1. **Health endpoint**: Update service name to "Telnyx-AssemblyAI Transcription Server"
+For bidirectional transcription, we capture:
 
-2. **POST /voice handler**:
-   - Return TeXML instead of TwiML
-   - Use Telnyx Stream element syntax
-   - Log caller info from Telnyx webhook fields
+1. **Outbound audio (user's voice):** Local microphone stream
+2. **Inbound audio (recipient's voice):** Remote audio from WebRTC call
 
-3. **WebSocket /media handler**:
-   - Extract `call_control_id` instead of `callSid`
-   - Extract `stream_id` instead of `streamSid`  
-   - Parse media from `msg.media.payload` (same format)
-   - Handle Telnyx-specific `sequence_number` for ordering
+These are mixed into a single stream and sent to AssemblyAI:
 
-4. **Console logging**:
-   - Update log prefixes from `[TWILIO]` to `[TELNYX]`
+```text
+Local Mic Audio ──┐
+                  ├──▶ Mixed Stream ──▶ AssemblyAI
+Remote Audio ─────┘
+```
 
-### Audio Flow (Unchanged)
+### useTelnyxCall Hook Interface
 
-Since Telnyx uses the same PCMU encoding at 8000Hz:
-- No changes needed to AssemblyAI connection
-- No changes to audio buffering logic
-- No changes to silence detection
+```typescript
+interface UseTelnyxCallReturn {
+  // State
+  callStatus: 'idle' | 'connecting' | 'ringing' | 'connected' | 'ended';
+  isReady: boolean;
+  error: string | null;
+  
+  // Call controls
+  startCall: (phoneNumber: string) => Promise<void>;
+  endCall: () => void;
+  muteAudio: (muted: boolean) => void;
+  
+  // Transcription
+  transcription: string;
+  isTranscribing: boolean;
+  
+  // Call info
+  duration: number;
+  callId: string | null;
+}
+```
+
+### Edge Function: telnyx-auth
+
+Creates a JWT token for the Telnyx WebRTC client:
+
+```typescript
+// Pseudocode
+POST /telnyx-auth
+{
+  // Uses TELNYX_API_KEY from secrets
+  // Returns: { token: "jwt...", expires_at: "..." }
+}
+```
 
 ---
 
-## Deployment Steps
+## Secrets Required
 
-After implementation:
+The following secrets need to be configured:
 
-1. Deploy updated server to Railway/Render
-2. Configure Telnyx:
-   - Go to Telnyx Mission Control Portal
-   - Create or select a TeXML Application
-   - Set Voice URL to: `https://your-server.com/voice`
-   - Assign a phone number to this application
-3. Test by calling the Telnyx number
+| Secret | Status | Purpose |
+|--------|--------|---------|
+| `Telnyx_API` | Already configured | API key for Telnyx |
+| `TELNYX_SIP_USERNAME` | Needs to be added | SIP Connection username |
+| `TELNYX_SIP_PASSWORD` | Needs to be added | SIP Connection password |
+| `TELNYX_CALLER_ID` | Needs to be added | Your Telnyx phone number |
+
+---
+
+## User Flow
+
+1. User clicks "Start Call" button on dashboard
+2. Call dialog opens asking for phone number
+3. User enters number or selects from leads
+4. Click "Call" initiates:
+   - Telnyx WebRTC connection established
+   - Outbound call placed to phone number
+   - Audio capture begins
+5. When call connects:
+   - Live transcription shows on screen
+   - AI coaching suggestions appear
+6. When call ends:
+   - Recording is saved
+   - Full analysis is generated
+   - User redirected to analysis page
+
+---
+
+## Alternative Approach: Server-Side Calling
+
+If browser-based WebRTC is too complex, an alternative is:
+
+1. **Use the existing `twilio-server`** (now Telnyx server)
+2. Add an endpoint to **initiate outbound calls**
+3. The server handles both audio directions
+4. Frontend receives transcripts via WebSocket
+
+This approach is simpler but requires the standalone server to be deployed.
 
 ---
 
@@ -168,8 +222,12 @@ After implementation:
 
 | File | Action | Description |
 |------|--------|-------------|
-| `twilio-server/index.js` | Modify | Update for Telnyx TeXML and event structure |
-| `twilio-server/README.md` | Modify | Update with Telnyx setup instructions |
-| `twilio-server/.env.example` | Minor update | Keep same vars, update comments |
-| `twilio-server/package.json` | Modify | Update name/description |
+| `src/hooks/useTelnyxCall.ts` | Create | WebRTC calling hook |
+| `src/components/calling/CallInterface.tsx` | Create | Full call UI |
+| `src/components/calling/CallDialog.tsx` | Create | Phone entry modal |
+| `supabase/functions/telnyx-auth/index.ts` | Create | JWT token generator |
+| `src/components/dashboard/DashboardHeader.tsx` | Modify | Change to call button |
+| `src/pages/Dashboard.tsx` | Modify | Add call state/interface |
+| `src/pages/Leads.tsx` | Modify | Use Telnyx for calls |
+| `package.json` | Modify | Add @telnyx/webrtc |
 
