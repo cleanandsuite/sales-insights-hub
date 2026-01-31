@@ -45,7 +45,7 @@ serve(async (req) => {
 
     const body = await req.json();
     
-    // Handle real-time token request for WebSocket transcription
+    // Handle real-time token request for WebSocket transcription (Universal Streaming v3)
     if (body.action === 'get_realtime_token') {
       const assemblyAIKey = Deno.env.get('ASSEMBLYAI_API_KEY');
       if (!assemblyAIKey) {
@@ -55,32 +55,34 @@ serve(async (req) => {
         );
       }
       
-      console.log('Fetching AssemblyAI real-time token...');
+      console.log('Fetching AssemblyAI Universal Streaming v3 token...');
+      // Use the API base URL with /v3/token path (not streaming subdomain)
       const tokenResponse = await fetch(
-        'https://api.assemblyai.com/v2/realtime/token',
+        'https://api.assemblyai.com/v3/token?expires_in_seconds=600',
         {
-          method: 'POST',
+          method: 'GET',
           headers: {
             'Authorization': assemblyAIKey,
-            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ expires_in: 3600 }),
         }
       );
 
       if (!tokenResponse.ok) {
         const errorText = await tokenResponse.text();
-        console.error('AssemblyAI token error:', tokenResponse.status, errorText);
+        console.error('AssemblyAI v3 token error:', tokenResponse.status, errorText);
         return new Response(
-          JSON.stringify({ error: `Failed to get token: ${tokenResponse.status}` }),
+          JSON.stringify({ error: `Failed to get token: ${tokenResponse.status}`, details: errorText }),
           { status: tokenResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
       const tokenData = await tokenResponse.json();
-      console.log('AssemblyAI real-time token obtained');
+      console.log('AssemblyAI Universal Streaming v3 token obtained');
       return new Response(
-        JSON.stringify({ token: tokenData.token }),
+        JSON.stringify({ 
+          token: tokenData.token,
+          wsUrl: 'wss://streaming.assemblyai.com/v3/ws'
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
