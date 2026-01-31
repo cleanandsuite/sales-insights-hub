@@ -1,15 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { TelnyxRTC } from '@telnyx/webrtc';
 import { supabase } from '@/integrations/supabase/client';
+import { useCallRecorder } from './useCallRecorder';
 
 export type CallStatus = 'idle' | 'connecting' | 'ringing' | 'connected' | 'ended' | 'error';
-
-interface TranscriptSegment {
-  text: string;
-  speaker: 'user' | 'remote';
-  timestamp: number;
-  isFinal: boolean;
-}
 
 interface UseTelnyxCallReturn {
   // State
@@ -27,8 +21,8 @@ interface UseTelnyxCallReturn {
   unholdCall: () => void;
   sendDTMF: (digit: string) => void;
   
-  // Transcription
-  transcripts: TranscriptSegment[];
+  // Transcription (from useCallRecorder)
+  transcripts: { text: string; speaker: 'user' | 'remote'; timestamp: number; isFinal: boolean }[];
   isTranscribing: boolean;
   
   // Call info
@@ -39,6 +33,9 @@ interface UseTelnyxCallReturn {
   // Volume control
   volume: number;
   setVolume: (volume: number) => void;
+  
+  // Recording
+  recordingBlob: Blob | null;
 }
 
 export function useTelnyxCall(): UseTelnyxCallReturn {
@@ -47,19 +44,25 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
   const [error, setError] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isOnHold, setIsOnHold] = useState(false);
-  const [transcripts, setTranscripts] = useState<TranscriptSegment[]>([]);
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [duration, setDuration] = useState(0);
   const [callId, setCallId] = useState<string | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [volume, setVolumeState] = useState(100);
+  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
 
   const clientRef = useRef<TelnyxRTC | null>(null);
   const callRef = useRef<any>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const assemblyWsRef = useRef<WebSocket | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+
+  // Use the new call recorder hook
+  const { 
+    isRecording, 
+    transcripts, 
+    isTranscribing, 
+    startRecording, 
+    stopRecording 
+  } = useCallRecorder();
 
   // Initialize Telnyx client
   const initializeClient = useCallback(async () => {
@@ -137,15 +140,37 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
           setCallStatus('connected');
           setCallId(call.id);
           startDurationTimer();
-          startBidirectionalTranscription(call);
+          
+          // Start recording and transcription when call connects
+          const localStream = call.localStream;
+          const remoteStreamFromCall = call.remoteStream;
+          
+          if (localStream) {
+            localStreamRef.current = localStream;
+          }
+          
+          if (remoteStreamFromCall) {
+            setRemoteStream(remoteStreamFromCall);
+            
+            // Start recording both streams
+            if (localStream && remoteStreamFromCall) {
+              startRecording(localStream, remoteStreamFromCall);
+            }
+          }
         } else if (state === 'hangup' || state === 'destroy') {
           setCallStatus('ended');
           stopDurationTimer();
-          stopTranscription();
+          // Stop recording and get the blob
+          stopRecording().then(blob => {
+            if (blob) {
+              setRecordingBlob(blob);
+              console.log('[TELNYX] Recording saved, size:', blob.size);
+            }
+          });
         }
         break;
     }
-  }, []);
+  }, [startRecording, stopRecording]);
 
   const startDurationTimer = useCallback(() => {
     setDuration(0);
@@ -161,155 +186,6 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     }
   }, []);
 
-  // Start bidirectional transcription using AssemblyAI Universal Streaming v3
-  const startBidirectionalTranscription = useCallback(async (call: any) => {
-    try {
-      setIsTranscribing(true);
-      
-      // Get local and remote audio streams
-      const localStream = call.localStream;
-      const remoteStreamFromCall = call.remoteStream;
-
-      // Expose remote stream for audio playback
-      if (remoteStreamFromCall) {
-        setRemoteStream(remoteStreamFromCall);
-      }
-
-      if (!localStream || !remoteStreamFromCall) {
-        console.warn('[TELNYX] Streams not available yet');
-        return;
-      }
-
-      // Create audio context for mixing streams
-      audioContextRef.current = new AudioContext({ sampleRate: 16000 });
-      const audioContext = audioContextRef.current;
-
-      // Create sources for both streams
-      const localSource = audioContext.createMediaStreamSource(localStream);
-      const remoteSource = audioContext.createMediaStreamSource(remoteStreamFromCall);
-
-      // Create a merger to combine both streams
-      const merger = audioContext.createChannelMerger(2);
-      localSource.connect(merger, 0, 0);
-      remoteSource.connect(merger, 0, 1);
-
-      // Create a destination to capture the mixed audio
-      const destination = audioContext.createMediaStreamDestination();
-      merger.connect(destination);
-      mediaStreamRef.current = destination.stream;
-
-      // Connect to AssemblyAI Universal Streaming v3 API
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      // Get API key for AssemblyAI Universal Streaming v3
-      const tokenResponse = await supabase.functions.invoke('transcribe-audio', {
-        body: { action: 'get_realtime_token' },
-        headers: { Authorization: `Bearer ${session.access_token}` }
-      });
-
-      if (tokenResponse.error || !tokenResponse.data?.apiKey) {
-        console.error('[TELNYX] Failed to get transcription credentials:', tokenResponse.error);
-        setIsTranscribing(false);
-        return;
-      }
-
-      // Universal Streaming v3 WebSocket with API key in query param
-      const wsUrl = new URL(tokenResponse.data.wsUrl || 'wss://streaming.assemblyai.com/v3/ws');
-      wsUrl.searchParams.set('sample_rate', '16000');
-      wsUrl.searchParams.set('api_key', tokenResponse.data.apiKey);
-      
-      const ws = new WebSocket(wsUrl.toString());
-      assemblyWsRef.current = ws;
-
-      ws.onopen = () => {
-        console.log('[ASSEMBLYAI] Connected to Universal Streaming v3');
-        startAudioStreaming(destination.stream, ws);
-      };
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        // Handle Universal Streaming v3 message types
-        if (data.type === 'Begin') {
-          console.log('[ASSEMBLYAI] Session started:', data.id);
-          return;
-        }
-        
-        // v3 uses 'Turn' messages with 'transcript' field
-        if (data.type === 'Turn' && data.transcript) {
-          setTranscripts(prev => {
-            const newSegment: TranscriptSegment = {
-              text: data.transcript,
-              speaker: 'remote',
-              timestamp: Date.now(),
-              isFinal: data.end_of_turn === true
-            };
-
-            if (data.end_of_turn) {
-              return [...prev.filter(t => t.isFinal), newSegment];
-            } else {
-              return [...prev.filter(t => t.isFinal), newSegment];
-            }
-          });
-        }
-        
-        if (data.type === 'Termination') {
-          console.log('[ASSEMBLYAI] Session terminated');
-        }
-      };
-
-      ws.onerror = (err) => {
-        console.error('[ASSEMBLYAI] WebSocket error:', err);
-      };
-
-      ws.onclose = (event) => {
-        console.log('[ASSEMBLYAI] WebSocket closed:', event.code, event.reason);
-        setIsTranscribing(false);
-      };
-    } catch (err) {
-      console.error('[TELNYX] Transcription error:', err);
-      setIsTranscribing(false);
-    }
-  }, []);
-
-  const startAudioStreaming = useCallback((stream: MediaStream, ws: WebSocket) => {
-    const audioContext = audioContextRef.current;
-    if (!audioContext) return;
-
-    const source = audioContext.createMediaStreamSource(stream);
-    const processor = audioContext.createScriptProcessor(4096, 1, 1);
-
-    source.connect(processor);
-    processor.connect(audioContext.destination);
-
-    processor.onaudioprocess = (e) => {
-      if (ws.readyState !== WebSocket.OPEN) return;
-
-      const inputData = e.inputBuffer.getChannelData(0);
-      const pcmData = new Int16Array(inputData.length);
-      
-      for (let i = 0; i < inputData.length; i++) {
-        pcmData[i] = Math.max(-32768, Math.min(32767, Math.floor(inputData[i] * 32768)));
-      }
-
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
-      ws.send(JSON.stringify({ audio_data: base64 }));
-    };
-  }, []);
-
-  const stopTranscription = useCallback(() => {
-    if (assemblyWsRef.current) {
-      assemblyWsRef.current.close();
-      assemblyWsRef.current = null;
-    }
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-    setIsTranscribing(false);
-  }, []);
-
   const startCall = useCallback(async (phoneNumber: string) => {
     if (!clientRef.current || !isReady) {
       setError('Client not ready. Please wait...');
@@ -319,8 +195,8 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     try {
       setError(null);
       setCallStatus('connecting');
-      setTranscripts([]);
       setDuration(0);
+      setRecordingBlob(null);
 
       // Format phone number
       const formattedNumber = phoneNumber.replace(/[^\d+]/g, '');
@@ -349,15 +225,21 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     }
   }, [isReady]);
 
-  const endCall = useCallback(() => {
+  const endCall = useCallback(async () => {
     if (callRef.current) {
       callRef.current.hangup();
       callRef.current = null;
     }
-    stopTranscription();
+    
+    // Stop recording and save
+    const blob = await stopRecording();
+    if (blob) {
+      setRecordingBlob(blob);
+    }
+    
     stopDurationTimer();
     setCallStatus('ended');
-  }, [stopTranscription, stopDurationTimer]);
+  }, [stopRecording, stopDurationTimer]);
 
   const muteAudio = useCallback((muted: boolean) => {
     if (callRef.current) {
@@ -407,10 +289,10 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       if (clientRef.current) {
         clientRef.current.disconnect();
       }
-      stopTranscription();
+      stopRecording();
       stopDurationTimer();
     };
-  }, [initializeClient, stopTranscription, stopDurationTimer]);
+  }, [initializeClient, stopRecording, stopDurationTimer]);
 
   return {
     callStatus,
@@ -431,5 +313,6 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     remoteStream,
     volume,
     setVolume,
+    recordingBlob,
   };
 }
