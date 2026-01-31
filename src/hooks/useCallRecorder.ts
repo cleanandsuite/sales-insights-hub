@@ -109,8 +109,10 @@ export function useCallRecorder(): UseCallRecorderReturn {
         headers: { Authorization: `Bearer ${session.access_token}` }
       });
 
+      console.log('[CALL_RECORDER] Token response:', JSON.stringify(response.data), 'Error:', response.error);
+
       if (response.error || !response.data?.token) {
-        console.error('[CALL_RECORDER] Failed to get transcription credentials:', response.error);
+        console.error('[CALL_RECORDER] Failed to get transcription credentials:', response.error, response.data);
         return;
       }
 
