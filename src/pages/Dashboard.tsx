@@ -26,7 +26,8 @@ import {
 
 // Existing Components
 import { ProfileSetupBanner } from '@/components/recording/ProfileSetupBanner';
-import { LiveRecordingInterface } from '@/components/recording/LiveRecordingInterface';
+import { CallDialog } from '@/components/calling/CallDialog';
+import { CallInterface } from '@/components/calling/CallInterface';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,9 +90,9 @@ export default function Dashboard() {
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isRecording, setIsRecording] = useState(false);
+  const [showCallDialog, setShowCallDialog] = useState(false);
+  const [activeCall, setActiveCall] = useState<string | null>(null);
   const [aiActive, setAiActive] = useState(true);
-  const [headphoneMode, setHeadphoneMode] = useState(false);
   const [kpis, setKpis] = useState<TeamKPIs | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<{ id: string; name: string; company: string } | null>(null);
 
@@ -195,23 +196,32 @@ export default function Dashboard() {
     return callDate >= dayAgo;
   }).length;
 
+  // Handle starting a call
+  const handleStartCall = (phoneNumber: string) => {
+    setShowCallDialog(false);
+    setActiveCall(phoneNumber);
+  };
+
   // Enterprise Dashboard for Executive users
   if (isExecutive && teamId) {
     return (
       <>
-        {isRecording && (
-          <LiveRecordingInterface onClose={() => setIsRecording(false)} useScreenShare={headphoneMode} />
+        {activeCall && (
+          <CallInterface phoneNumber={activeCall} onClose={() => setActiveCall(null)} />
         )}
+        
+        <CallDialog
+          open={showCallDialog}
+          onOpenChange={setShowCallDialog}
+          onStartCall={handleStartCall}
+        />
         
         <DashboardLayout>
           <div className="space-y-6 animate-fade-in">
             <DashboardHeader
               title="Executive Dashboard"
               subtitle="Team performance, goals, and revenue intelligence"
-              isRecording={isRecording}
-              headphoneMode={headphoneMode}
-              onStartRecording={() => setIsRecording(true)}
-              onHeadphoneModeChange={setHeadphoneMode}
+              onStartCall={() => setShowCallDialog(true)}
               showEnterpriseBadge
             />
 
@@ -257,9 +267,15 @@ export default function Dashboard() {
   // ============================================
   return (
     <>
-      {isRecording && (
-        <LiveRecordingInterface onClose={() => setIsRecording(false)} useScreenShare={headphoneMode} />
+      {activeCall && (
+        <CallInterface phoneNumber={activeCall} onClose={() => setActiveCall(null)} />
       )}
+      
+      <CallDialog
+        open={showCallDialog}
+        onOpenChange={setShowCallDialog}
+        onStartCall={handleStartCall}
+      />
       
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
@@ -267,10 +283,7 @@ export default function Dashboard() {
           <DashboardHeader
             title="Sales Dashboard"
             subtitle="AI-powered revenue intelligence"
-            isRecording={isRecording}
-            headphoneMode={headphoneMode}
-            onStartRecording={() => setIsRecording(true)}
-            onHeadphoneModeChange={setHeadphoneMode}
+            onStartCall={() => setShowCallDialog(true)}
           />
 
           <ProfileSetupBanner variant="full" />

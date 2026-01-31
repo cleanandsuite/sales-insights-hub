@@ -17,6 +17,8 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
 import { Search, Filter, Download, Users, Sparkles } from 'lucide-react';
 import { AddLeadDialog } from '@/components/leads/AddLeadDialog';
+import { CallDialog } from '@/components/calling/CallDialog';
+import { CallInterface } from '@/components/calling/CallInterface';
 
 interface Lead {
   id: string;
@@ -269,6 +271,9 @@ export default function Leads() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [aiActive, setAiActive] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
+  const [showCallDialog, setShowCallDialog] = useState(false);
+  const [activeCall, setActiveCall] = useState<string | null>(null);
+  const [pendingCallLead, setPendingCallLead] = useState<Lead | null>(null);
   const [stats, setStats] = useState({
     todaysLeads: 0,
     weeklyLeads: 0,
@@ -371,10 +376,17 @@ export default function Leads() {
       return;
     }
     if (lead.phone) {
-      window.location.href = `tel:${lead.phone}`;
+      setPendingCallLead(lead);
+      setShowCallDialog(true);
     } else {
       toast.error('No phone number available');
     }
+  };
+
+  const handleStartCall = (phoneNumber: string) => {
+    setShowCallDialog(false);
+    setActiveCall(phoneNumber);
+    setPendingCallLead(null);
   };
 
   const handleEmail = (lead: Lead) => {
@@ -419,7 +431,18 @@ export default function Leads() {
   };
 
   return (
-    <DashboardLayout>
+    <>
+      {activeCall && (
+        <CallInterface phoneNumber={activeCall} onClose={() => setActiveCall(null)} />
+      )}
+      
+      <CallDialog
+        open={showCallDialog}
+        onOpenChange={setShowCallDialog}
+        onStartCall={handleStartCall}
+      />
+      
+      <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -598,6 +621,7 @@ export default function Leads() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+      </DashboardLayout>
+    </>
   );
 }

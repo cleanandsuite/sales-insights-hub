@@ -1,18 +1,13 @@
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Mic, Headphones, Sparkles } from 'lucide-react';
+import { Phone, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DashboardHeaderProps {
   title?: string;
   subtitle?: string;
   userName?: string;
-  isRecording: boolean;
-  headphoneMode: boolean;
-  onStartRecording: () => void;
-  onHeadphoneModeChange: (value: boolean) => void;
+  onStartCall: () => void;
   showEnterpriseBadge?: boolean;
   className?: string;
 }
@@ -21,10 +16,7 @@ export function DashboardHeader({
   title,
   subtitle,
   userName = 'there',
-  isRecording,
-  headphoneMode,
-  onStartRecording,
-  onHeadphoneModeChange,
+  onStartCall,
   showEnterpriseBadge = false,
   className,
 }: DashboardHeaderProps) {
@@ -52,7 +44,7 @@ export function DashboardHeader({
 
       <div className="flex flex-col items-end gap-3">
         <Button
-          onClick={onStartRecording}
+          onClick={onStartCall}
           size="lg"
           className={cn(
             'gap-2 font-semibold shadow-lg transition-all duration-300',
@@ -62,24 +54,9 @@ export function DashboardHeader({
             'text-primary-foreground'
           )}
         >
-          <Mic className="h-5 w-5" />
-          🎙 Start Recording
+          <Phone className="h-5 w-5" />
+          📞 Start Call
         </Button>
-        <div className="flex items-center gap-2">
-          <Switch
-            id="headphone-mode"
-            checked={headphoneMode}
-            onCheckedChange={onHeadphoneModeChange}
-            className="data-[state=checked]:bg-primary"
-          />
-          <Label
-            htmlFor="headphone-mode"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer"
-          >
-            <Headphones className="h-4 w-4" />
-            🎧 Mode
-          </Label>
-        </div>
       </div>
     </div>
   );
