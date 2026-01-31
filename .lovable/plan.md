@@ -1,233 +1,85 @@
 
 
-# Telnyx Click-to-Call with Bidirectional Transcription
+# Fix One-Way Audio: Enable Remote Audio Playback
 
-## Overview
+## Problem
 
-This plan replaces the "Start Recording" button with a "Start Call" button that initiates outbound phone calls through Telnyx, with real-time bidirectional transcription of both parties (inbound and outbound audio) via AssemblyAI.
+You can't hear the other party because the remote audio stream from Telnyx WebRTC is being captured for transcription but **never attached to an audio element for playback**.
 
-## Architecture
-
+The current flow:
 ```text
-┌─────────────────┐                    ┌─────────────────┐
-│   Browser App   │───────────────────▶│  Telnyx WebRTC  │
-│   (Dashboard)   │◀───────────────────│     Client      │
-└────────┬────────┘                    └────────┬────────┘
-         │                                      │
-         │ Audio Streams                        │ PSTN Call
-         ▼                                      ▼
-┌─────────────────┐                    ┌─────────────────┐
-│   Local Audio   │                    │  Phone Network  │
-│   Processing    │                    │   (Recipient)   │
-└────────┬────────┘                    └─────────────────┘
-         │
-         │ Mixed Audio (both directions)
-         ▼
-┌─────────────────┐     ┌─────────────────┐
-│  Edge Function  │────▶│   AssemblyAI    │
-│  (transcribe)   │◀────│   Real-time     │
-└─────────────────┘     └─────────────────┘
-         │
-         ▼
-    Transcripts
+Remote Audio Stream ──▶ AudioContext (for transcription) ──▶ AssemblyAI
+                       (no playback!)
 ```
 
-## Key Components
+What we need:
+```text
+Remote Audio Stream ──┬──▶ AudioContext (for transcription) ──▶ AssemblyAI
+                      │
+                      └──▶ HTMLAudioElement (for playback) ──▶ Speakers
+```
 
-### 1. Call Dialog Component (New)
+## Solution
 
-A modal that allows users to:
-- Enter a phone number to call
-- Or select from recent contacts/leads
-- See call status (connecting, connected, ended)
-- View live transcription during the call
-- End the call
+Add an `<audio>` element and attach the remote stream to it when the call connects.
 
-### 2. Telnyx WebRTC Integration (New Hook)
+## Changes Required
 
-A custom React hook `useTelnyxCall` that:
-- Initializes the Telnyx WebRTC SDK
-- Handles authentication via a backend function that generates JWT tokens
-- Manages call state (idle, connecting, connected, ended)
-- Captures bidirectional audio streams
-- Streams audio to AssemblyAI for real-time transcription
+### 1. Update `useTelnyxCall.ts`
 
-### 3. Backend Functions (New Edge Functions)
+Add a ref for the audio element and expose the remote stream:
 
-**`telnyx-auth`** - Generates JWT tokens for WebRTC authentication:
-- Validates user session
-- Creates short-lived JWT for Telnyx WebRTC client
-- Returns token to frontend
+```typescript
+// Add new ref
+const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
 
-**`telnyx-transcribe`** (Modify existing server or create edge function approach):
-- For the WebRTC approach, audio comes from the browser
-- We can reuse the existing `transcribe-audio` function
-- Or create a new streaming endpoint
+// Add new state to expose remote stream
+const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
-### 4. UI Changes
+// In startBidirectionalTranscription, after getting remoteStream:
+setRemoteStream(call.remoteStream);
 
-**DashboardHeader.tsx:**
-- Replace "Start Recording" button with "Start Call" button
-- Phone icon instead of microphone
-- Remove headphone mode toggle (not needed for calls)
+// Return remoteStream from hook
+return {
+  // ... existing returns
+  remoteStream,
+};
+```
 
-**New CallInterface.tsx:**
-- Similar to LiveRecordingInterface but for phone calls
-- Phone number input field
-- Call/hangup controls
-- Live transcription panel
-- AI coaching during call
+### 2. Update `CallInterface.tsx`
 
-## Implementation Details
+Add a hidden audio element and attach the remote stream:
 
-### Files to Create
+```typescript
+// Add ref for audio element
+const remoteAudioRef = useRef<HTMLAudioElement>(null);
 
-| File | Purpose |
-|------|---------|
-| `src/hooks/useTelnyxCall.ts` | Telnyx WebRTC SDK integration hook |
-| `src/components/calling/CallInterface.tsx` | Full-screen call interface |
-| `src/components/calling/CallDialog.tsx` | Phone number entry dialog |
-| `src/components/calling/CallStatus.tsx` | Call status indicator |
-| `supabase/functions/telnyx-auth/index.ts` | JWT token generator for WebRTC |
+// Get remoteStream from hook
+const { remoteStream, /* ...other */ } = useTelnyxCall();
 
-### Files to Modify
+// Effect to attach stream to audio element
+useEffect(() => {
+  if (remoteAudioRef.current && remoteStream) {
+    remoteAudioRef.current.srcObject = remoteStream;
+    remoteAudioRef.current.play().catch(console.error);
+  }
+}, [remoteStream]);
+
+// In JSX, add hidden audio element
+<audio ref={remoteAudioRef} autoPlay playsInline />
+```
+
+## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/components/dashboard/DashboardHeader.tsx` | Replace recording button with call button |
-| `src/pages/Dashboard.tsx` | Integrate CallInterface instead of LiveRecordingInterface |
-| `src/pages/Leads.tsx` | Update `handleCall` to use Telnyx instead of `tel:` link |
-| `package.json` | Add `@telnyx/webrtc` SDK dependency |
+| `src/hooks/useTelnyxCall.ts` | Add `remoteStream` state, expose it from hook |
+| `src/components/calling/CallInterface.tsx` | Add `<audio>` element, attach stream for playback |
 
-### NPM Dependencies
+## Technical Notes
 
-```json
-{
-  "@telnyx/webrtc": "^2.19.0"
-}
-```
-
-### Telnyx Configuration Requirements
-
-Before this works, the user needs:
-1. A **Telnyx account** with the API key (already configured as `Telnyx_API`)
-2. A **Telnyx SIP Connection** or **Credential Connection** for WebRTC
-3. A **Phone Number** assigned to the connection for caller ID
-4. **WebRTC enabled** on the connection
-
----
-
-## Technical Specifications
-
-### Audio Capture Strategy
-
-For bidirectional transcription, we capture:
-
-1. **Outbound audio (user's voice):** Local microphone stream
-2. **Inbound audio (recipient's voice):** Remote audio from WebRTC call
-
-These are mixed into a single stream and sent to AssemblyAI:
-
-```text
-Local Mic Audio ──┐
-                  ├──▶ Mixed Stream ──▶ AssemblyAI
-Remote Audio ─────┘
-```
-
-### useTelnyxCall Hook Interface
-
-```typescript
-interface UseTelnyxCallReturn {
-  // State
-  callStatus: 'idle' | 'connecting' | 'ringing' | 'connected' | 'ended';
-  isReady: boolean;
-  error: string | null;
-  
-  // Call controls
-  startCall: (phoneNumber: string) => Promise<void>;
-  endCall: () => void;
-  muteAudio: (muted: boolean) => void;
-  
-  // Transcription
-  transcription: string;
-  isTranscribing: boolean;
-  
-  // Call info
-  duration: number;
-  callId: string | null;
-}
-```
-
-### Edge Function: telnyx-auth
-
-Creates a JWT token for the Telnyx WebRTC client:
-
-```typescript
-// Pseudocode
-POST /telnyx-auth
-{
-  // Uses TELNYX_API_KEY from secrets
-  // Returns: { token: "jwt...", expires_at: "..." }
-}
-```
-
----
-
-## Secrets Required
-
-The following secrets need to be configured:
-
-| Secret | Status | Purpose |
-|--------|--------|---------|
-| `Telnyx_API` | Already configured | API key for Telnyx |
-| `TELNYX_SIP_USERNAME` | Needs to be added | SIP Connection username |
-| `TELNYX_SIP_PASSWORD` | Needs to be added | SIP Connection password |
-| `TELNYX_CALLER_ID` | Needs to be added | Your Telnyx phone number |
-
----
-
-## User Flow
-
-1. User clicks "Start Call" button on dashboard
-2. Call dialog opens asking for phone number
-3. User enters number or selects from leads
-4. Click "Call" initiates:
-   - Telnyx WebRTC connection established
-   - Outbound call placed to phone number
-   - Audio capture begins
-5. When call connects:
-   - Live transcription shows on screen
-   - AI coaching suggestions appear
-6. When call ends:
-   - Recording is saved
-   - Full analysis is generated
-   - User redirected to analysis page
-
----
-
-## Alternative Approach: Server-Side Calling
-
-If browser-based WebRTC is too complex, an alternative is:
-
-1. **Use the existing `twilio-server`** (now Telnyx server)
-2. Add an endpoint to **initiate outbound calls**
-3. The server handles both audio directions
-4. Frontend receives transcripts via WebSocket
-
-This approach is simpler but requires the standalone server to be deployed.
-
----
-
-## Files Summary
-
-| File | Action | Description |
-|------|--------|-------------|
-| `src/hooks/useTelnyxCall.ts` | Create | WebRTC calling hook |
-| `src/components/calling/CallInterface.tsx` | Create | Full call UI |
-| `src/components/calling/CallDialog.tsx` | Create | Phone entry modal |
-| `supabase/functions/telnyx-auth/index.ts` | Create | JWT token generator |
-| `src/components/dashboard/DashboardHeader.tsx` | Modify | Change to call button |
-| `src/pages/Dashboard.tsx` | Modify | Add call state/interface |
-| `src/pages/Leads.tsx` | Modify | Use Telnyx for calls |
-| `package.json` | Modify | Add @telnyx/webrtc |
+- The `<audio>` element with `autoPlay` will play the remote audio through your speakers
+- `playsInline` ensures compatibility on mobile browsers
+- The `.play()` call handles browsers that require user interaction before audio playback
+- The AudioContext continues to work separately for transcription
 
