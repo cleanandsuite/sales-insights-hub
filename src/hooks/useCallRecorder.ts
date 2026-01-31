@@ -109,18 +109,22 @@ export function useCallRecorder(): UseCallRecorderReturn {
         headers: { Authorization: `Bearer ${session.access_token}` }
       });
 
-      if (response.error || !response.data?.apiKey) {
+      if (response.error || !response.data?.token) {
         console.error('[CALL_RECORDER] Failed to get transcription credentials:', response.error);
         return;
       }
+
+      console.log('[CALL_RECORDER] Got temp token, expires:', response.data.expiresAt);
 
       // Connect to AssemblyAI Universal Streaming v3
       const wsUrl = new URL(response.data.wsUrl || 'wss://streaming.assemblyai.com/v3/ws');
       wsUrl.searchParams.set('sample_rate', String(audioContext.sampleRate));
       wsUrl.searchParams.set('encoding', 'pcm_s16le');
       wsUrl.searchParams.set('format_turns', 'true');
-      wsUrl.searchParams.set('api_key', response.data.apiKey);
+      wsUrl.searchParams.set('token', response.data.token);
 
+      console.log('[CALL_RECORDER] Connecting to:', wsUrl.toString().replace(/token=[^&]+/, 'token=REDACTED'));
+      
       const ws = new WebSocket(wsUrl.toString());
       wsRef.current = ws;
 
