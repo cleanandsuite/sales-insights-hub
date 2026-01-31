@@ -160,17 +160,68 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
         } else if (state === 'hangup' || state === 'destroy') {
           setCallStatus('ended');
           stopDurationTimer();
-          // Stop recording and get the blob
-          stopRecording().then(blob => {
-            if (blob) {
+          // Stop recording and upload to storage
+          stopRecording().then(async (blob) => {
+            if (blob && blob.size > 0) {
               setRecordingBlob(blob);
-              console.log('[TELNYX] Recording saved, size:', blob.size);
+              console.log('[TELNYX] Recording blob created, size:', blob.size);
+              
+              try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                  console.error('[TELNYX] No session for upload');
+                  return;
+                }
+                
+                const fileName = `call_${Date.now()}.webm`;
+                const filePath = `${session.user.id}/${fileName}`;
+                
+                // Upload to storage
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                  .from('call-recordings')
+                  .upload(filePath, blob, {
+                    contentType: 'audio/webm',
+                    upsert: false
+                  });
+                
+                if (uploadError) {
+                  console.error('[TELNYX] Upload error:', uploadError);
+                  return;
+                }
+                
+                // Get public URL
+                const { data: urlData } = supabase.storage
+                  .from('call-recordings')
+                  .getPublicUrl(filePath);
+                
+                // Save to database
+                const { error: dbError } = await supabase
+                  .from('call_recordings')
+                  .insert({
+                    user_id: session.user.id,
+                    file_name: fileName,
+                    file_url: urlData.publicUrl,
+                    audio_url: urlData.publicUrl,
+                    duration_seconds: duration,
+                    file_size: blob.size,
+                    status: 'pending',
+                    live_transcription: transcripts.map(t => t.text).join(' ')
+                  });
+                
+                if (dbError) {
+                  console.error('[TELNYX] DB error:', dbError);
+                } else {
+                  console.log('[TELNYX] Recording saved to database');
+                }
+              } catch (err) {
+                console.error('[TELNYX] Save error:', err);
+              }
             }
           });
         }
         break;
     }
-  }, [startRecording, stopRecording]);
+  }, [startRecording, stopRecording, duration, transcripts]);
 
   const startDurationTimer = useCallback(() => {
     setDuration(0);
