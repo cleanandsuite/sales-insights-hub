@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,8 @@ interface CallInterfaceProps {
 }
 
 export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
+  const navigate = useNavigate();
+  
   const {
     callStatus,
     isReady,
@@ -99,16 +102,17 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     }
   }, [isReady, hasStartedCall, phoneNumber, startCall, incrementCallCount]);
 
-  // Handle close when call ends
+  // Navigate to recording analysis when call ends and recording is saved
   useEffect(() => {
-    // Keep the call UI open until the recording is saved (or we have a save error).
-    if (callStatus === 'ended' && hasStartedCall && !isSaving && !saveError) {
+    if (callStatus === 'ended' && hasStartedCall && !isSaving && savedRecordingId) {
+      // Navigate to the recording analysis page
       const timer = setTimeout(() => {
         onClose();
-      }, 2000);
+        navigate(`/recording/${savedRecordingId}`);
+      }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [callStatus, hasStartedCall, isSaving, saveError, onClose]);
+  }, [callStatus, hasStartedCall, isSaving, savedRecordingId, onClose, navigate]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

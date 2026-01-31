@@ -45,11 +45,14 @@ export function useCallRecorder(): UseCallRecorderReturn {
       setTranscripts([]);
       chunksRef.current = [];
 
+      console.log('[CALL_RECORDER] Starting recording...');
+      console.log('[CALL_RECORDER] Local tracks:', localStream.getAudioTracks().length);
+      console.log('[CALL_RECORDER] Remote tracks:', remoteStream.getAudioTracks().length);
+
       // Create audio context for mixing streams.
-      // Note: browsers may ignore a requested sampleRate; we always use the *actual* audioContext.sampleRate
-      // when configuring AssemblyAI.
       const audioContext = new AudioContext();
       audioContextRef.current = audioContext;
+      console.log('[CALL_RECORDER] AudioContext sampleRate:', audioContext.sampleRate);
 
       // Create sources for both streams
       const localSource = audioContext.createMediaStreamSource(localStream);
@@ -80,8 +83,10 @@ export function useCallRecorder(): UseCallRecorderReturn {
       // Start recording with 1-second chunks
       mediaRecorder.start(1000);
       setIsRecording(true);
+      console.log('[CALL_RECORDER] MediaRecorder started');
 
       // Set up real-time transcription via AssemblyAI
+      // Pass the merger so we can tap into the mixed audio
       await setupTranscription(audioContext, merger);
 
     } catch (err: any) {
@@ -120,11 +125,12 @@ export function useCallRecorder(): UseCallRecorderReturn {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('[CALL_RECORDER] AssemblyAI v3 connected');
+        console.log('[CALL_RECORDER] AssemblyAI v3 WebSocket connected');
         setIsTranscribing(true);
 
         // Create ScriptProcessor for streaming audio data
         const bufferSize = pickScriptProcessorBufferSize(audioContext.sampleRate);
+        console.log('[CALL_RECORDER] Using buffer size:', bufferSize);
         const processor = audioContext.createScriptProcessor(bufferSize, 2, 1);
         processorRef.current = processor;
 
@@ -138,6 +144,7 @@ export function useCallRecorder(): UseCallRecorderReturn {
         processor.connect(silentGain);
         silentGain.connect(audioContext.destination);
 
+        let audioChunksSent = 0;
         processor.onaudioprocess = (e) => {
           if (ws.readyState !== WebSocket.OPEN) return;
 
@@ -162,12 +169,19 @@ export function useCallRecorder(): UseCallRecorderReturn {
 
           // AssemblyAI v3 expects *binary audio frames* (not JSON/base64)
           ws.send(pcmData.buffer);
+          audioChunksSent++;
+          
+          // Log every 100 chunks to confirm audio is flowing
+          if (audioChunksSent % 100 === 0) {
+            console.log('[CALL_RECORDER] Audio chunks sent:', audioChunksSent);
+          }
         };
       };
 
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.log('[CALL_RECORDER] WS message:', data.type, data);
 
           if (data.type === 'Begin') {
             console.log('[CALL_RECORDER] Transcription session started:', data.id);
@@ -176,6 +190,7 @@ export function useCallRecorder(): UseCallRecorderReturn {
 
           // Handle Turn messages (contains transcript)
           if (data.type === 'Turn' && data.transcript) {
+            console.log('[CALL_RECORDER] Got transcript:', data.transcript);
             const segment: TranscriptSegment = {
               text: data.transcript,
               speaker: 'remote', // We could try to differentiate based on channel analysis
@@ -200,7 +215,7 @@ export function useCallRecorder(): UseCallRecorderReturn {
             console.error('[CALL_RECORDER] AssemblyAI error:', data.error);
           }
         } catch (err) {
-          console.error('[CALL_RECORDER] Failed to parse message:', err);
+          console.error('[CALL_RECORDER] Failed to parse message:', err, event.data);
         }
       };
 
