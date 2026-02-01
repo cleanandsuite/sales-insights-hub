@@ -1,15 +1,16 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
-import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
+import { useSidebarState } from '@/contexts/SidebarContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { SellSigLogo } from '@/components/ui/SellSigLogo';
+import { SellSigLogo, SellSigIcon } from '@/components/ui/SellSigLogo';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -33,10 +34,53 @@ const revenueIntelligenceItem = { to: '/revenue-intelligence', icon: TrendingUp,
 const adminNavItem = { to: '/experiments', icon: FlaskConical, label: 'Experiments' };
 const adminPanelItem = { to: '/admin', icon: Shield, label: 'Admin Panel' };
 
+interface NavItemProps {
+  item: { to: string; icon: React.ComponentType<{ className?: string }>; label: string };
+  isCollapsed: boolean;
+  onNavClick?: () => void;
+}
+
+function NavItem({ item, isCollapsed, onNavClick }: NavItemProps) {
+  const linkContent = (
+    <NavLink
+      to={item.to}
+      onClick={onNavClick}
+      className={({ isActive }) =>
+        cn(
+          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+          isCollapsed && 'justify-center px-2',
+          isActive
+            ? 'bg-primary/10 text-primary'
+            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+        )
+      }
+    >
+      <item.icon className="h-5 w-5 shrink-0" />
+      {!isCollapsed && <span>{item.label}</span>}
+    </NavLink>
+  );
+
+  if (isCollapsed) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>
+          {linkContent}
+        </TooltipTrigger>
+        <TooltipContent side="right" className="font-medium">
+          {item.label}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return linkContent;
+}
+
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { signOut } = useAuth();
   const { isManager } = useUserRole();
   const { isAdmin } = useAdminRole();
+  const { isCollapsed, toggleCollapse } = useSidebarState();
   
   let navItems = isManager 
     ? [...baseNavItems, managerNavItem, revenueIntelligenceItem]
@@ -48,64 +92,84 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     bottomItems = [...bottomItems.slice(0, -1), adminNavItem, adminPanelItem, bottomItems[bottomItems.length - 1]];
   }
 
+  const signOutButton = (
+    <button
+      onClick={signOut}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-destructive/10 hover:text-destructive",
+        isCollapsed && 'justify-center px-2'
+      )}
+    >
+      <LogOut className="h-5 w-5 shrink-0" />
+      {!isCollapsed && <span>Sign Out</span>}
+    </button>
+  );
+
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <SellSigLogo size="sm" linkTo="/dashboard" />
+      <div className={cn(
+        "flex h-16 items-center border-b border-sidebar-border",
+        isCollapsed ? "justify-center px-2" : "px-6"
+      )}>
+        {isCollapsed ? (
+          <NavLink to="/dashboard" className="flex items-center justify-center">
+            <div className="rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary/20 bg-primary/10 h-8 w-8">
+              <SellSigIcon className="h-5 w-5" />
+            </div>
+          </NavLink>
+        ) : (
+          <SellSigLogo size="sm" linkTo="/dashboard" />
+        )}
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
+      <nav className={cn(
+        "flex-1 space-y-1 py-4 overflow-y-auto",
+        isCollapsed ? "px-2" : "px-3"
+      )}>
         {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={onNavClick}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-              )
-            }
-          >
-            <item.icon className="h-5 w-5" />
-            {item.label}
-          </NavLink>
+          <NavItem key={item.to} item={item} isCollapsed={isCollapsed} onNavClick={onNavClick} />
         ))}
         
         <Separator className="my-3 bg-sidebar-border" />
         
         {bottomItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={onNavClick}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-              )
-            }
-          >
-            <item.icon className="h-5 w-5" />
-            {item.label}
-          </NavLink>
+          <NavItem key={item.to} item={item} isCollapsed={isCollapsed} onNavClick={onNavClick} />
         ))}
       </nav>
 
-      {/* Sign Out */}
-      <div className="border-t border-sidebar-border p-3">
+      {/* Sign Out & Toggle */}
+      <div className="border-t border-sidebar-border p-3 space-y-2">
+        {isCollapsed ? (
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              {signOutButton}
+            </TooltipTrigger>
+            <TooltipContent side="right" className="font-medium">
+              Sign Out
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          signOutButton
+        )}
+        
+        {/* Toggle Button - Hidden on mobile sheet */}
         <button
-          onClick={signOut}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-destructive/10 hover:text-destructive"
+          onClick={toggleCollapse}
+          className={cn(
+            "hidden lg:flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-foreground/50 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+            isCollapsed && 'justify-center px-2'
+          )}
         >
-          <LogOut className="h-5 w-5" />
-          Sign Out
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <>
+              <ChevronLeft className="h-4 w-4" />
+              <span>Collapse</span>
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -135,8 +199,13 @@ export function MobileHeader() {
 }
 
 export function Sidebar() {
+  const { isCollapsed } = useSidebarState();
+  
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-sidebar-border bg-sidebar hidden lg:block">
+    <aside className={cn(
+      "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar hidden lg:block transition-all duration-200",
+      isCollapsed ? "w-16" : "w-64"
+    )}>
       <SidebarContent />
     </aside>
   );
