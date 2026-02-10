@@ -202,8 +202,8 @@ export default function Dashboard() {
     setActiveCall(phoneNumber);
   };
 
-  // Enterprise Dashboard for Manager users
-  if (isExecutive && teamId) {
+  // Enterprise Dashboard for Manager users - TEMPORARILY UNLOCKED FOR TESTING
+  if (true || teamId) {
     return (
       <>
         {activeCall && (
