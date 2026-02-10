@@ -341,30 +341,11 @@ export default function Dashboard() {
                 </Button>
               </div>
 
-              {/* GOAL-DRIVEN METRICS FLOW */}
+              {/* SALES FLOW: Pipeline → Activity → Results → Actions */}
 
-              {/* Goal Progress Bar */}
-              <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">Goal Progress</h3>
-                  <span className="text-sm font-bold text-primary">
-                    {Math.round((mockMetrics.totalRevenue / mockMetrics.revenueGoal) * 100)}%
-                  </span>
-                </div>
-                <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-1000"
-                    style={{ width: `${Math.min((mockMetrics.totalRevenue / mockMetrics.revenueGoal) * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  ${formatCurrency(mockMetrics.totalRevenue)} of ${formatCurrency(mockMetrics.revenueGoal)} goal
-                </p>
-              </div>
-
-              {/* STEP A: Pipeline Health */}
+              {/* STEP A: Pipeline */}
               <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Pipeline Health</h3>
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Pipeline</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   <MetricCard
                     label="Active Pipeline"
@@ -443,7 +424,7 @@ export default function Dashboard() {
                   />
                   <MetricCard
                     label="Lost Deals"
-                    value={mockMetrics.lostDeads}
+                    value={mockMetrics.lostDeals}
                     icon={TrendingUp}
                     iconColor="text-destructive"
                     subtitle="This month"
@@ -454,7 +435,7 @@ export default function Dashboard() {
               {/* Revenue Chart */}
               <RevenueTrendChart data={mockRevenueData} goal={100000} />
 
-              {/* STEP D: Actions Needed */}
+              {/* STEP D: Actions */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {/* Priority Actions */}
                 <Card className="border-border/50 bg-card">
