@@ -97,16 +97,16 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'pipeline' | 'calls' | 'deals'>('overview');
 
   const [pipelineKpis] = useState({
-    bookingAttainment: 4150000,
+    bookingAttainment: 1245000,
     bookingTarget: 15000000,
-    gapToTarget: 10850000,
-    coverage: 2.5,
-    openPipeline: 27100000,
-    totalPipelineCreated: 30000000,
+    gapToTarget: 13755000,
+    coverage: 2.8,
+    openPipeline: 3200000,
+    totalPipelineCreated: 4200000,
     pipelineTarget: 45000000,
-    productsSold: 47,
-    appointmentsSet: 28,
-    appointmentTarget: 50,
+    productsSold: 89,
+    appointmentsSet: 67,
+    appointmentTarget: 100,
   });
 
   const isExecutive = isEnterprise && tier === 'executive';
