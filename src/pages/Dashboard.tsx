@@ -295,8 +295,8 @@ export default function Dashboard() {
             avgResponseTime={mockAIStatus.avgResponseTime}
           />
 
-          {/* Tab Navigation */}
-          <div className="flex items-center gap-1 border-b border-border/50 pb-1">
+          {/* Tab Navigation - Scrollable on mobile */}
+          <div className="flex items-center gap-1 border-b border-border/50 pb-1 overflow-x-auto pb-2 -mb-2">
             {[
               { id: 'overview', label: 'Overview', icon: LayoutDashboard },
               { id: 'pipeline', label: 'Pipeline', icon: TrendingUp },
@@ -307,7 +307,7 @@ export default function Dashboard() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap',
                   activeTab === tab.id
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -323,10 +323,10 @@ export default function Dashboard() {
           {activeTab === 'overview' && (
             <div className="space-y-4">
               {/* Quick Actions */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <Button
                   onClick={() => setShowCallDialog(true)}
-                  className="bg-primary hover:bg-primary/90"
+                  className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
                 >
                   <Phone className="h-4 w-4 mr-2" />
                   Start Call
@@ -334,14 +334,15 @@ export default function Dashboard() {
                 <Button
                   variant="outline"
                   onClick={() => navigate('/leads')}
+                  className="w-full sm:w-auto"
                 >
                   <CheckSquare className="h-4 w-4 mr-2" />
                   New Lead
                 </Button>
               </div>
 
-              {/* Compact KPI Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {/* Compact KPI Grid - Single col on mobile, 2 col small, 4 col desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                 <MetricCard
                   label="Revenue"
                   value={formatCurrency(mockMetrics.totalRevenue)}
@@ -374,17 +375,17 @@ export default function Dashboard() {
                   value={last24hCalls || mockMetrics.callsToday}
                   icon={Phone}
                   iconColor="text-warning"
-                  highlight={`${hotLeads || mockMetrics.hotLeads} hot leads`}
+                  highlight={`${hotLeads || mockMetrics.hotLeads} hot`}
                   highlightColor="warning"
-                  action={{ label: 'View Queue', onClick: () => navigate('/leads') }}
+                  action={{ label: 'Queue', onClick: () => navigate('/leads') }}
                 />
               </div>
 
               {/* Revenue Chart - Full Width */}
               <RevenueTrendChart data={mockRevenueData} goal={100000} />
 
-              {/* Two Column: Deals & Calls */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Two Column: Deals & Calls - Stacked on mobile */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {/* Priority Deals */}
                 <Card className="border-border/50 bg-card">
                   <CardHeader className="pb-3">
@@ -446,13 +447,13 @@ export default function Dashboard() {
 
           {activeTab === 'pipeline' && (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                 <MetricCard
                   label="Pipeline"
                   value={formatCurrency(mockMetrics.activePipeline)}
                   icon={TrendingUp}
                   iconColor="text-secondary"
-                  subtitle={`${mockMetrics.pipelineDeals} open deals`}
+                  subtitle={`${mockMetrics.pipelineDeals} deals`}
                 />
                 <MetricCard
                   label="Win Rate"
@@ -486,14 +487,14 @@ export default function Dashboard() {
 
           {activeTab === 'calls' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <h3 className="text-lg font-semibold">Recent Calls</h3>
-                <Button onClick={() => setShowCallDialog(true)}>
+                <Button onClick={() => setShowCallDialog(true)} className="w-full sm:w-auto">
                   <Phone className="h-4 w-4 mr-2" />
-                  Start New Call
+                  Start Call
                 </Button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {mockRecentCalls.map((call) => (
                   <RecentCallCard
                     key={call.id}
@@ -515,9 +516,9 @@ export default function Dashboard() {
 
           {activeTab === 'deals' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <h3 className="text-lg font-semibold">Priority Deals</h3>
-                <Button variant="outline" onClick={() => navigate('/enterprise')}>
+                <Button variant="outline" onClick={() => navigate('/enterprise')} className="w-full sm:w-auto">
                   View All Deals
                 </Button>
               </div>
