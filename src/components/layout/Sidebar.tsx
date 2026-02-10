@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/enterprise', icon: Target, label: 'Deals' },
+  { to: '/enterprise', icon: Building2, label: 'Enterprise' },
   { to: '/recordings', icon: Phone, label: 'Call Activity' },
   { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leads', icon: Target, label: 'Leads' },
