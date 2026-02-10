@@ -46,9 +46,8 @@ const PERIOD_OPTIONS = [
 const METRIC_OPTIONS = [
   { value: 'team_win_rate', label: 'Team Win Rate', suffix: '%' },
   { value: 'total_calls', label: 'Total Calls', suffix: '' },
-  { value: 'avg_score', label: 'Avg Team Score', suffix: '' },
-  { value: 'leads_converted', label: 'Leads Converted', suffix: '' },
-  { value: 'revenue_target', label: 'Revenue Target', suffix: '$' },
+  { value: 'avg_team_score', label: 'Avg Team Score', suffix: '' },
+  { value: 'coaching_coverage', label: 'Coaching Coverage', suffix: '%' },
 ];
 
 export function CompanyGoalsWidget({ teamId, kpis }: CompanyGoalsWidgetProps) {
@@ -97,9 +96,8 @@ export function CompanyGoalsWidget({ teamId, kpis }: CompanyGoalsWidgetProps) {
     const mapping: Record<string, number> = {
       team_win_rate: kpis.teamWinRate,
       total_calls: kpis.avgCallsPerRep * kpis.totalReps,
-      avg_score: (kpis.avgDiscoveryScore + kpis.avgCloserScore) / 2,
-      leads_converted: 0,
-      revenue_target: 0,
+      avg_team_score: (kpis.avgDiscoveryScore + kpis.avgCloserScore) / 2,
+      coaching_coverage: kpis.coachingCoveragePct,
     };
     return mapping[metric] || 0;
   };
