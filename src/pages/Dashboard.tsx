@@ -30,7 +30,7 @@ import { CallInterface } from '@/components/calling/CallInterface';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { DollarSign, Target, TrendingUp, Phone, ArrowRight, LayoutDashboard, Briefcase, PhoneCall, CheckSquare, Zap } from 'lucide-react';
+import { DollarSign, Target, TrendingUp, Phone, ArrowRight, LayoutDashboard, Briefcase, PhoneCall, CheckSquare, Zap, Calendar, BarChart3, Sparkles } from 'lucide-react';
 
 // Enterprise Components
 import { PipelineKPICards } from '@/components/enterprise/PipelineKPICards';
@@ -94,7 +94,6 @@ export default function Dashboard() {
   const [aiActive, setAiActive] = useState(true);
   const [kpis, setKpis] = useState<TeamKPIs | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<{ id: string; name: string; company: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'pipeline' | 'calls' | 'deals'>('overview');
 
   const [pipelineKpis] = useState({
     bookingAttainment: 1245000,
@@ -366,7 +365,7 @@ export default function Dashboard() {
   }
 
   // ============================================
-  // REDESIGNED SALES DASHBOARD
+  // SIMPLE SALES DASHBOARD - TODAY'S VIEW
   // ============================================
   return (
     <>
@@ -381,308 +380,181 @@ export default function Dashboard() {
       />
       
       <DashboardLayout>
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-6 animate-fade-in">
           {/* Header */}
           <DashboardHeader
-            title="Sales Dashboard"
-            subtitle="AI-powered revenue intelligence"
+            title="Good morning!"
+            subtitle={new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             onStartCall={() => setShowCallDialog(true)}
           />
 
-          {/* AI Status Bar - Compact */}
-          <AIStatusBar
-            isActive={aiActive}
-            todayLeads={todaysLeads || mockAIStatus.todayLeads}
-            weekLeads={leads.length || mockAIStatus.weekLeads}
-            conversionRate={mockAIStatus.conversionRate}
-            avgResponseTime={mockAIStatus.avgResponseTime}
-          />
+          {/* Today's Priorities */}
+          <div className="grid gap-4 md:grid-cols-3">
+            {/* Leads to Call Today */}
+            <Card className="border-border/50 bg-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Target className="h-4 w-4 text-primary" />
+                  Today's Priorities
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Leads to Call</p>
+                    <p className="text-xs text-muted-foreground">Follow up today</p>
+                  </div>
+                  <p className="text-2xl font-bold text-primary">3</p>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-warning/5 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Follow-ups Due</p>
+                    <p className="text-xs text-muted-foreground">Don't forget</p>
+                  </div>
+                  <p className="text-2xl font-bold text-warning">2</p>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-success/5 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium">Closing Soon</p>
+                    <p className="text-xs text-muted-foreground">This week</p>
+                  </div>
+                  <p className="text-2xl font-bold text-success">1</p>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Tab Navigation - Scrollable on mobile */}
-          <div className="flex items-center gap-1 border-b border-border/50 pb-1 overflow-x-auto pb-2 -mb-2">
-            {[
-              { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-              { id: 'pipeline', label: 'Pipeline', icon: TrendingUp },
-              { id: 'calls', label: 'Calls', icon: PhoneCall },
-              { id: 'deals', label: 'Deals', icon: Briefcase },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap',
-                  activeTab === tab.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                )}
-              >
-                <tab.icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            ))}
+            {/* Big Action Button */}
+            <Card className="border-border/50 bg-primary/5 md:col-span-2">
+              <CardContent className="pt-6">
+                <div className="flex flex-col items-center justify-center h-full py-4">
+                  <Button
+                    onClick={() => setShowCallDialog(true)}
+                    className="bg-primary hover:bg-primary/90 text-lg px-8 py-6 h-auto"
+                  >
+                    <Phone className="h-5 w-5 mr-3" />
+                    Start Call
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-3">
+                    AI coaching ready • WinWords active
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Tab Content */}
-          {activeTab === 'overview' && (
-            <div className="space-y-4">
-              {/* Quick Actions */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <Button
-                  onClick={() => setShowCallDialog(true)}
-                  className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
-                >
-                  <Phone className="h-4 w-4 mr-2" />
-                  Start Call
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/leads')}
-                  className="w-full sm:w-auto"
-                >
-                  <CheckSquare className="h-4 w-4 mr-2" />
-                  New Lead
-                </Button>
-              </div>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <MetricCard
+              label="Revenue"
+              value={formatCurrency(mockMetrics.totalRevenue)}
+              icon={DollarSign}
+              iconColor="text-success"
+              progress={{
+                current: mockMetrics.totalRevenue,
+                goal: mockMetrics.revenueGoal,
+                label: 'of goal',
+              }}
+            />
+            <MetricCard
+              label="Win Rate"
+              value={`${mockMetrics.winRate}%`}
+              icon={Target}
+              iconColor="text-primary"
+            />
+            <MetricCard
+              label="Active Deals"
+              value={mockMetrics.pipelineDeals}
+              icon={TrendingUp}
+              iconColor="text-secondary"
+              subtitle="In pipeline"
+            />
+            <MetricCard
+              label="Calls Today"
+              value={mockMetrics.callsToday}
+              icon={Phone}
+              iconColor="text-warning"
+              highlight={`${mockMetrics.hotLeads} hot leads`}
+              highlightColor="warning"
+            />
+          </div>
 
-              {/* SALES FLOW: Pipeline → Activity → Results → Actions */}
-
-              {/* STEP A: Pipeline */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Pipeline</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                  <MetricCard
-                    label="Active Pipeline"
-                    value={formatCurrency(mockMetrics.activePipeline)}
-                    icon={TrendingUp}
-                    iconColor="text-secondary"
-                    subtitle={`${mockMetrics.pipelineDeals} deals`}
-                  />
-                  <MetricCard
-                    label="Win Rate"
-                    value={`${mockMetrics.winRate}%`}
-                    icon={Target}
-                    iconColor="text-primary"
-                    subtitle="Last 30 days"
-                  />
-                  <MetricCard
-                    label="Avg Deal Size"
-                    value="$85K"
-                    icon={DollarSign}
-                    iconColor="text-success"
-                    subtitle="Per opportunity"
-                  />
-                </div>
-              </div>
-
-              {/* STEP B: Activity */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Activity</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                  <MetricCard
-                    label="Calls Today"
-                    value={last24hCalls || mockMetrics.callsToday}
-                    icon={Phone}
-                    iconColor="text-warning"
-                    highlight={`${hotLeads || mockMetrics.hotLeads} hot`}
-                    highlightColor="warning"
-                  />
-                  <MetricCard
-                    label="Leads This Week"
-                    value={leads.length || mockAIStatus.weekLeads}
-                    icon={TrendingUp}
-                    iconColor="text-secondary"
-                    subtitle="New prospects"
-                  />
-                  <MetricCard
-                    label="Conversion Rate"
-                    value={`${mockAIStatus.conversionRate}%`}
-                    icon={Target}
-                    iconColor="text-primary"
-                    subtitle="Lead to call"
-                  />
-                </div>
-              </div>
-
-              {/* STEP C: Results */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Results</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                  <MetricCard
-                    label="Revenue"
-                    value={formatCurrency(mockMetrics.totalRevenue)}
-                    icon={DollarSign}
-                    iconColor="text-success"
-                    progress={{
-                      current: mockMetrics.totalRevenue,
-                      goal: mockMetrics.revenueGoal,
-                      label: 'of goal',
-                    }}
-                  />
-                  <MetricCard
-                    label="Won Deals"
-                    value={mockMetrics.wonDeals}
-                    icon={CheckSquare}
-                    iconColor="text-success"
-                    subtitle="This month"
-                  />
-                  <MetricCard
-                    label="Lost Deals"
-                    value={mockMetrics.lostDeals}
-                    icon={TrendingUp}
-                    iconColor="text-destructive"
-                    subtitle="This month"
-                  />
-                </div>
-              </div>
-
-              {/* Revenue Chart */}
-              <RevenueTrendChart data={mockRevenueData} goal={100000} />
-
-              {/* STEP D: Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                {/* Priority Actions */}
-                <Card className="border-border/50 bg-card">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold">Priority Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {mockPriorityDeals.slice(0, 3).map((deal) => (
-                      <DealPriorityCard
-                        key={deal.id}
-                        name={deal.name}
-                        company={deal.company}
-                        value={deal.value}
-                        stage={deal.stage}
-                        health={deal.health}
-                        alert={deal.alert}
-                        nextAction={deal.nextAction}
-                        onClick={() => toast.info(`Opening: ${deal.name}`)}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Recent Calls */}
-                <Card className="border-border/50 bg-card">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold">Recent Calls</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {mockRecentCalls.slice(0, 2).map((call) => (
-                      <RecentCallCard
-                        key={call.id}
-                        contactName={call.contactName}
-                        company={call.company}
-                        score={call.score}
-                        summary={call.summary}
-                        timestamp={call.timestamp}
-                        buyingSignals={call.buyingSignals}
-                        onViewSummary={() => toast.info(`Summary: ${call.company}`)}
-                        onViewLead={() => navigate('/leads')}
-                        onSchedule={() => navigate('/schedule')}
-                        onCall={() => toast.info(`Calling ${call.contactName}...`)}
-                      />
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'pipeline' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-                <MetricCard
-                  label="Pipeline"
-                  value={formatCurrency(mockMetrics.activePipeline)}
-                  icon={TrendingUp}
-                  iconColor="text-secondary"
-                  subtitle={`${mockMetrics.pipelineDeals} deals`}
-                />
-                <MetricCard
-                  label="Win Rate"
-                  value={`${mockMetrics.winRate}%`}
-                  icon={Target}
-                  iconColor="text-primary"
-                  subtitle="24 won / 11 lost"
-                />
-                <MetricCard
-                  label="Revenue"
-                  value={formatCurrency(mockMetrics.totalRevenue)}
-                  icon={DollarSign}
-                  iconColor="text-success"
-                  progress={{
-                    current: mockMetrics.totalRevenue,
-                    goal: mockMetrics.revenueGoal,
-                    label: 'of goal',
-                  }}
-                />
-                <MetricCard
-                  label="Avg Deal"
-                  value="$85K"
-                  icon={TrendingUp}
-                  iconColor="text-secondary"
-                  subtitle="per opportunity"
-                />
-              </div>
-              <RevenueTrendChart data={mockRevenueData} goal={100000} />
-            </div>
-          )}
-
-          {activeTab === 'calls' && (
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                <h3 className="text-lg font-semibold">Recent Calls</h3>
-                <Button onClick={() => setShowCallDialog(true)} className="w-full sm:w-auto">
-                  <Phone className="h-4 w-4 mr-2" />
-                  Start Call
-                </Button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {mockRecentCalls.map((call) => (
-                  <RecentCallCard
-                    key={call.id}
-                    contactName={call.contactName}
-                    company={call.company}
-                    score={call.score}
-                    summary={call.summary}
-                    timestamp={call.timestamp}
-                    buyingSignals={call.buyingSignals}
-                    onViewSummary={() => toast.info(`Summary: ${call.company}`)}
-                    onViewLead={() => navigate('/leads')}
-                    onSchedule={() => navigate('/schedule')}
-                    onCall={() => toast.info(`Calling ${call.contactName}...`)}
-                  />
+          {/* Two Column: Today's Activity */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Recent Calls */}
+            <Card className="border-border/50 bg-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Recent Calls</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {mockRecentCalls.slice(0, 3).map((call) => (
+                  <div key={call.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium truncate">{call.contactName}</p>
+                        <Badge variant={call.score >= 85 ? 'default' : call.score >= 70 ? 'secondary' : 'destructive'}>
+                          {call.score}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">{call.company}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{call.summary}</p>
+                    </div>
+                  </div>
                 ))}
-              </div>
-            </div>
-          )}
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate('/recordings')}>
+                  View All Calls
+                </Button>
+              </CardContent>
+            </Card>
 
-          {activeTab === 'deals' && (
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-                <h3 className="text-lg font-semibold">Priority Deals</h3>
-                <Button variant="outline" onClick={() => navigate('/enterprise')} className="w-full sm:w-auto">
+            {/* Priority Deals */}
+            <Card className="border-border/50 bg-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Priority Deals</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {mockPriorityDeals.slice(0, 3).map((deal) => (
+                  <div key={deal.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium truncate">{deal.name}</p>
+                        <Badge variant={
+                          deal.health === 'on_track' ? 'default' :
+                          deal.health === 'monitor' ? 'secondary' : 'destructive'
+                        }>
+                          {deal.stage}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">{deal.company}</p>
+                      <p className="text-sm font-medium mt-1">{formatCurrency(deal.value)}</p>
+                    </div>
+                  </div>
+                ))}
+                <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate('/enterprise')}>
                   View All Deals
                 </Button>
-              </div>
-              <div className="space-y-3">
-                {mockPriorityDeals.map((deal) => (
-                  <DealPriorityCard
-                    key={deal.id}
-                    name={deal.name}
-                    company={deal.company}
-                    value={deal.value}
-                    stage={deal.stage}
-                    health={deal.health}
-                    alert={deal.alert}
-                    nextAction={deal.nextAction}
-                    onClick={() => toast.info(`Opening: ${deal.name}`)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Simple Nav Links */}
+          <div className="flex flex-wrap gap-2 pt-4 border-t">
+            <Button variant="outline" size="sm" onClick={() => navigate('/leads')}>
+              <Target className="h-4 w-4 mr-2" />
+              Leads
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/schedule')}>
+              <Calendar className="h-4 w-4 mr-2" />
+              Schedule
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/winwords')}>
+              <Sparkles className="h-4 w-4 mr-2" />
+              WinWords
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/analytics')}>
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </Button>
+          </div>
         </div>
       </DashboardLayout>
     </>
