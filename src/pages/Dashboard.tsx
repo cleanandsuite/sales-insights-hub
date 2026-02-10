@@ -341,60 +341,125 @@ export default function Dashboard() {
                 </Button>
               </div>
 
-              {/* Compact KPI Grid - Single col on mobile, 2 col small, 4 col desktop */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-                <MetricCard
-                  label="Revenue"
-                  value={formatCurrency(mockMetrics.totalRevenue)}
-                  icon={DollarSign}
-                  iconColor="text-success"
-                  trend={{ value: mockMetrics.revenueTrend, direction: 'up' }}
-                  progress={{
-                    current: mockMetrics.totalRevenue,
-                    goal: mockMetrics.revenueGoal,
-                    label: `${Math.round((mockMetrics.totalRevenue / mockMetrics.revenueGoal) * 100)}% of goal`,
-                  }}
-                />
-                <MetricCard
-                  label="Pipeline"
-                  value={formatCurrency(mockMetrics.activePipeline)}
-                  icon={TrendingUp}
-                  iconColor="text-secondary"
-                  subtitle={`${mockMetrics.pipelineDeals} deals`}
-                  trend={{ value: mockMetrics.pipelineTrend, direction: 'up' }}
-                />
-                <MetricCard
-                  label="Win Rate"
-                  value={`${mockMetrics.winRate}%`}
-                  icon={Target}
-                  iconColor="text-primary"
-                  trend={{ value: mockMetrics.winRateTrend, direction: 'up' }}
-                />
-                <MetricCard
-                  label="Calls Today"
-                  value={last24hCalls || mockMetrics.callsToday}
-                  icon={Phone}
-                  iconColor="text-warning"
-                  highlight={`${hotLeads || mockMetrics.hotLeads} hot`}
-                  highlightColor="warning"
-                  action={{ label: 'Queue', onClick: () => navigate('/leads') }}
-                />
+              {/* GOAL-DRIVEN METRICS FLOW */}
+
+              {/* Goal Progress Bar */}
+              <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-muted-foreground">Goal Progress</h3>
+                  <span className="text-sm font-bold text-primary">
+                    {Math.round((mockMetrics.totalRevenue / mockMetrics.revenueGoal) * 100)}%
+                  </span>
+                </div>
+                <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-1000"
+                    style={{ width: `${Math.min((mockMetrics.totalRevenue / mockMetrics.revenueGoal) * 100, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ${formatCurrency(mockMetrics.totalRevenue)} of ${formatCurrency(mockMetrics.revenueGoal)} goal
+                </p>
               </div>
 
-              {/* Revenue Chart - Full Width */}
+              {/* STEP A: Pipeline Health */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Pipeline Health</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  <MetricCard
+                    label="Active Pipeline"
+                    value={formatCurrency(mockMetrics.activePipeline)}
+                    icon={TrendingUp}
+                    iconColor="text-secondary"
+                    subtitle={`${mockMetrics.pipelineDeals} deals`}
+                  />
+                  <MetricCard
+                    label="Win Rate"
+                    value={`${mockMetrics.winRate}%`}
+                    icon={Target}
+                    iconColor="text-primary"
+                    subtitle="Last 30 days"
+                  />
+                  <MetricCard
+                    label="Avg Deal Size"
+                    value="$85K"
+                    icon={DollarSign}
+                    iconColor="text-success"
+                    subtitle="Per opportunity"
+                  />
+                </div>
+              </div>
+
+              {/* STEP B: Activity */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Activity</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  <MetricCard
+                    label="Calls Today"
+                    value={last24hCalls || mockMetrics.callsToday}
+                    icon={Phone}
+                    iconColor="text-warning"
+                    highlight={`${hotLeads || mockMetrics.hotLeads} hot`}
+                    highlightColor="warning"
+                  />
+                  <MetricCard
+                    label="Leads This Week"
+                    value={leads.length || mockAIStatus.weekLeads}
+                    icon={TrendingUp}
+                    iconColor="text-secondary"
+                    subtitle="New prospects"
+                  />
+                  <MetricCard
+                    label="Conversion Rate"
+                    value={`${mockAIStatus.conversionRate}%`}
+                    icon={Target}
+                    iconColor="text-primary"
+                    subtitle="Lead to call"
+                  />
+                </div>
+              </div>
+
+              {/* STEP C: Results */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Results</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                  <MetricCard
+                    label="Revenue"
+                    value={formatCurrency(mockMetrics.totalRevenue)}
+                    icon={DollarSign}
+                    iconColor="text-success"
+                    progress={{
+                      current: mockMetrics.totalRevenue,
+                      goal: mockMetrics.revenueGoal,
+                      label: 'of goal',
+                    }}
+                  />
+                  <MetricCard
+                    label="Won Deals"
+                    value={mockMetrics.wonDeals}
+                    icon={CheckSquare}
+                    iconColor="text-success"
+                    subtitle="This month"
+                  />
+                  <MetricCard
+                    label="Lost Deals"
+                    value={mockMetrics.lostDeads}
+                    icon={TrendingUp}
+                    iconColor="text-destructive"
+                    subtitle="This month"
+                  />
+                </div>
+              </div>
+
+              {/* Revenue Chart */}
               <RevenueTrendChart data={mockRevenueData} goal={100000} />
 
-              {/* Two Column: Deals & Calls - Stacked on mobile */}
+              {/* STEP D: Actions Needed */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                {/* Priority Deals */}
+                {/* Priority Actions */}
                 <Card className="border-border/50 bg-card">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold">Priority Deals</CardTitle>
-                      <Button variant="ghost" size="sm" onClick={() => navigate('/enterprise')}>
-                        View All <ArrowRight className="h-3 w-3 ml-1" />
-                      </Button>
-                    </div>
+                    <CardTitle className="text-base font-semibold">Priority Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {mockPriorityDeals.slice(0, 3).map((deal) => (
@@ -416,12 +481,7 @@ export default function Dashboard() {
                 {/* Recent Calls */}
                 <Card className="border-border/50 bg-card">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base font-semibold">Recent Calls</CardTitle>
-                      <Button variant="ghost" size="sm" onClick={() => navigate('/recordings')}>
-                        View All <ArrowRight className="h-3 w-3 ml-1" />
-                      </Button>
-                    </div>
+                    <CardTitle className="text-base font-semibold">Recent Calls</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {mockRecentCalls.slice(0, 2).map((call) => (
