@@ -30,6 +30,7 @@ const bottomNavItems = [
 ];
 
 const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
+const enterpriseNavItem = { to: '/enterprise', icon: Building2, label: 'Enterprise' };
 const revenueIntelligenceItem = { to: '/revenue-intelligence', icon: TrendingUp, label: 'Revenue Intel' };
 const adminNavItem = { to: '/experiments', icon: FlaskConical, label: 'Experiments' };
 const adminPanelItem = { to: '/admin', icon: Shield, label: 'Admin Panel' };
@@ -82,9 +83,13 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { isAdmin } = useAdminRole();
   const { isCollapsed, toggleCollapse } = useSidebarState();
   
-  let navItems = isManager 
-    ? [...baseNavItems, managerNavItem, revenueIntelligenceItem]
-    : baseNavItems;
+  // All users see Dashboard, Enterprise, Call Activity, WinWords, Leads, Analytics, Schedule, Coaching
+  let navItems = [...baseNavItems];
+  
+  // Managers also see Manager and Revenue Intelligence
+  if (isManager) {
+    navItems = [...navItems, managerNavItem, revenueIntelligenceItem];
+  }
   
   let bottomItems = [...bottomNavItems];
   
