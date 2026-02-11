@@ -16,7 +16,7 @@ export interface CharacterProps {
 }
 
 // Visual effect components
-function AuraEffect({ type, color, size }: { type: 'glow' | 'particles' | 'electric' | 'rainbow'; color: string; size: number }) {
+function AuraEffect({ type, color, size }: { type: string; color: string; size: number }) {
   switch (type) {
     case 'glow':
       return (

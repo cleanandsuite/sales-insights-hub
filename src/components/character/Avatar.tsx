@@ -128,11 +128,11 @@ export function PixelAvatar({ config, size = 64, className }: AvatarProps) {
       <PixelPath d={body.body} color={color} />
       
       {/* Hair (female) */}
-      {gender === 'female' && body.hair && (
-        <PixelPath d={body.hair} color={HAIR_COLORS[1]} />
+      {gender === 'female' && 'hair' in body && (body as any).hair && (
+        <PixelPath d={(body as any).hair} color={HAIR_COLORS[1]} />
       )}
-      {gender === 'female' && body.hairExtra && (
-        <PixelPath d={body.hairExtra} color={HAIR_COLORS[1]} />
+      {gender === 'female' && 'hairExtra' in body && (body as any).hairExtra && (
+        <PixelPath d={(body as any).hairExtra} color={HAIR_COLORS[1]} />
       )}
       
       {/* Eyes */}
