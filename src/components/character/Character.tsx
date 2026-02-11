@@ -261,6 +261,12 @@ export function WanderingCharacter({
   const effects = getVisualEffects(characterClass);
   const classColor = characterClass?.color.replace('bg-', '#') || '#3B82F6';
 
+  // Constrain position to stay within viewport
+  const clampedPosition = {
+    x: Math.max(-200, Math.min(200, position.x)), // Keep within -200 to 200
+    y: Math.max(-100, Math.min(0, position.y)),   // Keep within -100 to 0
+  };
+
   // Random wandering behavior
   useEffect(() => {
     const wanderInterval = setInterval(() => {
@@ -270,8 +276,14 @@ export function WanderingCharacter({
         setState('walk');
 
         // Calculate random position within bounds
-        const newX = Math.random() * 200 - 100; // -100 to 100
-        const newY = Math.random() * 100 - 50; // -50 to 50
+        // Character is positioned bottom-4 right-4 (16px from edges)
+        // Viewport: X range is viewport width - character width, Y range is viewport height - character height
+        const safePadding = size / 2;
+        const maxMoveX = window.innerWidth / 2 - size - safePadding;
+        const maxMoveY = window.innerHeight / 4 - size - safePadding;
+
+        const newX = Math.random() * (maxMoveX * 2) - maxMoveX; // Constrain to safe bounds
+        const newY = Math.random() * (maxMoveY * 2) - maxMoveY;
 
         setPosition({ x: newX, y: newY });
 
@@ -284,7 +296,7 @@ export function WanderingCharacter({
     }, 3000);
 
     return () => clearInterval(wanderInterval);
-  }, [isMoving]);
+  }, [isMoving, size]);
 
   return (
     <div
@@ -293,7 +305,7 @@ export function WanderingCharacter({
         isMoving && 'ease-in-out'
       )}
       style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
+        transform: `translate(${clampedPosition.x}px, ${clampedPosition.y}px)`,
       }}
     >
       {/* Character container with effects */}
