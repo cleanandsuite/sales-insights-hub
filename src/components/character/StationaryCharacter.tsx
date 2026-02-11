@@ -4,12 +4,13 @@ import { cn } from '@/lib/utils';
 export interface StationaryCharacterProps {
   config: SpriteConfig;
   size?: number;
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center' | 'inline';
   className?: string;
   name?: string;
   badge?: string; // Emoji badge for class
   state?: 'idle' | 'walk' | 'attack' | 'block' | 'hurt' | 'death';
   onClick?: () => void;
+  showName?: boolean;
 }
 
 export function StationaryCharacter({
@@ -21,6 +22,7 @@ export function StationaryCharacter({
   badge,
   state = 'idle',
   onClick,
+  showName = true,
 }: StationaryCharacterProps) {
   const positionClasses = {
     'top-left': 'fixed top-4 left-4',
@@ -28,12 +30,13 @@ export function StationaryCharacter({
     'bottom-left': 'fixed bottom-4 left-4',
     'bottom-right': 'fixed bottom-4 right-4',
     'center': 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+    'inline': 'inline-block', // For positioning inline with other elements
   };
 
   return (
     <div
       className={cn(
-        'relative inline-block cursor-pointer hover:scale-105 transition-transform',
+        'relative inline-block',
         positionClasses[position],
         className
       )}
