@@ -173,6 +173,7 @@ export default function Dashboard() {
                 badge="⚔️"
                 state="idle"
                 showName={false}
+                position="inline"
                 className="cursor-default"
               />
             </div>
