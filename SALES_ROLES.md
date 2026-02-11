@@ -2,11 +2,24 @@
 
 ## Based on the Funnel
 
+### 🔭 SCOUT
+**Starting Point — Learning the Basics**
+
+| What They Do | Core Focus |
+|--------------|-----------|
+| Training | Learn the process |
+| Shadowing | Watch experienced reps |
+| Junior outreach | Low-stakes prospecting |
+
+**Primary KPI:** Training completion, shadowing hours
+
+---
+
 ### 🏹 HUNTER
 **Front of Funnel — Finding New Opportunities**
 
 | What They Do | Core Strength |
-|--------------|---------------|
+|--------------|------------|
 | Prospecting | Finding leads |
 | Cold outreach | Quick qualification |
 | New logo acquisition | Pipeline generation |
@@ -19,7 +32,7 @@
 **Middle of Funnel — Nurturing Relationships**
 
 | What They Do | Core Strength |
-|--------------|---------------|
+|--------------|------------|
 | Lead nurturing | Moving leads forward |
 | Demo delivery | Discovery calls |
 | Proposal creation | Solution positioning |
@@ -32,7 +45,7 @@
 **Bottom/Post-Funnel — Growing Accounts**
 
 | What They Do | Core Strength |
-|--------------|---------------|
+|--------------|------------|
 | Relationship management | Retention |
 | Upselling | Expansion revenue |
 | Renewals | Customer success |
@@ -44,17 +57,22 @@
 ## Role Progression
 
 ```
-HUNTER → FARMER → ACCOUNT MANAGER
-   ↓           ↓             ↓
-Junior Rep  Senior Rep    Lead/Manager
+🔭 SCOUT (Entry Level)
+      ↓
+HUNTER / FARMER / ACCOUNT MANAGER (Choose specialization)
+      ↓
+SENIOR HUNTER / SENIOR FARMER / SENIOR AM (Expert level)
+      ↓
+TEAM LEAD / SALES MANAGER (Leadership)
 ```
 
 ---
 
-## Team Composition
+## Role Assignment
 
 | Role | Count | Purpose |
 |------|-------|---------|
+| Scout | As needed | New hires learning |
 | Hunter | 2-3 | Fill the funnel |
 | Farmer | 2-3 | Move leads forward |
 | Account Manager | 1-2 | Retain & grow |
@@ -65,17 +83,7 @@ Junior Rep  Senior Rep    Lead/Manager
 
 | Role | Primary KPI | Secondary KPI |
 |------|-----------|--------------|
+| Scout | Training | Shadowing |
 | Hunter | Pipeline Created | Discovery Calls |
 | Farmer | Win Rate | Proposals Sent |
 | Account Manager | Retention Rate | Expansion Revenue |
-
----
-
-## Natural Progression
-
-1. **Junior Hunter** → Focus on volume, learn basics
-2. **Senior Hunter** → Higher value prospecting
-3. **Junior Farmer** → Start nurturing complex deals
-4. **Senior Farmer** → Handle enterprise deals
-5. **Account Manager** → Post-sale relationships
-6. **Senior AM** → Strategic accounts

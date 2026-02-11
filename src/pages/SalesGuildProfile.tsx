@@ -8,14 +8,35 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Target, Users, TrendingUp, Phone, ArrowRight,
-  Search, Sprout, UserCheck, Star, Trophy
+  Search, Sprout, UserCheck, Star, Trophy, Binoculars
 } from 'lucide-react';
 
 // Sales Roles
 const ROLES = {
+  scout: {
+    id: 'scout',
+    name: 'Scout',
+    icon: Binoculars,
+    color: 'bg-gray-500',
+    bgLight: 'bg-gray-500/10',
+    border: 'border-gray-500/50',
+    text: 'text-gray-500',
+    emoji: '🔭',
+    primaryStat: 'Training Progress',
+    secondaryStat: 'Shadowing Hours',
+    stats: { prospecting: 40, discovery: 30, proposal: 20, negotiation: 20, closing: 30 },
+    skills: [
+      { name: 'Learning Basics', level: 5 },
+      { name: 'Shadowing', level: 5 },
+      { name: 'Process Master', level: 5 },
+      { name: 'Ready to Specialize', level: 5 },
+    ],
+    bestFor: 'Entry Level - New Hires',
+    kpis: ['Training Complete', 'Shadowing Hours', 'Certification'],
+    stage: 'Entry',
+  },
   hunter: {
     id: 'hunter',
     name: 'Hunter',
@@ -36,6 +57,7 @@ const ROLES = {
     ],
     bestFor: 'Front of Funnel',
     kpis: ['Calls Made', 'Leads Found', 'Pipeline Created'],
+    stage: 'Specialist',
   },
   farmer: {
     id: 'farmer',
@@ -57,6 +79,7 @@ const ROLES = {
     ],
     bestFor: 'Middle of Funnel',
     kpis: ['Demos Delivered', 'Proposals Sent', 'Win Rate'],
+    stage: 'Specialist',
   },
   accountManager: {
     id: 'accountManager',
@@ -78,6 +101,7 @@ const ROLES = {
     ],
     bestFor: 'Bottom of Funnel',
     kpis: ['Retention Rate', 'NPS Score', 'Expansion Revenue'],
+    stage: 'Specialist',
   },
 };
 
@@ -91,21 +115,21 @@ export default function SalesGuildProfile() {
   const navigate = useNavigate();
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState('hunter');
+  const [selectedRole, setSelectedRole] = useState('scout');
 
   const role = ROLES[selectedRole as keyof typeof ROLES];
 
   const character = {
-    name: 'Your Rep',
-    level: 12,
-    xp: 12450,
-    xpToNextLevel: 14400,
-    totalRevenue: 1200000,
-    dealsClosed: 89,
-    teamName: 'Team Alpha',
+    name: 'New Rep',
+    level: 1,
+    xp: 0,
+    xpToNextLevel: 1000,
+    totalRevenue: 0,
+    dealsClosed: 0,
+    teamName: 'Training Team',
   };
 
-  const xpProgress = Math.round((character.xp / character.xpToNextLevel) * 100);
+  const xpProgress = character.xpToNextLevel > 0 ? Math.round((character.xp / character.xpToNextLevel) * 100) : 0;
 
   return (
     <>
@@ -132,7 +156,7 @@ export default function SalesGuildProfile() {
                 {character.teamName} • Level {character.level} {role.emoji} {role.name}
               </p>
             </div>
-            <Button onClick={() => setShowCallDialog(true)} className="gap-2">
+            <Button onClick={() => setShowCallDialog(true)} className="gap-2" disabled={selectedRole === 'scout'}>
               <Phone className="h-4 w-4" />
               Start Call
             </Button>
@@ -159,15 +183,15 @@ export default function SalesGuildProfile() {
                       <p className="text-sm text-muted-foreground">{character.teamName}</p>
                       <div className="flex items-center justify-center gap-2 mt-2">
                         <Badge variant="outline" className={role.border}>{role.name}</Badge>
-                        <Badge>Level {character.level}</Badge>
+                        <Badge>{role.stage}</Badge>
                       </div>
                     </div>
 
                     {/* XP Progress */}
                     <div className="mt-6 space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Experience</span>
-                        <span>{character.xp.toLocaleString()} / {character.xpToNextLevel.toLocaleString()}</span>
+                        <span>Training Progress</span>
+                        <span>{character.xp} / {character.xpToNextLevel} XP</span>
                       </div>
                       <Progress value={xpProgress} className="h-3" />
                     </div>
@@ -183,6 +207,13 @@ export default function SalesGuildProfile() {
                         <p className="text-xs text-muted-foreground">Deals</p>
                       </div>
                     </div>
+
+                    {selectedRole === 'scout' && (
+                      <div className="mt-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                        <p className="text-sm font-medium text-amber-500">Complete training to specialize!</p>
+                        <p className="text-xs text-muted-foreground mt-1">Finish shadowing and certifications to choose your role.</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -262,7 +293,9 @@ export default function SalesGuildProfile() {
                     {role.kpis.map((kpi) => (
                       <div key={kpi} className="p-4 rounded-lg bg-muted/50 text-center">
                         <p className="text-sm text-muted-foreground">{kpi}</p>
-                        <p className="text-xl font-bold mt-1">Track</p>
+                        <p className="text-xl font-bold mt-1">
+                          {selectedRole === 'scout' ? 'Track' : 'Track'}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -272,7 +305,7 @@ export default function SalesGuildProfile() {
 
             {/* Roles Tab */}
             <TabsContent value="roles" className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {Object.values(ROLES).map((r) => (
                   <Card 
                     key={r.id}
@@ -286,14 +319,12 @@ export default function SalesGuildProfile() {
                         <span className="text-3xl">{r.emoji}</span>
                       </div>
                       <h3 className="font-bold text-center mt-3">{r.name}</h3>
-                      <p className="text-xs text-muted-foreground text-center mt-1">{r.bestFor}</p>
+                      <Badge className="mt-2">{r.stage}</Badge>
+                      <p className="text-xs text-muted-foreground text-center mt-2">{r.bestFor}</p>
                       
-                      <div className="mt-4 space-y-2">
+                      <div className="mt-4 p-3 rounded bg-muted/50">
                         <p className="text-xs">
                           <span className="font-medium">Primary:</span> {r.primaryStat}
-                        </p>
-                        <p className="text-xs">
-                          <span className="font-medium">KPIs:</span> {r.kpis.join(', ')}
                         </p>
                       </div>
                     </CardContent>
@@ -309,11 +340,18 @@ export default function SalesGuildProfile() {
                 <CardContent>
                   <div className="flex items-center gap-4 overflow-x-auto pb-4">
                     <div className="flex-shrink-0 text-center">
+                      <div className="h-16 w-16 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto">
+                        <span className="text-2xl">🔭</span>
+                      </div>
+                      <p className="text-sm font-medium mt-2">Scout</p>
+                      <p className="text-xs text-muted-foreground">Entry Level</p>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <div className="flex-shrink-0 text-center">
                       <div className="h-16 w-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
                         <span className="text-2xl">🏹</span>
                       </div>
                       <p className="text-sm font-medium mt-2">Hunter</p>
-                      <p className="text-xs text-muted-foreground">Front Funnel</p>
                     </div>
                     <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 text-center">
@@ -321,7 +359,6 @@ export default function SalesGuildProfile() {
                         <span className="text-2xl">🌱</span>
                       </div>
                       <p className="text-sm font-medium mt-2">Farmer</p>
-                      <p className="text-xs text-muted-foreground">Middle Funnel</p>
                     </div>
                     <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-shrink-0 text-center">
@@ -329,7 +366,6 @@ export default function SalesGuildProfile() {
                         <span className="text-2xl">👤</span>
                       </div>
                       <p className="text-sm font-medium mt-2">Account Manager</p>
-                      <p className="text-xs text-muted-foreground">Post-Sale</p>
                     </div>
                   </div>
                 </CardContent>
@@ -343,7 +379,30 @@ export default function SalesGuildProfile() {
                   <CardTitle className="text-base">Team Composition</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {/* Scouts */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🔭</span>
+                        <h4 className="font-medium">Scouts</h4>
+                        <Badge variant="outline">1</Badge>
+                      </div>
+                      {[
+                        { name: 'New Hire Kim', level: 1, xp: 150 },
+                      ].map((member) => (
+                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                          <div className="h-10 w-10 rounded-full bg-gray-500/20 flex items-center justify-center text-sm font-bold">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
+                          </div>
+                          <Badge variant="outline">{member.xp} XP</Badge>
+                        </div>
+                      ))}
+                    </div>
+
                     {/* Hunters */}
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
