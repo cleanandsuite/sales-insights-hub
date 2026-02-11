@@ -145,7 +145,7 @@ export default function Dashboard() {
                 variant={activeTab === tab.id ? 'default' : 'default'}
                 className={`
                   ${activeTab === tab.id 
-                    ? 'bg-blue-600! hover:bg-blue-500! border-blue-800!' 
+                    ? 'bg-blue-600 hover:bg-blue-500 border-blue-800' 
                     : 'bg-gray-700 hover:bg-gray-600 border-gray-900'
                   }
                   min-w-[100px]
