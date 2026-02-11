@@ -165,15 +165,18 @@ export default function Dashboard() {
                 <Phone className="h-4 w-4" />
                 Start Call
               </button>
-              {/* Stationary Pixel Arcade Character */}
-              <StationaryCharacter
-                config={RPG_CHARACTERS.soldier}
-                size={60}
-                name="Agent"
-                badge="⚔️"
-                state="idle"
-              />
             </div>
+          </div>
+
+          {/* Stationary Pixel Arcade Character - Fixed at bottom-right */}
+          <div className="fixed bottom-4 right-4 z-50">
+            <StationaryCharacter
+              config={RPG_CHARACTERS.soldier}
+              size={60}
+              name="Agent"
+              badge="⚔️"
+              state="idle"
+            />
           </div>
 
           {/* Overview Tab */}
