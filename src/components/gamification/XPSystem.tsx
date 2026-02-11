@@ -1,29 +1,39 @@
----
-# XP System - Visual Experience Tracker
+// XP System - Visual Experience Tracker
 
-## Core Logic
-- Track XP earned from: calls, deals, activities
-- Store in localStorage (sync with session later)
-- Calculate level based on total XP
-- Show progress bar to next level
+export const XP_LEVELS = [
+  { level: 1, xpRequired: 0 },
+  { level: 5, xpRequired: 100 },
+  { level: 10, xpRequired: 500 },
+  { level: 15, xpRequired: 1500 },
+  { level: 20, xpRequired: 5000 },
+  { level: 25, xpRequired: 25000 },
+];
 
-## XP Levels
-| Level | XP Required |
-|-------|-------------|-----------|
-| 1 | 0 |
-| 5 | 100 |
-| 10 | 500 |
-| 15 | 1,500 |
-| 20 | 5,000 |
-| 25 | 25,000 |
+export const XP_SOURCES = {
+  call: 10,
+  deal: 50,
+  activity: 25,
+};
 
-## XP Sources
-- Calls: +10 XP per call
-- Deals: +50 XP per closed deal
-- Activities: +25 XP per activity
+export function getLevelForXP(xp: number): number {
+  let level = 1;
+  for (const entry of XP_LEVELS) {
+    if (xp >= entry.xpRequired) {
+      level = entry.level;
+    }
+  }
+  return level;
+}
 
-## Progress Tracking
-- Current level
-- Total XP earned
-- XP to next level
-- Progress percentage (currentXP / requiredXP)
+export function getXPProgress(xp: number): { current: number; next: number; percent: number } {
+  let current = 0;
+  let next = 100;
+  for (let i = 0; i < XP_LEVELS.length; i++) {
+    if (xp >= XP_LEVELS[i].xpRequired) {
+      current = XP_LEVELS[i].xpRequired;
+      next = XP_LEVELS[i + 1]?.xpRequired ?? current + 1000;
+    }
+  }
+  const percent = Math.min(((xp - current) / (next - current)) * 100, 100);
+  return { current, next, percent };
+}
