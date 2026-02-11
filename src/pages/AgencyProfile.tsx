@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Character, CharacterConfig } from '@/components/character/Character';
+import { Character } from '@/components/character/Character';
+import type { CharacterConfig } from '@/components/character/Avatar';
 import { PixelAvatar, CharacterSelector } from '@/components/character/Avatar';
 import {
   Phone, Users, TrendingUp, Target, Zap, Trophy,
