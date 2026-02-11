@@ -115,6 +115,10 @@ export default {
           "0%, 100%": { boxShadow: "0 0 15px 3px rgba(34, 211, 238, 0.6), borderColor: "rgba(34, 211, 238, 0.8)" },
           "50%": { boxShadow: "0 0 25px 5px rgba(34, 211, 238, 0.9), borderColor: "rgba(34, 211, 238, 1)" },
         },
+        "neon-pulse-fast": {
+          "0%, 100%": { boxShadow: "0 0 15px 3px rgba(34, 211, 238, 0.8), borderColor: "rgba(34, 211, 238, 1)" },
+          "50%": { boxShadow: "0 0 25px 5px rgba(34, 211, 238, 0.9), borderColor: "rgba(34, 211, 238, 1)" },
+        },
         "bar-grow": {
           from: { transform: "scaleY(0)" },
           to: { transform: "scaleY(1)" },
@@ -129,6 +133,7 @@ export default {
         "progress-fill": "progress-fill 1s ease-out forwards",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "neon-pulse": "neon-pulse 2s ease-in-out infinite",
+        "neon-pulse-fast": "neon-pulse-fast 1s ease-in-out infinite",
         "bar-grow": "bar-grow 0.6s ease-out",
       },
     },

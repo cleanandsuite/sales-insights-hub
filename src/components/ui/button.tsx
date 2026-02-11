@@ -11,7 +11,8 @@ const buttonVariants = cva("inline-flex items-center justify-center gap-2 whites
       secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
       ghost: "hover:bg-accent hover:text-accent-foreground",
       link: "text-primary underline-offset-4 hover:underline",
-      neon: "bg-white text-gray-900 hover:bg-gray-50 border-2 border-cyan-400 animate-neon-pulse transition-all duration-200"
+      neon: "bg-white text-gray-900 hover:bg-gray-50 border-2 border-cyan-400 animate-neon-pulse transition-all duration-200",
+      neonActive: "bg-cyan-400 text-gray-900 hover:bg-cyan-500 border-2 border-cyan-300 animate-neon-pulse-fast shadow-[0_0_20px_rgba(34,211,238,0.8)] transition-all duration-200"
     },
     size: {
       default: "h-10 px-4 py-2",
