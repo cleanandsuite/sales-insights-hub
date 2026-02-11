@@ -42,8 +42,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PaymentComplete = lazy(() => import("./pages/PaymentComplete"));
 const UpgradePlan = lazy(() => import("./pages/UpgradePlan"));
 const Success = lazy(() => import("./pages/Success"));
-// A/B Testing disabled - always show landing page as-is
-// const Experiments = lazy(() => import("./pages/Experiments"));
+const Experiments = lazy(() => import("./pages/Experiments"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
 const GameStyleGuide = lazy(() => import("./pages/GameStyleGuide"));
@@ -98,8 +97,7 @@ const App = () => (
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
                 <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
-                {/* A/B Testing disabled - Experiments route hidden */}
-                {/* <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} /> */}
+                <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                 <Route path="/enterprise" element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
                 <Route path="/game-style" element={<ProtectedRoute><GameStyleGuide /></ProtectedRoute>} />

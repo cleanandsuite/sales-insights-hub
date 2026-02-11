@@ -3,10 +3,8 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { CallDialog } from '@/components/calling/CallDialog';
 import { CallInterface } from '@/components/calling/CallInterface';
-import { StationaryCharacter } from '@/components/character/StationaryCharacter';
-import { RPG_CHARACTERS, getBadgeForCharacter } from '@/lib/rpgSprites';
-import {
-  Phone, Flame, Trophy, Target, TrendingUp,
+import { 
+  Phone, Flame, Trophy, Target, TrendingUp, 
   Calendar, BarChart3, ArrowRight, Zap,
   DollarSign, Users, Clock, Crosshair, Activity
 } from 'lucide-react';
@@ -132,7 +130,7 @@ export default function Dashboard() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 items-center flex-1">
+          <div className="flex gap-2 items-center">
             {[
               { id: 'overview', label: 'Overview' },
               { id: 'charts', label: 'Charts' },
@@ -157,26 +155,13 @@ export default function Dashboard() {
               </MinecraftButton>
             ))}
             {/* Start Call Button - Next to Actions tab */}
-            <div className="flex items-center gap-8 ml-6">
-              <button
-                onClick={() => setShowCallDialog(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white font-bold border-b-4 border-red-600 rounded-none transition-all hover:translate-y-0.5 active:translate-y-0 active:border-b-2"
-              >
-                <Phone className="h-4 w-4" />
-                Start Call
-              </button>
-              {/* Stationary Pixel Arcade Character - Next to button */}
-              <StationaryCharacter
-                config={RPG_CHARACTERS.soldier}
-                size={60}
-                name="Agent"
-                badge="⚔️"
-                state="idle"
-                showName={false}
-                position="inline"
-                className="cursor-default"
-              />
-            </div>
+            <button
+              onClick={() => setShowCallDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white font-bold border-b-4 border-red-600 rounded-none transition-all hover:translate-y-0.5 active:translate-y-0 active:border-b-2"
+            >
+              <Phone className="h-4 w-4" />
+              Start Call
+            </button>
           </div>
 
           {/* Overview Tab */}

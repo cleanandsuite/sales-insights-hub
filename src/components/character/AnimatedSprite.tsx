@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface SpriteConfig {
@@ -56,14 +56,14 @@ export function AnimatedSprite({
     setCurrentState(state);
     setCurrentFrame(0);
 
-    const frameRate = config.frameRate || 200; // Slower frame rate to reduce flickering
+    const frameRate = config.frameRate || 150;
 
     frameIntervalRef.current = setInterval(() => {
       if (!isPlayingRef.current) return;
 
       setCurrentFrame((prev) => {
         const nextFrame = prev + 1;
-
+        
         // Check if animation complete
         if (nextFrame >= config.frames) {
           if (playOnce) {
@@ -73,7 +73,7 @@ export function AnimatedSprite({
           }
           return 0; // Loop back to first frame
         }
-
+        
         return nextFrame;
       });
     }, frameRate);
