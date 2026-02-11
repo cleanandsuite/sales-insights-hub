@@ -404,6 +404,40 @@ export default function Enterprise() {
           {/* Game Mode Tab */}
           <TabsContent value="gamemode" className="space-y-6 animate-fade-in">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Default (Original) */}
+              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08] overflow-hidden group hover:bg-card/40 transition-all cursor-pointer">
+                <div className="aspect-video bg-gradient-to-br from-gray-900 to-gray-800 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white">Default</h3>
+                    <Badge variant="outline" className="border-gray-600 text-gray-300">Original</Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-gray-800/50 p-2 rounded text-center">
+                      <p className="text-xs text-gray-300">$1.2M</p>
+                    </div>
+                    <div className="bg-gray-800/50 p-2 rounded text-center">
+                      <p className="text-xs text-gray-300">89</p>
+                    </div>
+                    <div className="bg-gray-800/50 p-2 rounded text-center">
+                      <p className="text-xs text-gray-300">78%</p>
+                    </div>
+                  </div>
+                  <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-gray-500 w-4/5" />
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">Original SellSig interface - clean and professional</p>
+                  <Button 
+                    className="w-full" 
+                    variant={selectedGameStyle === 'default' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGameStyle('default')}
+                  >
+                    {selectedGameStyle === 'default' ? 'Selected' : 'Select Style'}
+                  </Button>
+                </CardContent>
+              </Card>
+
               {/* Minimal Dark */}
               <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08] overflow-hidden group hover:bg-card/40 transition-all cursor-pointer">
                 <div className="aspect-video bg-gray-950 p-4 space-y-3">
