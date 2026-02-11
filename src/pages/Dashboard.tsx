@@ -430,14 +430,6 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
           </Tabs>
-
-          {/* Quick Nav */}
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate('/leads')}>Leads</Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/schedule')}>Schedule</Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/winwords')}>WinWords</Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/analytics')}>Analytics</Button>
-          </div>
         </div>
       </DashboardLayout>
     </>
