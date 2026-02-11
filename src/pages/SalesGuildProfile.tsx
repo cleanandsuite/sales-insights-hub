@@ -10,166 +10,74 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
-  Target, Users, TrendingUp, Clock, Star, Trophy,
-  Phone, ArrowRight, Zap, Crown, Heart, Search, 
-  Globe, BookOpen, ChevronRight
+  Target, Users, TrendingUp, Phone, ArrowRight,
+  Search, Sprout, UserCheck, Star, Trophy
 } from 'lucide-react';
 
 // Sales Roles
 const ROLES = {
-  closer: {
-    id: 'closer',
-    name: 'Closer',
-    icon: Target,
-    color: 'bg-blue-500',
-    bgLight: 'bg-blue-500/10',
-    border: 'border-blue-500/50',
-    text: 'text-blue-500',
-    emoji: '🛡️',
-    primaryStat: 'Objection Handling',
-    secondaryStat: 'Negotiation',
-    stats: { prospecting: 30, discovery: 60, presentation: 70, negotiation: 90, closing: 95 },
+  hunter: {
+    id: 'hunter',
+    name: 'Hunter',
+    icon: Search,
+    color: 'bg-amber-500',
+    bgLight: 'bg-amber-500/10',
+    border: 'border-amber-500/50',
+    text: 'text-amber-500',
+    emoji: '🏹',
+    primaryStat: 'Pipeline Created',
+    secondaryStat: 'Discovery Calls',
+    stats: { prospecting: 100, discovery: 60, proposal: 50, negotiation: 40, closing: 70 },
     skills: [
-      { name: 'Objection Shield', level: 8 },
-      { name: 'Deal Captain', level: 6 },
-      { name: 'Negotiation Master', level: 9 },
-      { name: 'Close Force', level: 7 },
+      { name: 'Cold Outreach', level: 9 },
+      { name: 'Quick Qualify', level: 8 },
+      { name: 'Pipeline Gen', level: 7 },
+      { name: 'Lead Finder', level: 10 },
     ],
-    synergies: ['Prospector', 'Strategist'],
-    bestFor: 'Enterprise & Complex B2B',
-    description: 'Handles the tough stuff so deals get done.',
+    bestFor: 'Front of Funnel',
+    kpis: ['Calls Made', 'Leads Found', 'Pipeline Created'],
   },
-  nurturer: {
-    id: 'nurturer',
-    name: 'Nurturer',
-    icon: Heart,
+  farmer: {
+    id: 'farmer',
+    name: 'Farmer',
+    icon: Sprout,
     color: 'bg-green-500',
     bgLight: 'bg-green-500/10',
     border: 'border-green-500/50',
     text: 'text-green-500',
-    emoji: '💚',
-    primaryStat: 'Customer Success',
-    secondaryStat: 'Retention',
-    stats: { prospecting: 40, discovery: 70, presentation: 50, negotiation: 60, closing: 70 },
+    emoji: '🌱',
+    primaryStat: 'Win Rate',
+    secondaryStat: 'Proposals Sent',
+    stats: { prospecting: 50, discovery: 100, proposal: 80, negotiation: 70, closing: 60 },
     skills: [
-      { name: 'Relationship Builder', level: 9 },
-      { name: 'Retention Hero', level: 8 },
-      { name: 'Upsell Finder', level: 7 },
-      { name: 'Trust Creator', level: 9 },
+      { name: 'Lead Nurture', level: 9 },
+      { name: 'Demo Master', level: 8 },
+      { name: 'Solution Design', level: 7 },
+      { name: 'Proposal Win', level: 8 },
     ],
-    synergies: ['Networker', 'Mentor'],
-    bestFor: 'Account Management & Renewals',
-    description: 'Builds relationships that last.',
+    bestFor: 'Middle of Funnel',
+    kpis: ['Demos Delivered', 'Proposals Sent', 'Win Rate'],
   },
-  hunter: {
-    id: 'hunter',
-    name: 'Hunter',
-    icon: Zap,
-    color: 'bg-red-500',
-    bgLight: 'bg-red-500/10',
-    border: 'border-red-500/50',
-    text: 'text-red-500',
-    emoji: '🎯',
-    primaryStat: 'Closing Rate',
-    secondaryStat: 'Speed',
-    stats: { prospecting: 50, discovery: 50, presentation: 50, negotiation: 80, closing: 100 },
+  accountManager: {
+    id: 'accountManager',
+    name: 'Account Manager',
+    icon: UserCheck,
+    color: 'bg-blue-500',
+    bgLight: 'bg-blue-500/10',
+    border: 'border-blue-500/50',
+    text: 'text-blue-500',
+    emoji: '👤',
+    primaryStat: 'Retention Rate',
+    secondaryStat: 'Expansion Revenue',
+    stats: { prospecting: 30, discovery: 60, proposal: 50, negotiation: 80, closing: 100 },
     skills: [
-      { name: 'Close Force', level: 10 },
-      { name: 'Speed Demon', level: 8 },
-      { name: 'Volume King', level: 7 },
-      { name: 'Competitive Edge', level: 6 },
+      { name: 'Relationship Builder', level: 10 },
+      { name: 'Customer Success', level: 9 },
+      { name: 'Upsell Engine', level: 8 },
+      { name: 'Renewal Master', level: 9 },
     ],
-    synergies: ['Prospector', 'Closer'],
-    bestFor: 'High-Volume Sales',
-    description: 'Closes deals. Fast.',
-  },
-  strategist: {
-    id: 'strategist',
-    name: 'Strategist',
-    icon: TrendingUp,
-    color: 'bg-purple-500',
-    bgLight: 'bg-purple-500/10',
-    border: 'border-purple-500/50',
-    text: 'text-purple-500',
-    emoji: '🧠',
-    primaryStat: 'Enterprise Deals',
-    secondaryStat: 'Multi-Stakeholder',
-    stats: { prospecting: 30, discovery: 90, presentation: 100, negotiation: 80, closing: 50 },
-    skills: [
-      { name: 'C-Suite Talk', level: 7 },
-      { name: 'Solution Design', level: 9 },
-      { name: 'Committee Navigator', level: 8 },
-      { name: 'Long Game', level: 8 },
-    ],
-    synergies: ['Closer', 'Networker'],
-    bestFor: 'Enterprise & Strategic Accounts',
-    description: 'Sees the big picture.',
-  },
-  prospector: {
-    id: 'prospector',
-    name: 'Prospector',
-    icon: Search,
-    color: 'bg-yellow-500',
-    bgLight: 'bg-yellow-500/10',
-    border: 'border-yellow-500/50',
-    text: 'text-yellow-500',
-    emoji: '🔍',
-    primaryStat: 'Finding Opportunities',
-    secondaryStat: 'Qualification',
-    stats: { prospecting: 100, discovery: 50, presentation: 30, negotiation: 40, closing: 60 },
-    skills: [
-      { name: 'Opportunity Finder', level: 10 },
-      { name: 'Quick Qualify', level: 9 },
-      { name: 'Lead Hunter', level: 8 },
-      { name: 'Pipeline Builder', level: 7 },
-    ],
-    synergies: ['Hunter', 'Strategist'],
-    bestFor: 'SDR & Outbound Teams',
-    description: 'Finds the hidden gems.',
-  },
-  networker: {
-    id: 'networker',
-    name: 'Networker',
-    icon: Globe,
-    color: 'bg-pink-500',
-    bgLight: 'bg-pink-500/10',
-    border: 'border-pink-500/50',
-    text: 'text-pink-500',
-    emoji: '🌐',
-    primaryStat: 'Referrals',
-    secondaryStat: 'Partnerships',
-    stats: { prospecting: 70, discovery: 80, presentation: 70, negotiation: 30, closing: 50 },
-    skills: [
-      { name: 'Referral Engine', level: 9 },
-      { name: 'Partnership Builder', level: 8 },
-      { name: 'Warm Introductions', level: 10 },
-      { name: 'Relationship Web', level: 7 },
-    ],
-    synergies: ['Nurturer', 'Strategist'],
-    bestFor: 'BD & Partnerships',
-    description: 'Connects people and opens doors.',
-  },
-  mentor: {
-    id: 'mentor',
-    name: 'Mentor',
-    icon: BookOpen,
-    color: 'bg-cyan-500',
-    bgLight: 'bg-cyan-500/10',
-    border: 'border-cyan-500/50',
-    text: 'text-cyan-500',
-    emoji: '🏆',
-    primaryStat: 'Team Training',
-    secondaryStat: 'Coaching',
-    stats: { prospecting: 50, discovery: 70, presentation: 70, negotiation: 50, closing: 60 },
-    skills: [
-      { name: 'Team Trainer', level: 9 },
-      { name: 'Rep Developer', level: 8 },
-      { name: 'Technique Share', level: 10 },
-      { name: 'Culture Builder', level: 7 },
-    ],
-    synergies: ['Everyone'],
-    bestFor: 'Team Leads & Senior Reps',
-    description: 'Makes the team better.',
+    bestFor: 'Bottom of Funnel',
+    kpis: ['Retention Rate', 'NPS Score', 'Expansion Revenue'],
   },
 };
 
@@ -183,7 +91,7 @@ export default function SalesGuildProfile() {
   const navigate = useNavigate();
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState('closer');
+  const [selectedRole, setSelectedRole] = useState('hunter');
 
   const role = ROLES[selectedRole as keyof typeof ROLES];
 
@@ -218,7 +126,7 @@ export default function SalesGuildProfile() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
                 <Users className="h-6 w-6 text-primary" />
-                Sales Guild Profile
+                Sales Guild
               </h1>
               <p className="text-sm text-muted-foreground">
                 {character.teamName} • Level {character.level} {role.emoji} {role.name}
@@ -281,16 +189,16 @@ export default function SalesGuildProfile() {
                 {/* Stats Breakdown */}
                 <Card className="lg:col-span-2">
                   <CardHeader>
-                    <CardTitle className="text-base">Skill Distribution</CardTitle>
+                    <CardTitle className="text-base">Funnel Performance</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       {[
-                        { label: 'Prospecting', value: role.stats.prospecting, icon: Search },
-                        { label: 'Discovery', value: role.stats.discovery, icon: Target },
-                        { label: 'Presentation', value: role.stats.presentation, icon: TrendingUp },
-                        { label: 'Negotiation', value: role.stats.negotiation, icon: Users },
-                        { label: 'Closing', value: role.stats.closing, icon: Trophy },
+                        { label: 'Prospecting', value: role.stats.prospecting, icon: Search, color: 'bg-amber-500' },
+                        { label: 'Discovery', value: role.stats.discovery, icon: Target, color: 'bg-blue-500' },
+                        { label: 'Proposal', value: role.stats.proposal, icon: TrendingUp, color: 'bg-purple-500' },
+                        { label: 'Negotiation', value: role.stats.negotiation, icon: Users, color: 'bg-orange-500' },
+                        { label: 'Closing', value: role.stats.closing, icon: Trophy, color: 'bg-green-500' },
                       ].map((stat) => (
                         <div key={stat.label} className="space-y-1">
                           <div className="flex items-center justify-between text-sm">
@@ -302,7 +210,7 @@ export default function SalesGuildProfile() {
                           </div>
                           <div className="h-2 rounded-full bg-muted overflow-hidden">
                             <div 
-                              className={`h-full ${role.color}`}
+                              className={`h-full ${stat.color}`}
                               style={{ width: `${stat.value}%` }}
                             />
                           </div>
@@ -313,7 +221,7 @@ export default function SalesGuildProfile() {
                 </Card>
               </div>
 
-              {/* Core Skills */}
+              {/* Core Strengths */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
@@ -340,11 +248,31 @@ export default function SalesGuildProfile() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* KPIs */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    Key Metrics ({role.name})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {role.kpis.map((kpi) => (
+                      <div key={kpi} className="p-4 rounded-lg bg-muted/50 text-center">
+                        <p className="text-sm text-muted-foreground">{kpi}</p>
+                        <p className="text-xl font-bold mt-1">Track</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Roles Tab */}
             <TabsContent value="roles" className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-3">
                 {Object.values(ROLES).map((r) => (
                   <Card 
                     key={r.id}
@@ -355,14 +283,17 @@ export default function SalesGuildProfile() {
                   >
                     <CardContent className="pt-6">
                       <div className={`h-12 w-12 mx-auto rounded-lg ${r.bgLight} flex items-center justify-center`}>
-                        <span className="text-2xl">{r.emoji}</span>
+                        <span className="text-3xl">{r.emoji}</span>
                       </div>
                       <h3 className="font-bold text-center mt-3">{r.name}</h3>
-                      <p className="text-xs text-muted-foreground text-center mt-1">{r.description}</p>
-                      <div className="mt-4 p-3 rounded bg-muted/50">
+                      <p className="text-xs text-muted-foreground text-center mt-1">{r.bestFor}</p>
+                      
+                      <div className="mt-4 space-y-2">
                         <p className="text-xs">
-                          <span className="font-medium">Best for:</span><br />
-                          {r.bestFor}
+                          <span className="font-medium">Primary:</span> {r.primaryStat}
+                        </p>
+                        <p className="text-xs">
+                          <span className="font-medium">KPIs:</span> {r.kpis.join(', ')}
                         </p>
                       </div>
                     </CardContent>
@@ -370,41 +301,35 @@ export default function SalesGuildProfile() {
                 ))}
               </div>
 
-              {/* Role Details */}
+              {/* Role Progression */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">
-                    {role.emoji} {role.name} Details
-                  </CardTitle>
+                  <CardTitle className="text-base">Role Progression</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div>
-                      <h4 className="font-medium mb-3">Synergies</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {role.synergies.map((synergy) => (
-                          <Badge key={synergy} variant="outline" className="gap-1">
-                            <Users className="h-3 w-3" />
-                            {synergy}
-                          </Badge>
-                        ))}
+                  <div className="flex items-center gap-4 overflow-x-auto pb-4">
+                    <div className="flex-shrink-0 text-center">
+                      <div className="h-16 w-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
+                        <span className="text-2xl">🏹</span>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Pair with these roles for better results!
-                      </p>
+                      <p className="text-sm font-medium mt-2">Hunter</p>
+                      <p className="text-xs text-muted-foreground">Front Funnel</p>
                     </div>
-                    <div>
-                      <h4 className="font-medium mb-3">Role Bonus</h4>
-                      <div className="p-3 rounded-lg bg-muted/50">
-                        <p className="text-sm">
-                          <span className="font-medium">{role.primaryStat}</span>
-                          <span className="text-muted-foreground"> +20% effectiveness</span>
-                        </p>
-                        <p className="text-sm mt-1">
-                          <span className="font-medium">{role.secondaryStat}</span>
-                          <span className="text-muted-foreground"> +10% effectiveness</span>
-                        </p>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <div className="flex-shrink-0 text-center">
+                      <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
+                        <span className="text-2xl">🌱</span>
                       </div>
+                      <p className="text-sm font-medium mt-2">Farmer</p>
+                      <p className="text-xs text-muted-foreground">Middle Funnel</p>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <div className="flex-shrink-0 text-center">
+                      <div className="h-16 w-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto">
+                        <span className="text-2xl">👤</span>
+                      </div>
+                      <p className="text-sm font-medium mt-2">Account Manager</p>
+                      <p className="text-xs text-muted-foreground">Post-Sale</p>
                     </div>
                   </div>
                 </CardContent>
@@ -413,72 +338,85 @@ export default function SalesGuildProfile() {
 
             {/* Team Tab */}
             <TabsContent value="team" className="space-y-6">
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Team Composition */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Team Synergies
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Team Composition</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {/* Hunters */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🏹</span>
+                        <h4 className="font-medium">Hunters</h4>
+                        <Badge variant="outline">2</Badge>
+                      </div>
                       {[
-                        { combo: 'Prospector + Hunter', effect: 'Find → Close pipeline', bonus: '+25% Win Rate' },
-                        { combo: 'Nurturer + Networker', effect: 'Retain → Grow accounts', bonus: '+30% Retention' },
-                        { combo: 'Strategist + Closer', effect: 'Complex → Close deals', bonus: '+40% Enterprise' },
-                        { combo: 'Mentor + All', effect: 'Team training', bonus: '+15% All Stats' },
-                      ].map((synergy) => (
-                        <div key={synergy.combo} className="flex items-center gap-4 p-3 rounded-lg border">
-                          <Badge variant="outline">{synergy.combo}</Badge>
-                          <div className="flex-1">
-                            <p className="text-sm">{synergy.effect}</p>
-                            <p className="text-xs text-success font-medium">{synergy.bonus}</p>
+                        { name: 'Sarah Chen', level: 15, xp: 15420 },
+                        { name: 'Mike Johnson', level: 14, xp: 14890 },
+                      ].map((member) => (
+                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                          <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-sm font-bold">
+                            {member.name.split(' ').map(n => n[0]).join('')}
                           </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
+                          </div>
+                          <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
 
-                {/* Current Team */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Crown className="h-4 w-4" />
-                      Team {character.teamName}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                    {/* Farmers */}
                     <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🌱</span>
+                        <h4 className="font-medium">Farmers</h4>
+                        <Badge variant="outline">2</Badge>
+                      </div>
                       {[
-                        { name: 'Sarah Chen', role: 'Closer', level: 15, xp: 15420 },
-                        { name: 'Mike Johnson', role: 'Hunter', level: 14, xp: 14890 },
-                        { name: 'Amanda Foster', role: 'Nurturer', level: 13, xp: 13200 },
-                        { name: 'David Lee', role: 'Strategist', level: 13, xp: 12900 },
-                      ].map((member, i) => {
-                        const memberRole = ROLES[member.role.toLowerCase() as keyof typeof ROLES];
-                        return (
-                          <div key={member.name} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50">
-                            <div className="flex items-center justify-center w-8 font-bold text-muted-foreground">
-                              {i + 1}
-                            </div>
-                            <div className={`h-10 w-10 rounded-full ${memberRole?.bgLight} flex items-center justify-center text-xl`}>
-                              {memberRole?.emoji}
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-medium">{member.name}</p>
-                              <p className="text-xs text-muted-foreground">Level {member.level} {memberRole?.name}</p>
-                            </div>
-                            <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
+                        { name: 'Amanda Foster', level: 13, xp: 13200 },
+                        { name: 'David Lee', level: 12, xp: 12900 },
+                      ].map((member) => (
+                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                          <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center text-sm font-bold">
+                            {member.name.split(' ').map(n => n[0]).join('')}
                           </div>
-                        );
-                      })}
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
+                          </div>
+                          <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
+                        </div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+
+                    {/* Account Managers */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">👤</span>
+                        <h4 className="font-medium">Account Managers</h4>
+                        <Badge variant="outline">1</Badge>
+                      </div>
+                      {[
+                        { name: 'Emily Zhang', level: 11, xp: 11500 },
+                      ].map((member) => (
+                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                          <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-sm font-bold">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
+                          </div>
+                          <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

@@ -1,236 +1,81 @@
-# Sales Guild Role System
+# Sales Guild Roles
 
-## 🎯 SALES GUILD ROLES
-*Gamified roles based on natural strengths, not job titles*
+## Based on the Funnel
 
----
+### 🏹 HUNTER
+**Front of Funnel — Finding New Opportunities**
 
-## 🛡️ THE CLOSER
-**"I handle the tough stuff so deals get done."**
+| What They Do | Core Strength |
+|--------------|---------------|
+| Prospecting | Finding leads |
+| Cold outreach | Quick qualification |
+| New logo acquisition | Pipeline generation |
 
-| Core Strength | Development Area |
-|--------------|-----------------|
-| Objection Handling | Volume |
-| Negotiation | Discovery |
-
-**What they do:**
-- Handles complex objections and pricing concerns
-- Steps in when deals stall
-- Drives deals to close
-
-**Best for:** Enterprise sales, complex B2B, competitive deals
+**Key Metrics:** Calls made, Leads found, Pipeline created
 
 ---
 
-## 💚 THE NURTURER
-**"I build relationships that last."**
+### 🌱 FARMER
+**Middle of Funnel — Nurturing Relationships**
 
-| Core Strength | Development Area |
-|--------------|-----------------|
-| Customer Success | Closing Speed |
-| Retention | Aggression |
+| What They Do | Core Strength |
+|--------------|---------------|
+| Lead nurturing | Moving leads forward |
+| Demo delivery | Discovery calls |
+| Proposal creation | Solution positioning |
 
-**What they do:**
-- Manages existing accounts
-- Turns customers into advocates
-- Finds upsell opportunities
-
-**Best for:** Account management, renewals, customer success
+**Key Metrics:** Demos delivered, Proposals sent, Win rate
 
 ---
 
-## 🎯 THE HUNTER
-**"I close deals. Fast."**
+### 👤 ACCOUNT MANAGER
+**Bottom/Post-Funnel — Growing Accounts**
 
-| Core Strength | Development Area |
-|--------------|-----------------|
-| Closing Rate | Long-term relationships |
-| Speed | Complex deals |
+| What They Do | Core Strength |
+|--------------|---------------|
+| Relationship management | Retention |
+| Upselling | Expansion revenue |
+| Renewals | Customer success |
 
-**What they do:**
-- High-volume outbound
-- Quick turnarounds
-- Competitive positioning
-
-**Best for:** High-volume sales, transactional deals
+**Key Metrics:** Retention rate, NPS, Expansion revenue
 
 ---
 
-## 🧠 THE STRATEGIST
-**"I see the big picture."**
+## Role Progression
 
-| Core Strength | Development Area |
-|--------------|-----------------|
-| Enterprise Deals | Quick wins |
-| Multi-stakeholder navigation | Volume |
-
-**What they do:**
-- Navigates complex buying committees
-- C-suite conversations
-- Long-term relationship building
-
-**Best for:** Enterprise, strategic accounts, complex sales
+```
+HUNTER → FARMER → ACCOUNT MANAGER
+   ↓           ↓             ↓
+Junior Rep  Senior Rep    Lead/Manager
+```
 
 ---
 
-## 🔍 THE PROSPECTOR
-**"I find the hidden gems."**
+## Team Composition
 
-| Core Strength | Development Area |
-|--------------|-----------------|
-| Finding opportunities | Closing |
-| Speed | Negotiation |
-
-**What they do:**
-- Outbound prospecting
-- Qualifying leads
-- Quick qualification
-
-**Best for:** SDR roles, outbound teams
+| Role | Count | Purpose |
+|------|-------|---------|
+| Hunter | 2-3 | Fill the funnel |
+| Farmer | 2-3 | Move leads forward |
+| Account Manager | 1-2 | Retain & grow |
 
 ---
 
-## 🌐 THE NETWORKER
-**"I connect people and open doors."**
+## Success Metrics by Role
 
-| Core Strength | Development Area |
-|--------------|-----------------|
-| Referrals | Closing |
-| Partnerships | Quick decisions |
-
-**What they do:**
-- Builds external relationships
-- Generates warm introductions
-- Creates partnership opportunities
-
-**Best for:** Business development, partnerships, referral generation
+| Role | Primary KPI | Secondary KPI |
+|------|-----------|--------------|
+| Hunter | Pipeline Created | Discovery Calls |
+| Farmer | Win Rate | Proposals Sent |
+| Account Manager | Retention Rate | Expansion Revenue |
 
 ---
 
-## 🏆 THE MENTOR
-**"I make the team better."**
+## Natural Progression
 
-| Core Strength | Development Area |
-|--------------|-----------------|
-| Training | Individual stats |
-| Coaching | Personal closing |
-
-**What they do:**
-- Trains new reps
-- Coaches underperformers
-- Shares winning techniques
-
-**Best for:** Team leads, senior reps, sales trainers
-
----
-
-## 📊 ROLE COMPARISON MATRIX
-
-| Role | Prospecting | Discovery | Presentation | Negotiation | Closing |
-|------|------------|----------|--------------|-------------|---------|
-| Closer | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Nurturer | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
-| Hunter | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Strategist | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Prospector | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| Networker | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
-| Mentor | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
-
----
-
-## 🔗 NATURAL PAIRINGS
-
-| Pairing | Why It Works |
-|---------|-------------|
-| Prospector + Hunter | Find → Close pipeline |
-| Nurturer + Networker | Retain → Grow accounts |
-| Strategist + Closer | Complex → Close deals |
-| Mentor + Everyone | Training → Team success |
-
----
-
-## 🎮 HOW IT WORKS
-
-**1. Take the Assessment**
-- Each rep completes a skills assessment
-- Results show natural strengths
-- Roles suggested based on performance data
-
-**2. Primary + Secondary Role**
-- Everyone has a primary role (strength)
-- Everyone has a secondary role (development)
-- Roles can change as skills grow
-
-**3. Team Composition**
-- Balanced teams have multiple roles
-- No two reps same role (avoid redundancy)
-- Synergies maximize team performance
-
-**4. Development Path**
-- Focus on primary role skills
-- Develop secondary role for growth
-- Unlock new capabilities over time
-
----
-
-## 📈 GROWTH TRACKS
-
-**Closer Track:**
-1. Objection Handler → Deal Captain → Revenue Leader
-
-**Nurturer Track:**
-1. Account Rep → Customer Champion → Success Director
-
-**Hunter Track:**
-1. SDR → Hunter → Volume Leader → Top Closer
-
-**Strategist Track:**
-1. Account Exec → Enterprise Rep → Strategic Director
-
-**Prospector Track:**
-1. SDR → Senior SDR → Lead Generator → Pipeline King
-
-**Networker Track:**
-1. BD Rep → Partnership Manager → Relationship Director
-
-**Mentor Track:**
-1. Senior Rep → Team Mentor → Sales Coach → Sales Leader
-
----
-
-## 🏅 ACHIEVEMENTS BY ROLE
-
-**Closer Achievements:**
-- Objection Master
-- Deal Captain
-- Revenue Leader
-
-**Nurturer Achievements:**
-- Customer Champion
-- Renewal Master
-- NPS Hero
-
-**Hunter Achievements:**
-- Volume King
-- Speed Demon
-- Closing Streak
-
-**Strategist Achievements:**
-- C-Suite Closer
-- Enterprise Win
-- Multi-Stakeholder Master
-
-**Prospector Achievements:**
-- Pipeline Builder
-- Lead Finder
-- Qualify Pro
-
-**Networker Achievements:**
-- Referral King
-- Partnership Hero
-- Warm Intro Master
-
-**Mentor Achievements:**
-- Team Trainer
-- Rep Developer
-- Culture Builder
+1. **Junior Hunter** → Focus on volume, learn basics
+2. **Senior Hunter** → Higher value prospecting
+3. **Junior Farmer** → Start nurturing complex deals
+4. **Senior Farmer** → Handle enterprise deals
+5. **Account Manager** → Post-sale relationships
+6. **Senior AM** → Strategic accounts
