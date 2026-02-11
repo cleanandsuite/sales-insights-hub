@@ -3,13 +3,15 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useNavigate } from 'react-router-dom';
 import { CallDialog } from '@/components/calling/CallDialog';
 import { CallInterface } from '@/components/calling/CallInterface';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { DollarSign, Target, TrendingUp, Phone, Calendar, BarChart3, Sparkles, ArrowRight, Clock, Users, Zap } from 'lucide-react';
+import { 
+  Trophy, Target, TrendingUp, Phone, Zap, Flame, 
+  Calendar, BarChart3, Sparkles, ArrowRight, DollarSign,
+  Activity, Clock, Users, Star
+} from 'lucide-react';
 
 // Mock Data
 import {
@@ -24,12 +26,38 @@ const formatCurrency = (value: number) => {
   return `$${value}`;
 };
 
+// XP to level calculation
+const getLevelFromXP = (xp: number) => Math.floor(Math.sqrt(xp / 100)) + 1;
+const getProgressToNextLevel = (xp: number) => {
+  const level = getLevelFromXP(xp);
+  const currentLevelXP = (level - 1) * (level - 1) * 100;
+  const nextLevelXP = level * level * 100;
+  return ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
 
-  const progressPercent = Math.round((mockMetrics.totalRevenue / mockMetrics.revenueGoal) * 100);
+  // Gamified stats
+  const stats = {
+    xp: 12450,
+    level: 12,
+    quota: { current: 1200000, target: 1500000 },
+    calls: { made: 247, followUpRate: 89 },
+    winRate: 78,
+    closeRate: 65,
+    leadConv: 52,
+    dealVelocity: 18,
+    avgDealSize: 45000,
+    responseTime: 1.2,
+    streak: 5,
+    weeklyGoal: { completed: 5, total: 8 },
+  };
+
+  const levelProgress = getProgressToNextLevel(stats.xp);
+  const quotaProgress = Math.round((stats.quota.current / stats.quota.target) * 100);
 
   return (
     <>
@@ -45,253 +73,335 @@ export default function Dashboard() {
       
       <DashboardLayout>
         <div className="space-y-6">
-          {/* Header */}
+          {/* Header with XP */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Your Stats</h1>
               <p className="text-sm text-muted-foreground">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
             </div>
-            <Button 
-              onClick={() => setShowCallDialog(true)}
-              className="gap-2"
-            >
+            <Button onClick={() => setShowCallDialog(true)} className="gap-2">
               <Phone className="h-4 w-4" />
               Start Call
             </Button>
           </div>
 
-          {/* Quick Stats Row */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* Revenue Card */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(mockMetrics.totalRevenue)}</div>
-                <div className="flex items-center gap-2 mt-2">
-                  <Progress value={progressPercent} className="flex-1 h-1.5" />
-                  <span className="text-xs text-muted-foreground">{progressPercent}%</span>
+          {/* Level & Quota Hero */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* XP Level Card */}
+            <Card className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-3xl font-bold">{stats.level}</span>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                      <Star className="h-4 w-4 text-primary-foreground" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-muted-foreground">Level {stats.level}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Progress value={levelProgress} className="flex-1 h-2" />
+                      <span className="text-sm font-medium">{Math.round(levelProgress)}%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{stats.xp.toLocaleString()} XP total</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center gap-1 text-warning">
+                      <Flame className="h-5 w-5" />
+                      <span className="text-xl font-bold">{stats.streak}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">day streak</p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  of {formatCurrency(mockMetrics.revenueGoal)} goal
-                </p>
               </CardContent>
             </Card>
 
-            {/* Win Rate Card */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Win Rate</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockMetrics.winRate}%</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {mockMetrics.wonDeals} won / {mockMetrics.lostDeals} lost
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Active Deals Card */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Deals</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockMetrics.pipelineDeals}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  In pipeline
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Calls Today Card */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Calls Today</CardTitle>
-                <Phone className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{mockMetrics.callsToday}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {mockMetrics.hotLeads} hot leads
-                </p>
+            {/* Quota Progress */}
+            <Card className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-success/5 to-transparent" />
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Quota Progress</span>
+                  <Badge variant="outline">{quotaProgress}%</Badge>
+                </div>
+                <div className="text-3xl font-bold mb-2">
+                  {formatCurrency(stats.quota.current)}
+                  <span className="text-lg font-normal text-muted-foreground">
+                    / {formatCurrency(stats.quota.target)}
+                  </span>
+                </div>
+                <Progress value={quotaProgress} className="h-3" />
               </CardContent>
             </Card>
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* Priority Actions - Takes 2 columns */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* Today's Priorities */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Today's Priorities</CardTitle>
-                    <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate('/leads')}>
-                      View all <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-primary" />
-                        <span className="text-sm font-medium">Leads to Call</span>
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold">3</div>
-                    </div>
-                    <div className="p-4 rounded-lg bg-warning/5 border border-warning/10">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-warning" />
-                        <span className="text-sm font-medium">Follow-ups Due</span>
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold">2</div>
-                    </div>
-                    <div className="p-4 rounded-lg bg-success/5 border border-success/10">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-success" />
-                        <span className="text-sm font-medium">Closing Soon</span>
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold">1</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Priority Deals */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Priority Deals</CardTitle>
-                    <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate('/enterprise')}>
-                      View all <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {mockPriorityDeals.slice(0, 4).map((deal) => (
+          {/* Core Stats Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Calls */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-primary" />
+                  Calls
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.calls.made}</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="h-1.5 flex-1 rounded-full bg-muted">
                     <div 
-                      key={deal.id} 
-                      className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => navigate('/enterprise')}
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="text-sm font-medium">
-                          {deal.company.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium truncate">{deal.name}</p>
-                          <Badge variant="outline" className="ml-2">
-                            {deal.stage}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">{deal.company}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold">{formatCurrency(deal.value)}</p>
-                        {deal.alert && (
-                          <p className="text-xs text-warning">{deal.alert}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right Column - Recent Activity */}
-            <div className="space-y-4">
-              {/* Start Call CTA */}
-              <Card className="bg-primary text-primary-foreground">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="h-12 w-12 rounded-full bg-primary-foreground/10 flex items-center justify-center mb-4">
-                      <Phone className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-semibold mb-1">Ready to make calls?</h3>
-                    <p className="text-sm text-primary-foreground/80 mb-4">
-                      AI coaching is ready to assist
-                    </p>
-                    <Button 
-                      variant="secondary" 
-                      className="w-full gap-2"
-                      onClick={() => setShowCallDialog(true)}
-                    >
-                      <Zap className="h-4 w-4" />
-                      Start Call
-                    </Button>
+                      className="h-full rounded-full bg-primary" 
+                      style={{ width: `${Math.min(stats.calls.made / 3, 100)}%` }} 
+                    />
                   </div>
-                </CardContent>
-              </Card>
+                  <span className="text-xs text-muted-foreground">daily avg</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{stats.calls.followUpRate}% follow-up rate</p>
+              </CardContent>
+            </Card>
 
-              {/* Recent Calls */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Recent Calls</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {mockRecentCalls.slice(0, 4).map((call) => (
-                    <div key={call.id} className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-xs">
-                          {call.contactName.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium truncate">{call.contactName}</p>
-                          <Badge 
-                            variant={call.score >= 85 ? 'default' : call.score >= 70 ? 'secondary' : 'destructive'}
-                            className="ml-2 text-xs"
-                          >
-                            {call.score}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">{call.company}</p>
-                      </div>
-                    </div>
+            {/* Win Rate */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-warning" />
+                  Win Rate
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.winRate}%</div>
+                <div className="flex gap-1 mt-2">
+                  {[1,2,3,4,5].map((i) => (
+                    <div 
+                      key={i}
+                      className={`h-2 flex-1 rounded-sm ${
+                        i <= Math.ceil(stats.winRate / 20) ? 'bg-warning' : 'bg-muted'
+                      }`}
+                    />
                   ))}
-                  <Button variant="ghost" size="sm" className="w-full" onClick={() => navigate('/recordings')}>
-                    View all calls
-                  </Button>
-                </CardContent>
-              </Card>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">vs {100 - stats.winRate}% loss rate</p>
+              </CardContent>
+            </Card>
 
-              {/* Quick Links */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Quick Links</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => navigate('/leads')}>
-                    <Target className="h-3 w-3" />
-                    Leads
-                  </Button>
-                  <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => navigate('/schedule')}>
-                    <Calendar className="h-3 w-3" />
-                    Schedule
-                  </Button>
-                  <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => navigate('/winwords')}>
-                    <Sparkles className="h-3 w-3" />
-                    WinWords
-                  </Button>
-                  <Button variant="outline" size="sm" className="justify-start gap-2" onClick={() => navigate('/analytics')}>
-                    <BarChart3 className="h-3 w-3" />
-                    Analytics
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Close Rate */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Target className="h-4 w-4 text-success" />
+                  Close Rate
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.closeRate}%</div>
+                <Progress value={stats.closeRate} className="mt-2 h-1.5" />
+                <p className="text-xs text-muted-foreground mt-1">Lead to close</p>
+              </CardContent>
+            </Card>
+
+            {/* Deal Velocity */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-secondary" />
+                  Deal Speed
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.dealVelocity} days</div>
+                <p className="text-xs text-muted-foreground mt-1">Average to close</p>
+                <p className="text-xs text-success mt-1">↓ 2 days vs last month</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Efficiency Metrics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                Efficiency Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Lead Conversion</p>
+                    <p className="text-2xl font-bold">{stats.leadConv}%</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center">
+                    <DollarSign className="h-6 w-6 text-success" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Avg Deal Size</p>
+                    <p className="text-2xl font-bold">{formatCurrency(stats.avgDealSize)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-lg bg-warning/10 flex items-center justify-center">
+                    <Clock className="h-6 w-6 text-warning" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Response Time</p>
+                    <p className="text-2xl font-bold">{stats.responseTime}h</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Weekly Goals & Achievements */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Weekly Goals */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  This Week
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Goals Completed</span>
+                  <Badge>{stats.weeklyGoal.completed}/{stats.weeklyGoal.total}</Badge>
+                </div>
+                <Progress value={(stats.weeklyGoal.completed / stats.weeklyGoal.total) * 100} className="h-2" />
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-muted-foreground">Calls Made</p>
+                    <p className="font-medium">18 / 20</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-muted-foreground">Leads Added</p>
+                    <p className="font-medium">12 / 15</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-muted-foreground">Deals Closed</p>
+                    <p className="font-medium">3 / 5</p>
+                  </div>
+                  <div className="p-2 rounded bg-muted/50">
+                    <p className="text-muted-foreground">Follow-ups</p>
+                    <p className="font-medium">25 / 30</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Achievements */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg border bg-warning/5 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-warning/20 flex items-center justify-center">
+                      <Trophy className="h-5 w-5 text-warning" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Top Performer</p>
+                      <p className="text-xs text-muted-foreground">Week of Jan 15</p>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-destructive/5 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-destructive/20 flex items-center justify-center">
+                      <Flame className="h-5 w-5 text-destructive" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Hot Streak</p>
+                      <p className="text-xs text-muted-foreground">5 deals in 7 days</p>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-primary/5 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Activity className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Iron Rep</p>
+                      <p className="text-xs text-muted-foreground">30 day streak</p>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-success/5 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center">
+                      <Zap className="h-5 w-5 text-success" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Quick Closer</p>
+                      <p className="text-xs text-muted-foreground">Avg 12 days</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Priority Actions */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Priority Actions</CardTitle>
+                <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate('/enterprise')}>
+                  View all <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+              {mockPriorityDeals.slice(0, 4).map((deal) => (
+                <div 
+                  key={deal.id} 
+                  className="p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => navigate('/enterprise')}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline" className="text-xs">{deal.stage}</Badge>
+                    <span className="text-sm font-semibold">{formatCurrency(deal.value)}</span>
+                  </div>
+                  <p className="text-sm font-medium truncate">{deal.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{deal.company}</p>
+                  {deal.alert && (
+                    <p className="text-xs text-warning mt-1">{deal.alert}</p>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Quick Navigation */}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/leads')}>
+              <Target className="h-3 w-3" />
+              Leads
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/schedule')}>
+              <Calendar className="h-3 w-3" />
+              Schedule
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/winwords')}>
+              <Sparkles className="h-3 w-3" />
+              WinWords
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/analytics')}>
+              <BarChart3 className="h-3 w-3" />
+              Analytics
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/enterprise')}>
+              <TrendingUp className="h-3 w-3" />
+              Deals
+            </Button>
           </div>
         </div>
       </DashboardLayout>
