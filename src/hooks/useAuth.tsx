@@ -159,14 +159,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     try {
-      // Use scope: 'local' to ensure local session is always cleared
-      // even if the server-side signout fails
-      await supabase.auth.signOut({ scope: 'local' });
+      await supabase.auth.signOut();
     } catch (error) {
+      // Ignore server errors - session may already be invalidated
       console.log('Sign out completed (session may have been expired)');
     }
-    // Force full page reload to /auth to clear all state
-    window.location.replace('/auth');
+    // Force redirect to auth page
+    window.location.href = '/auth';
   };
 
   return (

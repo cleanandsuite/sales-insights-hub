@@ -1,197 +1,556 @@
-/* Minecraft 3D Theme Styles */
+/* Google Fonts loaded in index.html with preconnect for optimal performance */
 
-/* Apply Minecraft styles when theme-minecraft class is on body */
-.theme-minecraft {
-  --mc-bg-primary: #1a1a1a;
-  --mc-bg-secondary: #2a2a2a;
-  --mc-bg-card: #333333;
-  --mc-border-light: #4a4a4a;
-  --mc-border-dark: #1a1a1a;
-  --mc-text-primary: #ffffff;
-  --mc-text-secondary: #a0a0a0;
-  --mc-accent: #f59e0b;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Blocky, squared corners everywhere */
-.theme-minecraft * {
-  border-radius: 0 !important;
-}
+@layer base {
+  :root {
+    /* Salesforce-inspired Enterprise Color Palette */
+    --background: 210 40% 98%; /* #F8FAFC - Light bg */
+    --foreground: 222 47% 11%; /* #0F172A - Deep navy text */
 
-/* Minecraft-style buttons */
-.theme-minecraft button {
-  border-radius: 0 !important;
-}
+    --card: 0 0% 100%; /* Pure white cards */
+    --card-foreground: 222 47% 11%;
 
-.theme-minecraft button[type="button"],
-.theme-minecraft button:not([class*="rounded"]) {
-  border-radius: 0 !important;
-}
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-/* Raised 3D button effect */
-.theme-minecraft .mc-button {
-  border-bottom-width: 4px !important;
-  border-right-width: 2px !important;
-  transition: all 0.1s ease;
-}
+    /* Salesforce Blue */
+    --primary: 210 100% 42%; /* #0176D3 - Salesforce Cloud Blue */
+    --primary-foreground: 0 0% 100%;
 
-.theme-minecraft .mc-button:active {
-  transform: translateY(2px);
-  border-bottom-width: 2px !important;
-}
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-/* Blocky cards */
-.theme-minecraft .mc-card {
-  border: 2px solid #4a4a4a;
-  border-bottom-width: 4px !important;
-  border-right-width: 4px !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255,255,255,0.1),
-    0 4px 0 #1a1a1a;
-}
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
 
-/* Blocky inputs */
-.theme-minecraft input,
-.theme-minecraft textarea,
-.theme-minecraft select {
-  border-radius: 0 !important;
-  border: 2px solid #4a4a4a !important;
-  border-bottom-width: 4px !important;
-}
+    /* Salesforce Teal/Cyan accent */
+    --accent: 177 70% 41%; /* #1B96A0 - Teal accent */
+    --accent-foreground: 0 0% 100%;
 
-/* Uppercase headers */
-.theme-minecraft h1,
-.theme-minecraft h2,
-.theme-minecraft h3,
-.theme-minecraft h4 {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-/* Blocky progress bars */
-.theme-minecraft progress {
-  border-radius: 0 !important;
-  border: 2px solid #4a4a4a;
-  border-bottom-width: 4px !important;
-}
+    --success: 156 72% 40%; /* Green for positive signals */
+    --success-foreground: 0 0% 100%;
 
-.theme-minecraft progress::-webkit-progress-bar {
-  background-color: #1a1a1a;
-  border-radius: 0 !important;
-}
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 11%;
 
-.theme-minecraft progress::-webkit-progress-value {
-  border-radius: 0 !important;
-}
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 100% 42%;
 
-/* Tab navigation - blocky style */
-.theme-minecraft [role="tablist"] {
-  gap: 0 !important;
-}
+    --radius: 0.75rem;
 
-.theme-minecraft [role="tab"] {
-  border-radius: 0 !important;
-  border-bottom-width: 4px !important;
-  margin-right: 2px !important;
-}
+    /* Sidebar - Dark Navy */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 210 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 47% 18%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 210 100% 50%;
 
-/* Beveled edge effect on cards */
-.theme-minecraft .mc-bevel {
-  border-top: 1px solid rgba(255,255,255,0.1) !important;
-  border-left: 1px solid rgba(255,255,255,0.1) !important;
-  border-right: 1px solid rgba(0,0,0,0.3) !important;
-  border-bottom: 1px solid rgba(0,0,0,0.3) !important;
-}
+    /* Chart colors - Salesforce palette */
+    --chart-1: 210 100% 42%;
+    --chart-2: 177 70% 41%;
+    --chart-3: 280 73% 55%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 84% 60%;
 
-/* Highlight corners */
-.theme-minecraft .mc-highlight::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  right: 50%;
-  height: 2px;
-  background: rgba(255,255,255,0.2);
-}
+    /* Salesforce gradient colors */
+    --sf-navy: 222 47% 11%;
+    --sf-blue: 210 100% 42%;
+    --sf-light-blue: 201 94% 48%;
+    --sf-teal: 177 70% 41%;
+    --sf-purple: 267 83% 60%;
 
-/* Shadow depth */
-.theme-minecraft .mc-shadow {
-  box-shadow: 
-    inset 0 2px 4px rgba(0,0,0,0.3),
-    0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Pixel-style font for stats (optional) */
-.theme-minecraft .mc-stat {
-  font-weight: 900;
-}
-
-/* Blocky badges */
-.theme-minecraft .mc-badge {
-  border-radius: 0 !important;
-  border-bottom-width: 2px !important;
-  text-transform: uppercase;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-}
-
-/* Avatar blocks */
-.theme-minecraft .mc-avatar {
-  border: 2px solid #4a4a4a;
-  border-bottom-width: 4px !important;
-  border-right-width: 4px !important;
-}
-
-.theme-minecraft .mc-avatar::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  right: 2px;
-  height: 4px;
-  background: rgba(255,255,255,0.15);
-}
-
-/* Smooth transitions */
-.theme-minecraft * {
-  transition: background-color 0.1s ease, border-color 0.1s ease !important;
-}
-
-/* Hover effects */
-.theme-minecraft .mc-hover:hover {
-  transform: translateY(-2px);
-  border-bottom-width: 6px !important;
-}
-
-/* Active state */
-.theme-minecraft .mc-active:active {
-  transform: translateY(2px);
-  border-bottom-width: 2px !important;
-}
-
-/* Cursor blink animation (Command/Shell style) */
-@keyframes blink-cursor {
-  0%, 50% {
-    opacity: 1;
+    /* Enterprise shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
-  51%, 100% {
-    opacity: 0;
+
+  .dark {
+    /* SellSig 2026 Dark Mode - Revenue Intelligence */
+    --background: 220 30% 4%; /* #0A0D14 Deep Navy */
+    --foreground: 0 0% 100%; /* #FFFFFF Pure white */
+    
+    --bg-secondary: 212 25% 8%; /* #0F1419 */
+    --bg-hover: 215 25% 15%; /* #232D3F */
+    --border-subtle: 213 25% 17%; /* #1E2A3B */
+    --border-default: 213 25% 24%; /* #2A3A50 */
+
+    --card: 215 25% 10%; /* #161B26 Elevated dark */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 215 25% 10%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 166 100% 42%; /* #00D4AA Electric Teal */
+    --primary-foreground: 220 30% 4%;
+
+    --secondary: 263 70% 58%; /* #8B5CF6 Soft Purple */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 215 20% 20%; /* Elevated hover */
+    --muted-foreground: 213 15% 68%; /* #A1AEBF Muted gray */
+
+    --accent: 217 91% 60%; /* #3B82F6 Info Blue */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%; /* #EF4444 Coral Red */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 160 84% 39%; /* #10B981 Success Green */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%; /* #F59E0B Amber */
+    --warning-foreground: 220 30% 4%;
+
+    --border: 213 25% 20%; /* Subtle border */
+    --input: 215 20% 16%;
+    --ring: 166 100% 42%;
+
+    --sidebar-background: 220 30% 4%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 166 100% 42%;
+    --sidebar-primary-foreground: 220 30% 4%;
+    --sidebar-accent: 215 20% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 213 25% 15%;
+    --sidebar-ring: 166 100% 42%;
+
+    /* Chart Colors - Professional palette */
+    --chart-1: 166 100% 42%; /* Teal */
+    --chart-2: 263 70% 58%; /* Purple */
+    --chart-3: 217 91% 60%; /* Blue */
+    --chart-4: 38 92% 50%; /* Amber */
+    --chart-5: 0 84% 60%; /* Red */
+    
+    /* Text colors */
+    --text-secondary: 213 15% 68%; /* #A1AEBF */
+    --text-muted: 215 15% 55%; /* #6B7A8F */
   }
 }
 
-.animate-blink-cursor {
-  animation: blink-cursor 1s step-end infinite;
-  vertical-align: middle;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight;
+    line-height: 1.1;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
+    line-height: 1.15;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl font-semibold;
+    line-height: 1.3;
+  }
+
+  h4, h5, h6 {
+    @apply font-semibold;
+  }
+
+  p {
+    @apply text-base md:text-lg leading-relaxed;
+    line-height: 1.6;
+  }
 }
 
-/* Light blue active tab indicator */
-.bg-blue-600 {
-  background-color: #2563eb !important;
+@layer components {
+  /* Salesforce-style card */
+  .card-enterprise {
+    @apply bg-card rounded-xl border border-border shadow-lg;
+  }
+
+  /* Primary CTA button - Salesforce style */
+  .btn-primary-enterprise {
+    @apply bg-primary text-primary-foreground font-semibold px-8 py-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  /* Secondary button - Outline style */
+  .btn-secondary-enterprise {
+    @apply bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-lg hover:bg-white/10 transition-all duration-300;
+  }
+
+  /* Fixed navigation bar */
+  .nav-enterprise {
+    @apply fixed top-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-md border-b border-border shadow-sm;
+  }
+
+  /* Hero section styling */
+  .hero-enterprise {
+    @apply pt-28 pb-20 md:pt-36 md:pb-28;
+  }
+
+  /* Gradient text effect - Salesforce cyan to blue */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(177 70% 51%) 0%, hsl(210 100% 52%) 50%, hsl(267 83% 65%) 100%);
+  }
+
+  /* Stats badge */
+  .stat-badge {
+    @apply inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold bg-primary/10 text-primary;
+  }
+
+  /* ============================================
+     SALESFORCE-INSPIRED GRADIENT BACKGROUNDS
+     ============================================ */
+
+  /* Hero Section: Deep navy to blue gradient like Salesforce */
+  .bg-hero-gradient {
+    position: relative;
+    background: linear-gradient(160deg, 
+      #032D60 0%,
+      #0176D3 50%,
+      #1B96FF 100%
+    );
+  }
+
+  .bg-hero-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+  }
+
+  .bg-hero-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 20% 80%, rgba(27,150,255,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 30% at 80% 60%, rgba(147,51,234,0.2) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  /* Animated dots pattern for hero */
+  .bg-hero-ai-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 15% 25%, rgba(255,255,255,0.12) 2px, transparent 2px),
+      radial-gradient(circle at 75% 35%, rgba(255,255,255,0.1) 2px, transparent 2px),
+      radial-gradient(circle at 45% 65%, rgba(255,255,255,0.08) 2px, transparent 2px),
+      radial-gradient(circle at 85% 75%, rgba(255,255,255,0.06) 1.5px, transparent 1.5px),
+      radial-gradient(circle at 25% 85%, rgba(255,255,255,0.08) 1.5px, transparent 1.5px);
+    background-size: 100px 100px, 120px 120px, 80px 80px, 60px 60px, 90px 90px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* Features Section: Light with subtle blue accents */
+  .bg-features-gradient {
+    position: relative;
+    background: linear-gradient(180deg, 
+      hsl(210 40% 98%) 0%,
+      hsl(210 50% 96%) 50%,
+      hsl(210 40% 98%) 100%
+    );
+  }
+
+  .bg-features-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(1,118,211,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Testimonials Section: Subtle purple gradient */
+  .bg-testimonials-gradient {
+    position: relative;
+    background: linear-gradient(160deg, 
+      rgba(147,51,234,0.05) 0%,
+      rgba(255,255,255,1) 40%,
+      rgba(255,255,255,1) 100%
+    );
+  }
+
+  /* Pricing Section: Clean with teal accents */
+  .bg-pricing-gradient {
+    position: relative;
+    background: linear-gradient(180deg, 
+      hsl(210 40% 98%) 0%,
+      hsl(177 30% 97%) 50%,
+      hsl(210 40% 98%) 100%
+    );
+  }
+
+  /* CTA Section: Bold Salesforce gradient */
+  .bg-cta-gradient {
+    position: relative;
+    background: linear-gradient(135deg, 
+      #032D60 0%, 
+      #0176D3 40%,
+      #1B96FF 100%
+    );
+  }
+
+  .bg-cta-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
+  }
+
+  /* Promo banner */
+  .bg-promo-banner {
+    background: linear-gradient(90deg, 
+      #0D9488 0%, 
+      #14B8A6 50%,
+      #2DD4BF 100%
+    );
+  }
+
+  /* ============================================
+     2025-2026 DESIGN TRENDS: AURORA & GLASS
+     ============================================ */
+
+  /* Aurora mesh background - trending 2025 */
+  .bg-hero-aurora {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 120% 80% at 10% 20%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse 100% 60% at 90% 80%, rgba(16, 185, 129, 0.2) 0%, transparent 45%),
+      radial-gradient(ellipse 80% 50% at 50% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 40%);
+    filter: blur(40px);
+    pointer-events: none;
+  }
+
+  .bg-hero-mesh {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 1px, transparent 1px),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 60px 60px, 80px 80px;
+    pointer-events: none;
+  }
+
+  /* CTA Aurora background */
+  .bg-cta-aurora {
+    position: relative;
+    background: linear-gradient(135deg, 
+      #032D60 0%, 
+      #0176D3 35%,
+      #1B96FF 70%,
+      #0891B2 100%
+    );
+  }
+
+  .bg-cta-aurora::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(147, 51, 234, 0.2) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 70% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 40%);
+    filter: blur(60px);
+    pointer-events: none;
+  }
+
+  /* Section aurora backgrounds */
+  .bg-section-aurora {
+    position: relative;
+    background: linear-gradient(180deg, 
+      hsl(210 40% 98%) 0%,
+      hsl(210 50% 97%) 50%,
+      hsl(210 40% 98%) 100%
+    );
+  }
+
+  .bg-section-aurora::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 40% at 20% 0%, rgba(1, 118, 211, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 30% at 80% 100%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  .bg-section-glass {
+    position: relative;
+    background: linear-gradient(180deg, 
+      rgba(248, 250, 252, 0.95) 0%,
+      rgba(241, 245, 249, 0.9) 50%,
+      rgba(248, 250, 252, 0.95) 100%
+    );
+    backdrop-filter: blur(20px);
+  }
+
+  /* Subtle mesh pattern */
+  .bg-mesh-subtle {
+    background-image: 
+      radial-gradient(circle, rgba(1,118,211,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Glass morphism cards - 2025 trend */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .glass-card-solid {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  }
+
+  .glass-card-subtle {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .glass-button {
+    box-shadow: 
+      0 10px 40px -10px rgba(1, 118, 211, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* Aurora gradient text */
+  .gradient-text-aurora {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, 
+      hsl(177 80% 60%) 0%, 
+      hsl(210 100% 60%) 35%,
+      hsl(267 90% 70%) 70%,
+      hsl(330 80% 65%) 100%
+    );
+    background-size: 200% 200%;
+    animation: aurora-shift 8s ease-in-out infinite;
+  }
+
+  @keyframes aurora-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }
 
-.bg-blue-600:hover {
-  background-color: #3b82f6 !important;
-}
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
 
-.border-blue-800 {
-  border-color: #1e40af !important;
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.6s ease-out forwards;
+  }
+
+  /* CTA Button Pulse Animation */
+  .animate-cta-pulse {
+    animation: ctaPulse 2.5s ease-in-out infinite;
+  }
+
+  /* Floating animation for decorative elements */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from { 
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes ctaPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  /* Slow spin animation for process indicators */
+  .animate-spin-slow {
+    animation: spin 3s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
