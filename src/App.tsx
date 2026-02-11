@@ -47,6 +47,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
 const GameStyleGuide = lazy(() => import("./pages/GameStyleGuide"));
 const Integrations = lazy(() => import("./pages/Integrations"));
+const StationaryCharacterDemo = lazy(() => import("./pages/StationaryCharacterDemo"));
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ const App = () => (
                 <Route path="/game-style" element={<ProtectedRoute><GameStyleGuide /></ProtectedRoute>} />
                 <Route path="/agency-profile" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
+                <Route path="/stationary-demo" element={<StationaryCharacterDemo />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/support" element={<Support />} />
