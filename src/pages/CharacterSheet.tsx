@@ -10,9 +10,9 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
-  Shield, Heart, Sword, Wand, Dagger, Music, Star, 
+  Shield, Heart, Sword, Wand, BookOpen, Music, Star, 
   Trophy, Users, Zap, Target, TrendingUp, ArrowRight,
-  ChevronRight, Sparkles, Flame, Crown
+  ChevronRight, Sparkles, Flame, Crown, Brain, Search, Presentation
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -105,7 +105,7 @@ const ROLES = {
   rogue: {
     id: 'rogue',
     name: 'Rogue',
-    icon: Dagger,
+    icon: Sword,
     color: 'bg-yellow-500',
     bgLight: 'bg-yellow-500/10',
     border: 'border-yellow-500/50',
@@ -115,7 +115,7 @@ const ROLES = {
     secondaryStat: 'Speed',
     stats: { prospecting: 100, discovery: 50, presentation: 30, negotiation: 40, closing: 60 },
     skills: [
-      { name: 'Ambush', icon: Dagger, level: 9 },
+      { name: 'Ambush', icon: Sword, level: 9 },
       { name: 'Fast Move', icon: Zap, level: 8 },
       { name: 'Spot Weakness', icon: Target, level: 7 },
       { name: 'Precision Strike', icon: Sword, level: 6 },
@@ -379,7 +379,7 @@ export default function CharacterSheet() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
-                    {role.icon className={`h-5 w-5 ${role.text}`} />}
+                    <role.icon className={`h-5 w-5 ${role.text}`} />
                     {role.name} Details
                   </CardTitle>
                 </CardHeader>
