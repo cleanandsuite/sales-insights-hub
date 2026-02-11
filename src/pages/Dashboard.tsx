@@ -127,14 +127,10 @@ export default function Dashboard() {
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
             </div>
-            <MinecraftButton onClick={() => setShowCallDialog(true)}>
-              <Phone className="h-4 w-4 mr-2" />
-              Start Call
-            </MinecraftButton>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {[
               { id: 'overview', label: 'Overview' },
               { id: 'charts', label: 'Charts' },
@@ -158,6 +154,14 @@ export default function Dashboard() {
                 )}
               </MinecraftButton>
             ))}
+            {/* Start Call Button - Next to Actions tab */}
+            <button
+              onClick={() => setShowCallDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white font-bold border-b-4 border-red-600 rounded-none transition-all hover:translate-y-0.5 active:translate-y-0 active:border-b-2"
+            >
+              <Phone className="h-4 w-4" />
+              Start Call
+            </button>
           </div>
 
           {/* Overview Tab */}
