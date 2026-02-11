@@ -157,7 +157,7 @@ export default function Dashboard() {
               </MinecraftButton>
             ))}
             {/* Start Call Button - Next to Actions tab */}
-            <div className="flex items-center gap-4 ml-4">
+            <div className="flex items-center gap-8 ml-6">
               <button
                 onClick={() => setShowCallDialog(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white font-bold border-b-4 border-red-600 rounded-none transition-all hover:translate-y-0.5 active:translate-y-0 active:border-b-2"
