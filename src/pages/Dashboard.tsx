@@ -366,10 +366,13 @@ export default function Dashboard() {
                       { name: 'Iron Rep', icon: '💪', desc: '30 day streak', color: 'default' },
                       { name: 'Quick Closer', icon: '⚡', desc: 'Avg 12 days', color: 'success' },
                     ].map((ach) => (
-                      <div key={ach.name} className="p-3 rounded-none border-2 border-border bg-muted/30">
+                      <div 
+                        key={ach.name} 
+                        className="p-3 bg-gray-800 border-2 border-gray-600 border-b-4 hover:bg-gray-700 hover:-translate-y-0.5 cursor-pointer transition-all"
+                      >
                         <div className="text-2xl mb-1">{ach.icon}</div>
-                        <p className="text-sm font-medium">{ach.name}</p>
-                        <p className="text-xs text-muted-foreground">{ach.desc}</p>
+                        <p className="text-sm font-medium text-white">{ach.name}</p>
+                        <p className="text-xs text-gray-400">{ach.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -388,15 +391,15 @@ export default function Dashboard() {
                   ].map((deal, i) => (
                     <div 
                       key={i} 
-                      className="p-3 rounded-none border-2 border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                      className="p-3 bg-gray-800 border-2 border-gray-600 border-b-4 hover:bg-gray-700 hover:-translate-y-0.5 cursor-pointer transition-all"
                       onClick={() => navigate('/enterprise')}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <MinecraftBadge variant="default">{deal.stage}</MinecraftBadge>
-                        <span className="text-sm font-bold">{formatCurrency(deal.value)}</span>
+                        <span className="text-sm font-bold text-amber-400">{formatCurrency(deal.value)}</span>
                       </div>
-                      <p className="text-sm font-medium truncate">{deal.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{deal.company}</p>
+                      <p className="text-sm font-medium text-white truncate">{deal.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{deal.company}</p>
                     </div>
                   ))}
                 </div>
