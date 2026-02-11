@@ -50,7 +50,7 @@ function MinimalDarkPreview() {
       </div>
       
       {/* Minimal Button */}
-      <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white">
+      <Button variant="neon" className="w-full font-mono">
         <Phone className="h-4 w-4 mr-2" />
         Start Call
       </Button>
@@ -93,10 +93,10 @@ function MinecraftBlockyPreview() {
       </div>
       
       {/* 3D Block Button */}
-      <button className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-wider border-b-4 border-green-800 active:border-b-0 active:mt-1 transition-all">
+      <Button variant="neon" className="w-full font-bold uppercase tracking-wider">
         <Phone className="h-4 w-4 inline mr-2" />
         Start Mission
-      </button>
+      </Button>
     </div>
   );
 }
@@ -140,7 +140,7 @@ function CyberpunkPreview() {
       </div>
       
       {/* Neon Button */}
-      <Button className="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-mono border border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+      <Button variant="neon" className="w-full font-mono">
         <Zap className="h-4 w-4 mr-2" />
         INITIATE_CALL
       </Button>
