@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone, ChevronLeft, ChevronRight, Palette } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
@@ -28,6 +28,8 @@ const bottomNavItems = [
   { to: '/profile', icon: UserCircle, label: 'Your Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
+
+const gameStyleItem = { to: '/game-style', icon: Palette, label: 'Game Style' };
 
 const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
 const enterpriseNavItem = { to: '/enterprise', icon: Building2, label: 'Enterprise' };
@@ -94,7 +96,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   let bottomItems = [...bottomNavItems];
   
   if (isAdmin) {
-    bottomItems = [...bottomItems.slice(0, -1), adminNavItem, adminPanelItem, bottomItems[bottomItems.length - 1]];
+    bottomItems = [...bottomItems.slice(0, -1), gameStyleItem, adminNavItem, adminPanelItem, bottomItems[bottomItems.length - 1]];
   }
 
   const signOutButton = (
