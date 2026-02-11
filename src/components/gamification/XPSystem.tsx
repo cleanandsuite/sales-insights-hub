@@ -1,29 +1,48 @@
----
-# XP System - Visual Experience Tracker
+import { useMemo } from 'react';
 
-## Core Logic
-- Track XP earned from: calls, deals, activities
-- Store in localStorage (sync with session later)
-- Calculate level based on total XP
-- Show progress bar to next level
+// XP level thresholds
+const LEVEL_THRESHOLDS = [
+  0, 100, 250, 500, 800, 1200, 1800, 2500, 3500, 5000,
+  7000, 9500, 12500, 16000, 20000, 25000, 31000, 38000, 46000, 55000,
+];
 
-## XP Levels
-| Level | XP Required |
-|-------|-------------|-----------|
-| 1 | 0 |
-| 5 | 100 |
-| 10 | 500 |
-| 15 | 1,500 |
-| 20 | 5,000 |
-| 25 | 25,000 |
+export function getLevel(xp: number): number {
+  let level = 1;
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (xp >= LEVEL_THRESHOLDS[i]) {
+      level = i + 1;
+      break;
+    }
+  }
+  return level;
+}
 
-## XP Sources
-- Calls: +10 XP per call
-- Deals: +50 XP per closed deal
-- Activities: +25 XP per activity
+export function getXPForNextLevel(xp: number): { current: number; required: number; progress: number } {
+  const level = getLevel(xp);
+  const currentThreshold = LEVEL_THRESHOLDS[level - 1] ?? 0;
+  const nextThreshold = LEVEL_THRESHOLDS[level] ?? currentThreshold + 5000;
+  const xpInLevel = xp - currentThreshold;
+  const xpNeeded = nextThreshold - currentThreshold;
+  return {
+    current: xpInLevel,
+    required: xpNeeded,
+    progress: Math.min((xpInLevel / xpNeeded) * 100, 100),
+  };
+}
 
-## Progress Tracking
-- Current level
-- Total XP earned
-- XP to next level
-- Progress percentage (currentXP / requiredXP)
+// XP award values
+export const XP_VALUES = {
+  CALL_COMPLETED: 10,
+  DEAL_CLOSED: 50,
+  ACTIVITY_LOGGED: 25,
+  RECORDING_ANALYZED: 15,
+  COACHING_SESSION: 30,
+} as const;
+
+export function useXPSystem(totalXP: number) {
+  return useMemo(() => ({
+    level: getLevel(totalXP),
+    totalXP,
+    ...getXPForNextLevel(totalXP),
+  }), [totalXP]);
+}

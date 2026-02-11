@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { CharacterConfig, SalesStats } from '@/lib/evolution';
+import type { CharacterConfig } from '@/components/character/Avatar';
+import type { SalesStats } from '@/lib/evolution';
 
 export interface CharacterState {
   config: CharacterConfig;
