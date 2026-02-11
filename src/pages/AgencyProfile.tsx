@@ -19,10 +19,10 @@ const ROLES = {
     id: 'recruit',
     name: 'Recruit',
     icon: Binoculars,
-    color: 'bg-gray-500',
-    bgLight: 'bg-gray-500/10',
-    border: 'border-gray-500/50',
-    text: 'text-gray-500',
+    color: 'bg-gray-600',
+    bgLight: 'bg-gray-600/10',
+    border: 'border-gray-500',
+    text: 'text-gray-400',
     emoji: '🔭',
     primaryStat: 'Training Progress',
     secondaryStat: 'Shadowing Hours',
@@ -41,9 +41,9 @@ const ROLES = {
     id: 'hunter',
     name: 'Hunter',
     icon: Search,
-    color: 'bg-amber-500',
-    bgLight: 'bg-amber-500/10',
-    border: 'border-amber-500/50',
+    color: 'bg-amber-600',
+    bgLight: 'bg-amber-600/10',
+    border: 'border-amber-500',
     text: 'text-amber-500',
     emoji: '🎯',
     primaryStat: 'Pipeline Created',
@@ -63,9 +63,9 @@ const ROLES = {
     id: 'closer',
     name: 'Closer',
     icon: Target,
-    color: 'bg-red-500',
-    bgLight: 'bg-red-500/10',
-    border: 'border-red-500/50',
+    color: 'bg-red-600',
+    bgLight: 'bg-red-600/10',
+    border: 'border-red-500',
     text: 'text-red-500',
     emoji: '🎯',
     primaryStat: 'Deals Closed',
@@ -85,9 +85,9 @@ const ROLES = {
     id: 'cultivator',
     name: 'Cultivator',
     icon: Sprout,
-    color: 'bg-green-500',
-    bgLight: 'bg-green-500/10',
-    border: 'border-green-500/50',
+    color: 'bg-green-600',
+    bgLight: 'bg-green-600/10',
+    border: 'border-green-500',
     text: 'text-green-500',
     emoji: '🌱',
     primaryStat: 'Win Rate',
@@ -107,9 +107,9 @@ const ROLES = {
     id: 'champion',
     name: 'Champion',
     icon: UserCheck,
-    color: 'bg-blue-500',
-    bgLight: 'bg-blue-500/10',
-    border: 'border-blue-500/50',
+    color: 'bg-blue-600',
+    bgLight: 'bg-blue-600/10',
+    border: 'border-blue-500',
     text: 'text-blue-500',
     emoji: '👑',
     primaryStat: 'Retention Rate',
@@ -133,6 +133,49 @@ const formatCurrency = (value: number) => {
   return `$${value}`;
 };
 
+// Boxy stat bar (Minecraft style)
+function BoxyStatBar({ label, value, max = 100, color = 'bg-amber-600' }: {
+  label: string;
+  value: number;
+  max?: number;
+  color?: string;
+}) {
+  const percent = Math.min((value / max) * 100, 100);
+  
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-sm font-bold uppercase tracking-wide">
+        <span>{label}</span>
+        <span>{value}</span>
+      </div>
+      <div className="h-6 bg-gray-800 border-2 border-gray-600 relative">
+        <div 
+          className={`h-full ${color} absolute top-0 left-0`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Boxy card component
+function BoxyCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-gray-900 border-4 border-gray-700 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+// Boxy badge
+function BoxyBadge({ children, color = 'bg-gray-700' }: { children: React.ReactNode; color?: string }) {
+  return (
+    <span className={`inline-block px-3 py-1 ${color} text-white font-bold uppercase text-xs tracking-wider border-2 border-white/20`}>
+      {children}
+    </span>
+  );
+}
+
 export default function AgencyProfile() {
   const navigate = useNavigate();
   const [showCallDialog, setShowCallDialog] = useState(false);
@@ -142,13 +185,13 @@ export default function AgencyProfile() {
   const role = ROLES[selectedRole as keyof typeof ROLES];
 
   const agent = {
-    name: 'Your Agent',
+    name: 'AGENT',
     level: 12,
     xp: 12450,
     xpToNextLevel: 14400,
     totalRevenue: 1200000,
     dealsClosed: 89,
-    agencyName: 'Team Alpha',
+    agencyName: 'TEAM ALPHA',
   };
 
   const xpProgress = Math.round((agent.xp / agent.xpToNextLevel) * 100);
@@ -166,357 +209,360 @@ export default function AgencyProfile() {
       />
       
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                <Medal className="h-6 w-6 text-amber-500" />
-                Agency Profile
+              <h1 className="text-3xl font-black uppercase tracking-wider text-white">
+                AGENCY PROFILE
               </h1>
-              <p className="text-sm text-muted-foreground">
-                {agent.agencyName} • Level {agent.level} {role.emoji} {role.name}
+              <p className="text-sm font-bold uppercase tracking-widest text-gray-500">
+                {agent.agencyName} // LVL {agent.level} {role.emoji}
               </p>
             </div>
-            <Button onClick={() => setShowCallDialog(true)} className="gap-2">
-              <Phone className="h-4 w-4" />
-              Start Mission
-            </Button>
+            <button 
+              onClick={() => setShowCallDialog(true)}
+              className="bg-green-700 hover:bg-green-600 text-white font-bold uppercase px-6 py-3 border-b-4 border-green-900 active:border-b-0 active:translate-y-1 transition-all"
+            >
+              START MISSION
+            </button>
           </div>
 
-          <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="profile">My Profile</TabsTrigger>
-              <TabsTrigger value="roles">Roles</TabsTrigger>
-              <TabsTrigger value="team">Agency</TabsTrigger>
+          <Tabs defaultValue="profile" className="space-y-4">
+            <TabsList className="bg-gray-900 border-4 border-gray-700 p-1 gap-1">
+              <TabsTrigger 
+                value="profile" 
+                className="font-bold uppercase px-6 py-2 data-[state=active]:bg-amber-600 data-[state=active]:text-white border-2 border-transparent data-[state=active]:border-white"
+              >
+                PROFILE
+              </TabsTrigger>
+              <TabsTrigger 
+                value="roles" 
+                className="font-bold uppercase px-6 py-2 data-[state=active]:bg-amber-600 data-[state=active]:text-white border-2 border-transparent data-[state=active]:border-white"
+              >
+                ROLES
+              </TabsTrigger>
+              <TabsTrigger 
+                value="team" 
+                className="font-bold uppercase px-6 py-2 data-[state=active]:bg-amber-600 data-[state=active]:text-white border-2 border-transparent data-[state=active]:border-white"
+              >
+                AGENCY
+              </TabsTrigger>
             </TabsList>
 
             {/* Profile Tab */}
-            <TabsContent value="profile" className="space-y-6">
-              <div className="grid gap-6 lg:grid-cols-3">
+            <TabsContent value="profile" className="space-y-4">
+              <div className="grid gap-4 lg:grid-cols-3">
                 {/* Agent Card */}
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <div className={`h-24 w-24 mx-auto rounded-full ${role.bgLight} flex items-center justify-center ${role.border} border-2`}>
-                        <span className="text-4xl">{role.emoji}</span>
-                      </div>
-                      <h2 className="text-xl font-bold mt-4">{agent.name}</h2>
-                      <p className="text-sm text-muted-foreground">{agent.agencyName}</p>
-                      <div className="flex items-center justify-center gap-2 mt-2">
-                        <Badge variant="outline" className={role.border}>{role.name}</Badge>
-                        <Badge>Level {agent.level}</Badge>
-                      </div>
+                <BoxyCard className="p-6">
+                  <div className="text-center">
+                    <div className={`h-24 w-24 mx-auto border-4 border-gray-600 ${role.bgLight} flex items-center justify-center`}>
+                      <span className="text-5xl">{role.emoji}</span>
                     </div>
+                    <h2 className="text-xl font-black uppercase mt-4 text-white">{agent.name}</h2>
+                    <p className="text-sm font-bold uppercase text-gray-500">{agent.agencyName}</p>
+                    <div className="flex items-center justify-center gap-2 mt-3">
+                      <BoxyBadge color={role.color}>{role.name}</BoxyBadge>
+                      <BoxyBadge color="bg-gray-700">LVL {agent.level}</BoxyBadge>
+                    </div>
+                  </div>
 
-                    {/* XP Progress */}
-                    <div className="mt-6 space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Experience</span>
-                        <span>{agent.xp.toLocaleString()} / {agent.xpToNextLevel.toLocaleString()}</span>
-                      </div>
-                      <Progress value={xpProgress} className="h-3" />
+                  {/* XP Bar */}
+                  <div className="mt-6">
+                    <div className="flex justify-between text-sm font-bold uppercase mb-1">
+                      <span className="text-gray-400">EXPERIENCE</span>
+                      <span className="text-amber-500">{agent.xp.toLocaleString()}</span>
                     </div>
+                    <div className="h-6 bg-gray-800 border-2 border-gray-600 relative">
+                      <div 
+                        className="h-full bg-amber-600 absolute top-0 left-0"
+                        style={{ width: `${xpProgress}%` }}
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white drop-shadow-md">
+                        {xpProgress}%
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 text-center mt-1 uppercase">Next Level: {agent.xpToNextLevel.toLocaleString()} XP</p>
+                  </div>
 
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-2 gap-4 mt-6">
-                      <div className="text-center p-3 rounded-lg bg-muted/50">
-                        <p className="text-2xl font-bold">{formatCurrency(agent.totalRevenue)}</p>
-                        <p className="text-xs text-muted-foreground">Revenue</p>
-                      </div>
-                      <div className="text-center p-3 rounded-lg bg-muted/50">
-                        <p className="text-2xl font-bold">{agent.dealsClosed}</p>
-                        <p className="text-xs text-muted-foreground">Missions</p>
-                      </div>
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-2 gap-3 mt-6">
+                    <div className="bg-gray-800 border-2 border-gray-600 p-3 text-center">
+                      <p className="text-2xl font-black text-amber-500">{formatCurrency(agent.totalRevenue)}</p>
+                      <p className="text-xs font-bold uppercase text-gray-500">Revenue</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="bg-gray-800 border-2 border-gray-600 p-3 text-center">
+                      <p className="text-2xl font-black text-green-500">{agent.dealsClosed}</p>
+                      <p className="text-xs font-bold uppercase text-gray-500">Missions</p>
+                    </div>
+                  </div>
+                </BoxyCard>
 
                 {/* Stats Breakdown */}
-                <Card className="lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="text-base">Funnel Performance</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {[
-                        { label: 'Prospecting', value: role.stats.prospecting, icon: Search, color: 'bg-amber-500' },
-                        { label: 'Discovery', value: role.stats.discovery, icon: Target, color: 'bg-blue-500' },
-                        { label: 'Proposal', value: role.stats.proposal, icon: TrendingUp, color: 'bg-purple-500' },
-                        { label: 'Negotiation', value: role.stats.negotiation, icon: Users, color: 'bg-orange-500' },
-                        { label: 'Closing', value: role.stats.closing, icon: Trophy, color: 'bg-green-500' },
-                      ].map((stat) => (
-                        <div key={stat.label} className="space-y-1">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="flex items-center gap-2">
-                              <stat.icon className="h-4 w-4 text-muted-foreground" />
-                              {stat.label}
-                            </span>
-                            <span className="font-medium">{stat.value}</span>
-                          </div>
-                          <div className="h-2 rounded-full bg-muted overflow-hidden">
-                            <div 
-                              className={`h-full ${stat.color}`}
-                              style={{ width: `${stat.value}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <BoxyCard className="lg:col-span-2 p-6">
+                  <h3 className="font-black uppercase text-white mb-4 flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-amber-500" />
+                    FUNNEL STATS
+                  </h3>
+                  <div className="space-y-3">
+                    <BoxyStatBar label="Prospecting" value={role.stats.prospecting} color="bg-amber-600" />
+                    <BoxyStatBar label="Discovery" value={role.stats.discovery} color="bg-blue-600" />
+                    <BoxyStatBar label="Proposal" value={role.stats.proposal} color="bg-purple-600" />
+                    <BoxyStatBar label="Negotiation" value={role.stats.negotiation} color="bg-orange-600" />
+                    <BoxyStatBar label="Closing" value={role.stats.closing} color="bg-green-600" />
+                  </div>
+                </BoxyCard>
               </div>
 
               {/* Core Strengths */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Star className="h-4 w-4" />
-                    Core Strengths
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                    {role.skills.map((skill) => (
-                      <div 
-                        key={skill.name}
-                        className={`p-3 rounded-lg ${role.bgLight} border ${role.border}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm">{skill.name}</span>
-                          <Badge variant="outline" className="text-xs">Lv.{skill.level}</Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {role.primaryStat} +{skill.level * 5}%
-                        </p>
+              <BoxyCard className="p-6">
+                <h3 className="font-black uppercase text-white mb-4 flex items-center gap-2">
+                  <Star className="h-5 w-5 text-amber-500" />
+                  CORE STRENGTHS
+                </h3>
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                  {role.skills.map((skill) => (
+                    <div 
+                      key={skill.name}
+                      className={`bg-gray-800 border-2 ${role.border} p-4`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold uppercase text-sm text-white">{skill.name}</span>
+                        <BoxyBadge color={role.color}>LVL {skill.level}</BoxyBadge>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <div className="h-4 bg-gray-900 border border-gray-600">
+                        <div 
+                          className={`h-full ${role.color}`}
+                          style={{ width: `${skill.level * 10}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </BoxyCard>
 
               {/* KPIs */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    Key Metrics ({role.name})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    {role.kpis.map((kpi) => (
-                      <div key={kpi} className="p-4 rounded-lg bg-muted/50 text-center">
-                        <p className="text-sm text-muted-foreground">{kpi}</p>
-                        <p className="text-xl font-bold mt-1">Track</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <BoxyCard className="p-6">
+                <h3 className="font-black uppercase text-white mb-4 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-green-500" />
+                  KEY METRICS // {role.name}
+                </h3>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {role.kpis.map((kpi) => (
+                    <div key={kpi} className="bg-gray-800 border-2 border-gray-700 p-4 text-center">
+                      <p className="text-sm font-bold uppercase text-gray-400">{kpi}</p>
+                      <p className="text-xl font-black text-white mt-1">---</p>
+                    </div>
+                  ))}
+                </div>
+              </BoxyCard>
             </TabsContent>
 
             {/* Roles Tab */}
-            <TabsContent value="roles" className="space-y-6">
+            <TabsContent value="roles" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                 {Object.values(ROLES).map((r) => (
-                  <Card 
+                  <BoxyCard 
                     key={r.id}
-                    className={`cursor-pointer transition-all hover:scale-105 ${
-                      selectedRole === r.id ? `${r.border} ring-2 ring-offset-2` : ''
+                    className={`p-6 cursor-pointer transition-all hover:bg-gray-800 hover:border-amber-500 ${
+                      selectedRole === r.id ? 'border-amber-500 bg-gray-800' : ''
                     }`}
                     onClick={() => setSelectedRole(r.id)}
                   >
-                    <CardContent className="pt-6">
-                      <div className={`h-12 w-12 mx-auto rounded-lg ${r.bgLight} flex items-center justify-center`}>
-                        <span className="text-3xl">{r.emoji}</span>
-                      </div>
-                      <h3 className="font-bold text-center mt-3">{r.name}</h3>
-                      <Badge className="mt-2">{r.track}</Badge>
-                      <p className="text-xs text-muted-foreground text-center mt-2">{r.bestFor}</p>
-                    </CardContent>
-                  </Card>
+                    <div className={`h-16 w-16 mx-auto border-4 border-gray-600 ${r.bgLight} flex items-center justify-center`}>
+                      <span className="text-4xl">{r.emoji}</span>
+                    </div>
+                    <h3 className="font-black text-center mt-3 text-white uppercase">{r.name}</h3>
+                    <div className="flex justify-center mt-2">
+                      <BoxyBadge color={r.color}>{r.track}</BoxyBadge>
+                    </div>
+                    <p className="text-xs text-center mt-3 font-bold uppercase text-gray-500">{r.bestFor}</p>
+                  </BoxyCard>
                 ))}
               </div>
 
               {/* Role Progression */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Career Path</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4 overflow-x-auto pb-4">
-                    <div className="flex-shrink-0 text-center">
-                      <div className="h-16 w-16 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto">
-                        <span className="text-2xl">🔭</span>
-                      </div>
-                      <p className="text-sm font-medium mt-2">Recruit</p>
-                      <p className="text-xs text-muted-foreground">Entry</p>
+              <BoxyCard className="p-6">
+                <h3 className="font-black uppercase text-white mb-4 flex items-center gap-2">
+                  <ArrowRight className="h-5 w-5 text-amber-500" />
+                  CAREER PATH
+                </h3>
+                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                  <div className="flex-shrink-0 text-center">
+                    <div className="h-16 w-16 mx-auto border-4 border-gray-600 bg-gray-800 flex items-center justify-center">
+                      <span className="text-2xl">🔭</span>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-shrink-0 text-center">
-                      <div className="h-16 w-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto">
-                        <span className="text-2xl">🎯</span>
-                      </div>
-                      <p className="text-sm font-medium mt-2">Hunter</p>
-                      <p className="text-xs text-muted-foreground">Front</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-shrink-0 text-center">
-                      <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
-                        <span className="text-2xl">🌱</span>
-                      </div>
-                      <p className="text-sm font-medium mt-2">Cultivator</p>
-                      <p className="text-xs text-muted-foreground">Middle</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-shrink-0 text-center">
-                      <div className="h-16 w-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto">
-                        <span className="text-2xl">👑</span>
-                      </div>
-                      <p className="text-sm font-medium mt-2">Champion</p>
-                      <p className="text-xs text-muted-foreground">Post-Sale</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-shrink-0 text-center">
-                      <div className="h-16 w-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto">
-                        <span className="text-2xl">⭐</span>
-                      </div>
-                      <p className="text-sm font-medium mt-2">Senior Agent</p>
-                      <p className="text-xs text-muted-foreground">Leadership</p>
-                    </div>
+                    <p className="text-sm font-bold mt-2 text-white uppercase">Recruit</p>
+                    <p className="text-xs text-gray-500 uppercase">Entry</p>
                   </div>
-                </CardContent>
-              </Card>
+                  <ArrowRight className="h-8 w-8 text-gray-600 flex-shrink-0" />
+                  <div className="flex-shrink-0 text-center">
+                    <div className="h-16 w-16 mx-auto border-4 border-amber-600 bg-amber-900/20 flex items-center justify-center">
+                      <span className="text-2xl">🎯</span>
+                    </div>
+                    <p className="text-sm font-bold mt-2 text-white uppercase">Hunter</p>
+                  </div>
+                  <ArrowRight className="h-8 w-8 text-gray-600 flex-shrink-0" />
+                  <div className="flex-shrink-0 text-center">
+                    <div className="h-16 w-16 mx-auto border-4 border-green-600 bg-green-900/20 flex items-center justify-center">
+                      <span className="text-2xl">🌱</span>
+                    </div>
+                    <p className="text-sm font-bold mt-2 text-white uppercase">Cultivator</p>
+                  </div>
+                  <ArrowRight className="h-8 w-8 text-gray-600 flex-shrink-0" />
+                  <div className="flex-shrink-0 text-center">
+                    <div className="h-16 w-16 mx-auto border-4 border-blue-600 bg-blue-900/20 flex items-center justify-center">
+                      <span className="text-2xl">👑</span>
+                    </div>
+                    <p className="text-sm font-bold mt-2 text-white uppercase">Champion</p>
+                  </div>
+                  <ArrowRight className="h-8 w-8 text-gray-600 flex-shrink-0" />
+                  <div className="flex-shrink-0 text-center">
+                    <div className="h-16 w-16 mx-auto border-4 border-purple-600 bg-purple-900/20 flex items-center justify-center">
+                      <span className="text-2xl">⭐</span>
+                    </div>
+                    <p className="text-sm font-bold mt-2 text-white uppercase">Senior</p>
+                  </div>
+                </div>
+              </BoxyCard>
             </TabsContent>
 
             {/* Agency Tab */}
-            <TabsContent value="team" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Agency Composition</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-5">
-                    {/* Recruit */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">🔭</span>
-                        <h4 className="font-medium">Recruits</h4>
-                        <Badge variant="outline">1</Badge>
-                      </div>
-                      {[
-                        { name: 'New Hire Kim', level: 1, xp: 150 },
-                      ].map((member) => (
-                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                          <div className="h-10 w-10 rounded-full bg-gray-500/20 flex items-center justify-center text-sm font-bold">
-                            {member.name.split(' ').map(n => n[0]).join('')}
+            <TabsContent value="team" className="space-y-4">
+              <BoxyCard className="p-6">
+                <h3 className="font-black uppercase text-white mb-4 flex items-center gap-2">
+                  <Users className="h-5 w-5 text-amber-500" />
+                  AGENCY COMPOSITION
+                </h3>
+                <div className="grid gap-4 md:grid-cols-5">
+                  {/* Recruits */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🔭</span>
+                      <h4 className="font-bold uppercase text-gray-400">Recruits</h4>
+                      <BoxyBadge color="bg-gray-700">1</BoxyBadge>
+                    </div>
+                    {[
+                      { name: 'NEW KIM', level: 1, xp: 150 },
+                    ].map((member) => (
+                      <div key={member.name} className="bg-gray-800 border-2 border-gray-700 p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-sm">
+                            NK
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-sm">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
+                            <p className="font-bold text-sm text-white uppercase">{member.name}</p>
+                            <p className="text-xs text-gray-500">LVL {member.level}</p>
                           </div>
-                          <Badge variant="outline">{member.xp} XP</Badge>
+                          <span className="text-xs font-bold text-amber-500">{member.xp} XP</span>
                         </div>
-                      ))}
-                    </div>
-
-                    {/* Hunters */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">🎯</span>
-                        <h4 className="font-medium">Hunters</h4>
-                        <Badge variant="outline">2</Badge>
                       </div>
-                      {[
-                        { name: 'Sarah Chen', level: 15, xp: 15420 },
-                        { name: 'Mike Johnson', level: 14, xp: 14890 },
-                      ].map((member) => (
-                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                          <div className="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-sm font-bold">
-                            {member.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
-                          </div>
-                          <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Cultivators */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">🌱</span>
-                        <h4 className="font-medium">Cultivators</h4>
-                        <Badge variant="outline">2</Badge>
-                      </div>
-                      {[
-                        { name: 'Amanda Foster', level: 13, xp: 13200 },
-                        { name: 'David Lee', level: 12, xp: 12900 },
-                      ].map((member) => (
-                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                          <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center text-sm font-bold">
-                            {member.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
-                          </div>
-                          <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Champions */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">👑</span>
-                        <h4 className="font-medium">Champions</h4>
-                        <Badge variant="outline">1</Badge>
-                      </div>
-                      {[
-                        { name: 'Emily Zhang', level: 11, xp: 11500 },
-                      ].map((member) => (
-                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                          <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-sm font-bold">
-                            {member.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
-                          </div>
-                          <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Senior Agents */}
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">⭐</span>
-                        <h4 className="font-medium">Senior</h4>
-                        <Badge variant="outline">1</Badge>
-                      </div>
-                      {[
-                        { name: 'Robert Kim', level: 18, xp: 22000 },
-                      ].map((member) => (
-                        <div key={member.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                          <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center text-sm font-bold">
-                            {member.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">Level {member.level}</p>
-                          </div>
-                          <Badge variant="outline">{member.xp.toLocaleString()} XP</Badge>
-                        </div>
-                      ))}
-                    </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Hunters */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🎯</span>
+                      <h4 className="font-bold uppercase text-amber-500">Hunters</h4>
+                      <BoxyBadge color="bg-amber-700">2</BoxyBadge>
+                    </div>
+                    {[
+                      { name: 'SARAH C', level: 15, xp: 15420 },
+                      { name: 'MIKE J', level: 14, xp: 14890 },
+                    ].map((member) => (
+                      <div key={member.name} className="bg-gray-800 border-2 border-amber-700 p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-amber-900/30 border-2 border-amber-600 flex items-center justify-center font-bold text-sm">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-white uppercase">{member.name}</p>
+                            <p className="text-xs text-gray-500">LVL {member.level}</p>
+                          </div>
+                          <span className="text-xs font-bold text-amber-500">{member.xp.toLocaleString()} XP</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Cultivators */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🌱</span>
+                      <h4 className="font-bold uppercase text-green-500">Cultivators</h4>
+                      <BoxyBadge color="bg-green-700">2</BoxyBadge>
+                    </div>
+                    {[
+                      { name: 'AMANDA F', level: 13, xp: 13200 },
+                      { name: 'DAVID L', level: 12, xp: 12900 },
+                    ].map((member) => (
+                      <div key={member.name} className="bg-gray-800 border-2 border-green-700 p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-green-900/30 border-2 border-green-600 flex items-center justify-center font-bold text-sm">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-white uppercase">{member.name}</p>
+                            <p className="text-xs text-gray-500">LVL {member.level}</p>
+                          </div>
+                          <span className="text-xs font-bold text-green-500">{member.xp.toLocaleString()} XP</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Champions */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">👑</span>
+                      <h4 className="font-bold uppercase text-blue-500">Champions</h4>
+                      <BoxyBadge color="bg-blue-700">1</BoxyBadge>
+                    </div>
+                    {[
+                      { name: 'EMILY Z', level: 11, xp: 11500 },
+                    ].map((member) => (
+                      <div key={member.name} className="bg-gray-800 border-2 border-blue-700 p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-blue-900/30 border-2 border-blue-600 flex items-center justify-center font-bold text-sm">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-white uppercase">{member.name}</p>
+                            <p className="text-xs text-gray-500">LVL {member.level}</p>
+                          </div>
+                          <span className="text-xs font-bold text-blue-500">{member.xp.toLocaleString()} XP</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Senior Agents */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">⭐</span>
+                      <h4 className="font-bold uppercase text-purple-500">Senior</h4>
+                      <BoxyBadge color="bg-purple-700">1</BoxyBadge>
+                    </div>
+                    {[
+                      { name: 'ROBERT K', level: 18, xp: 22000 },
+                    ].map((member) => (
+                      <div key={member.name} className="bg-gray-800 border-2 border-purple-700 p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-purple-900/30 border-2 border-purple-600 flex items-center justify-center font-bold text-sm">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-white uppercase">{member.name}</p>
+                            <p className="text-xs text-gray-500">LVL {member.level}</p>
+                          </div>
+                          <span className="text-xs font-bold text-purple-500">{member.xp.toLocaleString()} XP</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </BoxyCard>
             </TabsContent>
           </Tabs>
         </div>
