@@ -164,8 +164,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ignore server errors - session may already be invalidated
       console.log('Sign out completed (session may have been expired)');
     }
-    // Force redirect to auth page
-    window.location.href = '/auth';
+    // Force redirect to auth page (use React Router instead of window.location for better UX)
+    window.location.assign('/auth');
   };
 
   return (
