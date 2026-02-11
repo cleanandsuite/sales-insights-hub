@@ -5,7 +5,7 @@ import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
 import { Navigate } from 'react-router-dom';
-import { Loader2, Building2, Crown, Calendar, FileText, Shield, Users, TrendingUp, Phone, LayoutGrid, List, Plus } from 'lucide-react';
+import { Loader2, Building2, Crown, Calendar, FileText, Shield, Users, TrendingUp, Phone, LayoutGrid, List, Plus, Palette, Zap, Sparkles, Target, Crosshair } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,7 @@ export default function Enterprise() {
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedGameStyle, setSelectedGameStyle] = useState<string | null>(null);
 
   const loading = authLoading || enterpriseLoading || roleLoading || adminLoading;
 
@@ -208,6 +209,13 @@ export default function Enterprise() {
             >
               <Users className="h-4 w-4" />
               Users & Seats
+            </TabsTrigger>
+            <TabsTrigger 
+              value="gamemode" 
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2"
+            >
+              <Palette className="h-4 w-4" />
+              Game Mode
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
@@ -391,6 +399,205 @@ export default function Enterprise() {
             </div>
 
             <EnterpriseSeatManagement teamId={teamId || undefined} />
+          </TabsContent>
+
+          {/* Game Mode Tab */}
+          <TabsContent value="gamemode" className="space-y-6 animate-fade-in">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {/* Minimal Dark */}
+              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08] overflow-hidden group hover:bg-card/40 transition-all cursor-pointer">
+                <div className="aspect-video bg-gray-950 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white">Minimal Dark</h3>
+                    <Badge variant="outline" className="border-gray-700 text-gray-400">Clean</Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-gray-900/50 p-2 rounded text-center">
+                      <p className="text-xs text-emerald-400">$1.2M</p>
+                    </div>
+                    <div className="bg-gray-900/50 p-2 rounded text-center">
+                      <p className="text-xs text-blue-400">89</p>
+                    </div>
+                    <div className="bg-gray-900/50 p-2 rounded text-center">
+                      <p className="text-xs text-amber-400">78%</p>
+                    </div>
+                  </div>
+                  <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 w-4/5" />
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">Clean, modern interface with subtle accents</p>
+                  <Button 
+                    className="w-full" 
+                    variant={selectedGameStyle === 'minimal' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGameStyle('minimal')}
+                  >
+                    {selectedGameStyle === 'minimal' ? 'Selected' : 'Select Style'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Minecraft 3D */}
+              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08] overflow-hidden group hover:bg-card/40 transition-all cursor-pointer">
+                <div className="aspect-video bg-gray-800 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-black uppercase text-white tracking-wider">Minecraft 3D</h3>
+                    <span className="px-2 py-0.5 bg-amber-600 text-white font-black text-xs border-b-2 border-amber-800">Boxy</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-gray-950 border-2 border-gray-600 p-2 text-center">
+                      <p className="text-xs font-black text-amber-400">$1.2M</p>
+                    </div>
+                    <div className="bg-gray-950 border-2 border-gray-600 p-2 text-center">
+                      <p className="text-xs font-black text-green-400">89</p>
+                    </div>
+                    <div className="bg-gray-950 border-2 border-gray-600 p-2 text-center">
+                      <p className="text-xs font-black text-blue-400">78%</p>
+                    </div>
+                  </div>
+                  <div className="h-6 bg-gray-950 border-2 border-gray-600">
+                    <div className="h-full bg-amber-500" style={{ width: '80%' }} />
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">Blocky, voxel-style with 3D depth and beveled edges</p>
+                  <Button 
+                    className="w-full" 
+                    variant={selectedGameStyle === 'minecraft' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGameStyle('minecraft')}
+                  >
+                    {selectedGameStyle === 'minecraft' ? 'Selected' : 'Select Style'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Cyberpunk */}
+              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08] overflow-hidden group hover:bg-card/40 transition-all cursor-pointer">
+                <div className="aspect-video bg-slate-950 p-4 space-y-3 relative">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-cyan-500/20 blur-xl rounded-full" />
+                  <div className="flex items-center justify-between relative z-10">
+                    <h3 className="text-lg font-bold text-cyan-400 tracking-widest">Cyberpunk</h3>
+                    <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 font-mono text-xs border border-cyan-500/50">Neon</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 relative z-10">
+                    <div className="bg-slate-900/80 p-2 rounded text-center border border-slate-700">
+                      <p className="text-xs font-bold text-cyan-400 drop-shadow-lg">$1.2M</p>
+                    </div>
+                    <div className="bg-slate-900/80 p-2 rounded text-center border border-slate-700">
+                      <p className="text-xs font-bold text-pink-400 drop-shadow-lg">89</p>
+                    </div>
+                    <div className="bg-slate-900/80 p-2 rounded text-center border border-slate-700">
+                      <p className="text-xs font-bold text-amber-400 drop-shadow-lg">78%</p>
+                    </div>
+                  </div>
+                  <div className="h-1.5 bg-slate-800 rounded relative z-10">
+                    <div className="h-full bg-gradient-to-r from-cyan-500 to-pink-500 w-4/5 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">Neon glow effects with futuristic HUD design</p>
+                  <Button 
+                    className="w-full" 
+                    variant={selectedGameStyle === 'cyberpunk' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGameStyle('cyberpunk')}
+                  >
+                    {selectedGameStyle === 'cyberpunk' ? 'Selected' : 'Select Style'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* RPG Adventure */}
+              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08] overflow-hidden group hover:bg-card/40 transition-all cursor-pointer">
+                <div className="aspect-video bg-stone-900 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-serif text-amber-400">RPG Adventure</h3>
+                    <span className="px-2 py-0.5 bg-amber-900/50 text-amber-400 font-serif text-xs border border-amber-700">Quest</span>
+                  </div>
+                  <div className="flex gap-2 p-2 bg-stone-800/50 rounded border border-stone-700">
+                    <div className="h-10 w-10 rounded bg-amber-900/30 border-2 border-amber-600 flex items-center justify-center text-xl">🎯</div>
+                    <div>
+                      <p className="font-serif text-sm text-amber-100">AGENT</p>
+                      <p className="text-xs text-stone-400">LVL 12 • Hunter</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-2 bg-stone-800/50 rounded text-center border border-stone-700">
+                      <p className="text-sm font-serif text-amber-400">$1.2M</p>
+                    </div>
+                    <div className="p-2 bg-stone-800/50 rounded text-center border border-stone-700">
+                      <p className="text-sm font-serif text-green-400">89</p>
+                    </div>
+                    <div className="p-2 bg-stone-800/50 rounded text-center border border-stone-700">
+                      <p className="text-sm font-serif text-blue-400">78%</p>
+                    </div>
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">Character-focused with quest/mission framing</p>
+                  <Button 
+                    className="w-full" 
+                    variant={selectedGameStyle === 'rpg' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGameStyle('rpg')}
+                  >
+                    {selectedGameStyle === 'rpg' ? 'Selected' : 'Select Style'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Retro Arcade */}
+              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08] overflow-hidden group hover:bg-card/40 transition-all cursor-pointer">
+                <div className="aspect-video bg-black p-4 space-y-3 relative">
+                  <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] pointer-events-none" />
+                  <div className="flex items-center justify-between relative z-10">
+                    <h3 className="text-lg font-bold text-red-500 tracking-widest" style={{ textShadow: '2px 2px 0 #ff0000' }}>Arcade</h3>
+                    <span className="px-2 py-0.5 bg-red-600 text-white font-bold text-xs animate-pulse">HIGH SCORE</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 relative z-10">
+                    <div className="bg-gray-900 p-2 rounded text-center border-2 border-gray-600">
+                      <p className="text-xs font-bold text-yellow-400" style={{ textShadow: '2px 2px 0 #000' }}>$1.2M</p>
+                    </div>
+                    <div className="bg-gray-900 p-2 rounded text-center border-2 border-gray-600">
+                      <p className="text-xs font-bold text-cyan-400">89</p>
+                    </div>
+                    <div className="bg-gray-900 p-2 rounded text-center border-2 border-gray-600">
+                      <p className="text-xs font-bold text-red-400">LVL 12</p>
+                    </div>
+                  </div>
+                  <div className="h-4 bg-gray-900 border-2 border-gray-600 relative z-10">
+                    <div className="h-full bg-yellow-500 animate-pulse" style={{ width: '80%' }} />
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">Pixel fonts, scanlines, and high-score energy</p>
+                  <Button 
+                    className="w-full" 
+                    variant={selectedGameStyle === 'arcade' ? 'default' : 'outline'}
+                    onClick={() => setSelectedGameStyle('arcade')}
+                  >
+                    {selectedGameStyle === 'arcade' ? 'Selected' : 'Select Style'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Selected Style Info */}
+            {selectedGameStyle && (
+              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08]">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white capitalize">{selectedGameStyle.replace('-', ' ')} Style Selected</h3>
+                      <p className="text-sm text-muted-foreground">This style will be applied across the entire SellSig platform.</p>
+                    </div>
+                    <Button onClick={() => toast.success(`${selectedGameStyle} style applied!`)}>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Apply Style
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
           
           {/* Organization Settings Tab */}
