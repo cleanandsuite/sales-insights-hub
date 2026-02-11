@@ -135,14 +135,27 @@ export default function Dashboard() {
 
           {/* Tabs */}
           <div className="flex gap-2">
-            {['overview', 'charts', 'actions'].map((tab) => (
+            {[
+              { id: 'overview', label: 'Overview' },
+              { id: 'charts', label: 'Charts' },
+              { id: 'actions', label: 'Actions' },
+            ].map((tab) => (
               <MinecraftButton
-                key={tab}
-                variant={activeTab === tab ? 'default' : 'default'}
-                className={activeTab === tab ? '' : 'bg-gray-700 hover:bg-gray-600'}
-                onClick={() => setActiveTab(tab)}
+                key={tab.id}
+                variant={activeTab === tab.id ? 'default' : 'default'}
+                className={`
+                  ${activeTab === tab.id 
+                    ? 'bg-blue-600 hover:bg-blue-500 border-blue-800' 
+                    : 'bg-gray-700 hover:bg-gray-600 border-gray-900'
+                  }
+                  min-w-[100px]
+                `}
+                onClick={() => setActiveTab(tab.id)}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="ml-2 inline-block w-2 h-4 bg-white animate-blink-cursor" />
+                )}
               </MinecraftButton>
             ))}
           </div>

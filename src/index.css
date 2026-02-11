@@ -167,3 +167,31 @@
   transform: translateY(2px);
   border-bottom-width: 2px !important;
 }
+
+/* Cursor blink animation (Command/Shell style) */
+@keyframes blink-cursor {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.animate-blink-cursor {
+  animation: blink-cursor 1s step-end infinite;
+  vertical-align: middle;
+}
+
+/* Light blue active tab indicator */
+.bg-blue-600 {
+  background-color: #2563eb !important;
+}
+
+.bg-blue-600:hover {
+  background-color: #3b82f6 !important;
+}
+
+.border-blue-800 {
+  border-color: #1e40af !important;
+}
