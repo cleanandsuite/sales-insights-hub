@@ -43,7 +43,7 @@ export function ConfessionHeader({ onClaimRedemption }: ConfessionHeaderProps) {
               variant="outline"
               size="sm"
               onClick={handleCallNow}
-              className="gap-2 text-white border-white/20 hover:bg-white/10 hover:text-white"
+              className="gap-2 text-emerald-400 border-white/20 hover:bg-white hover:text-slate-950"
             >
               <Phone className="w-4 h-4" />
               <span className="hidden sm:inline">Call for Demo</span>
@@ -54,7 +54,7 @@ export function ConfessionHeader({ onClaimRedemption }: ConfessionHeaderProps) {
               variant="ghost"
               size="sm"
               onClick={() => navigate('/auth')}
-              className="gap-2 text-white/80 hover:text-white hover:bg-white/10"
+              className="gap-2 text-emerald-400 hover:bg-white hover:text-slate-950"
             >
               <LogIn className="w-4 h-4" />
               <span className="hidden sm:inline">Sign In</span>
