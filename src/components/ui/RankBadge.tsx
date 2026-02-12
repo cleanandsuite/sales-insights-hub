@@ -166,27 +166,42 @@ const RANKS: Record<string, RankInfo> = {
   },
 };
 
-// Get rank info from XP
+// Get rank info from XP - Adjusted progression
+// Unranked Tier (XP < 500) - Easier progression: Wood → Bronze
+// Bronze Tier (3,000 - 20,000) - More tiers available
+// Silver Tier (20,000 - 50,000) - Still very achievable
+// Gold Tier (50,000 - 100,000) - Significant achievement
+// Platinum Tier (100,000 - 250,000) - God-like status
 export function getRankFromXP(xp: number): string {
   if (!xp || xp < 0) return 'unranked';
-  if (xp < 1000) return 'wood';
-  if (xp < 3000) return 'iron';
-  if (xp < 5000) return 'copper';
-  if (xp < 7500) return 'bronze';
-  if (xp < 10000) return 'sapphire';
-  if (xp < 12500) return 'ruby';
-  if (xp < 15000) return 'emerald';
-  if (xp < 20000) return 'silver';
-  if (xp < 25000) return 'gold';
-  if (xp < 30000) return 'platinum';
-  if (xp < 35000) return 'titanium';
-  if (xp < 40000) return 'diamond';
-  if (xp < 50000) return 'master';
-  if (xp < 60000) return 'grandmaster';
-  if (xp < 70000) return 'legend';
-  if (xp < 75000) return 'champion';
-  if (xp < 100000) return 'overlord';
-  return 'divine';
+
+  // Unranked Tier (XP < 500) - Easier progression
+  if (xp < 250) return 'wood';
+  if (xp < 500) return 'iron';
+  if (xp < 1500) return 'copper';
+  if (xp < 3000) return 'bronze';
+
+  // Bronze Tier (3,000 - 20,000) - 5 tiers
+  if (xp < 5000) return 'sapphire';
+  if (xp < 7500) return 'ruby';
+  if (xp < 10000) return 'emerald';
+  if (xp < 12500) return 'silver';
+  if (xp < 15000) return 'gold';
+
+  // Silver Tier (20,000 - 50,000) - 4 tiers
+  if (xp < 20000) return 'platinum';
+  if (xp < 30000) return 'titanium';
+  if (xp < 35000) return 'diamond';
+  if (xp < 40000) return 'master';
+  if (xp < 50000) return 'grandmaster';
+  if (xp < 60000) return 'legend';
+  if (xp < 70000) return 'champion';
+  if (xp < 85000) return 'overlord';
+  if (xp < 100000) return 'mythic';
+
+  // Platinum Tier (100,000 - 250,000) - God-like status
+  if (xp < 150000) return 'divine';
+  return 'cosmic'; // Unlimited potential!
 }
 
 export function RankBadge({ rank, size = 'md', showNumber = true }: RankBadgeProps) {
@@ -330,7 +345,8 @@ export function RankBadge({ rank, size = 'md', showNumber = true }: RankBadgePro
         size === 'sm' ? "text-sm" : "text-md",
         "font-bold",
         "p-1 rounded-lg",
-        "text-white bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500",
+        "text-white",
+        "bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500",
         "border-2 border-white/20",
       )}>
         <span className="text-lg animate-pulse">🌟</span>
@@ -345,8 +361,11 @@ export function RankBadge({ rank, size = 'md', showNumber = true }: RankBadgePro
     <div className={cn(
       "flex items-center gap-2",
       size === 'sm' ? "text-sm" : "text-md",
-      "font-semibold text-muted-foreground",
-      "p-1 rounded-lg bg-muted/10 border-border",
+      "font-semibold",
+      "text-muted-foreground",
+      "p-1 rounded-lg",
+      "bg-muted/10",
+      "border-border",
     )}>
       <span className="text-lg">{rankInfo.emoji}</span>
       <span className="font-medium">{rankInfo.name}</span>
