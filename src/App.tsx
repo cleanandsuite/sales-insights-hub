@@ -45,7 +45,7 @@ const Experiments = lazy(() => import("./pages/Experiments"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
-const integrations = lazy(() => import("./pages/Integrations"));
+const Integrations = lazy(() => import("./pages/Integrations"));
 
 const queryClient = new QueryClient();
 

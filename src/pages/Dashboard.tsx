@@ -101,7 +101,7 @@ export default function Dashboard() {
   const stats = {
     xp: 12450,
     level: 12,
-    rank: getUserRank(12450),
+    rank: getRankFromXP(12450),
     quota: { current: 1200000, target: 1500000 },
     streak: 5,
   };

@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 export interface RankBadgeProps {
-  rank: number | 'unranked';
+  rank: string;
   size?: 'sm' | 'md' | 'lg';
   showNumber?: boolean;
 }
@@ -159,9 +159,8 @@ const RANKS: Record<string, RankInfo> = {
   cosmic: {
     name: 'Cosmic',
     emoji: '🌟',
-    color: 'text-transparent',
-    background: 'linear-gradient(135deg, #FF6B6B, #FECFEA, #00B4D8, #FF6B6B)',
     color: 'text-white',
+    bgColor: 'bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500',
     borderColor: 'border-transparent',
   },
 };
@@ -205,7 +204,7 @@ export function getRankFromXP(xp: number): string {
 }
 
 export function RankBadge({ rank, size = 'md', showNumber = true }: RankBadgeProps) {
-  if (rank === 'unranked' || typeof rank === 'number' && rank === 0) {
+  if (rank === 'unranked' || rank === '0') {
     const rankInfo = RANKS.unranked;
     return (
       <div className={cn(
