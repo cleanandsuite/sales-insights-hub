@@ -84,7 +84,7 @@ const App = () => (
               <Route path="/call-history" element={<Navigate to="/recordings" replace />} />
               <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/profile" element={<Navigate to="/settings" replace />} />
               <Route path="/team" element={<TeamProtectedRoute><Team /></TeamProtectedRoute>} />
               <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
               <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
@@ -93,13 +93,13 @@ const App = () => (
               <Route path="/revenue-intelligence" element={<ProtectedRoute><RevenueIntelligence /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
-              <Route path="/integrations/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
+              <Route path="/integrations/salesforce" element={<Navigate to="/settings" replace />} />
               <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
-              <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
+              <Route path="/experiments" element={<Navigate to="/settings" replace />} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
               <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
               <Route path="/enterprise" element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
-              <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
+              
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/support" element={<Support />} />
