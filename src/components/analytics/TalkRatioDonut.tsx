@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MessageSquare, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -9,7 +10,7 @@ interface TalkRatioDonutProps {
   isOptimal: boolean;
 }
 
-export function TalkRatioDonut({ you, them, isOptimal }: TalkRatioDonutProps) {
+export const TalkRatioDonut = memo(function TalkRatioDonut({ you, them, isOptimal }: TalkRatioDonutProps) {
   const data = [
     { name: 'You', value: you },
     { name: 'Prospect', value: them }
@@ -127,4 +128,4 @@ export function TalkRatioDonut({ you, them, isOptimal }: TalkRatioDonutProps) {
       </CardContent>
     </Card>
   );
-}
+});

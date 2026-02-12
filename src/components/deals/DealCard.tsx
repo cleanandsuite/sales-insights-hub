@@ -139,8 +139,8 @@ export function DealCard({ deal, onEdit, onStageChange }: DealCardProps) {
             <NextActionCard
               action={deal.nextAction}
               dueDate={deal.nextActionDueDate}
-              onComplete={() => console.log('Complete action')}
-              onReschedule={() => console.log('Reschedule')}
+              onComplete={() => {/* TODO: Implement complete action */}}
+              onReschedule={() => {/* TODO: Implement reschedule */}}
             />
           )}
 

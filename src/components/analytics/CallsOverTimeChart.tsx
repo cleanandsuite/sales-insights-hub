@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, ComposedChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { BarChart3 } from 'lucide-react';
@@ -12,7 +13,7 @@ interface CallsOverTimeChartProps {
   data: CallData[];
 }
 
-export function CallsOverTimeChart({ data }: CallsOverTimeChartProps) {
+export const CallsOverTimeChart = memo(function CallsOverTimeChart({ data }: CallsOverTimeChartProps) {
   const hasData = data.length > 0;
 
   const CustomTooltip = ({ active, payload, label }: { 
@@ -138,4 +139,4 @@ export function CallsOverTimeChart({ data }: CallsOverTimeChartProps) {
       </CardContent>
     </Card>
   );
-}
+});
