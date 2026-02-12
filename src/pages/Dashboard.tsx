@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RankBadge, getRankFromXP } from '@/components/ui/RankBadge';
 import { 
   Phone, Flame, Trophy, Target, TrendingUp, 
   Calendar, BarChart3, ArrowRight, Zap,
@@ -100,6 +101,7 @@ export default function Dashboard() {
   const stats = {
     xp: 12450,
     level: 12,
+    rank: getUserRank(12450),
     quota: { current: 1200000, target: 1500000 },
     streak: 5,
   };
@@ -152,11 +154,12 @@ export default function Dashboard() {
                       <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
                         <span className="text-2xl font-bold">{stats.level}</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-muted-foreground">Level {stats.level}</p>
-                        <StatBar label="" value={stats.xp} max={14400} color="bg-primary" />
-                        <p className="text-xs text-muted-foreground mt-1">{stats.xp.toLocaleString()} XP</p>
-                      </div>
+                      <RankBadge rank={stats.rank} size="lg" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Level {stats.level}</p>
+                      <StatBar label="" value={stats.xp} max={14400} color="bg-primary" />
+                      <p className="text-xs text-muted-foreground mt-1">{stats.xp.toLocaleString()} XP</p>
                     </div>
                   </CardContent>
                 </Card>

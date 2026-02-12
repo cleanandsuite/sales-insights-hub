@@ -45,7 +45,7 @@ const Experiments = lazy(() => import("./pages/Experiments"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
-const Integrations = lazy(() => import("./pages/Integrations"));
+const integrations = lazy(() => import("./pages/Integrations"));
 
 const queryClient = new QueryClient();
 
@@ -92,7 +92,8 @@ const App = () => (
               <Route path="/manager" element={<ProtectedRoute><Manager /></ProtectedRoute>} />
               <Route path="/revenue-intelligence" element={<ProtectedRoute><RevenueIntelligence /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
+              <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
+              <Route path="/integrations/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
               <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
               <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />

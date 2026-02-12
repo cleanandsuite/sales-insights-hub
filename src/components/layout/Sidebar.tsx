@@ -25,7 +25,7 @@ const baseNavItems = [
 ];
 
 const bottomNavItems = [
-  { to: '/integrations', icon: Link2, label: 'Integrations' },
+  { to: '/integrations/salesforce', icon: Link2, label: 'Salesforce' },
   { to: '/profile', icon: UserCircle, label: 'Your Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
