@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone, ChevronLeft, ChevronRight, Medal } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
@@ -21,6 +21,7 @@ const baseNavItems = [
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/coaching', icon: Trophy, label: 'Coaching' },
+  { to: '/leaderboard', icon: Medal, label: 'Leaderboard' },
 ];
 
 const bottomNavItems = [

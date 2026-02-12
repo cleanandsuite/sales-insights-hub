@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SidebarProvider } from "@/contexts/SidebarContext";
+import { LeaderboardProvider } from "@/contexts/LeaderboardContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TeamProtectedRoute } from "@/components/TeamProtectedRoute";
 import { Loader2 } from "lucide-react";
@@ -42,6 +43,7 @@ const UpgradePlan = lazy(() => import("./pages/UpgradePlan"));
 const Success = lazy(() => import("./pages/Success"));
 const Experiments = lazy(() => import("./pages/Experiments"));
 const Admin = lazy(() => import("./pages/Admin"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
 const Integrations = lazy(() => import("./pages/Integrations"));
 
@@ -62,9 +64,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-              <Route path="/" element={<Index />} />
+            <LeaderboardProvider>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
               
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<Navigate to="/auth" replace />} />
@@ -93,6 +96,7 @@ const App = () => (
               <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
               <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
               <Route path="/enterprise" element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
               <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
               <Route path="/terms" element={<TermsOfService />} />
@@ -101,8 +105,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </AuthProvider>
-        </BrowserRouter>
+          </LeaderboardProvider>
+        </AuthProvider>
+      </BrowserRouter>
       </SidebarProvider>
     </TooltipProvider>
   </QueryClientProvider>
