@@ -25,15 +25,13 @@ const baseNavItems = [
 ];
 
 const bottomNavItems = [
-  { to: '/integrations/salesforce', icon: Link2, label: 'Salesforce' },
-  { to: '/profile', icon: UserCircle, label: 'Your Profile' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 const managerNavItem = { to: '/manager', icon: Crown, label: 'Manager' };
 const enterpriseNavItem = { to: '/enterprise', icon: Building2, label: 'Enterprise' };
 const revenueIntelligenceItem = { to: '/revenue-intelligence', icon: TrendingUp, label: 'Revenue Intel' };
-const adminNavItem = { to: '/experiments', icon: FlaskConical, label: 'Experiments' };
+// Experiments moved to Settings
 const adminPanelItem = { to: '/admin', icon: Shield, label: 'Admin Panel' };
 
 interface NavItemProps {
@@ -95,7 +93,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   let bottomItems = [...bottomNavItems];
   
   if (isAdmin) {
-    bottomItems = [...bottomItems.slice(0, -1), adminNavItem, adminPanelItem, bottomItems[bottomItems.length - 1]];
+    bottomItems = [...bottomItems.slice(0, -1), adminPanelItem, bottomItems[bottomItems.length - 1]];
   }
 
   const signOutButton = (

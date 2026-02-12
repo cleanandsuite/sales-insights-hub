@@ -21,13 +21,19 @@ import {
   Check,
   AlertCircle,
   CreditCard,
-  Mail
+  Mail,
+  UserCircle,
+  FlaskConical
 } from 'lucide-react';
 
 import { PasswordChangeCard } from '@/components/settings/PasswordChangeCard';
 import { BillingTab } from '@/components/settings/BillingTab';
 import { InvitesTab } from '@/components/settings/InvitesTab';
 import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
+import { ProfileTab } from '@/components/settings/ProfileTab';
+import { SalesforceTab } from '@/components/settings/SalesforceTab';
+import { ExperimentsTab } from '@/components/settings/ExperimentsTab';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -59,6 +65,7 @@ interface CRMConnection {
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isAdmin } = useAdminRole();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -216,8 +223,12 @@ export default function Settings() {
           </Button>
         </div>
 
-        <Tabs defaultValue="audio" className="space-y-4 sm:space-y-6">
+        <Tabs defaultValue="profile" className="space-y-4 sm:space-y-6">
           <TabsList className="bg-muted/50 w-full flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="profile" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <UserCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Profile</span>
+            </TabsTrigger>
             <TabsTrigger value="audio" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Audio</span>
@@ -230,9 +241,13 @@ export default function Settings() {
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">CRM</span>
             </TabsTrigger>
+            <TabsTrigger value="salesforce" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Salesforce</span>
+            </TabsTrigger>
             <TabsTrigger value="billing" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Choose a Plan</span>
+              <span className="hidden xs:inline">Plan</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -246,7 +261,18 @@ export default function Settings() {
               <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Invites</span>
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="experiments" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+                <FlaskConical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Experiments</span>
+              </TabsTrigger>
+            )}
           </TabsList>
+
+          {/* Profile */}
+          <TabsContent value="profile">
+            <ProfileTab />
+          </TabsContent>
 
           {/* Audio Settings */}
           <TabsContent value="audio">
@@ -596,6 +622,18 @@ export default function Settings() {
           <TabsContent value="invites">
             <InvitesTab />
           </TabsContent>
+
+          {/* Salesforce */}
+          <TabsContent value="salesforce">
+            <SalesforceTab />
+          </TabsContent>
+
+          {/* Experiments (Admin only) */}
+          {isAdmin && (
+            <TabsContent value="experiments">
+              <ExperimentsTab />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </DashboardLayout>
