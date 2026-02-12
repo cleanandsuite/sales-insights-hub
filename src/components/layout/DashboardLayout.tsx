@@ -1,9 +1,6 @@
 import { ReactNode } from 'react';
 import { Sidebar, MobileHeader } from './Sidebar';
 import { useSidebarState } from '@/contexts/SidebarContext';
-import { useCharacter } from '@/contexts/CharacterContext';
-import { WanderingCharacter } from '@/components/character/Character';
-import { calculateClass } from '@/lib/evolution';
 import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
@@ -12,9 +9,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isCollapsed } = useSidebarState();
-  const { config, stats, name } = useCharacter();
-  const characterClass = calculateClass(stats);
-
+  
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
@@ -25,14 +20,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       )}>
         {children}
       </main>
-
-      {/* Wandering character - appears on all dashboard pages */}
-      <WanderingCharacter
-        config={config}
-        characterClass={characterClass}
-        size={80}
-        name={name}
-      />
     </div>
   );
 }

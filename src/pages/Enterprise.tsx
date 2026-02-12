@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
-import { useTheme, ThemeMode } from '@/contexts/ThemeContext';
 import { Navigate } from 'react-router-dom';
-import { Loader2, Building2, Crown, Calendar, FileText, Shield, Users, TrendingUp, Phone, LayoutGrid, List, Plus, Palette, Zap, Sparkles, Check, RefreshCcw } from 'lucide-react';
+import { Loader2, Building2, Crown, Calendar, FileText, Shield, Users, TrendingUp, Phone, LayoutGrid, List, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,6 @@ export default function Enterprise() {
   const { isEnterprise, tier, loading: enterpriseLoading } = useEnterpriseSubscription();
   const { teamId, loading: roleLoading } = useUserRole();
   const { isAdmin, loading: adminLoading } = useAdminRole();
-  const { theme, setTheme } = useTheme();
 
   // Deals state
   const [deals, setDeals] = useState<Deal[]>(mockDeals);
@@ -47,23 +45,6 @@ export default function Enterprise() {
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedGameStyle, setSelectedGameStyle] = useState<ThemeMode>(theme);
-
-  // Sync with theme context
-  useEffect(() => {
-    setSelectedGameStyle(theme);
-  }, [theme]);
-
-  // Apply selected theme
-  const handleApplyTheme = () => {
-    setTheme(selectedGameStyle);
-    toast.success(
-      selectedGameStyle === 'minecraft' 
-        ? '🎮 Minecraft 3D theme activated!' 
-        : '✓ Default theme applied',
-      { duration: 3000 }
-    );
-  };
 
   const loading = authLoading || enterpriseLoading || roleLoading || adminLoading;
 
@@ -227,13 +208,6 @@ export default function Enterprise() {
             >
               <Users className="h-4 w-4" />
               Users & Seats
-            </TabsTrigger>
-            <TabsTrigger 
-              value="gamemode" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2"
-            >
-              <Palette className="h-4 w-4" />
-              Game Mode
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
@@ -417,121 +391,6 @@ export default function Enterprise() {
             </div>
 
             <EnterpriseSeatManagement teamId={teamId || undefined} />
-          </TabsContent>
-
-          {/* Game Mode Tab */}
-          <TabsContent value="gamemode" className="space-y-6 animate-fade-in">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Default (Original) */}
-              <Card 
-                className={`bg-card/30 backdrop-blur-xl border-2 overflow-hidden cursor-pointer transition-all ${
-                  selectedGameStyle === 'default' 
-                    ? 'border-primary shadow-lg shadow-primary/20' 
-                    : 'border-white/[0.08] hover:border-white/[0.16]'
-                }`}
-                onClick={() => setSelectedGameStyle('default')}
-              >
-                <div className="aspect-video bg-gradient-to-br from-gray-900 to-gray-800 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-white">Default</h3>
-                    {selectedGameStyle === 'default' && (
-                      <Badge className="bg-primary text-primary-foreground">Selected</Badge>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-gray-800/50 p-2 rounded text-center">
-                      <p className="text-xs text-gray-300">$1.2M</p>
-                    </div>
-                    <div className="bg-gray-800/50 p-2 rounded text-center">
-                      <p className="text-xs text-gray-300">89</p>
-                    </div>
-                    <div className="bg-gray-800/50 p-2 rounded text-center">
-                      <p className="text-xs text-gray-300">78%</p>
-                    </div>
-                  </div>
-                  <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-gray-500 w-4/5" />
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">Original SellSig interface - clean and professional</p>
-                </CardContent>
-              </Card>
-
-              {/* Minecraft 3D */}
-              <Card 
-                className={`bg-card/30 backdrop-blur-xl border-2 overflow-hidden cursor-pointer transition-all ${
-                  selectedGameStyle === 'minecraft' 
-                    ? 'border-amber-500 shadow-lg shadow-amber-500/20' 
-                    : 'border-white/[0.08] hover:border-white/[0.16]'
-                }`}
-                onClick={() => setSelectedGameStyle('minecraft')}
-              >
-                <div className="aspect-video bg-gray-800 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-black uppercase text-white tracking-wider">Minecraft 3D</h3>
-                    {selectedGameStyle === 'minecraft' && (
-                      <span className="px-2 py-0.5 bg-amber-600 text-white font-black text-xs border-b-2 border-amber-800">Selected</span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-gray-950 border-2 border-gray-600 p-2 text-center">
-                      <p className="text-xs font-black text-amber-400">$1.2M</p>
-                    </div>
-                    <div className="bg-gray-950 border-2 border-gray-600 p-2 text-center">
-                      <p className="text-xs font-black text-green-400">89</p>
-                    </div>
-                    <div className="bg-gray-950 border-2 border-gray-600 p-2 text-center">
-                      <p className="text-xs font-black text-blue-400">78%</p>
-                    </div>
-                  </div>
-                  <div className="h-6 bg-gray-950 border-2 border-gray-600">
-                    <div className="h-full bg-amber-500" style={{ width: '80%' }} />
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">Blocky, voxel-style with 3D depth and beveled edges</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Selected Style Info */}
-            {selectedGameStyle && (
-              <Card className="bg-card/30 backdrop-blur-xl border-white/[0.08]">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white capitalize flex items-center gap-2">
-                        {selectedGameStyle === 'minecraft' && <span className="text-2xl">🎮</span>}
-                        {selectedGameStyle === 'default' && <span className="text-2xl">✓</span>}
-                        {selectedGameStyle === 'minecraft' ? 'Minecraft 3D' : 'Default'} Mode Selected
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedGameStyle === 'minecraft' 
-                          ? 'Blocky 3D style with raised buttons and beveled edges will be applied across the platform.'
-                          : 'Original SellSig interface - clean and professional.'}
-                      </p>
-                    </div>
-                    <Button 
-                      onClick={handleApplyTheme}
-                      className={selectedGameStyle === 'minecraft' ? 'bg-amber-600 hover:bg-amber-500' : ''}
-                    >
-                      {selectedGameStyle === theme ? (
-                        <>
-                          <Check className="h-4 w-4 mr-2" />
-                          Active
-                        </>
-                      ) : (
-                        <>
-                          <RefreshCcw className="h-4 w-4 mr-2" />
-                          Apply Theme
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
           
           {/* Organization Settings Tab */}

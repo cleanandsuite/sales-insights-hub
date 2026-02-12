@@ -6,8 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SidebarProvider } from "@/contexts/SidebarContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { CharacterProvider } from "@/contexts/CharacterContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TeamProtectedRoute } from "@/components/TeamProtectedRoute";
 import { Loader2 } from "lucide-react";
@@ -45,9 +43,7 @@ const Success = lazy(() => import("./pages/Success"));
 const Experiments = lazy(() => import("./pages/Experiments"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
-const GameStyleGuide = lazy(() => import("./pages/GameStyleGuide"));
 const Integrations = lazy(() => import("./pages/Integrations"));
-const StationaryCharacterDemo = lazy(() => import("./pages/StationaryCharacterDemo"));
 
 const queryClient = new QueryClient();
 
@@ -62,58 +58,51 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SidebarProvider>
-        <ThemeProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <AuthProvider>
-            <CharacterProvider>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                <Route path="/" element={<Index />} />
-
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/login" element={<Navigate to="/auth" replace />} />
-                <Route path="/signup" element={<Navigate to="/auth" replace />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/upgrade" element={<ProtectedRoute><UpgradePlan /></ProtectedRoute>} />
-                <Route path="/account-blocked" element={<AccountBlocked />} />
-                <Route path="/success" element={<Success />} />
-                <Route path="/payment-complete" element={<PaymentComplete />} />
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
-                <Route path="/recording/:id" element={<ProtectedRoute><RecordingAnalysis /></ProtectedRoute>} />
-                <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
-                <Route path="/call-history" element={<Navigate to="/recordings" replace />} />
-                <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/team" element={<TeamProtectedRoute><Team /></TeamProtectedRoute>} />
-                <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
-                <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
-                <Route path="/winwords" element={<ProtectedRoute><WinWords /></ProtectedRoute>} />
-                <Route path="/manager" element={<ProtectedRoute><Manager /></ProtectedRoute>} />
-                <Route path="/revenue-intelligence" element={<ProtectedRoute><RevenueIntelligence /></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
-                <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
-                <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                <Route path="/enterprise" element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
-                <Route path="/game-style" element={<ProtectedRoute><GameStyleGuide /></ProtectedRoute>} />
-                <Route path="/agency-profile" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
-                <Route path="/stationary-demo" element={<StationaryCharacterDemo />} />
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/support" element={<Support />} />
-                <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </CharacterProvider>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+              <Route path="/" element={<Index />} />
+              
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Navigate to="/auth" replace />} />
+              <Route path="/signup" element={<Navigate to="/auth" replace />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/upgrade" element={<ProtectedRoute><UpgradePlan /></ProtectedRoute>} />
+              <Route path="/account-blocked" element={<AccountBlocked />} />
+              <Route path="/success" element={<Success />} />
+              <Route path="/payment-complete" element={<PaymentComplete />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
+              <Route path="/recording/:id" element={<ProtectedRoute><RecordingAnalysis /></ProtectedRoute>} />
+              <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+              <Route path="/call-history" element={<Navigate to="/recordings" replace />} />
+              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+              <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/team" element={<TeamProtectedRoute><Team /></TeamProtectedRoute>} />
+              <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+              <Route path="/coaching" element={<ProtectedRoute><Coaching /></ProtectedRoute>} />
+              <Route path="/winwords" element={<ProtectedRoute><WinWords /></ProtectedRoute>} />
+              <Route path="/manager" element={<ProtectedRoute><Manager /></ProtectedRoute>} />
+              <Route path="/revenue-intelligence" element={<ProtectedRoute><RevenueIntelligence /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/settings/salesforce" element={<ProtectedRoute><SalesforceSettings /></ProtectedRoute>} />
+              <Route path="/audio-test" element={<ProtectedRoute><AudioTest /></ProtectedRoute>} />
+              <Route path="/experiments" element={<ProtectedRoute><Experiments /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/enterprise" element={<ProtectedRoute><Enterprise /></ProtectedRoute>} />
+              <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </AuthProvider>
         </BrowserRouter>
-        </ThemeProvider>
       </SidebarProvider>
     </TooltipProvider>
   </QueryClientProvider>
