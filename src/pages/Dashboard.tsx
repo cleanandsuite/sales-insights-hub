@@ -1,23 +1,21 @@
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { useNavigate } from 'react-router-dom';
 import { CallDialog } from '@/components/calling/CallDialog';
 import { CallInterface } from '@/components/calling/CallInterface';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RankBadge, getRankFromXP } from '@/components/ui/RankBadge';
 import { 
   Phone, Flame, Trophy, Target, TrendingUp, 
   Calendar, BarChart3, ArrowRight, Zap,
-  DollarSign, Users, Clock, Crosshair, Activity
+  DollarSign, Users, Clock, Activity, ChevronRight
 } from 'lucide-react';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area, PieChart, Pie, Cell
+  AreaChart, Area, PieChart, Pie, Cell, Legend
 } from 'recharts';
 
 const formatCurrency = (value: number) => {
@@ -26,33 +24,45 @@ const formatCurrency = (value: number) => {
   return `$${value}`;
 };
 
-// Stat bar component
-function StatBar({ label, value, max = 100, unit = '', color = 'bg-primary', icon: Icon }: {
+// Clean stat card with subtle color indicator
+function StatCard({ label, value, subtext, color = 'blue', icon: Icon, trend }: {
   label: string;
-  value: number;
-  max?: number;
-  unit?: string;
-  color?: string;
+  value: string | number;
+  subtext?: string;
+  color?: 'blue' | 'green' | 'purple' | 'orange' | 'red';
   icon?: React.ComponentType<{ className?: string }>;
+  trend?: { value: number; up: boolean };
 }) {
-  const percent = Math.min((value / max) * 100, 100);
+  const colors = {
+    blue: 'bg-blue-500',
+    green: 'bg-emerald-500',
+    purple: 'bg-violet-500',
+    orange: 'bg-amber-500',
+    red: 'bg-rose-500',
+  };
   
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between text-sm">
-        <div className="flex items-center gap-2">
-          {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-          <span className="font-medium">{label}</span>
+    <Card className="hover:shadow-md transition-shadow duration-200">
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">{label}</p>
+            <p className="text-2xl font-bold tracking-tight">{value}</p>
+            {subtext && <p className="text-xs text-muted-foreground">{subtext}</p>}
+            {trend && (
+              <p className={`text-xs font-medium ${trend.up ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {trend.up ? '↑' : '↓'} {Math.abs(trend.value)}% vs last month
+              </p>
+            )}
+          </div>
+          {Icon && (
+            <div className={`p-2 rounded-lg ${colors[color]} bg-opacity-10`}>
+              <Icon className={`h-5 w-5 ${colors[color].replace('bg-', 'text-')}`} />
+            </div>
+          )}
         </div>
-        <span className="font-bold">{value}{unit}</span>
-      </div>
-      <div className="h-2 rounded-full bg-muted overflow-hidden">
-        <div 
-          className={`h-full ${color} transition-all duration-500`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -92,8 +102,15 @@ const weeklyActivityData = [
   { day: 'Fri', calls: 6, deals: 1 },
 ];
 
+// Recent activity items
+const recentActivity = [
+  { id: 1, type: 'call', title: 'Call with Apex Energy', time: '2 hours ago', score: 85, status: 'positive' },
+  { id: 2, type: 'deal', title: 'Deal moved to Negotiation', time: '4 hours ago', value: '$45,000', status: 'neutral' },
+  { id: 3, type: 'call', title: 'Call with TechCorp', time: 'Yesterday', score: 72, status: 'neutral' },
+  { id: 4, type: 'lead', title: 'New lead: Sarah Johnson', time: 'Yesterday', company: 'DataSync Inc', status: 'positive' },
+];
+
 export default function Dashboard() {
-  const navigate = useNavigate();
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -122,10 +139,10 @@ export default function Dashboard() {
       
       <DashboardLayout>
         <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
+          {/* Clean Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Your Stats</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
               <p className="text-sm text-muted-foreground">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
@@ -138,122 +155,109 @@ export default function Dashboard() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
+            <TabsList className="grid w-full max-w-[300px] grid-cols-3">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="charts">Charts</TabsTrigger>
-              <TabsTrigger value="actions">Actions</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6 mt-6">
-              {/* XP & Quota Hero */}
+              {/* Level & Progress */}
               <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-4">
-                      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-2xl font-bold">{stats.level}</span>
-                      </div>
-                      <RankBadge rank={stats.rank} size="lg" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-muted-foreground">Level {stats.level}</p>
-                      <StatBar label="" value={stats.xp} max={14400} color="bg-primary" />
-                      <p className="text-xs text-muted-foreground mt-1">{stats.xp.toLocaleString()} XP</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
                 <Card className="md:col-span-2">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Crosshair className="h-5 w-5 text-primary" />
-                        <span className="font-semibold">Quota Progress</span>
-                      </div>
-                      <Badge variant="outline">{quotaPercent}%</Badge>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-medium">Quota Progress</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-end gap-3">
+                      <span className="text-3xl font-bold">{formatCurrency(stats.quota.current)}</span>
+                      <span className="text-muted-foreground">of {formatCurrency(stats.quota.target)}</span>
                     </div>
-                    <StatBar 
-                      label="" 
-                      value={stats.quota.current} 
-                      max={stats.quota.target} 
-                      color="bg-success" 
-                    />
-                    <div className="flex justify-between text-sm mt-2">
-                      <span>{formatCurrency(stats.quota.current)}</span>
-                      <span className="text-muted-foreground">{formatCurrency(stats.quota.target)}</span>
+                    <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                        style={{ width: `${quotaPercent}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-2 text-sm">
+                      <span className="text-muted-foreground">{quotaPercent}% achieved</span>
+                      <span className="text-emerald-600 font-medium">{formatCurrency(stats.quota.target - stats.quota.current)} to go</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-medium">Your Level</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-3">
+                      <div className="h-14 w-14 rounded-full bg-violet-100 dark:bg-violet-900 flex items-center justify-center">
+                        <span className="text-2xl font-bold text-violet-600 dark:text-violet-300">{stats.level}</span>
+                      </div>
+                      <div>
+                        <RankBadge rank={stats.rank} size="lg" />
+                        <p className="text-sm text-muted-foreground">{stats.xp.toLocaleString()} XP</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Quick Stats Grid */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Win Rate</p>
-                        <p className="text-2xl font-bold">78%</p>
-                      </div>
-                      <Trophy className="h-8 w-8 text-warning/50" />
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Close Rate</p>
-                        <p className="text-2xl font-bold">65%</p>
-                      </div>
-                      <Target className="h-8 w-8 text-success/50" />
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Calls</p>
-                        <p className="text-2xl font-bold">247</p>
-                      </div>
-                      <Phone className="h-8 w-8 text-primary/50" />
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Avg Deal</p>
-                        <p className="text-2xl font-bold">$45K</p>
-                      </div>
-                      <DollarSign className="h-8 w-8 text-secondary/50" />
-                    </div>
-                  </CardContent>
-                </Card>
+              {/* Key Metrics Grid */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <StatCard 
+                  label="Win Rate" 
+                  value="78%" 
+                  subtext="Last 30 days"
+                  color="blue"
+                  icon={Trophy}
+                  trend={{ value: 5, up: true }}
+                />
+                <StatCard 
+                  label="Close Rate" 
+                  value="65%" 
+                  subtext="42 of 65 deals"
+                  color="green"
+                  icon={Target}
+                  trend={{ value: 3, up: true }}
+                />
+                <StatCard 
+                  label="Total Calls" 
+                  value="247" 
+                  subtext="This month"
+                  color="purple"
+                  icon={Phone}
+                />
+                <StatCard 
+                  label="Avg Deal Size" 
+                  value="$45K" 
+                  subtext="$3.2M pipeline"
+                  color="orange"
+                  icon={DollarSign}
+                />
               </div>
 
-              {/* Skills Radar & Deal Breakdown */}
+              {/* Two Column: Skills & Pipeline */}
               <div className="grid gap-6 lg:grid-cols-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Skills Distribution</CardTitle>
+                    <CardTitle className="text-base">Sales Skills</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[250px]">
+                    <div className="h-[200px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <RadarChart data={skillsData}>
-                          <PolarGrid stroke="#374151" />
-                          <PolarAngleAxis dataKey="skill" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
-                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#6B7280', fontSize: 10 }} />
+                          <PolarGrid stroke="#E5E7EB" />
+                          <PolarAngleAxis dataKey="skill" tick={{ fill: '#6B7280', fontSize: 11 }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#9CA3AF', fontSize: 10 }} />
                           <Radar
                             name="Skills"
                             dataKey="value"
-                            stroke="#3B82F6"
-                            fill="#3B82F6"
-                            fillOpacity={0.5}
+                            stroke="#8B5CF6"
+                            fill="#8B5CF6"
+                            fillOpacity={0.3}
                           />
                           <Tooltip />
                         </RadarChart>
@@ -264,18 +268,18 @@ export default function Dashboard() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Deal Pipeline</CardTitle>
+                    <CardTitle className="text-base">Pipeline by Stage</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[250px]">
+                    <div className="h-[200px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
                             data={dealStageData}
                             cx="50%"
                             cy="50%"
-                            innerRadius={50}
-                            outerRadius={80}
+                            innerRadius={40}
+                            outerRadius={70}
                             paddingAngle={2}
                             dataKey="value"
                           >
@@ -284,25 +288,44 @@ export default function Dashboard() {
                             ))}
                           </Pie>
                           <Tooltip />
+                          <Legend />
                         </PieChart>
                       </ResponsiveContainer>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {dealStageData.map((item) => (
-                        <div key={item.name} className="flex items-center gap-1 text-xs">
-                          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-muted-foreground">{item.name}</span>
-                        </div>
-                      ))}
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <Button variant="outline" className="justify-start gap-2 h-auto py-3">
+                      <Flame className="h-4 w-4 text-amber-500" />
+                      <span>{stats.streak} Day Streak 🔥</span>
+                    </Button>
+                    <Button variant="outline" className="justify-start gap-2 h-auto py-3">
+                      <Target className="h-4 w-4 text-blue-500" />
+                      <span>Log Call</span>
+                    </Button>
+                    <Button variant="outline" className="justify-start gap-2 h-auto py-3">
+                      <Users className="h-4 w-4 text-violet-500" />
+                      <span>Add Lead</span>
+                    </Button>
+                    <Button variant="outline" className="justify-start gap-2 h-auto py-3">
+                      <Calendar className="h-4 w-4 text-emerald-500" />
+                      <span>Schedule</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Charts Tab */}
             <TabsContent value="charts" className="space-y-6 mt-6">
-              {/* Revenue Trend */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Revenue Trend</CardTitle>
@@ -311,16 +334,29 @@ export default function Dashboard() {
                   <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={revenueData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="month" tick={{ fill: '#9CA3AF' }} />
-                        <YAxis tickFormatter={(v) => `$${v/1000}k`} tick={{ fill: '#9CA3AF' }} />
+                        <defs>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis dataKey="month" tick={{ fill: '#6B7280' }} />
+                        <YAxis tickFormatter={(v) => `$${v/1000}k`} tick={{ fill: '#6B7280' }} />
                         <Tooltip formatter={(v: number) => formatCurrency(v)} />
                         <Area 
                           type="monotone" 
                           dataKey="revenue" 
                           stroke="#3B82F6" 
-                          fill="#3B82F6" 
-                          fillOpacity={0.3} 
+                          fillOpacity={1} 
+                          fill="url(#colorRevenue)" 
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="target" 
+                          stroke="#9CA3AF" 
+                          strokeDasharray="5 5"
+                          fill="none" 
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -328,7 +364,6 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Weekly Activity */}
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Weekly Activity</CardTitle>
@@ -337,12 +372,13 @@ export default function Dashboard() {
                   <div className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={weeklyActivityData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                        <XAxis dataKey="day" tick={{ fill: '#9CA3AF' }} />
-                        <YAxis tick={{ fill: '#9CA3AF' }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis dataKey="day" tick={{ fill: '#6B7280' }} />
+                        <YAxis tick={{ fill: '#6B7280' }} />
                         <Tooltip />
-                        <Bar dataKey="calls" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="deals" fill="#10B981" radius={[4, 4, 0, 0]} />
+                        <Legend />
+                        <Bar dataKey="calls" name="Calls" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="deals" name="Deals" fill="#10B981" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -350,97 +386,69 @@ export default function Dashboard() {
               </Card>
             </TabsContent>
 
-            {/* Actions Tab */}
-            <TabsContent value="actions" className="space-y-6 mt-6">
-              {/* Consistency & Achievements */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Flame className="h-4 w-4 text-warning" />
-                      Consistency
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4 p-4 bg-warning/5 rounded-lg border border-warning/20">
-                      <div className="h-12 w-12 rounded-full bg-warning/20 flex items-center justify-center">
-                        <Flame className="h-6 w-6 text-warning" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">{stats.streak} day streak</p>
-                        <p className="text-sm text-muted-foreground">Keep it up!</p>
-                      </div>
-                    </div>
-                    <StatBar label="Weekly Goals" value={5} max={8} color="bg-primary" />
-                    <StatBar label="Call Goal" value={8} max={10} unit="/day" color="bg-success" />
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Trophy className="h-4 w-4" />
-                      Achievements
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3">
-                      {[
-                        { name: 'Top Performer', icon: '🏆', desc: 'Week of Jan 15', color: 'warning' },
-                        { name: 'Hot Streak', icon: '🔥', desc: '5 deals in 7 days', color: 'destructive' },
-                        { name: 'Iron Rep', icon: '💪', desc: '30 day streak', color: 'primary' },
-                        { name: 'Quick Closer', icon: '⚡', desc: 'Avg 12 days', color: 'success' },
-                      ].map((ach) => (
-                        <div key={ach.name} className={`p-3 rounded-lg border bg-${ach.color}/5 border-${ach.color}/20`}>
-                          <div className="text-2xl mb-1">{ach.icon}</div>
-                          <p className="text-sm font-medium">{ach.name}</p>
-                          <p className="text-xs text-muted-foreground">{ach.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Priority Actions */}
+            {/* Activity Tab */}
+            <TabsContent value="activity" className="space-y-6 mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Priority Actions</CardTitle>
+                  <CardTitle className="text-base">Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-                    {[
-                      { name: 'Enterprise License', company: 'Acme Corp', value: 125000, stage: 'Proposal' },
-                      { name: 'Platform Migration', company: 'TechStart Inc', value: 89000, stage: 'Qualification' },
-                      { name: 'Annual Renewal', company: 'Global Systems', value: 67000, stage: 'Negotiation' },
-                      { name: 'Expansion Deal', company: 'MegaCorp', value: 156000, stage: 'Proposal' },
-                    ].map((deal, i) => (
+                  <div className="space-y-4">
+                    {recentActivity.map((item) => (
                       <div 
-                        key={i} 
-                        className="p-3 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
-                        onClick={() => navigate('/enterprise')}
+                        key={item.id} 
+                        className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <Badge variant="outline">{deal.stage}</Badge>
-                          <span className="text-sm font-semibold">{formatCurrency(deal.value)}</span>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            item.type === 'call' ? 'bg-blue-100 dark:bg-blue-900' :
+                            item.type === 'deal' ? 'bg-emerald-100 dark:bg-emerald-900' :
+                            'bg-violet-100 dark:bg-violet-900'
+                          }`}>
+                            {item.type === 'call' && <Phone className="h-4 w-4 text-blue-600 dark:text-blue-300" />}
+                            {item.type === 'deal' && <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />}
+                            {item.type === 'lead' && <Users className="h-4 w-4 text-violet-600 dark:text-violet-300" />}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{item.title}</p>
+                            <p className="text-xs text-muted-foreground">{item.time}</p>
+                          </div>
                         </div>
-                        <p className="text-sm font-medium truncate">{deal.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{deal.company}</p>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Flame className="h-4 w-4 text-amber-500" />
+                      Streak
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-4xl font-bold">{stats.streak}</p>
+                    <p className="text-sm text-muted-foreground">days</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-violet-500" />
+                      This Week
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold">8/10</p>
+                    <p className="text-sm text-muted-foreground">calls completed</p>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
-
-          {/* Quick Nav */}
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate('/leads')}>Leads</Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/schedule')}>Schedule</Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/winwords')}>WinWords</Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/analytics')}>Analytics</Button>
-          </div>
         </div>
       </DashboardLayout>
     </>
