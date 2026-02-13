@@ -1,0 +1,32 @@
+{
+  "name": "telnyx-assemblyai-transcription",
+  "version": "1.0.0",
+  "description": "Real-time phone call transcription server using Telnyx Media Streams and AssemblyAI",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "telnyx",
+    "assemblyai",
+    "transcription",
+    "real-time",
+    "speech-to-text",
+    "phone",
+    "texml"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
