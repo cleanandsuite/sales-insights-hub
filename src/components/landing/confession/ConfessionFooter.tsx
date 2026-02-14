@@ -1,9 +1,10 @@
+import React from 'react';
 import { SellSigLogo } from '@/components/ui/SellSigLogo';
 import { Link } from 'react-router-dom';
 
-export function ConfessionFooter() {
+export const ConfessionFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   return (
-    <footer className="bg-slate-950 border-t border-white/10 py-12">
+    <footer ref={ref} className="bg-slate-950 border-t border-white/10 py-12">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <SellSigLogo variant="light" size="sm" showTagline={false} />
@@ -35,4 +36,6 @@ export function ConfessionFooter() {
       </div>
     </footer>
   );
-}
+});
+
+ConfessionFooter.displayName = "ConfessionFooter";

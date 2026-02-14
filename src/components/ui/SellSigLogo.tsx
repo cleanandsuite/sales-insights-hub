@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -31,13 +32,13 @@ interface SellSigLogoProps {
   className?: string;
 }
 
-export function SellSigLogo({
+export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
   size = "md",
   variant = "default",
   showTagline = true,
   linkTo = "/",
   className,
-}: SellSigLogoProps) {
+}, ref) => {
   const sizeClasses = {
     sm: {
       container: "h-8 w-8",
@@ -80,7 +81,7 @@ export function SellSigLogo({
   const colors = variantClasses[variant];
 
   const logoContent = (
-    <div className={cn("flex items-center gap-2.5 hover:opacity-90 transition-opacity group", className)}>
+    <div ref={ref} className={cn("flex items-center gap-2.5 hover:opacity-90 transition-opacity group", className)}>
       <div
         className={cn(
           "rounded-xl flex items-center justify-center backdrop-blur-sm border group-hover:border-opacity-60 transition-colors",
@@ -111,6 +112,8 @@ export function SellSigLogo({
   }
 
   return logoContent;
-}
+});
+
+SellSigLogo.displayName = "SellSigLogo";
 
 export { SellSigIcon };
