@@ -1,3 +1,12 @@
+/**
+ * SellSig Hero Section - Week 1 Redesign
+ * 
+ * Design specs from: nova-hero-mockup.md
+ * Headline: "Close More Deals with AI That Coaches You"
+ * Subhead: Includes "34% more closes"
+ * CTA: "No Credit Card required"
+ */
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -5,13 +14,9 @@ import {
   Play,
   CheckCircle,
   Phone,
-  Brain,
   Sparkles,
-  Users,
-  Zap,
-  MessageSquare,
   TrendingUp,
-  Shield,
+  Zap,
 } from "lucide-react";
 
 interface HeroSectionProps {
@@ -19,21 +24,30 @@ interface HeroSectionProps {
   onWatchDemoClick: () => void;
 }
 
+// Design tokens from nova-hero-mockup.md
+// Colors:
+// - Background Primary: #0F172A (Deep Navy)
+// - Primary: #2563EB (Trust Blue)
+// - Secondary/AI: #7C3AED (Premium Purple)
+// - Success: #10B981 (Action Green)
+// - Text Primary: #F8FAFC
+// - Text Secondary: #94A3B8
+
 // Product Mockup Component - Shows AI coaching in action
 const ProductMockup = () => (
   <div className="relative w-full max-w-2xl mx-auto">
     {/* Main Interface Frame */}
-    <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-xl">
+    <div className="rounded-[24px] overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.5)] border border-white/10 bg-gradient-to-br from-[#1E293B] to-[#0F172A]">
       {/* Browser-like header */}
-      <div className="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-white/10">
-        <div className="flex gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-red-400/80" />
-          <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
-          <div className="w-3 h-3 rounded-full bg-green-400/80" />
+      <div className="flex items-center gap-2 px-4 py-3 bg-[#0F172A]/80 border-b border-white/10">
+        <div className="flex gap-2">
+          <div className="w-3 h-3 rounded-full bg-[#EF4444]" />
+          <div className="w-3 h-3 rounded-full bg-[#F59E0B]" />
+          <div className="w-3 h-3 rounded-full bg-[#10B981]" />
         </div>
         <div className="flex-1 flex justify-center">
-          <div className="bg-slate-700/50 rounded-lg px-4 py-1.5 text-xs text-white/60 font-medium">
-            sellsig.ai — Live Sales Call
+          <div className="bg-[#1E293B]/50 rounded-lg px-4 py-1.5 text-xs text-[#64748B] font-medium">
+            sellsig.ai — Live Coaching
           </div>
         </div>
       </div>
@@ -43,44 +57,44 @@ const ProductMockup = () => (
         {/* Call header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center text-white font-bold text-sm">
               JD
             </div>
             <div>
-              <p className="text-white font-semibold text-sm">John Davis — Acme Corp</p>
-              <p className="text-white/50 text-xs">Enterprise Deal • $125,000</p>
+              <p className="text-[#F8FAFC] font-semibold text-sm">John Davis — Acme Corp</p>
+              <p className="text-[#64748B] text-xs">Enterprise Deal • $125,000</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-green-500/20 rounded-full px-3 py-1">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-green-400 text-xs font-medium">Live</span>
+            <div className="flex items-center gap-1.5 bg-[#10B981]/20 rounded-full px-3 py-1">
+              <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="text-[#10B981] text-xs font-medium">Live</span>
             </div>
-            <span className="text-white/60 text-xs font-mono">12:34</span>
+            <span className="text-[#94A3B8] text-xs font-mono">12:34</span>
           </div>
         </div>
 
         {/* Audio waveform simulation */}
-        <div className="flex items-center gap-1 h-12 px-4 bg-slate-700/30 rounded-xl">
-          {[...Array(40)].map((_, i) => (
+        <div className="flex items-center gap-1 h-12 px-4 bg-[#1E293B]/30 rounded-[12px]">
+          {[...Array(32)].map((_, i) => (
             <div
               key={i}
-              className="flex-1 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-pulse"
+              className="flex-1 bg-gradient-to-t from-[#2563EB] to-[#06B6D4] rounded-full"
               style={{
-                height: `${Math.random() * 60 + 20}%`,
+                height: `${30 + Math.random() * 50}%`,
+                animation: `waveform ${0.5 + Math.random() * 0.5}s ease-in-out infinite`,
                 animationDelay: `${i * 0.05}s`,
-                animationDuration: `${0.5 + Math.random() * 0.5}s`,
               }}
             />
           ))}
         </div>
 
         {/* Transcript snippet */}
-        <div className="space-y-2 bg-slate-700/20 rounded-xl p-4">
+        <div className="space-y-2 bg-[#1E293B]/20 rounded-[12px] p-4">
           <div className="flex items-start gap-2">
-            <span className="text-blue-400 text-xs font-medium shrink-0">Prospect:</span>
-            <p className="text-white/80 text-xs leading-relaxed">
-              "The price seems high compared to what we're paying now..."
+            <span className="text-[#2563EB] text-xs font-semibold shrink-0">Prospect:</span>
+            <p className="text-[#94A3B8] text-sm italic leading-relaxed">
+              "The price seems high..."
             </p>
           </div>
         </div>
@@ -88,188 +102,297 @@ const ProductMockup = () => (
     </div>
 
     {/* AI Coaching Prompt - Main floating card */}
-    <div className="absolute -right-4 top-1/4 bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-2xl p-5 max-w-xs animate-float border border-slate-200/50">
+    <div 
+      className="absolute -right-4 top-1/4 bg-white rounded-[16px] shadow-[0_8px_24px_rgba(0,0,0,0.5)] p-5 max-w-[280px] border border-black/10"
+      style={{ animation: 'float 3s ease-in-out infinite alternate' }}
+    >
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-[#7C3AED] flex items-center justify-center">
           <Zap className="w-4 h-4 text-white" />
         </div>
         <div>
-          <span className="text-xs font-bold text-primary uppercase tracking-wide">AI Coach</span>
-          <span className="text-xs text-slate-400 ml-2">Just now</span>
+          <span className="text-xs font-bold text-[#7C3AED] uppercase tracking-wide">AI Coach</span>
+          <span className="text-xs text-[#64748B] ml-2">Just now</span>
         </div>
       </div>
-      <p className="text-sm text-slate-700 font-medium leading-relaxed mb-3">
+      <p className="text-sm text-[#334155] font-medium leading-relaxed mb-3">
         💡 <strong>Price objection detected!</strong> Reframe around ROI:
       </p>
-      <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-        <p className="text-xs text-slate-600 italic">
-          "I understand. Many clients felt that way initially—but after seeing 40% more closed deals in 90 days, they
-          found it paid for itself 3x over."
+      <div className="bg-[#F5F3FF] rounded-lg p-3 border border-[#7C3AED]/10">
+        <p className="text-xs text-[#6B7280] italic">
+          "I understand. Many clients felt that way initially—but after seeing 40% more closed deals in 90 days..."
         </p>
       </div>
-      <div className="flex items-center gap-2 mt-3">
-        <Button size="sm" className="text-xs h-7 px-3 bg-primary hover:bg-primary/90">
+      <div className="flex items-center justify-between mt-3">
+        <Button size="sm" className="text-xs h-8 px-3 bg-[#2563EB] hover:bg-[#3B82F6] text-white rounded-[6px]">
           Use This Response
         </Button>
-        <span className="text-xs text-green-600 font-medium">92% success rate</span>
+        <span className="text-xs text-[#10B981] font-medium">92% success rate</span>
       </div>
     </div>
 
     {/* Floating stat - Deal velocity */}
     <div
-      className="absolute -left-6 bottom-16 bg-white rounded-xl shadow-xl p-4 animate-float border border-slate-100"
-      style={{ animationDelay: "1s" }}
+      className="absolute -left-6 bottom-16 bg-white rounded-[12px] shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 border border-black/10"
+      style={{ animation: 'float 3.5s ease-in-out infinite alternate', animationDelay: '1s' }}
     >
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
-          <TrendingUp className="w-5 h-5 text-green-600" />
+        <div className="w-11 h-11 rounded-xl bg-[#10B981]/20 flex items-center justify-center">
+          <TrendingUp className="w-5 h-5 text-[#10B981]" />
         </div>
         <div>
-          <p className="text-xl font-bold text-slate-900">2x</p>
-          <p className="text-xs text-slate-500">Deal Velocity</p>
+          <p className="text-xl font-bold text-[#0F172A]">2x</p>
+          <p className="text-xs text-[#64748B]">Deal Velocity</p>
         </div>
       </div>
     </div>
 
-    {/* Floating stat - Success rate */}
+    {/* Floating stat - Revenue Growth */}
     <div
-      className="absolute -left-2 top-8 bg-white rounded-xl shadow-xl p-3 animate-float border border-slate-100"
-      style={{ animationDelay: "2s" }}
+      className="absolute -left-2 top-8 bg-white rounded-[12px] shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-3 border border-black/10"
+      style={{ animation: 'float 3s ease-in-out infinite alternate', animationDelay: '1.5s' }}
     >
       <div className="flex items-center gap-2">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-          <Phone className="w-4 h-4 text-blue-600" />
+        <div className="w-9 h-9 rounded-lg bg-[#2563EB]/20 flex items-center justify-center">
+          <Phone className="w-4 h-4 text-[#2563EB]" />
         </div>
         <div>
-          <p className="text-lg font-bold text-slate-900">+35%</p>
-          <p className="text-[10px] text-slate-500">Revenue Growth</p>
+          <p className="text-lg font-bold text-[#0F172A]">+35%</p>
+          <p className="text-[11px] text-[#64748B]">Revenue Growth</p>
         </div>
       </div>
     </div>
 
     {/* Live insights badge */}
     <div
-      className="absolute -bottom-4 right-1/4 bg-slate-900 text-white rounded-full px-4 py-2 shadow-xl animate-float flex items-center gap-2"
-      style={{ animationDelay: "0.5s" }}
+      className="absolute -bottom-4 right-1/4 bg-[#0F172A] text-white rounded-full px-5 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.5)] flex items-center gap-2"
+      style={{ animation: 'float 2.8s ease-in-out infinite alternate', animationDelay: '0.5s' }}
     >
-      <Sparkles className="w-4 h-4 text-yellow-400" />
-      <span className="text-xs font-medium">Live Insights Active</span>
+      <Sparkles className="w-4 h-4 text-[#F59E0B]" />
+      <span className="text-xs font-semibold">Live Coaching Active</span>
     </div>
   </div>
 );
 
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
-    <section className="relative bg-hero-gradient min-h-[100vh] flex items-center overflow-hidden">
-      {/* Aurora mesh background - 2025/2026 trend */}
-      <div className="bg-hero-aurora" />
-      <div className="bg-hero-mesh" />
+    <section className="relative bg-[#0F172A] min-h-[100vh] flex items-center overflow-hidden">
+      {/* Background mesh gradient - subtle drift animation */}
+      <div 
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: 'radial-gradient(ellipse 100% 80% at 20% 10%, rgba(37,99,235,0.3) 0%, transparent 50%), radial-gradient(ellipse 80% 60% at 80% 90%, rgba(124,58,237,0.3) 0%, transparent 40%)',
+          filter: 'blur(100px)',
+          animation: 'meshDrift 20s ease-in-out infinite',
+        }}
+      />
 
-      {/* Promo Banner */}
-      <div className="absolute top-16 left-0 right-0 bg-promo-banner py-3 z-20">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-white font-semibold text-sm md:text-base">
-            🔥 Limited Offer: 40% off for life – grandfathered pricing for the next 100 users!
-            <ArrowRight className="inline h-4 w-4 ml-2" />
-          </p>
-        </div>
-      </div>
+      {/* Particle effects - subtle dots */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px), radial-gradient(circle, rgba(255,255,255,0.08) 2px, transparent 2px)',
+          backgroundSize: '60px 60px, 100px 100px',
+        }}
+      />
 
-      <div className="container mx-auto px-4 pt-36 pb-20 relative z-10">
+      <div className="container mx-auto px-4 py-24 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Content - Split hero: headline + CTA */}
-          <div className="space-y-8 text-center lg:text-left">
+          {/* Left Content - Copy & CTA */}
+          <div className="space-y-6 text-center lg:text-left max-w-xl">
             {/* Pre-headline badge */}
-            <div className="inline-block animate-fade-in">
-              <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm font-medium backdrop-blur-md glass-effect">
-                <Sparkles className="h-3.5 w-3.5 mr-2" />
-                #1 AI Coach for Sales Calls
-              </Badge>
+            <div 
+              className="inline-block rounded-full px-4 py-2 border"
+              style={{
+                background: 'rgba(124,58,237,0.2)',
+                borderColor: 'rgba(124,58,237,0.3)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#A78BFA]" />
+                <span className="text-sm font-semibold text-[#A78BFA]">#1 AI Coach for Sales</span>
+              </div>
             </div>
 
-            {/* Main Headline - H1 optimized for SEO */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.1] animate-slide-up">
-              AI Coaching for Sales Calls:
-              <br />
-              <span className="gradient-text-aurora">Win More Deals, Faster</span>
+            {/* Main Headline - H1 */}
+            <h1 
+              className="text-4xl sm:text-5xl md:text-[56px] font-extrabold text-[#F8FAFC] leading-[1.1] tracking-tight"
+              style={{
+                animation: 'slideUp 0.6s ease-out forwards',
+                animationDelay: '0.1s',
+                opacity: 0,
+              }}
+            >
+              Close More Deals with{' '}
+              <span 
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg, #3B82F6, #7C3AED, #A78BFA)',
+                }}
+              >
+                AI That Coaches You
+              </span>
             </h1>
 
-            {/* Subheadline - Shorter, punchier */}
-            <p
-              className="text-lg md:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-slide-up"
+            {/* Subheadline - Includes "34% more closes" */}
+            <p 
+              className="text-lg md:text-xl text-[#94A3B8] leading-[1.6] max-w-lg mx-auto lg:mx-0"
               style={{
-                animationDelay: "0.1s",
+                animation: 'slideUp 0.4s ease-out forwards',
+                animationDelay: '0.2s',
+                opacity: 0,
               }}
             >
-              Real-time AI coaching that analyzes every call, handles objections for you, and turns your reps into
-              closers—all in 60 seconds.
+              Real-time coaching during calls. Insights that actually help. <span className="text-[#10B981] font-semibold">34% more closes</span> — guaranteed.
             </p>
 
-            {/* Primary CTA - BIG and prominent with urgency */}
-            <div className="flex flex-col gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
-                <Button
-                  size="lg"
-                  onClick={onStartTrialClick}
-                  className="group gap-3 font-bold text-lg px-8 py-7 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-2xl hover:shadow-green-500/25 transition-all rounded-xl animate-cta-pulse border-0"
-                >
-                  Claim 40% Off & Free Trial
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={onWatchDemoClick}
-                  className="group gap-2 font-semibold text-lg px-8 py-7 border-2 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary rounded-xl backdrop-blur-md transition-all glass-effect"
-                >
-                  <Play className="h-5 w-5 fill-current" />
-                  See It In Action
-                </Button>
-              </div>
-              {/* CTA subtext - friction reducers */}
-              <p className="text-sm text-white/60 flex items-center gap-4 justify-center lg:justify-start flex-wrap">
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  14-day free trial
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  No Charge until 15th Day
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Shield className="h-4 w-4 text-green-400" />
-                  Lifetime pricing locked
-                </span>
-              </p>
-            </div>
-
-            {/* Social Proof - Combined with stats */}
-            <div
-              className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start animate-slide-up"
+            {/* CTA Buttons */}
+            <div 
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center pt-2"
               style={{
-                animationDelay: "0.3s",
+                animation: 'scaleIn 0.4s ease-out forwards',
+                animationDelay: '0.3s',
+                opacity: 0,
               }}
             >
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
-                <Users className="h-4 w-4 text-accent" />
-                <span className="text-white/90 text-sm font-medium">Join 500+ reps becoming rejection-proof</span>
+              {/* Primary CTA - "Start Free" */}
+              <Button
+                size="lg"
+                onClick={onStartTrialClick}
+                className="group gap-3 font-semibold text-lg px-8 py-4 rounded-[24px] text-white shadow-[0_0_40px_rgba(37,99,235,0.4)] border-0"
+                style={{
+                  background: 'linear-gradient(90deg, #2563EB, #3B82F6)',
+                  transition: 'all 0.2s ease-out',
+                }}
+              >
+                Start Free
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+
+              {/* Secondary CTA - "Watch Demo" */}
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={onWatchDemoClick}
+                className="group gap-2 font-semibold text-lg px-8 py-4 rounded-[24px] text-[#F8FAFC] bg-transparent border-2 border-white/20 hover:bg-white/10 hover:border-white/40 transition-all"
+              >
+                <Play className="h-5 w-5 fill-current" />
+                Watch Demo
+              </Button>
+            </div>
+
+            {/* CTA Subtext - "No Credit Card required" */}
+            <div 
+              className="flex items-center justify-center lg:justify-start gap-3 text-sm text-[#94A3B8]"
+              style={{
+                animation: 'fadeIn 0.3s ease-out forwards',
+                animationDelay: '0.35s',
+                opacity: 0,
+              }}
+            >
+              <CheckCircle className="w-4 h-4 text-[#10B981]" />
+              <span>No Credit Card required</span>
+              <span className="text-white/20">•</span>
+              <span>14-day free trial</span>
+            </div>
+
+            {/* Social Proof Stats */}
+            <div 
+              className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm"
+              style={{
+                animation: 'fadeIn 0.3s ease-out forwards',
+                animationDelay: '0.4s',
+                opacity: 0,
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#F8FAFC]">+35%</span>
+                <span className="text-[#94A3B8]">Revenue</span>
               </div>
-              <div className="flex items-center gap-3 text-white/70 text-sm">
-                <span className="font-bold text-white">+35%</span> Revenue
-                <span className="text-white/30">•</span>
-                <span className="font-bold text-white">2x</span> Velocity
-                <span className="text-white/30">•</span>
-                <span className="font-bold text-white">95%</span> Accuracy
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#F8FAFC]">2x</span>
+                <span className="text-[#94A3B8]">Deal Velocity</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#F8FAFC]">500+</span>
+                <span className="text-[#94A3B8]">Responses</span>
               </div>
             </div>
           </div>
 
-          {/* Right Side - Premium Product Mockup */}
-          <div className="relative animate-slide-in-right hidden lg:block">
+          {/* Right Side - Product Mockup */}
+          <div 
+            className="relative hidden lg:block"
+            style={{
+              animation: 'slideInRight 0.6s ease-out forwards',
+              animationDelay: '0.4s',
+              opacity: 0,
+            }}
+          >
             <ProductMockup />
           </div>
         </div>
       </div>
+
+      {/* Inline styles for keyframe animations */}
+      <style>{`
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(24px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes float {
+          from {
+            transform: translateY(-8px);
+          }
+          to {
+            transform: translateY(8px);
+          }
+        }
+
+        @keyframes waveform {
+          0%, 100% { transform: scaleY(0.3); }
+          50% { transform: scaleY(0.8); }
+        }
+
+        @keyframes meshDrift {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(20px, 10px); }
+        }
+      `}</style>
     </section>
   );
 }
