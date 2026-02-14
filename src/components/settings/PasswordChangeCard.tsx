@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Lock, Eye, EyeOff } from 'lucide-react';
+import { validatePasswordStrength } from '@/lib/secureApiClient';
 
 export function PasswordChangeCard() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -23,8 +24,9 @@ export function PasswordChangeCard() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    const strength = validatePasswordStrength(newPassword);
+    if (!strength.isValid) {
+      strength.errors.forEach(err => toast.error(err));
       return;
     }
 
@@ -66,7 +68,7 @@ export function PasswordChangeCard() {
               placeholder="Enter new password"
               className="pl-10 pr-10"
               required
-              minLength={6}
+              minLength={8}
             />
             <Button
               type="button"

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { validatePasswordStrength } from '@/lib/secureApiClient';
 
 export default function PaymentComplete() {
   const [searchParams] = useSearchParams();
@@ -210,8 +211,9 @@ export default function PaymentComplete() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    const strength = validatePasswordStrength(formData.password);
+    if (!strength.isValid) {
+      strength.errors.forEach(err => toast.error(err));
       return;
     }
 
@@ -399,7 +401,7 @@ export default function PaymentComplete() {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Create a password"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
                 <button
                   type="button"
@@ -420,7 +422,7 @@ export default function PaymentComplete() {
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 placeholder="Confirm your password"
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
 
