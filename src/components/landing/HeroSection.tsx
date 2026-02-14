@@ -176,7 +176,7 @@ const ProductMockup = () => (
 
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
-    <section className="relative bg-[#0F172A] min-h-[100vh] flex items-center overflow-hidden">
+    <section className="relative bg-[#0F172A] h-[800px] lg:h-[900px] flex items-center overflow-hidden">
       {/* Background mesh gradient - subtle drift animation */}
       <div 
         className="absolute inset-0 opacity-30"
