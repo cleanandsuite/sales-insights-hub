@@ -2,8 +2,14 @@ import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Import new Hero Section (Week 1 Redesign)
-import { HeroSection } from '@/components/landing/HeroSection';
+// Import confession sections
+import { ConfessionHeader } from '@/components/landing/confession/ConfessionHeader';
+import { HeroConfession } from '@/components/landing/confession/HeroConfession';
+import { ConfessionSection } from '@/components/landing/confession/ConfessionSection';
+import { ConductorSection } from '@/components/landing/confession/ConductorSection';
+import { RedemptionSection } from '@/components/landing/confession/RedemptionSection';
+import { CloseSequence } from '@/components/landing/confession/CloseSequence';
+import { ConfessionFooter } from '@/components/landing/confession/ConfessionFooter';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -36,12 +42,29 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0F172A]">
-      {/* Week 1 Redesign - New Hero */}
-      <HeroSection 
-        onStartTrialClick={handleStartTrialClick}
-        onWatchDemoClick={handleWatchDemoClick}
-      />
+    <div className="min-h-screen bg-slate-950">
+      {/* Fixed Header */}
+      <ConfessionHeader onClaimRedemption={handleClaimRedemption} />
+
+      <main>
+        {/* 1. Hero / Hook - Redesigned with new copy */}
+        <HeroConfession onClaimRedemption={handleClaimRedemption} />
+
+        {/* 2. Confession Section - Emotional surrender */}
+        <ConfessionSection />
+
+        {/* 3. Conductor Section - State control */}
+        <ConductorSection />
+
+        {/* 4. Redemption Section - Ministry moment */}
+        <RedemptionSection />
+
+        {/* 5. Close Sequence - 5-step pressure cascade */}
+        <CloseSequence onClaimRedemption={handleClaimRedemption} />
+      </main>
+
+      {/* Footer */}
+      <ConfessionFooter />
     </div>
   );
 }

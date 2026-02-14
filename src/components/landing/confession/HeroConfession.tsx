@@ -120,26 +120,22 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
             ref={headlineRef}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight"
           >
-            <span className="hero-word inline-block">Your</span>{' '}
-            <span className="hero-word inline-block text-red-400">Sales Calls</span>{' '}
-            <span className="hero-word inline-block">Are</span>{' '}
-            <span className="hero-word inline-block">Bleeding</span>{' '}
-            <span className="hero-word inline-block">Money.</span>
+            <span className="hero-word inline-block">Close</span>{' '}
+            <span className="hero-word inline-block">More</span>{' '}
+            <span className="hero-word inline-block">Deals</span>{' '}
+            <span className="hero-word inline-block">with</span>{' '}
             <br />
-            <span className="hero-word inline-block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              AI Coaching
-            </span>{' '}
-            <span className="hero-word inline-block text-white/90">Stops</span>{' '}
-            <span className="hero-word inline-block text-white/90">The</span>{' '}
-            <span className="hero-word inline-block text-white/90">Bleeding.</span>
+            <span className="hero-word inline-block bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              AI That Coaches You
+            </span>
           </h1>
 
-          {/* Subheadline - Shame exposure */}
+          {/* Subheadline - Updated for Week 1 */}
           <p className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-            Every objection you fumble. Every deal you lose. Every "I'll think about it" that haunts you at 2AM.
+            Real-time coaching during calls. Insights that actually help.
             <br />
-            <span className="text-white font-semibold">
-              AI coaching hears it all — and fixes it in real-time.
+            <span className="text-green-400 font-bold">
+              34% more closes — guaranteed.
             </span>
           </p>
 
@@ -154,7 +150,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
               {/* Glow effect */}
               <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <span className="relative flex items-center gap-3">
-                🔥 Claim Your Redemption — $97/mo
+                🚀 Start Free — No Credit Card Required
                 <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </span>
             </Button>
