@@ -1,27 +1,32 @@
 
 
-## Fix React forwardRef Warnings and HeroConfession Issues
+## Update Hero Section Copy
 
-### Problem
-The browser console shows "Function components cannot be given refs" warnings for `CloseSequence`, `ConfessionFooter`, and `SellSigLogo`. The `HeroConfession` component may have similar issues. These warnings don't crash the app but indicate improper ref handling.
+### Changes to `src/components/landing/confession/HeroConfession.tsx`
 
-### Changes
+**1. Headline (lines 118-135)**
+Replace the current "Your Sales Calls Are Bleeding Money / AI Coaching Stops The Bleeding" with:
+- **"Close More Deals with AI That Coaches You"**
+- Clean, benefit-driven headline without the shame/confession framing
 
-**1. `src/components/ui/SellSigLogo.tsx`**
-- Wrap the `SellSigLogo` component with `React.forwardRef` so it can accept a ref from parent components (e.g., when used inside navigation or tooltip triggers).
+**2. Subheadline (lines 137-144)**
+Replace the current multi-line shame copy with:
+- **"34% more closes -- guaranteed"**
+- Short, punchy, proof-driven
 
-**2. `src/components/landing/confession/ConfessionFooter.tsx`**
-- Wrap with `React.forwardRef` and forward the ref to the outer `<footer>` element.
+**3. Primary CTA button (lines 148-160)**
+Replace "Claim Your Redemption -- $97/mo" with:
+- **"Start Free -- No Credit Card Required"**
+- Lower friction, removes price from the hero
 
-**3. `src/components/landing/confession/CloseSequence.tsx`**
-- Wrap with `React.forwardRef` and forward the ref to the outer `<section>` element.
+### What stays the same
+- The `forwardRef` wrapper and all ref handling (recently fixed)
+- GSAP word animations, floating orbs, background styling
+- Phone number / call-for-demo button
+- Trust signals and social proof stats below the CTA
 
-**4. `src/components/landing/confession/HeroConfession.tsx`**
-- Wrap with `React.forwardRef` and forward the ref to the outer `<section>` element.
-- This ensures compatibility if a parent (or GSAP ScrollTrigger) attempts to attach a ref.
-
-### Technical Notes
-- All four components will use `React.forwardRef` with proper TypeScript typing (`React.forwardRef<HTMLElement, Props>`).
-- Named exports will be preserved; `displayName` will be set for better DevTools debugging.
-- No behavioral or visual changes -- purely fixes the console warnings.
+### Technical Details
+- The headline word-animation uses `.hero-word` spans -- these will be restructured for the new copy
+- The pre-headline badge (red "WARNING" pill) will be replaced with something matching the new tone
+- No new dependencies or files needed
 
