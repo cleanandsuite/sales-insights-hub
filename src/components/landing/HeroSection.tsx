@@ -1,14 +1,11 @@
 /**
- * SellSig Hero Section - Week 1 Redesign
+ * SellSig Hero Section - Award-Winning Redesign
  * 
  * Design specs from: nova-hero-mockup.md
- * Headline: "Close More Deals with AI That Coaches You"
- * Subhead: Includes "34% more closes"
- * CTA: "No Credit Card required"
+ * Created by: Nova (Creative Director)
  */
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowRight,
   Play,
@@ -17,6 +14,10 @@ import {
   Sparkles,
   TrendingUp,
   Zap,
+  BarChart3,
+  Brain,
+  Shield,
+  Rocket,
 } from "lucide-react";
 
 interface HeroSectionProps {
@@ -24,14 +25,48 @@ interface HeroSectionProps {
   onWatchDemoClick: () => void;
 }
 
-// Design tokens from nova-hero-mockup.md
-// Colors:
-// - Background Primary: #0F172A (Deep Navy)
-// - Primary: #2563EB (Trust Blue)
-// - Secondary/AI: #7C3AED (Premium Purple)
-// - Success: #10B981 (Action Green)
-// - Text Primary: #F8FAFC
-// - Text Secondary: #94A3B8
+// Floating stat cards components
+const FloatingStatCard = ({ 
+  icon: Icon, 
+  stat, 
+  label, 
+  color,
+  position,
+  delay = 0,
+  size = 'normal'
+}: { 
+  icon: React.ElementType;
+  stat: string;
+  label: string;
+  color: string;
+  position: string;
+  delay?: number;
+  size?: 'normal' | 'small';
+}) => (
+  <div
+    className={`absolute bg-white/95 backdrop-blur-sm rounded-[12px] shadow-lg border border-black/10 ${
+      size === 'small' ? 'p-3' : 'p-4'
+    }`}
+    style={{
+      animation: `float 3s ease-in-out infinite alternate`,
+      animationDelay: `${delay}s`,
+      ...position,
+    }}
+  >
+    <div className={`flex items-center ${size === 'small' ? 'gap-2' : 'gap-3'}`}>
+      <div 
+        className={`${size === 'small' ? 'w-9 h-9 rounded-lg' : 'w-11 h-11 rounded-xl'} flex items-center justify-center`}
+        style={{ backgroundColor: `${color}20` }}
+      >
+        <Icon className={size === 'small' ? 'w-4 h-4' : 'w-5 h-5'} style={{ color }} />
+      </div>
+      <div>
+        <p className={`font-bold text-[#0F172A] ${size === 'small' ? 'text-lg' : 'text-xl'}`}>{stat}</p>
+        <p className={`text-[#64748B] ${size === 'small' ? 'text-[11px]' : 'text-xs'}`}>{label}</p>
+      </div>
+    </div>
+  </div>
+);
 
 // Product Mockup Component - Shows AI coaching in action
 const ProductMockup = () => (
@@ -101,9 +136,9 @@ const ProductMockup = () => (
       </div>
     </div>
 
-    {/* AI Coaching Prompt - Main floating card */}
+    {/* AI Coaching Prompt - Main floating card with glassmorphism */}
     <div 
-      className="absolute -right-4 top-1/4 bg-white rounded-[16px] shadow-[0_8px_24px_rgba(0,0,0,0.5)] p-5 max-w-[280px] border border-black/10"
+      className="absolute -right-6 top-1/4 bg-white/95 backdrop-blur-md rounded-[16px] shadow-[0_8px_24px_rgba(0,0,0,0.5)] p-5 max-w-[280px] border border-black/10"
       style={{ animation: 'float 3s ease-in-out infinite alternate' }}
     >
       <div className="flex items-center gap-2 mb-3">
@@ -124,7 +159,7 @@ const ProductMockup = () => (
         </p>
       </div>
       <div className="flex items-center justify-between mt-3">
-        <Button size="sm" className="text-xs h-8 px-3 bg-[#2563EB] hover:bg-[#3B82F6] text-white rounded-[6px]">
+        <Button size="sm" className="text-xs h-8 px-3 bg-[#2563EB] hover:bg-[#3B82F6] text-white rounded-[6px] transition-all hover:scale-105">
           Use This Response
         </Button>
         <span className="text-xs text-[#10B981] font-medium">92% success rate</span>
@@ -132,36 +167,25 @@ const ProductMockup = () => (
     </div>
 
     {/* Floating stat - Deal velocity */}
-    <div
-      className="absolute -left-6 bottom-16 bg-white rounded-[12px] shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-4 border border-black/10"
-      style={{ animation: 'float 3.5s ease-in-out infinite alternate', animationDelay: '1s' }}
-    >
-      <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-[#10B981]/20 flex items-center justify-center">
-          <TrendingUp className="w-5 h-5 text-[#10B981]" />
-        </div>
-        <div>
-          <p className="text-xl font-bold text-[#0F172A]">2x</p>
-          <p className="text-xs text-[#64748B]">Deal Velocity</p>
-        </div>
-      </div>
-    </div>
+    <FloatingStatCard
+      icon={TrendingUp}
+      stat="2x"
+      label="Deal Velocity"
+      color="#10B981"
+      position={{ left: '-24px', bottom: '64px' }}
+      delay={1}
+    />
 
     {/* Floating stat - Revenue Growth */}
-    <div
-      className="absolute -left-2 top-8 bg-white rounded-[12px] shadow-[0_4px_12px_rgba(0,0,0,0.4)] p-3 border border-black/10"
-      style={{ animation: 'float 3s ease-in-out infinite alternate', animationDelay: '1.5s' }}
-    >
-      <div className="flex items-center gap-2">
-        <div className="w-9 h-9 rounded-lg bg-[#2563EB]/20 flex items-center justify-center">
-          <Phone className="w-4 h-4 text-[#2563EB]" />
-        </div>
-        <div>
-          <p className="text-lg font-bold text-[#0F172A]">+35%</p>
-          <p className="text-[11px] text-[#64748B]">Revenue Growth</p>
-        </div>
-      </div>
-    </div>
+    <FloatingStatCard
+      icon={Phone}
+      stat="+35%"
+      label="Revenue Growth"
+      color="#2563EB"
+      position={{ left: '-8px', top: '32px' }}
+      delay={1.5}
+      size="small"
+    />
 
     {/* Live insights badge */}
     <div
@@ -176,10 +200,10 @@ const ProductMockup = () => (
 
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
-    <section className="relative bg-[#0F172A] h-[800px] lg:h-[900px] flex items-center overflow-hidden">
+    <section className="relative bg-[#0F172A] min-h-screen flex items-center overflow-hidden">
       {/* Background mesh gradient - subtle drift animation */}
       <div 
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
           background: 'radial-gradient(ellipse 100% 80% at 20% 10%, rgba(37,99,235,0.3) 0%, transparent 50%), radial-gradient(ellipse 80% 60% at 80% 90%, rgba(124,58,237,0.3) 0%, transparent 40%)',
           filter: 'blur(100px)',
@@ -188,35 +212,43 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
       />
 
       {/* Particle effects - subtle dots */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px), radial-gradient(circle, rgba(255,255,255,0.08) 2px, transparent 2px)',
-          backgroundSize: '60px 60px, 100px 100px',
-        }}
-      />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(25)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-white/10"
+            style={{
+              width: `${2 + Math.random() * 2}px`,
+              height: `${2 + Math.random() * 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `particleFloat ${15 + Math.random() * 10}s linear infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          />
+        ))}
+      </div>
 
       <div className="container mx-auto px-4 py-24 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content - Copy & CTA */}
           <div className="space-y-6 text-center lg:text-left max-w-xl">
-            {/* Pre-headline badge */}
+            {/* Pre-headline badge with pulse animation */}
             <div 
-              className="inline-block rounded-full px-4 py-2 border"
+              className="inline-flex items-center rounded-full px-4 py-2 border"
               style={{
                 background: 'rgba(124,58,237,0.2)',
                 borderColor: 'rgba(124,58,237,0.3)',
+                animation: 'badgePulse 2s ease-in-out infinite',
               }}
             >
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#A78BFA]" />
-                <span className="text-sm font-semibold text-[#A78BFA]">#1 AI Coach for Sales</span>
-              </div>
+              <Sparkles className="w-3.5 h-3.5 text-[#A78BFA] mr-2" />
+              <span className="text-sm font-semibold text-[#A78BFA]">#1 AI Coach for Sales</span>
             </div>
 
             {/* Main Headline - H1 */}
             <h1 
-              className="text-4xl sm:text-5xl md:text-[56px] font-extrabold text-[#F8FAFC] leading-[1.1] tracking-tight"
+              className="text-[36px] sm:text-[48px] md:text-[56px] font-extrabold text-[#F8FAFC] leading-[1.1] tracking-tight"
               style={{
                 animation: 'slideUp 0.6s ease-out forwards',
                 animationDelay: '0.1s',
@@ -228,22 +260,24 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
                 className="bg-clip-text text-transparent"
                 style={{
                   backgroundImage: 'linear-gradient(90deg, #3B82F6, #7C3AED, #A78BFA)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
                 }}
               >
                 AI That Coaches You
               </span>
             </h1>
 
-            {/* Subheadline - Includes "34% more closes" */}
+            {/* Subheadline - Exact text from spec */}
             <p 
-              className="text-lg md:text-xl text-[#94A3B8] leading-[1.6] max-w-lg mx-auto lg:mx-0"
+              className="text-[18px] md:text-[20px] text-[#94A3B8] leading-[1.6] max-w-[480px]"
               style={{
                 animation: 'slideUp 0.4s ease-out forwards',
                 animationDelay: '0.2s',
                 opacity: 0,
               }}
             >
-              Real-time coaching during calls. Insights that actually help. <span className="text-[#10B981] font-semibold">34% more closes</span> — guaranteed.
+              Real-time coaching during calls. Insights that actually help. Wins that stack up.
             </p>
 
             {/* CTA Buttons */}
@@ -255,18 +289,27 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
                 opacity: 0,
               }}
             >
-              {/* Primary CTA - "Start Free" */}
+              {/* Primary CTA - "Start Free" with glow animation */}
               <Button
                 size="lg"
                 onClick={onStartTrialClick}
-                className="group gap-3 font-semibold text-lg px-8 py-4 rounded-[24px] text-white shadow-[0_0_40px_rgba(37,99,235,0.4)] border-0"
+                className="group relative font-semibold text-[18px] px-8 py-4 rounded-[24px] text-white border-0 overflow-hidden"
                 style={{
                   background: 'linear-gradient(90deg, #2563EB, #3B82F6)',
                   transition: 'all 0.2s ease-out',
                 }}
               >
-                Start Free
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <span className="relative z-10 flex items-center gap-3">
+                  Start Free
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <span 
+                  className="absolute inset-0 rounded-[24px]"
+                  style={{
+                    boxShadow: '0 0 40px rgba(37,99,235,0.4)',
+                    animation: 'glowPulse 3s ease-in-out infinite',
+                  }}
+                />
               </Button>
 
               {/* Secondary CTA - "Watch Demo" */}
@@ -274,14 +317,14 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
                 size="lg"
                 variant="outline"
                 onClick={onWatchDemoClick}
-                className="group gap-2 font-semibold text-lg px-8 py-4 rounded-[24px] text-[#F8FAFC] bg-transparent border-2 border-white/20 hover:bg-white/10 hover:border-white/40 transition-all"
+                className="group gap-2 font-semibold text-[18px] px-8 py-4 rounded-[24px] text-[#F8FAFC] bg-transparent border-2 border-white/20 hover:bg-white/10 hover:border-white/40 transition-all hover:scale-[1.02]"
               >
                 <Play className="h-5 w-5 fill-current" />
                 Watch Demo
               </Button>
             </div>
 
-            {/* CTA Subtext - "No Credit Card required" */}
+            {/* CTA Subtext */}
             <div 
               className="flex items-center justify-center lg:justify-start gap-3 text-sm text-[#94A3B8]"
               style={{
@@ -391,6 +434,43 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
         @keyframes meshDrift {
           0%, 100% { transform: translate(0, 0); }
           50% { transform: translate(20px, 10px); }
+        }
+
+        @keyframes badgePulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+
+        @keyframes glowPulse {
+          0%, 100% { 
+            box-shadow: 0 0 40px rgba(37,99,235,0.4);
+          }
+          50% { 
+            box-shadow: 0 0 60px rgba(37,99,235,0.6);
+          }
+        }
+
+        @keyframes particleFloat {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.2;
+          }
+          90% {
+            opacity: 0.2;
+          }
+          100% {
+            transform: translateY(-100vh) translateX(20px);
+            opacity: 0;
+          }
+        }
+
+        @media (max-width: 1024px) {
+          .hidden\\:lg\\:block {
+            display: none;
+          }
         }
       `}</style>
     </section>
