@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Zap, PhoneCall, Bot, Shield } from 'lucide-react';
 import { gsap } from 'gsap';
@@ -31,7 +31,7 @@ const FloatingOrb = ({
   />
 );
 
-export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
+export const HeroConfession = React.forwardRef<HTMLElement, HeroConfessionProps>(({ onClaimRedemption }, ref) => {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const orbsRef = useFloatingOrbs();
 
@@ -54,7 +54,7 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
   }, []);
 
   return (
-    <section className="relative min-h-[100vh] flex items-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <section ref={ref} className="relative min-h-[100vh] flex items-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Animated background orbs */}
       <div ref={orbsRef} className="absolute inset-0 overflow-hidden pointer-events-none">
         <FloatingOrb 
@@ -213,4 +213,6 @@ export function HeroConfession({ onClaimRedemption }: HeroConfessionProps) {
       </div>
     </section>
   );
-}
+});
+
+HeroConfession.displayName = "HeroConfession";

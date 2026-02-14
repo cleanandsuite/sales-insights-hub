@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useScrollReveal, useCountUp } from '../gsap/useGSAPAnimations';
 import { ArrowRight, Check, Star, Shield, Clock, AlertTriangle, Users, TrendingUp, Zap, Quote } from 'lucide-react';
@@ -39,7 +39,7 @@ interface CloseSequenceProps {
   onClaimRedemption: () => void;
 }
 
-export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
+export const CloseSequence = React.forwardRef<HTMLElement, CloseSequenceProps>(({ onClaimRedemption }, ref) => {
   const revealRef = useScrollReveal();
   const ctaWrapperRef = useRef<HTMLDivElement>(null);
   const revenueRef = useCountUp(4200000, 2.5);
@@ -64,7 +64,7 @@ export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
   }, []);
 
   return (
-    <section className="relative py-24 md:py-32 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
+    <section ref={ref} className="relative py-24 md:py-32 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
       {/* Urgency overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(239,68,68,0.1)_0%,transparent_50%)] pointer-events-none" />
 
@@ -232,4 +232,6 @@ export function CloseSequence({ onClaimRedemption }: CloseSequenceProps) {
       </div>
     </section>
   );
-}
+});
+
+CloseSequence.displayName = "CloseSequence";
