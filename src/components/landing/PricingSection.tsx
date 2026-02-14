@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Clock, Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePricingAvailability } from "@/hooks/usePricingAvailability";
 
@@ -50,13 +50,27 @@ function CountdownTimer({ deadline }: { deadline: Date }) {
 
 // Comparison table data
 const comparisonData = [
-  { feature: "Setup Time", sellsig: "60 seconds", gong: "2-4 weeks", chorus: "1-2 weeks", fireflies: "10 minutes" },
-  { feature: "Price (per user/mo)", sellsig: "$29", gong: "$100-300", chorus: "$80-200", fireflies: "$19" },
+  { feature: "Setup Time", sellsig: "Minutes", gong: "2-4 weeks", chorus: "1-2 weeks", fireflies: "10 minutes" },
+  { feature: "Price (per user/mo)", sellsig: "$25-55", gong: "$100-300", chorus: "$80-200", fireflies: "$19" },
+  {
+    feature: "Unlimited Recording",
+    sellsig: "✓ Yes",
+    gong: "✓ Enterprise",
+    chorus: "✓ Enterprise",
+    fireflies: "✓ Paid plans",
+  },
   {
     feature: "Live Coaching",
     sellsig: "✓ Real-time",
     gong: "Post-call only",
     chorus: "Post-call only",
+    fireflies: "✗",
+  },
+  {
+    feature: "AI Coach Personalities",
+    sellsig: "✓ 5 Styles",
+    gong: "✗",
+    chorus: "✗",
     fireflies: "✗",
   },
   {
@@ -66,7 +80,6 @@ const comparisonData = [
     chorus: "✓ Enterprise",
     fireflies: "Limited",
   },
-  { feature: "Credit Card Setup", sellsig: "✗ Card required", gong: "✗", chorus: "✗", fireflies: "✓" },
 ];
 
 export function PricingSection() {
@@ -85,44 +98,67 @@ export function PricingSection() {
 
   const pricingTiers = [
     {
-      name: "Single User",
+      name: "Starter",
       description: "Perfect for individual sales reps",
       trialPrice: "$0",
       trialPeriod: "14 days",
-      price: "$29",
+      price: "$25",
       pricePeriod: "/mo",
-      priceNote: "Grandfathered forever (Reg. $49/mo)",
+      priceNote: "200 AI coaching minutes included",
       features: [
         "Unlimited call recordings",
         "AI transcription & analysis",
         "Live coaching suggestions",
         "Lead intelligence",
         "Deal insights",
+        "200 AI minutes/month",
         "Email support",
       ],
       cta: "Start Free 14-Day Trial",
       popular: true,
-      available: singleUserAvailable,
+      available: true,
+    },
+    {
+      name: "Pro",
+      description: "For serious sales professionals",
+      trialPrice: "$0",
+      trialPeriod: "14 days",
+      price: "$55",
+      pricePeriod: "/mo",
+      priceNote: "Unlimited AI coaching",
+      features: [
+        "Everything in Starter",
+        "Unlimited AI coaching minutes",
+        "5 AI Coach Personalities",
+        "Smart Coaching Engine",
+        "Priority support",
+        "Advanced analytics",
+        "Team leaderboards",
+      ],
+      cta: "Start Free 14-Day Trial",
+      popular: true,
+      available: true,
     },
     {
       name: "Enterprise",
       description: "For scaling sales organizations",
       trialPrice: null,
       trialPeriod: null,
-      price: "$99",
+      price: "$150",
       pricePeriod: "/user/mo",
       priceNote: "Contact for volume discounts",
       features: [
-        "Everything in Single User",
-        "Team analytics dashboard",
-        "Manager performance reports",
-        "Lead assignment & routing",
-        "Custom playbooks",
-        "Priority support",
+        "Everything in Pro",
+        "Dedicated account manager",
+        "Custom integrations",
+        "SLA guarantees",
+        "Advanced security",
+        "API access",
+        "24/7 phone support",
       ],
-      cta: "Coming Soon",
+      cta: "Contact Sales",
       popular: false,
-      available: false,
+      available: true,
     },
   ];
 
@@ -149,18 +185,6 @@ export function PricingSection() {
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Start with a 14-day free trial. No charge until you see the value.
           </p>
-
-          {/* Urgency Banner */}
-          {!availability?.isDeadlinePassed && singleUserAvailable && (
-            <div className="mt-6 inline-block">
-              <div className="bg-destructive text-destructive-foreground px-6 py-3 rounded-lg shadow-md">
-                <p className="text-base font-bold mb-1">
-                  ⏰ First {availability?.singleUser.spotsRemaining ?? 100} Users – Ends Jan 31
-                </p>
-                <CountdownTimer deadline={deadline} />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Pricing Cards */}

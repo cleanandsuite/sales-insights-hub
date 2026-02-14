@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { CallSummaryCard } from '@/components/leads/CallSummaryCard';
@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic, Download, Search, FileText, Trash2, Upload, File, X, CheckCircle, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic, Download, Search, FileText, Trash2, Upload, File, X, CheckCircle, Loader2, Filter, User, MessageSquareText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { createPlayableObjectUrl } from '@/lib/audioPlayback';
@@ -75,7 +76,20 @@ export default function Recordings() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [contactFilter, setContactFilter] = useState('all');
+  const [scoreFilter, setScoreFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Extract unique contacts from recordings
+  const uniqueContacts = useMemo(() => {
+    const contacts = new Set<string>();
+    recordings.forEach(r => {
+      if (r.name) contacts.add(r.name);
+      if (r.file_name) contacts.add(r.file_name.split('.')[0]);
+    });
+    return Array.from(contacts).sort();
+  }, [recordings]);
   
   // Upload state
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -121,6 +135,102 @@ export default function Recordings() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Extract context snippet around search term
+  const getSearchSnippet = (text: string | null, query: string): string => {
+    if (!text || !query) return '';
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    const index = lowerText.indexOf(lowerQuery);
+    if (index === -1) return '';
+    
+    const start = Math.max(0, index - 40);
+    const end = Math.min(text.length, index + query.length + 40);
+    let snippet = text.slice(start, end);
+    
+    if (start > 0) snippet = '...' + snippet;
+    if (end < text.length) snippet = snippet + '...';
+    
+    return snippet;
+  };
+
+  // Highlight search term in text
+  const highlightMatch = (text: string | null, query: string): React.ReactNode => {
+    if (!text || !query) return text || '';
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return parts.map((part, i) => 
+      part.toLowerCase() === query.toLowerCase() 
+        ? <mark key={i} className="bg-primary/30 text-primary px-0.5 rounded">{part}</mark>
+        : part
+    );
+  };
+
+  // Search across all relevant fields
+  const searchRecordings = useCallback((recording: CallRecording, summary: CallSummary | undefined, query: string): { matched: boolean; snippets: { field: string; text: string }[] } => {
+    if (!query.trim()) return { matched: false, snippets: [] };
+    
+    const lowerQuery = query.toLowerCase();
+    const snippets: { field: string; text: string }[] = [];
+    let matched = false;
+
+    // Search in recording fields
+    const name = (recording.name || recording.file_name || '').toLowerCase();
+    if (name.includes(lowerQuery)) {
+      matched = true;
+      snippets.push({ field: 'Name', text: recording.name || recording.file_name });
+    }
+
+    const transcription = recording.live_transcription || '';
+    if (transcription.toLowerCase().includes(lowerQuery)) {
+      matched = true;
+      snippets.push({ field: 'Transcript', text: getSearchSnippet(recording.live_transcription, query) });
+    }
+
+    const summaryText = recording.summary || '';
+    if (summaryText.toLowerCase().includes(lowerQuery)) {
+      matched = true;
+      snippets.push({ field: 'Summary', text: getSearchSnippet(recording.summary, query) });
+    }
+
+    const topics = recording.key_topics?.join(' ') || '';
+    if (topics.toLowerCase().includes(lowerQuery)) {
+      matched = true;
+      const matchedTopics = recording.key_topics?.filter(t => t.toLowerCase().includes(lowerQuery)) || [];
+      snippets.push({ field: 'Topics', text: matchedTopics.join(', ') });
+    }
+
+    // Search in call summary fields
+    if (summary) {
+      const keyPoints = summary.key_points?.join(' ') || '';
+      if (keyPoints.toLowerCase().includes(lowerQuery)) {
+        matched = true;
+        const matchedPoints = summary.key_points?.filter(p => p.toLowerCase().includes(lowerQuery)) || [];
+        snippets.push({ field: 'Key Points', text: matchedPoints.slice(0, 2).join(' | ') });
+      }
+
+      const nextSteps = summary.agreed_next_steps?.join(' ') || '';
+      if (nextSteps.toLowerCase().includes(lowerQuery)) {
+        matched = true;
+        const matchedSteps = summary.agreed_next_steps?.filter(s => s.toLowerCase().includes(lowerQuery)) || [];
+        snippets.push({ field: 'Next Steps', text: matchedSteps.slice(0, 2).join(' | ') });
+      }
+
+      const emotional = summary.emotional_tone || '';
+      if (emotional.toLowerCase().includes(lowerQuery)) {
+        matched = true;
+        snippets.push({ field: 'Tone', text: summary.emotional_tone });
+      }
+
+      const watchOut = summary.watch_out_for?.join(' ') || '';
+      if (watchOut.toLowerCase().includes(lowerQuery)) {
+        matched = true;
+        const matchedItems = summary.watch_out_for?.filter(w => w.toLowerCase().includes(lowerQuery)) || [];
+        snippets.push({ field: 'Watch Out', text: matchedItems.slice(0, 2).join(' | ') });
+      }
+    }
+
+    return { matched, snippets };
+  }, []);
 
   const handlePlayPause = async (recording: CallRecording) => {
     if (!recording.audio_url) return;
@@ -225,13 +335,48 @@ export default function Recordings() {
     }
   };
 
-  const filteredRecordings = recordings.filter(r => {
-    const displayName = r.name || r.file_name;
-    const matchesSearch = displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.file_name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDate = filterByDate(r);
-    return matchesSearch && matchesDate;
-  });
+  const filterByContact = (recording: CallRecording) => {
+    if (contactFilter === 'all') return true;
+    const name = recording.name || recording.file_name || '';
+    return name.toLowerCase().includes(contactFilter.toLowerCase());
+  };
+
+  const filterByScore = (recording: CallRecording) => {
+    if (scoreFilter === 'all') return true;
+    const score = recording.sentiment_score ?? 0;
+    switch (scoreFilter) {
+      case 'high':
+        return score >= 0.7;
+      case 'medium':
+        return score >= 0.4 && score < 0.7;
+      case 'low':
+        return score < 0.4;
+      default:
+        return true;
+    }
+  };
+
+  // Apply all filters and search
+  const filteredRecordings = useMemo(() => {
+    return recordings.filter(r => {
+      const { matched } = searchRecordings(r, summaries[r.id], searchQuery);
+      const matchesSearch = !searchQuery.trim() || matched;
+      const matchesDate = filterByDate(r);
+      const matchesContact = filterByContact(r);
+      const matchesScore = filterByScore(r);
+      return matchesSearch && matchesDate && matchesContact && matchesScore;
+    });
+  }, [recordings, searchQuery, dateFilter, contactFilter, scoreFilter, summaries, searchRecordings]);
+
+  // Get search results with snippets for display
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return filteredRecordings.map(r => ({
+      recording: r,
+      summary: summaries[r.id],
+      ...searchRecordings(r, summaries[r.id], searchQuery)
+    }));
+  }, [filteredRecordings, searchQuery, summaries, searchRecordings]);
 
   // Calculate stats
   const totalCalls = recordings.length;
@@ -595,28 +740,101 @@ export default function Recordings() {
         </div>
 
         {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search transcripts, summaries, topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-10"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={showFilters ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                Filters
+                {(dateFilter !== 'all' || contactFilter !== 'all' || scoreFilter !== 'all') && (
+                  <span className="ml-1 h-2 w-2 rounded-full bg-primary" />
+                )}
+              </Button>
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Date" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger className="w-[180px]">
-              <Calendar className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="Filter by date" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time</SelectItem>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
-            </SelectContent>
-          </Select>
+
+          {/* Expanded Filters */}
+          {showFilters && (
+            <div className="flex flex-wrap gap-3 p-4 rounded-lg border border-border/50 bg-card/50">
+              <Select value={contactFilter} onValueChange={setContactFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <User className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Contact" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Contacts</SelectItem>
+                  {uniqueContacts.slice(0, 50).map(contact => (
+                    <SelectItem key={contact} value={contact}>{contact}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={scoreFilter} onValueChange={setScoreFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Score" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Scores</SelectItem>
+                  <SelectItem value="high">High (70%+)</SelectItem>
+                  <SelectItem value="medium">Medium (40-70%)</SelectItem>
+                  <SelectItem value="low">Low (&lt;40%)</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setDateFilter('all');
+                  setContactFilter('all');
+                  setScoreFilter('all');
+                }}
+                className="text-muted-foreground"
+              >
+                Clear filters
+              </Button>
+            </div>
+          )}
+
+          {/* Search Results Count */}
+          {searchQuery && (
+            <p className="text-sm text-muted-foreground">
+              Found <span className="font-medium text-foreground">{filteredRecordings.length}</span> result{filteredRecordings.length !== 1 ? 's' : ''} for "{searchQuery}"
+            </p>
+          )}
         </div>
 
         {loading ? (
@@ -636,7 +854,11 @@ export default function Recordings() {
         ) : (
           <div className="space-y-4">
             <div className="grid gap-4">
-              {filteredRecordings.map((recording) => (
+              {filteredRecordings.map((recording) => {
+                const result = searchResults.find(r => r.recording.id === recording.id);
+                const snippets = result?.snippets || [];
+                
+                return (
                 <div
                   key={recording.id}
                   className={`card-gradient rounded-xl border transition-all ${
@@ -667,7 +889,7 @@ export default function Recordings() {
                             className="font-semibold text-foreground truncate cursor-pointer hover:text-primary transition-colors"
                             onClick={() => setExpandedId(expandedId === recording.id ? null : recording.id)}
                           >
-                            {recording.name || recording.file_name}
+                            {searchQuery ? highlightMatch(recording.name || recording.file_name, searchQuery) : recording.name || recording.file_name}
                           </h3>
                           
                           <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
@@ -696,6 +918,22 @@ export default function Recordings() {
                                 >
                                   {topic}
                                 </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Search Snippets */}
+                          {searchQuery && snippets.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                              {snippets.slice(0, 3).map((snippet, idx) => (
+                                <div key={idx} className="flex items-start gap-2 text-sm">
+                                  <Badge variant="outline" className="shrink-0 text-xs font-normal">
+                                    {snippet.field}
+                                  </Badge>
+                                  <span className="text-muted-foreground line-clamp-2">
+                                    {highlightMatch(snippet.text, searchQuery)}
+                                  </span>
+                                </div>
                               ))}
                             </div>
                           )}
@@ -764,7 +1002,8 @@ export default function Recordings() {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
