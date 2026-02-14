@@ -110,9 +110,9 @@ export const HeroConfession = React.forwardRef<HTMLElement, HeroConfessionProps>
         <div className="max-w-5xl mx-auto text-center space-y-8">
           
           {/* Pre-headline - Pattern interrupt */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium animate-pulse">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            ⚠️ WARNING: This will expose everything you've been hiding
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            AI-Powered Sales Coaching Platform
           </div>
 
           {/* Main Headline - H1 with keywords */}
@@ -120,27 +120,19 @@ export const HeroConfession = React.forwardRef<HTMLElement, HeroConfessionProps>
             ref={headlineRef}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight"
           >
-            <span className="hero-word inline-block">Your</span>{' '}
-            <span className="hero-word inline-block text-red-400">Sales Calls</span>{' '}
-            <span className="hero-word inline-block">Are</span>{' '}
-            <span className="hero-word inline-block">Bleeding</span>{' '}
-            <span className="hero-word inline-block">Money.</span>
-            <br />
-            <span className="hero-word inline-block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-              AI Coaching
-            </span>{' '}
-            <span className="hero-word inline-block text-white/90">Stops</span>{' '}
-            <span className="hero-word inline-block text-white/90">The</span>{' '}
-            <span className="hero-word inline-block text-white/90">Bleeding.</span>
+            <span className="hero-word inline-block">Close</span>{' '}
+            <span className="hero-word inline-block">More</span>{' '}
+            <span className="hero-word inline-block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">Deals</span>{' '}
+            <span className="hero-word inline-block">with</span>{' '}
+            <span className="hero-word inline-block">AI</span>{' '}
+            <span className="hero-word inline-block">That</span>{' '}
+            <span className="hero-word inline-block text-white/90">Coaches</span>{' '}
+            <span className="hero-word inline-block text-white/90">You</span>
           </h1>
 
           {/* Subheadline - Shame exposure */}
-          <p className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-            Every objection you fumble. Every deal you lose. Every "I'll think about it" that haunts you at 2AM.
-            <br />
-            <span className="text-white font-semibold">
-              AI coaching hears it all — and fixes it in real-time.
-            </span>
+          <p className="text-2xl md:text-3xl text-white/80 max-w-3xl mx-auto leading-relaxed font-semibold">
+            34% more closes — guaranteed
           </p>
 
           {/* CTA Section */}
@@ -154,7 +146,7 @@ export const HeroConfession = React.forwardRef<HTMLElement, HeroConfessionProps>
               {/* Glow effect */}
               <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
               <span className="relative flex items-center gap-3">
-                🔥 Claim Your Redemption — $97/mo
+                Start Free — No Credit Card Required
                 <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </span>
             </Button>
