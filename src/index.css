@@ -554,3 +554,71 @@
     }
   }
 }
+
+/* ============================================
+   2025 DASHBOARD PREMIUM STYLES
+   ============================================ */
+
+.bg-dashboard-gradient {
+  background: linear-gradient(180deg, 
+    hsl(225 20% 97%) 0%,
+    hsl(225 25% 95%) 50%,
+    hsl(225 20% 97%) 100%
+  );
+}
+
+.dark .bg-dashboard-gradient {
+  background: linear-gradient(180deg, 
+    hsl(220 30% 4%) 0%,
+    hsl(220 28% 6%) 50%,
+    hsl(220 30% 4%) 100%
+  );
+}
+
+.card-premium {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 
+    0 1px 2px hsl(0 0% 0% / 0.02),
+    0 4px 12px hsl(0 0% 0% / 0.04),
+    0 16px 32px hsl(0 0% 0% / 0.04);
+  transition: all 0.3s ease;
+}
+
+.dark .card-premium {
+  background: hsl(215 25% 10% / 0.95);
+  box-shadow: 
+    0 1px 2px hsl(0 0% 0% / 0.1),
+    0 4px 12px hsl(0 0% 0% / 0.15),
+    0 16px 32px hsl(0 0% 0% / 0.1);
+}
+
+.card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 1px 2px hsl(0 0% 0% / 0.02),
+    0 8px 24px hsl(0 0% 0% / 0.06),
+    0 24px 48px hsl(0 0% 0% / 0.06);
+}
+
+.icon-gradient-teal {
+  background: linear-gradient(135deg, hsl(166 100% 42%) 0%, hsl(177 70% 41%) 100%);
+  color: white;
+}
+
+.icon-gradient-purple {
+  background: linear-gradient(135deg, hsl(263 70% 58%) 0%, hsl(280 73% 55%) 100%);
+  color: white;
+}
+
+.icon-gradient-blue {
+  background: linear-gradient(135deg, hsl(210 100% 42%) 0%, hsl(201 94% 48%) 100%);
+  color: white;
+}
+
+.icon-gradient-amber {
+  background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(32 95% 44%) 100%);
+  color: white;
+}
