@@ -201,7 +201,7 @@ const ProductMockup = () => (
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
     <section className="relative bg-white min-h-screen flex items-center overflow-hidden">
-      {/* Clean white background */}
+      {/* Clean white background - fixed */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
