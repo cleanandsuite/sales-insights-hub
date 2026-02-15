@@ -201,32 +201,13 @@ const ProductMockup = () => (
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
     <section className="relative bg-[#0F172A] min-h-screen flex items-center overflow-hidden">
-      {/* Background mesh gradient - subtle drift animation */}
+      {/* Clean background - subtle gradient only */}
       <div 
-        className="absolute inset-0 opacity-30 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 100% 80% at 20% 10%, rgba(37,99,235,0.3) 0%, transparent 50%), radial-gradient(ellipse 80% 60% at 80% 90%, rgba(124,58,237,0.3) 0%, transparent 40%)',
-          filter: 'blur(100px)',
-          animation: 'meshDrift 20s ease-in-out infinite',
+          background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)',
         }}
       />
-
-      {/* Particle effects - subtle dots */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(25)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white/10"
-            style={{
-              width: `${2 + Math.random() * 2}px`,
-              height: `${2 + Math.random() * 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `particleFloat ${15 + Math.random() * 10}s linear infinite`,
-              animationDelay: `${Math.random() * 10}s`,
-            }}
-          />
-        ))}
       </div>
 
       <div className="container mx-auto px-4 py-24 relative z-10">
