@@ -40,7 +40,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0F172A]">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <HeroSection 
         onStartTrialClick={handleStartTrialClick}
