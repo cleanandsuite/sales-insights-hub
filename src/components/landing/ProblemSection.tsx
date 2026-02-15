@@ -107,17 +107,17 @@ export function ProblemSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#0F172A] py-16 md:py-24 overflow-hidden"
+      className="relative bg-white py-16 md:py-24 overflow-hidden"
     >
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Left Column: The Pain */}
           <div ref={painRef} className="space-y-8">
             <div>
-              <p className="font-mono text-xs font-bold text-[#64748B] tracking-[0.1em] mb-4">
+              <p className="font-mono text-xs font-bold text-gray-500 tracking-[0.1em] mb-4">
                 THE PROBLEM
               </p>
-              <h2 className="text-[28px] md:text-[40px] font-bold text-[#F8FAFC] leading-[1.2]">
+              <h2 className="text-[28px] md:text-[40px] font-bold text-[#0F172A] leading-[1.2]">
                 Your Sales Team Is Wingin' It
               </h2>
             </div>
@@ -133,10 +133,10 @@ export function ProblemSection() {
                     style={{ color: point.iconColor }} 
                   />
                   <div>
-                    <h3 className="text-lg font-semibold text-[#F8FAFC] mb-2">
+                    <h3 className="text-lg font-semibold text-[#0F172A] mb-2">
                       {point.title}
                     </h3>
-                    <p className="text-[15px] text-[#94A3B8] leading-relaxed">
+                    <p className="text-[15px] text-gray-600 leading-relaxed">
                       {point.description}
                     </p>
                   </div>
@@ -183,10 +183,10 @@ export function ProblemSection() {
                       />
                     </div>
                     <div>
-                      <h4 className="text-base font-semibold text-[#F8FAFC] mb-1">
+                      <h4 className="text-base font-semibold text-[#0F172A] mb-1">
                         {point.title}
                       </h4>
-                      <p className="text-sm text-[#94A3B8] leading-relaxed">
+                      <p className="text-sm text-gray-600 leading-relaxed">
                         {point.description}
                       </p>
                     </div>

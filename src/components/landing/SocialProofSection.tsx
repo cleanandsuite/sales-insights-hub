@@ -92,18 +92,18 @@ export function SocialProofSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#0F172A] py-16 md:py-24 overflow-hidden"
+      className="relative bg-gray-50 py-16 md:py-24 overflow-hidden"
     >
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16">
-          <p className="font-mono text-xs font-bold text-[#64748B] tracking-[0.1em] mb-4">
+          <p className="font-mono text-xs font-bold text-gray-500 tracking-[0.1em] mb-4">
             TRUSTED BY TEAMS
           </p>
-          <h2 className="text-[28px] md:text-[40px] font-bold text-[#F8FAFC] leading-[1.2] mb-3">
+          <h2 className="text-[28px] md:text-[40px] font-bold text-[#0F172A] leading-[1.2] mb-3">
             Loved by Sales Professionals
           </h2>
-          <p className="text-[18px] text-[#94A3B8]">
+          <p className="text-[18px] text-gray-600">
             Join hundreds of teams already closing more deals
           </p>
         </div>
@@ -113,7 +113,7 @@ export function SocialProofSection() {
           {companyLogos.map((logo, index) => (
             <div 
               key={index}
-              className="logo-item text-xl md:text-2xl font-bold text-[#64748B] hover:text-[#94A3B8] transition-colors cursor-default"
+              className="logo-item text-xl md:text-2xl font-bold text-gray-400 hover:text-gray-600 transition-colors cursor-default"
             >
               {logo}
             </div>
@@ -125,7 +125,7 @@ export function SocialProofSection() {
           {testimonials.map((testimonial, index) => (
             <div 
               key={index}
-              className="testimonial-card relative bg-[#1E293B] rounded-[16px] p-6 border border-white/10 hover:border-white/20 transition-all duration-200"
+              className="testimonial-card relative bg-white rounded-[16px] p-6 border border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm"
             >
               {/* Quote icon */}
               <Quote className="w-8 h-8 text-[#7C3AED]/30 absolute top-4 right-4" />
@@ -141,7 +141,7 @@ export function SocialProofSection() {
               </div>
 
               {/* Quote */}
-              <p className="text-[15px] text-[#94A3B8] leading-relaxed mb-6">
+              <p className="text-[15px] text-gray-600 leading-relaxed mb-6">
                 "{testimonial.quote}"
               </p>
 
@@ -153,10 +153,10 @@ export function SocialProofSection() {
                   {testimonial.avatar}
                 </div>
                 <div>
-                  <p className="text-[#F8FAFC] font-semibold text-sm">
+                  <p className="text-[#0F172A] font-semibold text-sm">
                     {testimonial.author}
                   </p>
-                  <p className="text-[#64748B] text-xs">
+                  <p className="text-gray-500 text-xs">
                     {testimonial.role}, {testimonial.company}
                   </p>
                 </div>
@@ -177,10 +177,10 @@ export function SocialProofSection() {
               key={index}
               className="text-center"
             >
-              <p className="text-[32px] md:text-[48px] font-bold font-mono text-[#F8FAFC]">
+              <p className="text-[32px] md:text-[48px] font-bold font-mono text-[#0F172A]">
                 {item.stat}
               </p>
-              <p className="text-[14px] text-[#64748B]">
+              <p className="text-[14px] text-gray-500">
                 {item.label}
               </p>
             </div>

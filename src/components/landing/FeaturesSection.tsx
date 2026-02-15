@@ -95,21 +95,18 @@ export function FeaturesSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative py-16 md:py-24 overflow-hidden"
-      style={{
-        background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)'
-      }}
+      className="relative py-16 md:py-24 overflow-hidden bg-white"
     >
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="features-header text-center mb-12 md:mb-16">
-          <p className="font-mono text-xs font-bold text-[#64748B] tracking-[0.1em] mb-4">
+          <p className="font-mono text-xs font-bold text-gray-500 tracking-[0.1em] mb-4">
             KEY FEATURES
           </p>
-          <h2 className="text-[28px] md:text-[40px] font-bold text-[#F8FAFC] leading-[1.2] mb-3">
+          <h2 className="text-[28px] md:text-[40px] font-bold text-[#0F172A] leading-[1.2] mb-3">
             Everything You Need to Close
           </h2>
-          <p className="text-[18px] text-[#94A3B8]">
+          <p className="text-[18px] text-gray-600">
             Powerful features, simple to use
           </p>
         </div>
@@ -119,7 +116,7 @@ export function FeaturesSection() {
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="feature-card group relative bg-[#1E293B] rounded-[16px] p-7 border border-white/10 hover:border-white/30 transition-all duration-200 hover:-translate-y-1 overflow-hidden"
+              className="feature-card group relative bg-white rounded-[16px] p-7 border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:-translate-y-1 overflow-hidden shadow-sm"
             >
               {/* Glow effect at top */}
               <div 
@@ -138,18 +135,18 @@ export function FeaturesSection() {
               </div>
 
               {/* Title */}
-              <h3 className="text-[20px] font-semibold text-[#F8FAFC] mb-2">
+              <h3 className="text-[20px] font-semibold text-[#0F172A] mb-2">
                 {feature.title}
               </h3>
 
               {/* Description */}
-              <p className="text-[15px] text-[#94A3B8] leading-relaxed mb-4">
+              <p className="text-[15px] text-gray-600 leading-relaxed mb-4">
                 {feature.description}
               </p>
 
               {/* Stats Row */}
               <div 
-                className="pt-4 border-t border-white/10"
+                className="pt-4 border-t border-gray-100"
               >
                 <span 
                   className="text-[14px] font-bold"

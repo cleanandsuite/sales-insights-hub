@@ -121,18 +121,18 @@ export function PricingSection({ onStartTrialClick }: PricingSectionProps) {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#0F172A] py-16 md:py-24 overflow-hidden"
+      className="relative bg-white py-16 md:py-24 overflow-hidden"
     >
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="pricing-header text-center mb-12 md:mb-16">
-          <p className="font-mono text-xs font-bold text-[#64748B] tracking-[0.1em] mb-4">
+          <p className="font-mono text-xs font-bold text-gray-500 tracking-[0.1em] mb-4">
             PRICING
           </p>
-          <h2 className="text-[28px] md:text-[40px] font-bold text-[#F8FAFC] leading-[1.2] mb-3">
+          <h2 className="text-[28px] md:text-[40px] font-bold text-[#0F172A] leading-[1.2] mb-3">
             Simple, Transparent Pricing
           </h2>
-          <p className="text-[18px] text-[#94A3B8]">
+          <p className="text-[18px] text-gray-600">
             Start with a 14-day free trial. No credit card required.
           </p>
         </div>
@@ -142,10 +142,10 @@ export function PricingSection({ onStartTrialClick }: PricingSectionProps) {
           {pricingTiers.map((tier, index) => (
             <div 
               key={index}
-              className={`pricing-card relative bg-[#1E293B] rounded-[24px] p-8 border transition-all duration-200 hover:-translate-y-1 ${
+              className={`pricing-card relative bg-white rounded-[24px] p-8 border transition-all duration-200 hover:-translate-y-1 shadow-sm ${
                 tier.popular 
                   ? 'border-[#7C3AED] shadow-lg shadow-[#7C3AED]/20' 
-                  : 'border-white/10 hover:border-white/20'
+                  : 'border-gray-200 hover:border-gray-300'
               }`}
             >
               {/* Popular badge */}
@@ -160,20 +160,20 @@ export function PricingSection({ onStartTrialClick }: PricingSectionProps) {
               )}
 
               {/* Plan name */}
-              <h3 className="text-xl font-semibold text-[#F8FAFC] mb-2">
+              <h3 className="text-xl font-semibold text-[#0F172A] mb-2">
                 {tier.name}
               </h3>
-              <p className="text-sm text-[#64748B] mb-6">
+              <p className="text-sm text-gray-500 mb-6">
                 {tier.description}
               </p>
 
               {/* Price */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-[40px] font-bold text-[#F8FAFC]">
+                  <span className="text-[40px] font-bold text-[#0F172A]">
                     {tier.price}
                   </span>
-                  <span className="text-[#64748B]">
+                  <span className="text-gray-500">
                     {tier.period}
                   </span>
                 </div>
@@ -190,7 +190,7 @@ export function PricingSection({ onStartTrialClick }: PricingSectionProps) {
                 {tier.features.map((feature, fIndex) => (
                   <li 
                     key={fIndex} 
-                    className="flex items-start gap-3 text-sm text-[#94A3B8]"
+                    className="flex items-start gap-3 text-sm text-gray-600"
                   >
                     <Check 
                       className="w-5 h-5 shrink-0" 
@@ -207,7 +207,7 @@ export function PricingSection({ onStartTrialClick }: PricingSectionProps) {
                 className={`w-full py-3 px-6 rounded-[12px] font-semibold text-[16px] transition-all duration-200 hover:scale-[1.02] ${
                   tier.popular
                     ? 'text-white'
-                    : 'bg-white/10 text-[#F8FAFC] border border-white/20 hover:bg-white/20'
+                    : 'bg-gray-50 text-[#0F172A] border border-gray-200 hover:bg-gray-100'
                 }`}
                 style={{
                   backgroundColor: tier.popular ? tier.accentColor : undefined
@@ -220,7 +220,7 @@ export function PricingSection({ onStartTrialClick }: PricingSectionProps) {
         </div>
 
         {/* Bottom note */}
-        <p className="text-center text-sm text-[#64748B] mt-12">
+        <p className="text-center text-sm text-gray-500 mt-12">
           All plans include a 14-day free trial. Cancel anytime.
         </p>
       </div>

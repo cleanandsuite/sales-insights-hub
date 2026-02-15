@@ -200,12 +200,12 @@ const ProductMockup = () => (
 
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
   return (
-    <section className="relative bg-[#0F172A] min-h-screen flex items-center overflow-hidden">
-      {/* Clean background - subtle gradient only */}
+    <section className="relative bg-white min-h-screen flex items-center overflow-hidden">
+      {/* Clean white background */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)',
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
         }}
       />
       </div>
@@ -214,22 +214,21 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content - Copy & CTA */}
           <div className="space-y-6 text-center lg:text-left max-w-xl">
-            {/* Pre-headline badge with pulse animation */}
+            {/* Pre-headline badge */}
             <div 
               className="inline-flex items-center rounded-full px-4 py-2 border"
               style={{
-                background: 'rgba(124,58,237,0.2)',
-                borderColor: 'rgba(124,58,237,0.3)',
-                animation: 'badgePulse 2s ease-in-out infinite',
+                background: 'rgba(37,99,235,0.1)',
+                borderColor: 'rgba(37,99,235,0.2)',
               }}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#A78BFA] mr-2" />
-              <span className="text-sm font-semibold text-[#A78BFA]">#1 AI Coach for Sales</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#2563EB] mr-2" />
+              <span className="text-sm font-semibold text-[#2563EB]">#1 AI Coach for Sales</span>
             </div>
 
             {/* Main Headline - H1 */}
             <h1 
-              className="text-[36px] sm:text-[48px] md:text-[56px] font-extrabold text-[#F8FAFC] leading-[1.1] tracking-tight"
+              className="text-[36px] sm:text-[48px] md:text-[56px] font-extrabold text-[#0F172A] leading-[1.1] tracking-tight"
               style={{
                 animation: 'slideUp 0.6s ease-out forwards',
                 animationDelay: '0.1s',
@@ -251,7 +250,7 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
 
             {/* Subheadline - Exact text from spec */}
             <p 
-              className="text-[18px] md:text-[20px] text-[#94A3B8] leading-[1.6] max-w-[480px]"
+              className="text-[18px] md:text-[20px] text-gray-600 leading-[1.6] max-w-[480px]"
               style={{
                 animation: 'slideUp 0.4s ease-out forwards',
                 animationDelay: '0.2s',
@@ -298,7 +297,7 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
                 size="lg"
                 variant="outline"
                 onClick={onWatchDemoClick}
-                className="group gap-2 font-semibold text-[18px] px-8 py-4 rounded-[24px] text-[#F8FAFC] bg-transparent border-2 border-white/20 hover:bg-white/10 hover:border-white/40 transition-all hover:scale-[1.02]"
+                className="group gap-2 font-semibold text-[18px] px-8 py-4 rounded-[24px] text-[#0F172A] bg-transparent border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-400 transition-all hover:scale-[1.02]"
               >
                 <Play className="h-5 w-5 fill-current" />
                 Watch Demo
@@ -307,7 +306,7 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
 
             {/* CTA Subtext */}
             <div 
-              className="flex items-center justify-center lg:justify-start gap-3 text-sm text-[#94A3B8]"
+              className="flex items-center justify-center lg:justify-start gap-3 text-sm text-gray-600"
               style={{
                 animation: 'fadeIn 0.3s ease-out forwards',
                 animationDelay: '0.35s',
@@ -330,16 +329,16 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
               }}
             >
               <div className="flex items-center gap-2">
-                <span className="font-bold text-[#F8FAFC]">+35%</span>
-                <span className="text-[#94A3B8]">Revenue</span>
+                <span className="font-bold text-[#0F172A]">+35%</span>
+                <span className="text-gray-600">Revenue</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-[#F8FAFC]">2x</span>
-                <span className="text-[#94A3B8]">Deal Velocity</span>
+                <span className="font-bold text-[#0F172A]">2x</span>
+                <span className="text-gray-600">Deal Velocity</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-[#F8FAFC]">500+</span>
-                <span className="text-[#94A3B8]">Responses</span>
+                <span className="font-bold text-[#0F172A]">500+</span>
+                <span className="text-gray-600">Responses</span>
               </div>
             </div>
           </div>

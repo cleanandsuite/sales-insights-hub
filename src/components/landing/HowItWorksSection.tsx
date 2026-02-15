@@ -96,20 +96,20 @@ export function HowItWorksSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#0F172A] py-16 md:py-24 overflow-hidden"
+      className="relative bg-gray-50 py-16 md:py-24 overflow-hidden"
     >
       <div className="container mx-auto px-4">
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="how-it-works-header text-center mb-12 md:mb-16">
-          <p className="font-mono text-xs font-bold text-[#64748B] tracking-[0.1em] mb-4">
+          <p className="font-mono text-xs font-bold text-gray-500 tracking-[0.1em] mb-4">
             HOW IT WORKS
           </p>
-          <h2 className="text-[28px] md:text-[40px] font-bold text-[#F8FAFC] leading-[1.2] mb-3">
+          <h2 className="text-[28px] md:text-[40px] font-bold text-[#0F172A] leading-[1.2] mb-3">
             From First Call to Close in 3 Steps
           </h2>
-          <p className="text-[18px] text-[#94A3B8]">
+          <p className="text-[18px] text-gray-600">
             Get started in minutes. See results in days.
           </p>
         </div>
@@ -119,7 +119,7 @@ export function HowItWorksSection() {
           {steps.map((step, index) => (
             <div 
               key={index}
-              className="step-card group relative bg-[#1E293B] rounded-[24px] p-8 border border-white/10 hover:border-white/20 transition-all duration-200 hover:-translate-y-1"
+              className="step-card group relative bg-white rounded-[24px] p-8 border border-gray-200 hover:border-gray-300 transition-all duration-200 hover:-translate-y-1 shadow-sm"
             >
               {/* Step Number - positioned absolutely */}
               <span 
@@ -145,12 +145,12 @@ export function HowItWorksSection() {
               </div>
 
               {/* Title */}
-              <h3 className="text-[22px] font-semibold text-[#F8FAFC] mb-3">
+              <h3 className="text-[22px] font-semibold text-[#0F172A] mb-3">
                 {step.title}
               </h3>
 
               {/* Description */}
-              <p className="text-[15px] text-[#94A3B8] leading-relaxed">
+              <p className="text-[15px] text-gray-600 leading-relaxed">
                 {step.description}
               </p>
             </div>

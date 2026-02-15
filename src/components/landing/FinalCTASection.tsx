@@ -61,15 +61,9 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#0F172A] py-16 md:py-24 overflow-hidden"
+      className="relative bg-gray-50 py-16 md:py-24 overflow-hidden"
     >
-      {/* Background gradient mesh */}
-      <div 
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 100% 60% at 50% 100%, rgba(124,58,237,0.2) 0%, transparent 50%)',
-        }}
-      />
+      {/* Background gradient mesh - removed for white theme */}
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="cta-content max-w-3xl mx-auto text-center space-y-8">
@@ -88,7 +82,7 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
           </div>
 
           {/* Headline */}
-          <h2 className="text-[32px] md:text-[48px] font-bold text-[#F8FAFC] leading-tight">
+          <h2 className="text-[32px] md:text-[48px] font-bold text-[#0F172A] leading-tight">
             Ready to Give Your Team{' '}
             <span 
               className="bg-clip-text text-transparent"
@@ -103,7 +97,7 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
           </h2>
 
           {/* Subheadline */}
-          <p className="text-[18px] text-[#94A3B8] max-w-xl mx-auto">
+          <p className="text-[18px] text-gray-600 max-w-xl mx-auto">
             Join sales leaders who use SellSig to transform sales calls into 
             consistent wins. Start your 14-day free trial today.
           </p>
@@ -125,7 +119,7 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
             </button>
 
             {/* Trust badges */}
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-6 text-sm text-[#94A3B8]">
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-6 text-sm text-gray-600">
               <span className="flex items-center gap-1">
                 <CheckCircle className="w-4 h-4 text-[#10B981]" />
                 14-day free trial
@@ -152,18 +146,18 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
           ].map((item, index) => (
             <div 
               key={index}
-              className="cta-stat bg-[#1E293B]/50 backdrop-blur-sm rounded-[16px] p-4 md:p-6 border border-white/10 text-center"
+              className="cta-stat bg-white rounded-[16px] p-4 md:p-6 border border-gray-200 text-center shadow-sm"
             >
               <item.icon 
                 className="w-6 h-6 mx-auto mb-2" 
                 style={{ color: item.color }} 
               />
               <p 
-                className="text-[28px] md:text-[36px] font-bold font-mono text-[#F8FAFC]"
+                className="text-[28px] md:text-[36px] font-bold font-mono text-[#0F172A]"
               >
                 {item.stat}
               </p>
-              <p className="text-xs md:text-sm text-[#64748B]">
+              <p className="text-xs md:text-sm text-gray-500">
                 {item.label}
               </p>
             </div>
