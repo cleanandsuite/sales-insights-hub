@@ -98,13 +98,7 @@ export function HowItWorksSection() {
       ref={sectionRef}
       className="relative bg-[#0F172A] py-16 md:py-24 overflow-hidden"
     >
-      {/* Subtle mesh gradient background */}
-      <div 
-        className="absolute inset-0 opacity-20 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 50%)',
-        }}
-      />
+      <div className="container mx-auto px-4">
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
