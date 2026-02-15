@@ -98,8 +98,6 @@ export function HowItWorksSection() {
       ref={sectionRef}
       className="relative bg-gray-50 py-16 md:py-24 overflow-hidden"
     >
-      <div className="container mx-auto px-4">
-
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="how-it-works-header text-center mb-12 md:mb-16">
