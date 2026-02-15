@@ -208,7 +208,6 @@ export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSection
           background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
         }}
       />
-      </div>
 
       <div className="container mx-auto px-4 py-24 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
