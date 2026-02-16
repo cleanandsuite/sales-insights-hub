@@ -1,32 +1,28 @@
 
 
-## Update Hero Section Copy
+## Fix: Hero Background Image Not Visible
 
-### Changes to `src/components/landing/confession/HeroConfession.tsx`
+### Problem
+The dashboard image is invisible due to three compounding factors:
+1. **Mask gradient** starts at `transparent` (0% visible) and peaks at only `rgba(0,0,0,0.4)` (40% visible) in a narrow band (20%-35%), then goes back to transparent by 50%
+2. **Dark overlay** (`bg-[#020617]/60`) at `z-[1]` covers the image with 60% opacity dark fill
+3. **Base opacity** set to `0.5` on the image itself
 
-**1. Headline (lines 118-135)**
-Replace the current "Your Sales Calls Are Bleeding Money / AI Coaching Stops The Bleeding" with:
-- **"Close More Deals with AI That Coaches You"**
-- Clean, benefit-driven headline without the shame/confession framing
+Combined effect: `0.4 (mask peak) x 0.5 (opacity) x 0.4 (overlay lets 40% through)` = ~8% visible. Essentially invisible against a near-black background.
 
-**2. Subheadline (lines 137-144)**
-Replace the current multi-line shame copy with:
-- **"34% more closes -- guaranteed"**
-- Short, punchy, proof-driven
+### Solution
+Adjust the values so the image is actually visible while still maintaining text readability:
 
-**3. Primary CTA button (lines 148-160)**
-Replace "Claim Your Redemption -- $97/mo" with:
-- **"Start Free -- No Credit Card Required"**
-- Lower friction, removes price from the hero
+**In `src/components/landing/HeroSection.tsx`:**
 
-### What stays the same
-- The `forwardRef` wrapper and all ref handling (recently fixed)
-- GSAP word animations, floating orbs, background styling
-- Phone number / call-for-demo button
-- Trust signals and social proof stats below the CTA
+1. **Increase mask peak opacity** from `0.4` to `1.0` -- let the mask fully reveal the image in the visible band
+2. **Widen the visible band** -- start revealing at 10%, peak at 30%, fade out by 60%
+3. **Increase base opacity** from `0.5` to `0.7`
+4. **Reduce dark overlay** from `60%` to `30%` so it darkens for readability without hiding the image
 
-### Technical Details
-- The headline word-animation uses `.hero-word` spans -- these will be restructured for the new copy
-- The pre-headline badge (red "WARNING" pill) will be replaced with something matching the new tone
-- No new dependencies or files needed
+Updated mask gradient:
+```
+linear-gradient(to bottom, transparent 10%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.6) 50%, transparent 60%)
+```
 
+This gives the image a clear visible area in the middle/lower portion of the hero while keeping text readable and the fade-in/fade-out effect the user requested.

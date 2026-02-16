@@ -115,6 +115,11 @@ export default {
           from: { transform: "scaleY(0)" },
           to: { transform: "scaleY(1)" },
         },
+        "shimmer": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -125,6 +130,7 @@ export default {
         "progress-fill": "progress-fill 1s ease-out forwards",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "bar-grow": "bar-grow 0.6s ease-out",
+        "shimmer": "shimmer 5s linear infinite",
       },
     },
   },
