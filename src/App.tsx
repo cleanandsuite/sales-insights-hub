@@ -10,6 +10,7 @@ import { LeaderboardProvider } from "@/contexts/LeaderboardContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TeamProtectedRoute } from "@/components/TeamProtectedRoute";
 import { Loader2 } from "lucide-react";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 // Eagerly load the landing page for best initial load performance
 import Index from "./pages/Index";
@@ -105,6 +106,7 @@ const App = () => (
               <Route path="/support" element={<Support />} />
               <Route path="*" element={<NotFound />} />
               </Routes>
+              <CookieConsentBanner />
             </Suspense>
           </LeaderboardProvider>
         </AuthProvider>
