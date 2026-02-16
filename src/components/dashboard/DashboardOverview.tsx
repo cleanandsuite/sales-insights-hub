@@ -87,31 +87,31 @@ export function DashboardOverview() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Recent Calls */}
         <Card className="lg:col-span-2 border-0 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-slate-900">Recent Calls</h2>
-              <Button variant="ghost" size="sm">View All</Button>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h2 className="font-semibold text-slate-900 text-sm sm:text-base">Recent Calls</h2>
+              <Button variant="ghost" size="sm" className="text-xs sm:text-sm">View All</Button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {recentCalls.map((call) => (
-                <div key={call.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-medium text-slate-600">
+                <div key={call.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-200 flex items-center justify-center font-medium text-slate-600 text-xs sm:text-sm">
                       {call.rep.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <p className="font-medium text-slate-900">{call.prospect}</p>
-                      <p className="text-sm text-slate-500">{call.rep} • {call.duration}</p>
+                      <p className="font-medium text-slate-900 text-sm">{call.prospect}</p>
+                      <p className="text-xs text-slate-500">{call.rep} • {call.duration}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge className={call.outcome === 'Won' ? 'bg-emerald-100 text-emerald-700' : call.outcome === 'Lost' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}>
+                    <Badge className={`text-[10px] sm:text-xs ${call.outcome === 'Won' ? 'bg-emerald-100 text-emerald-700' : call.outcome === 'Lost' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
                       {call.outcome}
                     </Badge>
-                    <p className="text-sm font-medium text-slate-600 mt-1">{call.score}%</p>
+                    <p className="text-xs sm:text-sm font-medium text-slate-600 mt-1">{call.score}%</p>
                   </div>
                 </div>
               ))}
@@ -121,21 +121,21 @@ export function DashboardOverview() {
 
         {/* AI Insights */}
         <Card className="border-0 shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="h-5 w-5 text-amber-500" />
-              <h2 className="font-semibold text-slate-900">AI Insights</h2>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+              <h2 className="font-semibold text-slate-900 text-sm sm:text-base">AI Insights</h2>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {aiInsights.map((insight, i) => (
-                <div key={i} className="p-3 rounded-lg bg-slate-50">
+                <div key={i} className="p-2 sm:p-3 rounded-lg bg-slate-50">
                   <div className="flex items-start gap-2">
-                    {insight.type === 'opportunity' && <Target className="h-4 w-4 text-emerald-500 mt-0.5" />}
-                    {insight.type === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5" />}
-                    {insight.type === 'success' && <CheckCircle2 className="h-4 w-4 text-blue-500 mt-0.5" />}
+                    {insight.type === 'opportunity' && <Target className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 mt-0.5" />}
+                    {insight.type === 'warning' && <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-amber-500 mt-0.5" />}
+                    {insight.type === 'success' && <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 mt-0.5" />}
                     <div>
-                      <p className="text-sm font-medium text-slate-900">{insight.text}</p>
-                      <p className="text-xs text-slate-400 mt-1">{insight.time}</p>
+                      <p className="text-xs sm:text-sm font-medium text-slate-900">{insight.text}</p>
+                      <p className="text-[10px] sm:text-xs text-slate-400 mt-1">{insight.time}</p>
                     </div>
                   </div>
                 </div>
@@ -147,20 +147,20 @@ export function DashboardOverview() {
 
       {/* Buyer Signals */}
       <Card className="border-0 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity className="h-5 w-5 text-violet-500" />
-            <h2 className="font-semibold text-slate-900">Live Buyer Signals - Acme Corp</h2>
-            <Badge variant="outline" className="ml-auto">Live</Badge>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-violet-500" />
+            <h2 className="font-semibold text-slate-900 text-sm sm:text-base">Live Buyer Signals - Acme Corp</h2>
+            <Badge variant="outline" className="ml-auto text-[10px] sm:text-xs">Live</Badge>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {signals.map((signal) => (
-              <div key={signal.label} className="space-y-2">
-                <div className="flex justify-between text-sm">
+              <div key={signal.label} className="space-y-1 sm:space-y-2">
+                <div className="flex justify-between text-[10px] sm:text-sm">
                   <span className="text-slate-600">{signal.label}</span>
                   <span className="font-medium text-slate-900">{signal.value}%</span>
                 </div>
-                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div className="h-1.5 sm:h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div className={`h-full ${signal.color} rounded-full transition-all`} style={{ width: `${signal.value}%` }} />
                 </div>
               </div>

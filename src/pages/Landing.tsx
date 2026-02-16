@@ -3,6 +3,7 @@ import { HeroSection } from '@/components/landing/HeroSection';
 import { ProblemSection } from '@/components/landing/ProblemSection';
 import { FeaturesSection } from '@/components/landing/FeaturesSection';
 import { ComparisonSection } from '@/components/landing/ComparisonSection';
+import { SocialProofSection } from '@/components/landing/SocialProofSection';
 import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
@@ -21,6 +22,7 @@ export default function Landing() {
         <ProblemSection />
         <FeaturesSection />
         <ComparisonSection />
+        <SocialProofSection />
         <TestimonialsSection />
         <CTASection onStartTrialClick={handleStartTrialClick} />
       </main>
