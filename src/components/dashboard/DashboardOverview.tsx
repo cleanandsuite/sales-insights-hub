@@ -41,21 +41,21 @@ export function DashboardOverview() {
   const [timeRange, setTimeRange] = useState('7d');
 
   return (
-    <div className="space-y-6 p-6 bg-slate-50 min-h-screen">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6 bg-slate-50 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-slate-500">Real-time sales intelligence</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-xs sm:text-sm text-slate-500">Real-time sales intelligence</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2">
           {['24h', '7d', '30d', '90d'].map((range) => (
             <Button
               key={range}
               variant={timeRange === range ? 'default' : 'outline'}
               size="sm"
               onClick={() => setTimeRange(range)}
-              className={timeRange === range ? 'bg-slate-900' : ''}
+              className={`${timeRange === range ? 'bg-slate-900' : ''} text-xs sm:text-sm px-2 sm:px-4`}
             >
               {range}
             </Button>
@@ -63,23 +63,23 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Metrics Grid - 2x2 on mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
         {metrics.map((metric) => (
           <Card key={metric.label} className="border-0 shadow-sm">
-            <CardContent className="p-4">
+            <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <div className="p-2 rounded-lg bg-slate-100">
-                  <metric.icon className="h-5 w-5 text-slate-600" />
+                <div className="p-1.5 sm:p-2 rounded-lg bg-slate-100">
+                  <metric.icon className="h-3 w-3 sm:h-5 sm:w-5 text-slate-600" />
                 </div>
-                <div className={`flex items-center gap-1 text-sm font-medium ${metric.up ? 'text-emerald-600' : 'text-red-600'}`}>
-                  {metric.up ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                <div className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-sm font-medium ${metric.up ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {metric.up ? <ArrowUp className="h-2 w-2 sm:h-4 sm:w-4" /> : <ArrowDown className="h-2 w-2 sm:h-4 sm:w-4" />}
                   {metric.change}
                 </div>
               </div>
-              <div className="mt-3">
-                <p className="text-2xl font-bold text-slate-900">{metric.value}</p>
-                <p className="text-sm text-slate-500">{metric.label}</p>
+              <div className="mt-2 sm:mt-3">
+                <p className="text-lg sm:text-2xl font-bold text-slate-900">{metric.value}</p>
+                <p className="text-[10px] sm:text-sm text-slate-500">{metric.label}</p>
               </div>
             </CardContent>
           </Card>
