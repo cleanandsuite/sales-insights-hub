@@ -18,7 +18,7 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
           backgroundPosition: 'center top',
           maskImage: 'linear-gradient(to bottom, transparent 10%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.6) 50%, transparent 60%)',
           WebkitMaskImage: 'linear-gradient(to bottom, transparent 10%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.6) 50%, transparent 60%)',
-          opacity: 0.7,
+          opacity: 0.5,
         }}
       />
 
