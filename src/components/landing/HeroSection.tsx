@@ -16,14 +16,14 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
           backgroundImage: `url(${heroDashboard})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
-          maskImage: 'linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.4) 35%, transparent 50%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.4) 35%, transparent 50%)',
-          opacity: 0.5,
+          maskImage: 'linear-gradient(to bottom, transparent 10%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.6) 50%, transparent 60%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 10%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.6) 50%, transparent 60%)',
+          opacity: 0.7,
         }}
       />
 
       {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-[#020617]/60 z-[1]" />
+      <div className="absolute inset-0 bg-[#020617]/30 z-[1]" />
 
       <div className="relative z-10 max-w-3xl mx-auto px-4 space-y-6">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.1] tracking-tight">
