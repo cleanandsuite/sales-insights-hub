@@ -63,8 +63,8 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Metrics Grid - 2x2 on mobile */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+      {/* Metrics Grid - 1 col on mobile, 2 on small, 4 on desktop */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
         {metrics.map((metric) => (
           <Card key={metric.label} className="border-0 shadow-sm">
             <CardContent className="p-3 sm:p-4">

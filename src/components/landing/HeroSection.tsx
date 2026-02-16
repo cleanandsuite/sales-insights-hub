@@ -32,9 +32,9 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="sm:hidden absolute top-14 right-4 z-50 bg-slate-800 rounded-lg p-4 shadow-xl">
-            <a href="#features" className="block py-2 text-white">Features</a>
-            <a href="#pricing" className="block py-2 text-white">Pricing</a>
-            <Button size="sm" onClick={onStartTrialClick} className="mt-2 w-full">Start Free</Button>
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">Features</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-white">Pricing</a>
+            <Button size="sm" onClick={() => { setMobileMenuOpen(false); onStartTrialClick(); }} className="mt-2 w-full">Start Free</Button>
           </div>
         )}
 
@@ -90,6 +90,10 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
               <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
               <span className="text-xs sm:text-sm">14-day free trial</span>
             </div>
+            <div className="hidden sm:flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              <span className="text-sm">Cancel anytime</span>
+            </div>
           </div>
         </div>
 
@@ -100,15 +104,16 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
             <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 rounded-xl sm:rounded-2xl blur-xl opacity-30" />
             
             {/* Dashboard mock */}
-            <div className="relative rounded-xl sm:rounded-2xl border border-slate-700/50 bg-slate-900/80 backdrop-blur-xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-xl sm:rounded-2xl border border-slate-700/50 bg-slate-900/80 backdrop-blur-xl overflow-hidden shadow-2xl min-w-0">
               {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 border-b border-slate-700/50">
-                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/80" />
-                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-500/80" />
-                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500/80" />
-                <div className="ml-auto flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full bg-slate-800 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 border-b border-slate-700/50 overflow-x-auto">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-red-500/80 flex-shrink-0" />
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-amber-500/80 flex-shrink-0" />
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-emerald-500/80 flex-shrink-0" />
+                <div className="ml-auto flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 rounded-full bg-slate-800 text-[10px] sm:text-xs text-slate-400 flex-shrink-0">
                   <BarChart3 className="h-3 w-3" />
                   <span className="hidden sm:inline">Live Dashboard</span>
+                  <span className="sm:hidden">Live</span>
                 </div>
               </div>
               
