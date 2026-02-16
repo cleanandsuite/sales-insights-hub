@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Sparkles, TrendingUp, Phone, Brain, Zap, ArrowRight, MessageSquare, Target, Clock } from 'lucide-react';
+import { Sparkles, TrendingUp, Phone, Brain, Zap, ArrowRight, MessageSquare, Target, Clock, Play } from 'lucide-react';
 
 interface HeroSectionProps {
   onStartTrialClick: () => void;
