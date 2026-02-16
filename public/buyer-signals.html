@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Signal Intelligence Poster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            --text-dark: #0F172A;
+            --text-gray: #475569;
+            --bg-dark: #020617;
+            --bg-light: #F8FAFC;
+            --accent-purple: #7C3AED;
+            --accent-blue: #4F46E5;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; min-height: 100vh; }
+        .poster-container { width: 720px; min-height: 960px; background-color: var(--bg-light); position: relative; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+        .hero { position: relative; height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px; color: white; background: var(--bg-dark); overflow: hidden; }
+        .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)), url('https://sfile.chatglm.cn/images-ppt/b8827feabe35.png'); background-size: cover; background-position: center; opacity: 0.6; z-index: 0; }
+        .hero-content { position: relative; z-index: 1; max-width: 600px; }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: 48px; line-height: 1.1; font-weight: 900; margin-bottom: 20px; background: linear-gradient(135deg, #E0E7FF 0%, #A5B4FC 50%, #E0E7FF 100%); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(124, 58, 237, 0.3); animation: shimmer 5s linear infinite; letter-spacing: -0.02em; }
+        @keyframes shimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .hero h2 { font-size: 20px; font-weight: 700; color: #F8FAFC; margin-bottom: 20px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
+        .hero-tagline { font-family: 'Inter', sans-serif; font-style: normal; font-size: 18px; font-weight: 600; color: #E0E7FF; border-top: 2px solid #7C3AED; padding-top: 15px; margin-top: 10px; letter-spacing: 0.02em; }
+        .problem-section { background-color: var(--bg-dark); padding: 30px 40px; color: white; display: flex; flex-direction: column; gap: 20px; }
+        .problem-header { font-size: 22px; font-weight: 800; color: #F8FAFC; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
+        .problem-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .problem-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .problem-icon { font-size: 32px; color: #EF4444; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5)); }
+        .problem-text { font-size: 13px; font-weight: 500; color: #E2E8F0; line-height: 1.4; }
+        .problem-result { text-align: center; font-size: 15px; font-weight: 700; color: #FCA5A5; margin-top: 5px; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
+        .features-section { padding: 30px 40px; background-color: var(--bg-light); }
+        .feature-header { text-align: center; font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; color: var(--text-dark); margin-bottom: 25px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .feature-cards { display: flex; flex-direction: column; gap: 20px; }
+        .feature-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; gap: 15px; border-left: 5px solid var(--accent-purple); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .feature-card.blue { border-left-color: var(--accent-blue); }
+        .feature-card.green { border-left-color: #10B981; }
+        .feature-icon { min-width: 45px; height: 45px; border-radius: 12px; background: rgba(124, 58, 237, 0.1); color: var(--accent-purple); display: flex; justify-content: center; align-items: center; font-weight: 700; }
+        .feature-card.blue .feature-icon { background: rgba(79, 70, 229, 0.1); color: var(--accent-blue); }
+        .feature-card.green .feature-icon { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+        .feature-content h3 { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .feature-content p { font-size: 14px; font-weight: 500; color: var(--text-gray); line-height: 1.5; }
+        .comparison-section { padding: 20px 40px; background-color: #F1F5F9; }
+        .comparison-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .comparison-table th { background: #E2E8F0; color: var(--text-dark); font-weight: 800; padding: 12px 10px; text-align: left; }
+        .comparison-table td { background: white; padding: 10px; border-bottom: 1px solid #F1F5F9; color: var(--text-gray); font-weight: 500; }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table .highlight { background: rgba(124, 58, 237, 0.08); font-weight: 800; color: var(--accent-purple); border-left: 3px solid var(--accent-purple); }
+        .social-proof { padding: 25px 40px; display: flex; justify-content: center; }
+        .testimonial-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 6px 25px rgba(0,0,0,0.08); max-width: 520px; text-align: center; position: relative; border-top: 4px solid var(--accent-purple); }
+        .quote-mark { font-size: 50px; color: rgba(124, 58, 237, 0.1); position: absolute; top: 10px; left: 20px; font-family: serif; }
+        .testimonial-text { font-style: italic; font-size: 16px; font-weight: 600; color: var(--text-dark); margin-bottom: 15px; position: relative; z-index: 1; line-height: 1.5; }
+        .testimonial-author { font-size: 13px; color: var(--text-gray); font-weight: 700; }
+        .cta-section { margin-top: auto; padding: 45px 40px; background: var(--primary-gradient); text-align: center; color: white; position: relative; overflow: hidden; }
+        .cta-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 50%); z-index: 0; }
+        .cta-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 900; margin-bottom: 15px; position: relative; z-index: 1; text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); letter-spacing: -0.02em; }
+        .cta-subtitle { font-size: 16px; font-weight: 600; opacity: 0.95; margin-bottom: 25px; position: relative; z-index: 1; }
+        .cta-button { background: white; color: var(--accent-purple); padding: 16px 40px; border-radius: 40px; font-weight: 800; font-size: 16px; display: inline-block; box-shadow: 0 6px 20px rgba(0,0,0,0.2); position: relative; z-index: 1; transition: transform 0.2s ease, box-shadow 0.2s ease; letter-spacing: 0.02em; }
+        .cta-button:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
+    </style>
+</head>
+<body>
+    <div class="poster-container">
+        <div class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-content">
+                <h1>Buyer Signal Intelligence That Turns Every Call Into a Win</h1>
+                <h2>AI That Detects Intent Before Your Buyer Says It</h2>
+                <p class="hero-tagline">Close faster. Ramp quicker. Win more.</p>
+            </div>
+        </div>
+        <div class="problem-section">
+            <div class="problem-header">
+                <i class="material-icons">warning</i>
+                <span>Buyers are signaling intent everywhere—but most tools miss it</span>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-item">
+                    <i class="material-icons problem-icon">history</i>
+                    <div class="problem-text">Gong & Chorus replay calls after the deal's cold</div>
+                </div>
+                <div class="problem-item">
+                    <i class="material-icons problem-icon">flag</i>
+                    <div class="problem-text">ZoomInfo & Outreach flag accounts, but not what happens in the room</div>
+                </div>
+                <div class="problem-item">
+                    <i class="material-icons problem-icon">person_off</i>
+                    <div class="problem-text">Reps fly solo, missing micro-signals like hesitation or urgency</div>
+                </div>
+            </div>
+            <div class="problem-result">Result: Missed opportunities, stalled pipelines, inconsistent performance.</div>
+        </div>
+        <div class="features-section">
+            <div class="feature-header">Full-Cycle Buyer Signal Intelligence</div>
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="material-icons">rocket_launch</i></div>
+                    <div class="feature-content">
+                        <h3>Pre-Call: Signal-Powered Prep</h3>
+                        <p>AI scans history & external signals to craft tailored discovery questions and preemptive objection handlers.</p>
+                    </div>
+                </div>
+                <div class="feature-card blue">
+                    <div class="feature-icon"><i class="material-icons">hearing</i></div>
+                    <div class="feature-content">
+                        <h3>During Call: Live Detection</h3>
+                        <p>Real-time AI spots tone shifts, objections, and stakeholder signals, delivering whisper-quiet prompts for better pivots.</p>
+                    </div>
+                </div>
+                <div class="feature-card green">
+                    <div class="feature-icon"><i class="material-icons">trending_up</i></div>
+                    <div class="feature-content">
+                        <h3>Post-Call: Signal-to-Growth</h3>
+                        <p>Deep analysis scores call quality against benchmarks and builds custom playbooks to upgrade your skills permanently.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="comparison-section">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Us</th>
+                        <th>Competitors</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Real-Time Signal Detection</td>
+                        <td class="highlight">Tone, Intent, Objections</td>
+                        <td>Post-call only / None</td>
+                    </tr>
+                    <tr>
+                        <td>Pre-Call Proactive Prep</td>
+                        <td class="highlight">Signal-driven, Personalized</td>
+                        <td>Basic / Generic</td>
+                    </tr>
+                    <tr>
+                        <td>Live Call Guidance</td>
+                        <td class="highlight">Unobtrusive, Adaptive</td>
+                        <td>Clunky / None</td>
+                    </tr>
+                    <tr>
+                        <td>Personalization</td>
+                        <td class="highlight">Your style + signals</td>
+                        <td>Team averages / One-size-fits-all</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="social-proof">
+            <div class="testimonial-card">
+                <div class="quote-mark">"</div>
+                <p class="testimonial-text">Finally, an AI that sees buyer signals in the moment—not days later.</p>
+                <p class="testimonial-author">— Sales rep at scaling SaaS team</p>
+            </div>
+        </div>
+        <div class="cta-section">
+            <h3 class="cta-title">Stop Chasing. Start Detecting.</h3>
+            <p class="cta-subtitle">Get your first buyer signal insights and personalized strategy in minutes.</p>
+            <div class="cta-button">Start Free Trial – No Card Required</div>
+        </div>
+    </div>
+</body>
+</html>

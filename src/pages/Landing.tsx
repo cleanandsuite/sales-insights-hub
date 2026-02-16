@@ -1,60 +1,61 @@
-import { useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useState } from 'react';
 
-// Import confession sections
-import { ConfessionHeader } from '@/components/landing/confession/ConfessionHeader';
-import { HeroConfession } from '@/components/landing/confession/HeroConfession';
-import { ConfessionSection } from '@/components/landing/confession/ConfessionSection';
-import { ConductorSection } from '@/components/landing/confession/ConductorSection';
-import { RedemptionSection } from '@/components/landing/confession/RedemptionSection';
-import { CloseSequence } from '@/components/landing/confession/CloseSequence';
-import { ConfessionFooter } from '@/components/landing/confession/ConfessionFooter';
+// Import professional landing components
+import { LandingHeader } from '@/components/landing/LandingHeader';
+import { HeroSection } from '@/components/landing/HeroSection';
+import { FeaturesSection } from '@/components/landing/FeaturesSection';
+import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
+import { ROISection } from '@/components/landing/ROISection';
+import { PricingSection } from '@/components/landing/PricingSection';
+import { LandingFooter } from '@/components/landing/LandingFooter';
 
-// Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger);
-
-// Stripe payment link
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/fZu6oG1zi7O7euubi69k400';
+// Demo video modal
+import { DemoVideoModal } from '@/components/landing/DemoVideoModal';
 
 export default function Landing() {
-  const handleClaimRedemption = () => {
-    window.open(STRIPE_PAYMENT_LINK, '_blank');
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+
+  const handleStartTrialClick = () => {
+    window.location.href = '/signup';
   };
 
-  // Initialize GSAP ScrollTrigger on mount
-  useEffect(() => {
-    ScrollTrigger.refresh();
-    
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
+  const handleWatchDemoClick = () => {
+    setIsDemoModalOpen(true);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-white">
       {/* Fixed Header */}
-      <ConfessionHeader onClaimRedemption={handleClaimRedemption} />
+      <LandingHeader onStartTrialClick={handleStartTrialClick} />
 
       <main>
-        {/* 1. Hero / Hook - Freight train opening */}
-        <HeroConfession onClaimRedemption={handleClaimRedemption} />
+        {/* Hero Section - Professional headline from Design Brain */}
+        <HeroSection 
+          onStartTrialClick={handleStartTrialClick}
+          onWatchDemoClick={handleWatchDemoClick}
+        />
 
-        {/* 2. Confession Section - Emotional surrender */}
-        <ConfessionSection />
+        {/* Features Section */}
+        <FeaturesSection />
 
-        {/* 3. Conductor Section - State control */}
-        <ConductorSection />
+        {/* ROI Section */}
+        <ROISection />
 
-        {/* 4. Redemption Section - Ministry moment */}
-        <RedemptionSection />
+        {/* Testimonials Section */}
+        <TestimonialsSection />
 
-        {/* 5. Close Sequence - 5-step pressure cascade */}
-        <CloseSequence onClaimRedemption={handleClaimRedemption} />
+        {/* Pricing Section */}
+        <PricingSection />
       </main>
 
       {/* Footer */}
-      <ConfessionFooter />
+      <LandingFooter />
+
+      {/* Demo Video Modal */}
+      <DemoVideoModal 
+        isOpen={isDemoModalOpen}
+        onClose={() => setIsDemoModalOpen(false)}
+      />
     </div>
   );
 }
