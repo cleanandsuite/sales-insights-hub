@@ -183,7 +183,6 @@ export function RevenueTrendChart({
         </div>
 
         {/* Footer Stats */}
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-4 mt-4 border-t border-border/50 text-xs sm:text-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 pt-4 mt-4 border-t border-border/50 text-xs sm:text-sm">
           <div>
             <span className="text-muted-foreground">YTD: </span>
