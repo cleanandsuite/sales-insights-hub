@@ -58,7 +58,7 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        'group relative rounded-2xl border border-border/50 bg-card p-6',
+        'group relative rounded-2xl border border-border/50 bg-card p-4 sm:p-6',
         'transition-all duration-300 ease-out',
         'hover:border-primary/30 hover:bg-muted/50 hover:-translate-y-0.5',
         'hover:shadow-lg hover:shadow-primary/5',
@@ -73,7 +73,7 @@ export function MetricCard({
       {/* Hero Value */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="text-3xl font-bold text-foreground animate-count-up">
+          <p className="text-2xl sm:text-3xl font-bold text-foreground animate-count-up">
             {value}
           </p>
 

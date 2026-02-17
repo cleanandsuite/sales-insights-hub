@@ -21,7 +21,7 @@ export function AIStatusBar({
   return (
     <div
       className={cn(
-        'flex items-center gap-6 px-5 py-3 rounded-xl',
+        'flex flex-wrap items-center gap-3 sm:gap-6 px-4 sm:px-5 py-3 rounded-xl',
         'bg-muted/30 border border-border/30',
         className
       )}
@@ -44,29 +44,29 @@ export function AIStatusBar({
         </span>
       </div>
 
-      <div className="h-4 w-px bg-border/50" />
+      <div className="hidden sm:block h-4 w-px bg-border/50" />
 
       {/* Metrics */}
-      <div className="flex items-center gap-6 flex-1">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-6 flex-1">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Zap className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Today's Leads:</span>
-          <span className="text-sm font-medium text-foreground">{todayLeads}</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Leads:</span>
+          <span className="text-xs sm:text-sm font-medium text-foreground">{todayLeads}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">This Week:</span>
-          <span className="text-sm font-medium text-foreground">{weekLeads}</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Week:</span>
+          <span className="text-xs sm:text-sm font-medium text-foreground">{weekLeads}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Conversion:</span>
-          <span className="text-sm font-medium text-primary">{conversionRate}%</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">Conv:</span>
+          <span className="text-xs sm:text-sm font-medium text-primary">{conversionRate}%</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Avg Response:</span>
           <span className="text-sm font-medium text-foreground">{avgResponseTime}</span>
