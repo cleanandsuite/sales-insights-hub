@@ -15,7 +15,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar />
       <MobileHeader />
       <main className={cn(
-        "min-h-screen p-4 pt-20 lg:p-8 lg:pt-8 transition-all duration-200",
+        "min-h-screen p-3 sm:p-4 pt-16 sm:pt-20 lg:p-8 lg:pt-8 transition-all duration-200",
         isCollapsed ? "lg:ml-16" : "lg:ml-64"
       )}>
         {children}
