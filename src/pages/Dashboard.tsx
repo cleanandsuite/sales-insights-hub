@@ -69,7 +69,7 @@ export default function Dashboard() {
       />
       
       <DashboardLayout>
-        <div className="bg-dashboard-gradient -m-4 lg:-m-8 p-4 lg:p-8 min-h-screen space-y-8">
+        <div className="bg-dashboard-gradient -m-3 sm:-m-4 lg:-m-8 p-3 sm:p-4 lg:p-8 min-h-screen space-y-6 sm:space-y-8">
           {/* Header */}
           <DashboardHeader onStartCall={() => setShowCallDialog(true)} />
 
@@ -83,7 +83,7 @@ export default function Dashboard() {
           />
 
           {/* KPI Cards */}
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-4">
             <MetricCard
               label="Total Revenue"
               value="$301K"
@@ -120,7 +120,7 @@ export default function Dashboard() {
           </div>
 
           {/* Revenue Chart + Priority Deals */}
-          <div className="grid gap-6 lg:grid-cols-5">
+          <div className="grid gap-4 sm:gap-6 lg:grid-cols-5">
             <div className="lg:col-span-3">
               <RevenueTrendChart data={revenueData} goal={100000} />
             </div>
