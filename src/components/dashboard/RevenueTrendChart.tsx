@@ -184,12 +184,13 @@ export function RevenueTrendChart({
 
         {/* Footer Stats */}
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pt-4 mt-4 border-t border-border/50 text-xs sm:text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-4 mt-4 border-t border-border/50 text-xs sm:text-sm">
           <div>
-            <span className="text-muted-foreground">YTD Total: </span>
+            <span className="text-muted-foreground">YTD: </span>
             <span className="font-semibold text-foreground">{formatCurrency(ytdTotal)}</span>
           </div>
           <div>
-            <span className="text-muted-foreground">Avg Monthly: </span>
+            <span className="text-muted-foreground">Avg: </span>
             <span className="font-semibold text-foreground">{formatCurrency(avgMonthly)}</span>
           </div>
           <div>
