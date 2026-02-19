@@ -242,31 +242,34 @@ export default function Schedule() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Schedule</h1>
-            <p className="text-muted-foreground mt-1">Plan and prepare for upcoming calls</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Schedule</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">Plan and prepare for upcoming calls</p>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button 
               variant="outline" 
-              className="gap-2"
+              size="sm"
+              className="gap-2 flex-1 sm:flex-none"
               onClick={() => {
                 setPreSelectedRecordingId(null);
                 setIsAIDialogOpen(true);
               }}
             >
               <Sparkles className="h-4 w-4" />
-              AI Schedule
+              <span className="hidden xs:inline">AI Schedule</span>
+              <span className="xs:hidden">AI</span>
             </Button>
             
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2 flex-1 sm:flex-none" size="sm">
                   <Plus className="h-4 w-4" />
-                  Schedule Call
+                  <span className="hidden xs:inline">Schedule Call</span>
+                  <span className="xs:hidden">Schedule</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
@@ -401,7 +404,7 @@ export default function Schedule() {
           />
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Calendar */}
           <div className="lg:col-span-2">
             <div className="card-gradient rounded-xl border border-border/50 p-6">

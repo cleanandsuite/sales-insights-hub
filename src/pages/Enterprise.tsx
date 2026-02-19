@@ -157,71 +157,73 @@ export default function Enterprise() {
       {/* Dark gradient background overlay */}
       <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a1f] via-[#111133] to-[#0a0a1f] -z-10" />
       
-      <div className="space-y-8 animate-fade-in relative">
+      <div className="space-y-4 sm:space-y-8 animate-fade-in relative">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-lg shadow-primary/10">
-                <Building2 className="h-8 w-8 text-primary" />
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-lg shadow-primary/10">
+                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight">
                   Enterprise Dashboard
                 </h1>
-                <p className="text-muted-foreground mt-0.5">
+                <p className="text-sm text-muted-foreground mt-0.5 hidden sm:block">
                   Revenue intelligence, deals, and organization management
                 </p>
               </div>
-              <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium gap-1 ml-2">
+              <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-medium gap-1">
                 <Crown className="h-3 w-3" />
                 {tier === 'executive' ? 'Executive' : 'Staff'}
               </Badge>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1 p-4 rounded-xl bg-card/30 backdrop-blur-xl border border-white/[0.08]">
-            <span className="text-lg font-semibold text-foreground">{organization.name}</span>
-            <span className="text-sm text-muted-foreground font-mono">ID: {organization.id}</span>
+          <div className="flex items-center gap-2 p-3 sm:p-4 rounded-xl bg-card/30 backdrop-blur-xl border border-white/[0.08] self-start">
+            <div>
+              <span className="text-sm sm:text-base font-semibold text-foreground block">{organization.name}</span>
+              <span className="text-xs text-muted-foreground font-mono">ID: {organization.id}</span>
+            </div>
           </div>
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="deals" className="space-y-6">
-          <TabsList className="bg-card/30 backdrop-blur-xl border border-white/[0.08] p-1 h-auto flex-wrap">
+        <Tabs defaultValue="deals" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-card/30 backdrop-blur-xl border border-white/[0.08] p-1 h-auto flex-wrap w-full sm:w-auto">
             <TabsTrigger 
               value="deals" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"
             >
-              <TrendingUp className="h-4 w-4" />
+              <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Deals
             </TabsTrigger>
             <TabsTrigger 
               value="activity" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"
             >
-              <Phone className="h-4 w-4" />
-              Call Activity
+              <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Activity
             </TabsTrigger>
             <TabsTrigger 
               value="users" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"
             >
-              <Users className="h-4 w-4" />
-              Users & Seats
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Users
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"
             >
-              <Shield className="h-4 w-4" />
-              Organization Settings
+              <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Organization </span>Settings
             </TabsTrigger>
             <TabsTrigger 
               value="log" 
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-2"
+              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"
             >
-              <FileText className="h-4 w-4" />
-              Activity Log
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Log
             </TabsTrigger>
           </TabsList>
           
@@ -241,8 +243,8 @@ export default function Enterprise() {
             />
 
             {/* View Toggle & Add Deal */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 bg-card rounded-lg border p-1">
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 bg-card rounded-lg border p-1 self-start">
                 <Button
                   variant={dealsViewMode === 'table' ? 'default' : 'ghost'}
                   size="sm"
@@ -250,7 +252,7 @@ export default function Enterprise() {
                   className="gap-2"
                 >
                   <List className="h-4 w-4" />
-                  Table
+                  <span className="hidden xs:inline">Table</span>
                 </Button>
                 <Button
                   variant={dealsViewMode === 'kanban' ? 'default' : 'ghost'}
@@ -259,11 +261,12 @@ export default function Enterprise() {
                   className="gap-2"
                 >
                   <LayoutGrid className="h-4 w-4" />
-                  Board
+                  <span className="hidden xs:inline">Board</span>
                 </Button>
               </div>
-              <Button onClick={handleAddDeal}>
-                + Add Deal
+              <Button onClick={handleAddDeal} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Deal
               </Button>
             </div>
 

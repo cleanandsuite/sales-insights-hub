@@ -510,7 +510,7 @@ export default function Leads() {
           />
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Leads List */}
           <div className="lg:col-span-2 space-y-4">
             {/* Search and Filter */}
