@@ -40,7 +40,7 @@ export default function Enterprise() {
   // Deals state
   const [deals, setDeals] = useState<Deal[]>(mockDeals);
   const [healthFilter, setHealthFilter] = useState<HealthStatus | 'all'>('all');
-  const [dealsViewMode, setDealsViewMode] = useState<'table' | 'kanban'>('table');
+  const [dealsViewMode, setDealsViewMode] = useState<'table' | 'kanban'>('kanban');
   const [dealModalOpen, setDealModalOpen] = useState(false);
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);

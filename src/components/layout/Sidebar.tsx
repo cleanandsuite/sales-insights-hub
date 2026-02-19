@@ -17,9 +17,9 @@ const baseNavItems = [
   { to: '/leads', icon: Target, label: 'Leads' },
   { to: '/recordings', icon: Phone, label: 'Recordings' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics & Coaching' },
-  { to: '/schedule', icon: Calendar, label: 'Schedule' },
-  { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leaderboard', icon: Medal, label: 'Leaderboard' },
+  { to: '/winwords', icon: Sparkles, label: 'WinWords' },
+  { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/enterprise', icon: Building2, label: 'Enterprise' },
 ];
 

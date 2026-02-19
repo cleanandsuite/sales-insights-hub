@@ -25,7 +25,7 @@ export function DashboardHeader({
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   
   const displayTitle = title || `${greeting}, ${userName} 👋`;
-  const displaySubtitle = subtitle || "Here's your revenue intelligence for today";
+  const displaySubtitle = subtitle || "Your daily performance hub — let's make calls and close deals";
 
   return (
     <div className={cn('flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between', className)}>
