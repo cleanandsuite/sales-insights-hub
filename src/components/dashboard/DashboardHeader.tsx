@@ -20,15 +20,14 @@ export function DashboardHeader({
   showEnterpriseBadge = false,
   className,
 }: DashboardHeaderProps) {
-  // Get time of day for greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   
   const displayTitle = title || `${greeting}, ${userName} 👋`;
-  const displaySubtitle = subtitle || "Your daily performance hub — let's make calls and close deals";
+  const displaySubtitle = subtitle || "Ready to crush your goals today? Let's get started.";
 
   return (
-    <div className={cn('flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between', className)}>
+    <div className={cn('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
       <div>
         <div className="flex items-center gap-3">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{displayTitle}</h1>
@@ -42,22 +41,21 @@ export function DashboardHeader({
         <p className="text-muted-foreground mt-1">{displaySubtitle}</p>
       </div>
 
-      <div className="flex flex-col items-end gap-3">
-        <Button
-          onClick={onStartCall}
-          size="lg"
-          className={cn(
-            'gap-2 font-semibold shadow-lg transition-all duration-300',
-            'bg-gradient-to-r from-primary to-primary/80',
-            'hover:from-primary/90 hover:to-primary/70',
-            'hover:shadow-xl hover:shadow-primary/20',
-            'text-primary-foreground'
-          )}
-        >
-          <Phone className="h-5 w-5" />
-          📞 Start Call
-        </Button>
-      </div>
+      {/* Start Call button - prominent, red, next to greeting */}
+      <Button
+        onClick={onStartCall}
+        size="lg"
+        className={cn(
+          'gap-2 font-bold shadow-lg transition-all duration-200 shrink-0',
+          'bg-destructive hover:bg-destructive/90 active:bg-destructive/80',
+          'text-destructive-foreground border-0',
+          'hover:shadow-xl hover:shadow-destructive/30',
+          'px-6 py-3 text-base rounded-xl'
+        )}
+      >
+        <Phone className="h-5 w-5" />
+        Start Call
+      </Button>
     </div>
   );
 }
