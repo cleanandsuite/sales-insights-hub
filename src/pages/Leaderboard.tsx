@@ -68,11 +68,11 @@ export default function Leaderboard() {
   return (
     <>
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Leaderboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Leaderboard</h1>
               <p className="text-sm text-muted-foreground">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
@@ -85,7 +85,7 @@ export default function Leaderboard() {
               >
                 <Settings className="h-4 w-4" />
               </Button>
-              <Button onClick={() => navigate('/settings')}>
+              <Button size="sm" onClick={() => navigate('/settings')}>
                 Settings
               </Button>
             </div>
@@ -122,9 +122,9 @@ export default function Leaderboard() {
           {/* Main Content */}
           {data.enabled ? (
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-                <TabsTrigger value="challenges">Team Challenges</TabsTrigger>
+              <TabsList className="w-full sm:w-auto">
+                <TabsTrigger value="leaderboard" className="flex-1 sm:flex-none">Leaderboard</TabsTrigger>
+                <TabsTrigger value="challenges" className="flex-1 sm:flex-none">Team Challenges</TabsTrigger>
               </TabsList>
 
               {/* Leaderboard Tab */}
@@ -161,38 +161,38 @@ export default function Leaderboard() {
                         <div
                           key={entry.id}
                           className={cn(
-                            "flex items-center gap-4 p-4 rounded-lg border transition-colors",
+                            "flex flex-col xs:flex-row xs:items-center gap-3 p-3 sm:p-4 rounded-lg border transition-colors",
                             entry.name === 'You'
                               ? 'bg-primary/10 border-primary'
                               : 'bg-muted/30 hover:bg-muted/50'
                           )}
                         >
-                          {/* Rank */}
-                          <div className="w-12 text-center">
-                            {getRankBadge(index + 1)}
-                          </div>
-
-                          {/* Name */}
-                          <div className="flex-1">
-                            <p className="font-medium">{entry.name}</p>
-                            {entry.name === 'You' && (
-                              <Badge variant="secondary" className="ml-2">You</Badge>
-                            )}
+                          {/* Rank + Name row */}
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className="w-10 xs:w-12 text-center shrink-0">
+                              {getRankBadge(index + 1)}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">{entry.name}</p>
+                              {entry.name === 'You' && (
+                                <Badge variant="secondary" className="text-xs">You</Badge>
+                              )}
+                            </div>
                           </div>
 
                           {/* Stats */}
-                          <div className="grid grid-cols-3 gap-6 text-sm">
+                          <div className="grid grid-cols-3 gap-3 sm:gap-6 text-sm ml-13 xs:ml-0">
                             <div>
-                              <p className="text-muted-foreground">XP</p>
-                              <p className="font-semibold">{entry.xp.toLocaleString()}</p>
+                              <p className="text-muted-foreground text-xs">XP</p>
+                              <p className="font-semibold text-xs sm:text-sm">{entry.xp.toLocaleString()}</p>
                             </div>
                             <div>
-                              <p className="text-muted-foreground">Quota</p>
-                              <p className="font-semibold">{formatCurrency(entry.quota)}</p>
+                              <p className="text-muted-foreground text-xs">Quota</p>
+                              <p className="font-semibold text-xs sm:text-sm">{formatCurrency(entry.quota)}</p>
                             </div>
                             <div>
-                              <p className="text-muted-foreground">Wins</p>
-                              <p className="font-semibold">{entry.wins}</p>
+                              <p className="text-muted-foreground text-xs">Wins</p>
+                              <p className="font-semibold text-xs sm:text-sm">{entry.wins}</p>
                             </div>
                           </div>
                         </div>

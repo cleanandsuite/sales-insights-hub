@@ -415,22 +415,22 @@ export default function Dashboard() {
           />
 
           {/* Dashboard Tabs */}
-          <Tabs defaultValue="calls" className="space-y-6">
-            <TabsList className="bg-muted/50 h-10">
-              <TabsTrigger value="calls" className="gap-2">
+          <Tabs defaultValue="calls" className="space-y-4 sm:space-y-6">
+            <TabsList className="bg-muted/50 h-10 w-full sm:w-auto">
+              <TabsTrigger value="calls" className="gap-1.5 flex-1 sm:flex-none">
                 <Phone className="h-4 w-4" />
-                Calls & Activity
+                <span className="hidden xs:inline">Calls &amp; </span>Activity
               </TabsTrigger>
-              <TabsTrigger value="revenue" className="gap-2">
+              <TabsTrigger value="revenue" className="gap-1.5 flex-1 sm:flex-none">
                 <DollarSign className="h-4 w-4" />
-                Revenue & Pipeline
+                <span className="hidden xs:inline">Revenue &amp; </span>Pipeline
               </TabsTrigger>
             </TabsList>
 
             {/* === CALLS TAB === */}
-            <TabsContent value="calls" className="space-y-6 mt-0">
+            <TabsContent value="calls" className="space-y-4 sm:space-y-6 mt-0">
               {/* Real Call KPIs */}
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
                 <MetricCard
                   label="Calls Today"
                   value={String(kpis.callsToday)}
@@ -451,6 +451,7 @@ export default function Dashboard() {
                   icon={Mic}
                   iconColor="text-primary"
                   subtitle="Recorded & analyzed"
+                  className="col-span-2 lg:col-span-1"
                 />
               </div>
 
@@ -479,8 +480,8 @@ export default function Dashboard() {
             </TabsContent>
 
             {/* === REVENUE TAB === */}
-            <TabsContent value="revenue" className="space-y-6 mt-0">
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <TabsContent value="revenue" className="space-y-4 sm:space-y-6 mt-0">
+              <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
                 <MetricCard
                   label="Total Revenue"
                   value="$301K"
@@ -504,10 +505,11 @@ export default function Dashboard() {
                   iconColor="text-warning"
                   subtitle="24 Won / 11 Lost"
                   trend={{ value: 3, direction: 'up' }}
+                  className="col-span-2 lg:col-span-1"
                 />
               </div>
 
-              <div className="grid gap-4 sm:gap-6 lg:grid-cols-5">
+              <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-5">
                 <div className="lg:col-span-3">
                   <RevenueTrendChart data={[
                     { month: 'Jul', revenue: 35000, target: 50000 },

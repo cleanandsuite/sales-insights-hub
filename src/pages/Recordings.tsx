@@ -424,21 +424,22 @@ export default function Recordings() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Recordings</h1>
-            <p className="text-muted-foreground mt-1">All your saved call recordings and AI summaries</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Recordings</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">All your saved call recordings and AI summaries</p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" className="gap-2" onClick={handleExportAll}>
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" className="gap-2 flex-1 sm:flex-none" onClick={handleExportAll}>
               <Download className="h-4 w-4" />
-              Export All
+              <span className="hidden xs:inline">Export All</span>
+              <span className="xs:hidden">Export</span>
             </Button>
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2 flex-1 sm:flex-none">
                   <Upload className="h-4 w-4" />
                   Upload
                 </Button>
@@ -555,7 +556,7 @@ export default function Recordings() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <div className="card-gradient rounded-xl border border-border/50 p-5">
             <div className="flex items-center gap-3 mb-2">
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -670,7 +671,7 @@ export default function Recordings() {
                             {recording.name || recording.file_name}
                           </h3>
                           
-                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3.5 w-3.5" />
                               {new Date(recording.created_at).toLocaleDateString()}

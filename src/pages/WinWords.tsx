@@ -221,34 +221,34 @@ export default function WinWords() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
-              <Trophy className="h-8 w-8 text-yellow-500" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
+              <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
                 WINWORDS
               </h1>
-              <p className="text-muted-foreground">AI-powered sales scripts that win deals</p>
+              <p className="text-sm text-muted-foreground">AI-powered sales scripts that win deals</p>
             </div>
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="generate" className="gap-2">
-              <Sparkles className="h-4 w-4" />
+          <TabsList className="w-full sm:w-auto flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="generate" className="gap-1.5 flex-1 sm:flex-none text-xs sm:text-sm">
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Generate
             </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <History className="h-4 w-4" />
+            <TabsTrigger value="history" className="gap-1.5 flex-1 sm:flex-none text-xs sm:text-sm">
+              <History className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               History
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
+            <TabsTrigger value="analytics" className="gap-1.5 flex-1 sm:flex-none text-xs sm:text-sm">
+              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Analytics
             </TabsTrigger>
           </TabsList>

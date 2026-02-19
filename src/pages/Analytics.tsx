@@ -172,53 +172,53 @@ export default function Analytics() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Analytics & Coaching</h1>
-            <p className="text-muted-foreground mt-1">Performance metrics, AI insights, and coaching tools</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Analytics & Coaching</h1>
+            <p className="text-sm text-muted-foreground mt-1">Performance metrics, AI insights, and coaching tools</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <div className="flex bg-muted rounded-lg p-1">
               {(['7d', '30d', '90d'] as TimeRange[]).map((range) => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  className={`px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
                     timeRange === range
                       ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : '90 Days'}
+                  {range === '7d' ? '7D' : range === '30d' ? '30D' : '90D'}
                 </button>
               ))}
             </div>
             <Button onClick={handleRefresh} variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
+              <RefreshCw className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="performance" className="space-y-6">
-          <TabsList className="bg-muted/50 flex-wrap h-auto gap-1">
-            <TabsTrigger value="performance">Call Performance</TabsTrigger>
-            <TabsTrigger value="skills">Skills & Trends</TabsTrigger>
-            <TabsTrigger value="coaching-queue" className="gap-2">
-              <ClipboardList className="h-3.5 w-3.5" />
-              Coaching Queue
+        <Tabs defaultValue="performance" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-muted/50 flex-wrap h-auto gap-1 p-1 w-full">
+            <TabsTrigger value="performance" className="flex-1 sm:flex-none text-xs sm:text-sm">Performance</TabsTrigger>
+            <TabsTrigger value="skills" className="flex-1 sm:flex-none text-xs sm:text-sm">Skills</TabsTrigger>
+            <TabsTrigger value="coaching-queue" className="gap-1.5 flex-1 sm:flex-none text-xs sm:text-sm">
+              <ClipboardList className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden sm:inline">Coaching </span>Queue
             </TabsTrigger>
-            <TabsTrigger value="ai-coach" className="gap-2">
-              <Brain className="h-3.5 w-3.5" />
+            <TabsTrigger value="ai-coach" className="gap-1.5 flex-1 sm:flex-none text-xs sm:text-sm">
+              <Brain className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               AI Coach
             </TabsTrigger>
-            <TabsTrigger value="coaching-roi">Coaching ROI</TabsTrigger>
+            <TabsTrigger value="coaching-roi" className="flex-1 sm:flex-none text-xs sm:text-sm">ROI</TabsTrigger>
           </TabsList>
 
           {/* Analytics: Performance Tab */}
-          <TabsContent value="performance" className="space-y-6">
+          <TabsContent value="performance" className="space-y-4 sm:space-y-6">
             <AnalyticsOverviewCards data={data} />
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <CallsOverTimeChart data={data.callsOverTime} />
               <TalkRatioDonut 
                 you={data.talkRatio.you} 
@@ -226,11 +226,11 @@ export default function Analytics() {
                 isOptimal={data.talkRatio.isOptimal} 
               />
             </div>
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <TimeHeatmap data={data.callsByTimeSlot} />
               <ScoreDistributionChart distribution={data.scoreDistribution} />
             </div>
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <TopPatternsGrid patterns={data.topPatterns} />
               <ImprovementFocus areas={data.improvementAreas} />
               <CompetitorIntelligence competitors={data.competitorMentions} />
@@ -238,8 +238,8 @@ export default function Analytics() {
           </TabsContent>
 
           {/* Analytics: Skills Tab */}
-          <TabsContent value="skills" className="space-y-6">
-            <div className="grid lg:grid-cols-3 gap-6">
+          <TabsContent value="skills" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <PerformanceRadarChart 
                 currentSkills={data.currentSkills} 
                 previousSkills={data.previousSkills} 
