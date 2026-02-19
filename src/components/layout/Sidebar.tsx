@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Upload, LogOut, FileAudio, Users, Calendar, Trophy, Settings, Target, BarChart3, Sparkles, Menu, Crown, UserCircle, FlaskConical, TrendingUp, Shield, Building2, Link2, Phone, ChevronLeft, ChevronRight, Medal } from 'lucide-react';
+import { LayoutDashboard, LogOut, Calendar, Settings, Target, BarChart3, Sparkles, Menu, Crown, TrendingUp, Shield, Building2, Phone, ChevronLeft, ChevronRight, Medal } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
@@ -14,14 +14,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/enterprise', icon: Building2, label: 'Enterprise' },
-  { to: '/recordings', icon: Phone, label: 'Call Activity' },
-  { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leads', icon: Target, label: 'Leads' },
-  { to: '/analytics', icon: BarChart3, label: 'Analytics' },
+  { to: '/recordings', icon: Phone, label: 'Recordings' },
+  { to: '/analytics', icon: BarChart3, label: 'Analytics & Coaching' },
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
-  { to: '/coaching', icon: Trophy, label: 'Coaching' },
+  { to: '/winwords', icon: Sparkles, label: 'WinWords' },
   { to: '/leaderboard', icon: Medal, label: 'Leaderboard' },
+  { to: '/enterprise', icon: Building2, label: 'Enterprise' },
 ];
 
 const bottomNavItems = [
