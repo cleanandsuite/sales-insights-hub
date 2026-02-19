@@ -1,51 +1,51 @@
-import { Clock, Flag, UserX, AlertTriangle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import dashboardPreview from '@/assets/dashboard-preview.jpg';
 
-const problems = [
-  {
-    icon: Clock,
-    text: 'Gong & Chorus replay calls after the deal\'s cold',
-  },
-  {
-    icon: Flag,
-    text: 'ZoomInfo & Outreach flag accounts, but not what happens in the room',
-  },
-  {
-    icon: UserX,
-    text: 'Reps fly solo, missing micro-signals like hesitation or urgency',
-  },
+const checkpoints = [
+  'Find the signals that drive revenue — before your competitor does',
+  'Coach reps live, not after the fact when the deal is already cold',
+  'Turn call insights into closed deals with personalized playbooks',
 ];
 
 export function ProblemSection() {
   return (
-    <section className="bg-[#020617] text-white py-12 px-4">
-      <div className="container mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <AlertTriangle className="h-6 w-6 text-amber-400 shrink-0" />
-          <h2 className="text-lg sm:text-xl font-extrabold text-white/95">
-            Buyers are signaling intent everywhere—but most tools miss it
-          </h2>
-        </div>
+    <section className="bg-blue-50 py-16 sm:py-20 px-4">
+      <div className="container mx-auto max-w-5xl">
+        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+          {/* Left: text content */}
+          <div>
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-blue-600 bg-blue-100 px-3 py-1 rounded-full mb-4">
+              How It Works
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 leading-tight tracking-tight mb-5">
+              How real-time coaching produces real pipeline growth
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-8">
+              Most tools analyze calls <em>after</em> the deal has gone cold. SellSig listens live,
+              detects buyer signals in the moment, and gives your reps the exact words to move deals forward — right now.
+            </p>
+            <ul className="space-y-4">
+              {checkpoints.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700 font-medium leading-snug">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Problem Grid */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-6">
-          {problems.map((problem) => (
-            <div
-              key={problem.text}
-              className="bg-white/5 border border-white/10 rounded-xl p-5 text-center space-y-3"
-            >
-              <problem.icon className="h-8 w-8 text-red-400 mx-auto drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-              <p className="text-sm font-medium text-slate-200 leading-snug">
-                {problem.text}
-              </p>
+          {/* Right: dashboard image */}
+          <div className="hidden md:block">
+            <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-200">
+              <img
+                src={dashboardPreview}
+                alt="SellSig live coaching dashboard"
+                className="w-full h-auto object-cover"
+                loading="lazy"
+              />
             </div>
-          ))}
+          </div>
         </div>
-
-        {/* Result line */}
-        <p className="text-center text-sm sm:text-base font-bold text-red-300">
-          Result: Missed opportunities, stalled pipelines, inconsistent performance.
-        </p>
       </div>
     </section>
   );
