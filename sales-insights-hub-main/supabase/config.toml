@@ -1,0 +1,55 @@
+project_id = "bvkcxmcwbwxguklimyym"
+
+[functions.transcribe-audio]
+verify_jwt = false
+
+[functions.analyze-conversation]
+verify_jwt = false
+
+[functions.analyze-recording]
+verify_jwt = false
+
+[functions.salesforce-sync]
+verify_jwt = false
+
+[functions.generate-call-summary]
+verify_jwt = false
+
+[functions.salesforce-oauth]
+verify_jwt = false
+
+[functions.deal-coach]
+verify_jwt = false
+
+[functions.winwords-generate]
+verify_jwt = false
+
+[functions.test-db]
+verify_jwt = false
+
+[functions.ai-lead-score]
+verify_jwt = false
+
+[functions.pain-detector]
+verify_jwt = false
+
+[functions.live-coach]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.support-chat]
+verify_jwt = false
+
+[functions.submit-support-ticket]
+verify_jwt = false
+
+[functions.schedule-assistant]
+verify_jwt = false
+
+[functions.calendar-sync]
+verify_jwt = false
+
+[functions.live-summary]
+verify_jwt = false

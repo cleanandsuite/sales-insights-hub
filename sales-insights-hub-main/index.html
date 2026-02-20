@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Preconnect to critical origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Load fonts asynchronously with font-display: swap for faster FCP -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+    </noscript>
+    
+    <!-- Inline critical styles for faster FCP/LCP - hero content renders immediately -->
+    <style>
+      body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #020617; color: #f8fafc; }
+      #root { min-height: 100vh; }
+      /* Critical hero styles for immediate LCP */
+      .bg-hero-gradient { background: linear-gradient(135deg, #032D60 0%, #0a1628 50%, #020617 100%); }
+      h1 { font-weight: 800; line-height: 1.1; }
+    </style>
+    
+    <!-- SEO Optimized Meta Tags -->
+    <title>AI Coaching for Sales Calls | Real-Time Coaching | SellSig</title>
+    <meta name="description" content="Transform your sales calls with AI coaching that listens, coaches, and helps you close. Real-time AI coaching whispers perfect responses. Stop losing deals." />
+    <meta name="keywords" content="AI coaching, sales calls, real-time coaching, sales AI, objection handling, close more deals, AI sales coaching" />
+    <meta name="author" content="SellSig" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="AI Coaching for Sales Calls | Real-Time Coaching | SellSig" />
+    <meta property="og:description" content="AI coaching that listens to every sales call and whispers perfect responses in real-time. Transform your sales calls with coaching that never fails." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sellsig.com/" />
+    <meta property="og:image" content="https://sellsig.com/og-image.png" />
+    <meta property="og:site_name" content="SellSig" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@SellSig" />
+    <meta name="twitter:title" content="AI Coaching for Sales Calls | Real-Time Coaching" />
+    <meta name="twitter:description" content="AI coaching that listens, coaches, and helps you close. Real-time coaching for every sales call." />
+    <meta name="twitter:image" content="https://sellsig.com/og-image.png" />
+    
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="canonical" href="https://sellsig.com/" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -2,14 +2,11 @@ import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Import all new sections (Week 2 Redesign - Team's Design)
+// Import header with login button
+import { LandingHeader } from '@/components/landing/LandingHeader';
+
+// Import hero section
 import { HeroSection } from '@/components/landing/HeroSection';
-import { ProblemSection } from '@/components/landing/ProblemSection';
-import { HowItWorksSection } from '@/components/landing/HowItWorksSection';
-import { FeaturesSection } from '@/components/landing/FeaturesSection';
-import { SocialProofSection } from '@/components/landing/SocialProofSection';
-import { PricingSection } from '@/components/landing/PricingSection';
-import { FinalCTASection } from '@/components/landing/FinalCTASection';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -40,30 +37,15 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-slate-900">
+      {/* Header with Login */}
+      <LandingHeader onStartTrialClick={handleStartTrialClick} />
+
+      {/* Hero Section with Phone Interface */}
       <HeroSection 
         onStartTrialClick={handleStartTrialClick}
         onWatchDemoClick={handleWatchDemoClick}
       />
-
-      {/* Problem Section - Pain → Solution */}
-      <ProblemSection />
-
-      {/* How It Works - 3 Step Cards */}
-      <HowItWorksSection />
-
-      {/* Features Section - 2x2 Grid */}
-      <FeaturesSection />
-
-      {/* Social Proof - Logos + Testimonials */}
-      <SocialProofSection />
-
-      {/* Pricing Section - 3-Tier */}
-      <PricingSection onStartTrialClick={handleStartTrialClick} />
-
-      {/* Final CTA Section */}
-      <FinalCTASection onStartTrialClick={handleStartTrialClick} />
     </div>
   );
 }

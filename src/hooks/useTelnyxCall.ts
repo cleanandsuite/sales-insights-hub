@@ -59,6 +59,15 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedRecordingId, setSavedRecordingId] = useState<string | null>(null);
 
+  // Audio device settings from user preferences
+  const [audioSettings, setAudioSettings] = useState<{
+    default_mic_device_id: string | null;
+    default_speaker_device_id: string | null;
+  }>({
+    default_mic_device_id: null,
+    default_speaker_device_id: null,
+  });
+
   const clientRef = useRef<TelnyxRTC | null>(null);
   const callRef = useRef<any>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -86,6 +95,39 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
   useEffect(() => {
     transcriptsRef.current = transcripts;
   }, [transcripts]);
+
+  // Fetch audio device settings from user preferences
+  useEffect(() => {
+    const fetchAudioSettings = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('default_mic_device_id, default_speaker_device_id')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('[TELNYX] Error fetching audio settings:', error);
+          return;
+        }
+
+        if (data) {
+          console.log('[TELNYX] Loaded audio settings:', data);
+          setAudioSettings({
+            default_mic_device_id: data.default_mic_device_id,
+            default_speaker_device_id: data.default_speaker_device_id,
+          });
+        }
+      } catch (err) {
+        console.error('[TELNYX] Error fetching audio settings:', err);
+      }
+    };
+
+    fetchAudioSettings();
+  }, []);
 
   const getFinalTranscriptText = useCallback((segments: UseTelnyxCallReturn['transcripts']) => {
     return segments
@@ -312,12 +354,27 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
 
       const callerId = callerIdResponse.data?.caller_id;
 
-      const call = clientRef.current.newCall({
+      // Build call options with user's audio device preferences
+      const callOptions: any = {
         destinationNumber: formattedNumber,
         callerNumber: callerId,
         audio: true,
         video: false,
-      });
+      };
+
+      // Apply user's preferred microphone if set
+      if (audioSettings.default_mic_device_id) {
+        callOptions.micId = audioSettings.default_mic_device_id;
+        console.log('[TELNYX] Using preferred microphone:', audioSettings.default_mic_device_id);
+      }
+
+      // Apply user's preferred speaker if set
+      if (audioSettings.default_speaker_device_id) {
+        callOptions.speakerId = audioSettings.default_speaker_device_id;
+        console.log('[TELNYX] Using preferred speaker:', audioSettings.default_speaker_device_id);
+      }
+
+      const call = clientRef.current.newCall(callOptions);
 
       callRef.current = call;
     } catch (err: any) {
@@ -325,7 +382,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       setError(err.message || 'Failed to start call');
       setCallStatus('error');
     }
-  }, [isReady]);
+  }, [isReady, audioSettings]);
 
   const endCall = useCallback(async () => {
     if (callRef.current) {
