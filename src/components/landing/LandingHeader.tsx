@@ -18,13 +18,11 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-white/10">
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="[&_span]:!text-gray-900 [&_.text-white]:!text-gray-900 [&_.text-blue-500]:!text-blue-600 [&_.text-blue-400]:!text-blue-600 [&_.text-muted-foreground]:!text-gray-500">
-            <SellSigLogo variant="default" linkTo="/" showTagline={false} />
-          </div>
+          <SellSigLogo variant="default" linkTo="/" showTagline={false} />
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -33,7 +31,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
                 <Link
                   key={link.label}
                   to={link.to}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                  className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -41,7 +39,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                  className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
                 >
                   {link.label}
                 </a>
@@ -52,13 +50,13 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-3">
             <Link to="/auth">
-              <Button variant="ghost" size="sm" className="font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100">
+              <Button variant="ghost" size="sm" className="font-medium text-gray-300 hover:text-white hover:bg-white/10">
                 Log In
               </Button>
             </Link>
             <Button
               onClick={onStartTrialClick}
-              className="font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm px-5"
+              className="font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg shadow-sm px-5"
             >
               Get Started Free
             </Button>
@@ -67,20 +65,20 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
-              <X className="h-6 w-6 text-gray-700" />
+              <X className="h-6 w-6 text-white" />
             ) : (
-              <Menu className="h-6 w-6 text-gray-700" />
+              <Menu className="h-6 w-6 text-white" />
             )}
           </button>
         </nav>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100 bg-white">
+          <div className="md:hidden py-4 border-t border-white/10 bg-[#0A0A0A]">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) =>
                 link.to ? (
@@ -88,7 +86,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
                     key={link.label}
                     to={link.to}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -97,21 +95,21 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
                     key={link.label}
                     href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                   >
                     {link.label}
                   </a>
                 )
               )}
-              <div className="border-t border-gray-100 my-2" />
+              <div className="border-t border-white/10 my-2" />
               <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full">
-                <Button variant="ghost" className="w-full justify-center font-medium text-gray-700 hover:bg-gray-100">
+                <Button variant="ghost" className="w-full justify-center font-medium text-gray-300 hover:bg-white/10">
                   Log In
                 </Button>
               </Link>
               <Button
                 onClick={onStartTrialClick}
-                className="w-full font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                className="w-full font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg"
               >
                 Get Started Free
               </Button>
