@@ -105,18 +105,11 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
   // Navigate to recording analysis when call ends and recording is saved
   useEffect(() => {
     if (callStatus === 'ended' && hasStartedCall && !isSaving && savedRecordingId) {
+      // Navigate to the recording analysis page
       const timer = setTimeout(() => {
         onClose();
         navigate(`/recording/${savedRecordingId}`);
       }, 1500);
-      return () => clearTimeout(timer);
-    }
-    // If call ended but no recording saved (e.g. very short call / error), go back to dashboard
-    if (callStatus === 'ended' && hasStartedCall && !isSaving && !savedRecordingId) {
-      const timer = setTimeout(() => {
-        onClose();
-        navigate('/dashboard');
-      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [callStatus, hasStartedCall, isSaving, savedRecordingId, onClose, navigate]);

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Calendar, Settings, Target, BarChart3, Sparkles, Menu, Crown, TrendingUp, Shield, Building2, ChevronLeft, ChevronRight, Medal } from 'lucide-react';
+import { LayoutDashboard, LogOut, Calendar, Settings, Target, BarChart3, Sparkles, Menu, Crown, TrendingUp, Shield, Building2, Phone, ChevronLeft, ChevronRight, Medal } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/leads', icon: Target, label: 'Leads' },
+  { to: '/recordings', icon: Phone, label: 'Recordings' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics & Coaching' },
   { to: '/leaderboard', icon: Medal, label: 'Leaderboard' },
   { to: '/winwords', icon: Sparkles, label: 'WinWords' },

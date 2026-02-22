@@ -64,8 +64,8 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
     default: {
       containerBg: "bg-primary/10",
       containerBorder: "border-primary/20",
-      text: "text-foreground",
-      highlight: "text-primary",
+      text: "text-white",
+      highlight: "text-blue-500",
       tagline: "text-muted-foreground",
     },
     light: {

@@ -25,22 +25,24 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
     </noscript>
     
-    <!-- Inline critical styles for faster FCP/LCP -->
+    <!-- Inline critical styles for faster FCP/LCP - hero content renders immediately -->
     <style>
-      body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A0A; color: #f8fafc; }
+      body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #020617; color: #f8fafc; }
       #root { min-height: 100vh; }
+      /* Critical hero styles for immediate LCP */
+      .bg-hero-gradient { background: linear-gradient(135deg, #032D60 0%, #0a1628 50%, #020617 100%); }
       h1 { font-weight: 800; line-height: 1.1; }
     </style>
     
     <!-- SEO Optimized Meta Tags -->
-    <title>AI Sales Coaching Software | Real-Time Call Coaching | SellSig</title>
-    <meta name="description" content="AI sales coaching that coaches reps in real-time during live calls. Detect buyer signals, handle objections, and close 30% more deals with SellSig." />
-    <meta name="keywords" content="AI sales coaching, AI coaching, real-time sales coaching, conversation intelligence, AI sales software, sales call coaching, buyer signal detection" />
+    <title>AI Coaching for Sales Calls | Real-Time Coaching | SellSig</title>
+    <meta name="description" content="Transform your sales calls with AI coaching that listens, coaches, and helps you close. Real-time AI coaching whispers perfect responses. Stop losing deals." />
+    <meta name="keywords" content="AI coaching, sales calls, real-time coaching, sales AI, objection handling, close more deals, AI sales coaching" />
     <meta name="author" content="SellSig" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="AI Sales Coaching Software | Real-Time Call Coaching | SellSig" />
-    <meta property="og:description" content="AI sales coaching that coaches reps in real-time during live calls. Detect buyer signals, handle objections, and close 30% more deals with SellSig." />
+    <meta property="og:title" content="AI Coaching for Sales Calls | Real-Time Coaching | SellSig" />
+    <meta property="og:description" content="AI coaching that listens to every sales call and whispers perfect responses in real-time. Transform your sales calls with coaching that never fails." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://sellsig.com/" />
     <meta property="og:image" content="https://sellsig.com/og-image.png" />
@@ -49,21 +51,21 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@SellSig" />
-    <meta name="twitter:title" content="AI Sales Coaching Software | Real-Time Call Coaching | SellSig" />
-    <meta name="twitter:description" content="AI sales coaching that coaches reps in real-time during live calls. Detect buyer signals, handle objections, and close 30% more deals." />
+    <meta name="twitter:title" content="AI Coaching for Sales Calls | Real-Time Coaching" />
+    <meta name="twitter:description" content="AI coaching that listens, coaches, and helps you close. Real-time coaching for every sales call." />
     <meta name="twitter:image" content="https://sellsig.com/og-image.png" />
     
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="canonical" href="https://sellsig.com/" />
     
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "SellSig",
-      "alternateName": "AI Sales Coaching Software",
-      "description": "AI-powered sales coaching platform that provides real-time coaching during live sales calls. Detects buyer signals, handles objections, and helps sales teams close 30% more deals.",
+      "alternateName": "Buyer Signal Intelligence",
+      "description": "AI-powered sales coaching platform that detects real-time buying intent signals and provides personalized coaching for sales reps.",
       "url": "https://sellsig.com",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
@@ -76,22 +78,14 @@
       },
       "aggregateRating": {
         "@type": "AggregateRating",
-        "ratingValue": "4.9",
+        "ratingValue": "4.8",
         "reviewCount": "127"
       },
       "creator": {
         "@type": "Organization",
         "name": "SellSig",
         "url": "https://sellsig.com"
-      },
-      "featureList": [
-        "Real-time AI sales coaching",
-        "Buyer signal detection",
-        "Live objection handling",
-        "CRM auto-capture",
-        "Conversation intelligence",
-        "Sales performance analytics"
-      ]
+      }
     }
     </script>
     
@@ -103,44 +97,10 @@
       "name": "SellSig",
       "url": "https://sellsig.com",
       "logo": "https://sellsig.com/logo.png",
-      "description": "AI sales coaching software that coaches reps in real-time during live sales calls with buyer signal detection and conversation intelligence.",
+      "description": "AI-powered buyer signal intelligence platform for sales teams",
       "sameAs": [
         "https://twitter.com/SellSig",
         "https://linkedin.com/company/sellsig"
-      ]
-    }
-    </script>
-
-    <!-- FAQ Schema -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is AI sales coaching?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "AI sales coaching uses artificial intelligence to provide real-time guidance to sales reps during live calls. SellSig's AI coaching detects buyer signals, suggests objection handlers, and recommends closing techniques while the prospect is still on the line."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How does real-time AI coaching work during sales calls?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "SellSig listens to your live sales conversations and uses AI to analyze the conversation in real-time. It detects buying signals, identifies objections, and surfaces contextual coaching prompts that help reps respond effectively in the moment."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How is SellSig different from Gong or Chorus?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Unlike Gong and Chorus which analyze calls after they happen, SellSig provides real-time AI coaching during live calls. This means reps get instant guidance on handling objections, detecting buyer signals, and closing deals while the conversation is happening."
-          }
-        }
       ]
     }
     </script>
