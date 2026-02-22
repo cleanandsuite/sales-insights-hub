@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ interface CallDialogProps {
 }
 
 export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: CallDialogProps) {
+  const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
   const {
     callsToday,
@@ -110,7 +112,10 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false);
+                navigate('/dashboard');
+              }}
               disabled={isConnecting}
             >
               Cancel
