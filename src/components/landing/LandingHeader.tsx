@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 interface LandingHeaderProps {
   onStartTrialClick: () => void;
@@ -9,114 +8,111 @@ interface LandingHeaderProps {
 
 export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navLinks = [
     { label: 'Features', href: '#features' },
     { label: 'Pricing', href: '#pricing' },
-    { label: 'Integrations', href: '#integrations' },
+    { label: 'Customers', href: '#customers' },
+    { label: 'FAQ', href: '#faq' },
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800">
-      <div className="container mx-auto px-4">
-        <nav className="flex items-center justify-between h-16">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/80 backdrop-blur-xl border-b border-gray-200/60 shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="max-w-[1200px] mx-auto px-6">
+        <nav className="flex items-center justify-between h-16" aria-label="Main navigation">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <Phone className="w-4 h-4 text-white" />
+          <Link to="/" className="flex items-center gap-2.5 group" aria-label="SellSig home">
+            <div className="w-8 h-8 rounded-lg bg-[#0f172a] flex items-center justify-center transition-transform group-hover:scale-105">
+              <span className="text-white font-bold text-sm tracking-tight">S</span>
             </div>
-            <span className="text-xl font-bold text-white">SellSig</span>
+            <span className="text-[18px] font-semibold text-[#0f172a] tracking-tight">SellSig</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              link.to ? (
-                <Link 
-                  key={link.label}
-                  to={link.to} 
-                  className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <a 
-                  key={link.label}
-                  href={link.href} 
-                  className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
-                >
-                  {link.label}
-                </a>
-              )
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-[14px] font-medium text-gray-500 hover:text-[#0f172a] transition-colors"
+              >
+                {link.label}
+              </a>
             ))}
           </div>
 
           {/* Desktop CTAs */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link to="/auth">
-              <Button variant="ghost" size="sm" className="font-medium text-slate-300 hover:text-white hover:bg-slate-800">
-                Log In
-              </Button>
-            </Link>
-            <Button 
-              onClick={onStartTrialClick}
-              className="font-semibold bg-blue-600 hover:bg-blue-500"
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              to="/auth"
+              className="text-[14px] font-medium text-gray-600 hover:text-[#0f172a] px-4 py-2 transition-colors"
             >
-              Start Free
-            </Button>
+              Log in
+            </Link>
+            <button
+              onClick={onStartTrialClick}
+              className="text-[14px] font-medium text-white bg-[#0f172a] hover:bg-[#1e293b] px-5 py-2.5 rounded-lg transition-colors"
+            >
+              Start free trial
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors"
+            className="md:hidden p-2 -mr-2 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
-              <X className="h-6 w-6 text-white" />
+              <X className="h-5 w-5 text-[#0f172a]" />
             ) : (
-              <Menu className="h-6 w-6 text-white" />
+              <Menu className="h-5 w-5 text-[#0f172a]" />
             )}
           </button>
         </nav>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-800 animate-fade-in">
-            <div className="flex flex-col gap-2">
+          <div className="md:hidden pb-6 animate-fade-in" role="navigation" aria-label="Mobile navigation">
+            <div className="flex flex-col gap-1 pt-2 border-t border-gray-100">
               {navLinks.map((link) => (
-                link.to ? (
-                  <Link 
-                    key={link.label}
-                    to={link.to}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ) : (
-                  <a 
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                )
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-3 py-3 text-[15px] font-medium text-gray-600 hover:text-[#0f172a] hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  {link.label}
+                </a>
               ))}
-              <div className="border-t border-slate-800 my-2" />
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="w-full">
-                <Button variant="ghost" className="w-full justify-center font-medium text-slate-300 hover:bg-slate-800">
-                  Log In
-                </Button>
-              </Link>
-              <Button 
-                onClick={onStartTrialClick}
-                className="w-full font-semibold bg-blue-600"
+              <div className="border-t border-gray-100 my-2" />
+              <Link
+                to="/auth"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-3 text-[15px] font-medium text-gray-600 hover:text-[#0f172a] hover:bg-gray-50 rounded-lg transition-colors"
               >
-                Start Free
-              </Button>
+                Log in
+              </Link>
+              <button
+                onClick={onStartTrialClick}
+                className="mt-1 text-[15px] font-medium text-white bg-[#0f172a] hover:bg-[#1e293b] px-5 py-3 rounded-lg transition-colors"
+              >
+                Start free trial
+              </button>
             </div>
           </div>
         )}

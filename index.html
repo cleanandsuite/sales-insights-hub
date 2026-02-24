@@ -3,36 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <!-- Preconnect to critical origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
+
     <!-- Load fonts asynchronously with font-display: swap for faster FCP -->
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
     <noscript>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
     </noscript>
-    
-    <!-- Inline critical styles for faster FCP/LCP - hero content renders immediately -->
+
+    <!-- Inline critical styles for faster FCP/LCP -->
     <style>
-      body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #020617; color: #f8fafc; }
+      body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #ffffff; color: #0f172a; }
       #root { min-height: 100vh; }
-      /* Critical hero styles for immediate LCP */
-      .bg-hero-gradient { background: linear-gradient(135deg, #032D60 0%, #0a1628 50%, #020617 100%); }
-      h1 { font-weight: 800; line-height: 1.1; }
+      h1 { font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
     </style>
-    
+
     <!-- SEO Optimized Meta Tags -->
-    <title>AI Coaching for Sales Calls | Real-Time Coaching | SellSig</title>
-    <meta name="description" content="Transform your sales calls with AI coaching that listens, coaches, and helps you close. Real-time AI coaching whispers perfect responses. Stop losing deals." />
-    <meta name="keywords" content="AI coaching, sales calls, real-time coaching, sales AI, objection handling, close more deals, AI sales coaching" />
+    <title>SellSig — Revenue Intelligence Platform | AI Sales Coaching</title>
+    <meta name="description" content="SellSig is the revenue intelligence platform that coaches your sales team in real-time. Increase win rates by 40%, accelerate deal velocity, and turn every conversation into revenue." />
+    <meta name="keywords" content="revenue intelligence, AI sales coaching, conversation intelligence, sales analytics, deal velocity, win rate optimization, sales enablement, enterprise sales platform" />
     <meta name="author" content="SellSig" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="AI Coaching for Sales Calls | Real-Time Coaching | SellSig" />
-    <meta property="og:description" content="AI coaching that listens to every sales call and whispers perfect responses in real-time. Transform your sales calls with coaching that never fails." />
+    <meta property="og:title" content="SellSig — Revenue Intelligence Platform" />
+    <meta property="og:description" content="The revenue intelligence platform that makes every rep your best rep. Real-time AI coaching, conversation analytics, and pipeline intelligence." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://sellsig.com/" />
     <meta property="og:image" content="https://sellsig.com/og-image.png" />
@@ -41,10 +39,34 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@SellSig" />
-    <meta name="twitter:title" content="AI Coaching for Sales Calls | Real-Time Coaching" />
-    <meta name="twitter:description" content="AI coaching that listens, coaches, and helps you close. Real-time coaching for every sales call." />
+    <meta name="twitter:title" content="SellSig — Revenue Intelligence Platform" />
+    <meta name="twitter:description" content="The revenue intelligence platform that makes every rep your best rep. Real-time AI coaching and conversation intelligence." />
     <meta name="twitter:image" content="https://sellsig.com/og-image.png" />
-    
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SellSig",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "Revenue intelligence platform with real-time AI sales coaching",
+      "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": "99",
+        "highPrice": "249",
+        "priceCurrency": "USD",
+        "offerCount": "3"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "847"
+      }
+    }
+    </script>
+
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="canonical" href="https://sellsig.com/" />
   </head>
