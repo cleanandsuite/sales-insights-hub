@@ -8,7 +8,8 @@ export function PricingSection() {
     window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank');
   };
 
-  const starterPrice = annual ? 63 : 79;
+  const starterRegular = annual ? 103 : 129;
+  const starterPromo = annual ? 79 : 99;
   const proPrice = annual ? 160 : 200;
 
   const starterFeatures = [
@@ -25,7 +26,7 @@ export function PricingSection() {
   const proFeatures = [
     { text: '3 user seats', bold: true },
     { text: 'Dedicated US business phone number', bold: true },
-    { text: '5,000 call minutes/month', bold: true },
+    { text: '7,000 call minutes/month', bold: true },
     { text: 'Unlimited script generation' },
     { text: 'Live emotion & sentiment detection' },
     { text: 'Real-time objection coaching' },
@@ -71,10 +72,18 @@ export function PricingSection() {
         <div className="grid md:grid-cols-2 gap-5 max-w-[880px] mx-auto">
           {/* Starter */}
           <div className="bg-white border-[1.5px] border-[#E4E8F0] rounded-[20px] p-10 relative transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(10,22,40,.12)]">
-            <span className="text-[11px] font-bold tracking-[.1em] uppercase text-[#0057FF] block mb-4">Starter</span>
+            <span className="text-[11px] font-bold tracking-[.1em] uppercase text-[#0057FF] block mb-2">Starter</span>
+            <div className="bg-[#FFF8E1] border border-[#FFD54F] rounded-lg px-3 py-1.5 mb-3 inline-block">
+              <span className="text-[11px] font-bold text-[#E65100] uppercase tracking-wide">🔥 New user promo · Only 17 spots left</span>
+            </div>
+            <div className="font-bricolage text-[#0A1628] leading-none mb-1">
+              <span className="text-[28px] font-bold line-through opacity-40 mr-2">
+                ${starterRegular}<span className="text-sm font-medium">/mo</span>
+              </span>
+            </div>
             <div className="font-bricolage text-[64px] font-extrabold tracking-[-3px] leading-none text-[#0A1628]">
               <sup className="text-[22px] font-bold tracking-normal align-super">$</sup>
-              {starterPrice}
+              {starterPromo}
               <sub className="text-base font-medium tracking-normal opacity-50 font-jakarta">/mo</sub>
             </div>
             <p className="text-[15px] text-[#3B4A63] mt-2.5 mb-7">For individual reps getting started with AI coaching.</p>
@@ -118,11 +127,14 @@ export function PricingSection() {
             <p className="text-[15px] text-white/50 mt-2.5 mb-7">The complete SellSig platform for your whole team.</p>
             {/* Phone highlight */}
             <div className="bg-[rgba(107,159,255,.1)] border border-[rgba(107,159,255,.25)] rounded-[10px] p-4 mb-6 flex gap-3 items-start">
-              <span className="text-xl shrink-0">📞</span>
+            <span className="text-xl shrink-0">📞</span>
               <div>
                 <span className="text-[13px] font-bold text-[#6B9FFF] block">Dedicated Business Phone Line Included</span>
-                <span className="text-xs text-white/40">5,000 min · 3 users · 1 dedicated number · 99.9% uptime</span>
+                <span className="text-xs text-white/40">7,000 min · 3 users · 1 dedicated number · 99.9% uptime</span>
               </div>
+            </div>
+            <div className="bg-[rgba(255,215,0,.12)] border border-[rgba(255,215,0,.3)] rounded-lg px-3 py-1.5 mb-6 text-center">
+              <span className="text-[12px] font-bold text-[#FFD700]">⚡ Limited time: +2,000 bonus minutes included</span>
             </div>
             <hr className="border-white/10 mb-6" />
             <ul className="flex flex-col gap-[11px] mb-9">
