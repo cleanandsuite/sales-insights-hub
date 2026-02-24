@@ -622,3 +622,60 @@
   background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(32 95% 44%) 100%);
   color: white;
 }
+
+/* ============================================
+   LANDING PAGE — Velox Design System
+   ============================================ */
+
+/* Landing page body grid background */
+.landing-grid-bg {
+  position: relative;
+}
+.landing-grid-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(#E4E8F0 1px, transparent 1px),
+    linear-gradient(90deg, #E4E8F0 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.35;
+}
+
+/* Bricolage heading utility */
+.font-bricolage {
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+.font-jakarta {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Landing waveform animation */
+@keyframes landing-wv {
+  0%, 100% { opacity: 0.4; transform: scaleY(0.3); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+.animate-waveform {
+  animation: landing-wv 1s ease-in-out infinite;
+}
+
+/* Landing blink dot */
+@keyframes landing-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.animate-blink {
+  animation: landing-blink 2s ease infinite;
+}
+
+/* Landing reveal animation */
+.landing-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.landing-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}

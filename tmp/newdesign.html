@@ -1,0 +1,1405 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velox AI — Intelligent Sales Coaching Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   TOKENS
+───────────────────────────────────────────── */
+:root {
+  --brand:        #0057FF;
+  --brand-dark:   #003FBB;
+  --brand-light:  #EEF3FF;
+  --brand-mid:    #D0DCFF;
+  --navy:         #0A1628;
+  --navy2:        #162140;
+  --text:         #0A1628;
+  --text2:        #3B4A63;
+  --text3:        #6B7A99;
+  --border:       #E4E8F0;
+  --border2:      #D0D7E6;
+  --bg:           #FFFFFF;
+  --bg2:          #F7F9FC;
+  --bg3:          #F0F4FB;
+  --green:        #00875A;
+  --green-bg:     #E3F5EE;
+  --red:          #D92D20;
+  --red-bg:       #FEF0EF;
+  --amber:        #B54708;
+  --amber-bg:     #FEF6EE;
+  --shadow-sm:    0 1px 3px rgba(10,22,40,.06), 0 1px 2px rgba(10,22,40,.04);
+  --shadow-md:    0 4px 16px rgba(10,22,40,.08), 0 2px 6px rgba(10,22,40,.04);
+  --shadow-lg:    0 12px 48px rgba(10,22,40,.12), 0 4px 12px rgba(10,22,40,.06);
+  --shadow-xl:    0 24px 80px rgba(10,22,40,.14), 0 8px 24px rgba(10,22,40,.08);
+  --radius:       12px;
+  --radius-sm:    8px;
+  --radius-lg:    20px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─────────────────────────────────────────────
+   NAV
+───────────────────────────────────────────── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:500;
+  height: 68px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items:center; justify-content:space-between;
+  padding: 0 40px;
+}
+.nav-logo {
+  display: flex; align-items:center; gap:8px;
+  text-decoration: none; color: var(--text);
+}
+.nav-logo-mark {
+  width:32px; height:32px;
+  background: var(--brand);
+  border-radius:8px;
+  display: flex; align-items:center; justify-content:center;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight:800; font-size:16px; color:#fff; letter-spacing:-1px;
+}
+.nav-logo-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight:700; font-size:20px; letter-spacing:-0.5px; color:var(--text);
+}
+.nav-links {
+  display:flex; gap:4px; list-style:none;
+  align-items:center;
+}
+.nav-links > li { position:relative; }
+.nav-links a {
+  display:flex; align-items:center; gap:4px;
+  padding: 8px 14px; border-radius:6px;
+  font-size:14px; font-weight:500; color:var(--text2);
+  text-decoration:none; transition:all .15s;
+}
+.nav-links a:hover { color:var(--text); background:var(--bg2); }
+.nav-right { display:flex; align-items:center; gap:10px; }
+.nav-signin { font-size:14px; font-weight:500; color:var(--text2); text-decoration:none; padding:8px 16px; border-radius:6px; transition:all .15s; }
+.nav-signin:hover { color:var(--text); background:var(--bg2); }
+.nav-cta { background:var(--brand); color:#fff; font-size:14px; font-weight:600; text-decoration:none; padding:9px 20px; border-radius:8px; transition:all .2s; white-space:nowrap; }
+.nav-cta:hover { background:var(--brand-dark); transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,87,255,.3); }
+.nav-demo { font-size:14px; font-weight:500; color:var(--brand); text-decoration:none; padding:9px 16px; border-radius:8px; border:1.5px solid var(--brand-mid); transition:all .2s; }
+.nav-demo:hover { background:var(--brand-light); }
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+.hero {
+  padding: 140px 40px 100px;
+  max-width: 1280px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center;
+  position:relative;
+}
+/* Subtle grid bg */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:-1;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size:60px 60px;
+  opacity:.35;
+}
+/* Blue gradient blob */
+.hero-blob {
+  position:absolute; top:-80px; right:-120px;
+  width:700px; height:700px; border-radius:50%;
+  background: radial-gradient(circle, rgba(0,87,255,.07) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--brand-light); border:1px solid var(--brand-mid);
+  padding:6px 14px; border-radius:100px;
+  font-size:12px; font-weight:600; color:var(--brand);
+  letter-spacing:.04em; margin-bottom:24px;
+}
+.hero-eyebrow-dot { width:6px; height:6px; border-radius:50%; background:var(--brand); animation:blink 2s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.hero h1 {
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:clamp(44px,4.5vw,64px);
+  font-weight:800; line-height:1.1; letter-spacing:-2px;
+  color:var(--navy); margin-bottom:24px;
+}
+.hero h1 .highlight {
+  color:var(--brand);
+  position:relative; display:inline-block;
+}
+.hero h1 .highlight::after {
+  content:''; position:absolute; left:0; bottom:-2px; right:0; height:3px;
+  background:var(--brand); border-radius:2px; opacity:.3;
+}
+.hero-sub {
+  font-size:18px; color:var(--text2); line-height:1.7;
+  max-width:460px; margin-bottom:40px; font-weight:400;
+}
+.hero-actions { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:48px; }
+.btn-primary {
+  background:var(--brand); color:#fff;
+  padding:14px 28px; border-radius:10px;
+  font-size:15px; font-weight:600;
+  text-decoration:none; transition:all .2s;
+  box-shadow:0 2px 12px rgba(0,87,255,.25);
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn-primary:hover { background:var(--brand-dark); transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,87,255,.35); }
+.btn-secondary {
+  background:var(--bg); color:var(--text); border:1.5px solid var(--border2);
+  padding:13px 28px; border-radius:10px;
+  font-size:15px; font-weight:600;
+  text-decoration:none; transition:all .2s;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn-secondary:hover { border-color:var(--brand); color:var(--brand); background:var(--brand-light); transform:translateY(-2px); }
+.social-proof {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.avatar-stack { display:flex; }
+.avatar-stack img, .avatar-stack .av {
+  width:32px; height:32px; border-radius:50%;
+  border:2px solid #fff; margin-left:-8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#fff;
+}
+.avatar-stack .av:first-child { margin-left:0; }
+.sp-text { font-size:13px; color:var(--text3); font-weight:500; }
+.sp-text strong { color:var(--text); font-weight:600; }
+.sp-stars { color:#F5A623; font-size:13px; letter-spacing:2px; }
+
+/* ─────────────────────────────────────────────
+   HERO DASHBOARD MOCKUP
+───────────────────────────────────────────── */
+.hero-visual { position:relative; z-index:2; }
+.dashboard {
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-xl);
+  overflow:hidden;
+}
+.dash-titlebar {
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding:12px 20px;
+  display:flex; align-items:center; gap:8px;
+}
+.dtb-dots { display:flex; gap:6px; }
+.dtb-dot { width:10px; height:10px; border-radius:50%; }
+.dtb-url {
+  flex:1; background:#fff; border:1px solid var(--border);
+  border-radius:6px; padding:5px 12px;
+  font-size:11px; color:var(--text3); max-width:280px; margin:0 auto;
+}
+.dash-body { padding:20px; }
+.dash-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.dash-title { font-size:13px; font-weight:700; color:var(--text); }
+.dash-live { display:inline-flex; align-items:center; gap:6px; background:var(--green-bg); color:var(--green); font-size:11px; font-weight:600; padding:4px 10px; border-radius:100px; border:1px solid rgba(0,135,90,.15); }
+.dash-live::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; animation:blink 1.5s ease infinite; }
+
+/* Waveform */
+.wave-container { display:flex; align-items:center; gap:3px; height:48px; background:var(--bg2); border-radius:8px; padding:8px 12px; margin-bottom:14px; }
+.wave-b { flex:1; background:var(--brand-mid); border-radius:2px; animation:wv 1s ease-in-out infinite; }
+@keyframes wv { 0%,100%{opacity:.4;transform:scaleY(.3)} 50%{opacity:1;transform:scaleY(1)} }
+
+/* Emotion meters */
+.emotion-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+.emo-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:10px 8px; text-align:center; }
+.emo-val { font-family:'Bricolage Grotesque',sans-serif; font-size:22px; font-weight:700; line-height:1; }
+.emo-lbl { font-size:10px; color:var(--text3); margin-top:3px; font-weight:500; }
+
+/* Coaching alert */
+.coach-alert {
+  background:var(--brand-light); border:1px solid var(--brand-mid);
+  border-radius:10px; padding:14px 16px; margin-bottom:14px;
+}
+.ca-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.ca-badge { background:var(--brand); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; letter-spacing:.04em; }
+.ca-time { font-size:11px; color:var(--text3); }
+.ca-text { font-size:13px; color:var(--text); line-height:1.6; }
+.ca-text strong { color:var(--brand); }
+
+/* Script hints */
+.script-hint { display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:8px; transition:background .2s; }
+.script-hint:hover { background:var(--bg2); }
+.sh-icon { width:22px; height:22px; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; }
+.sh-text { font-size:12px; color:var(--text2); line-height:1.5; }
+.sh-text b { color:var(--text); font-weight:600; }
+
+/* Floating cards */
+.float { position:absolute; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-lg); padding:14px 18px; }
+.fl-val { font-family:'Bricolage Grotesque',sans-serif; font-size:26px; font-weight:800; color:var(--text); line-height:1; }
+.fl-sub { font-size:11px; color:var(--text3); margin-top:3px; font-weight:500; }
+.fl-delta { font-size:12px; font-weight:600; margin-top:4px; display:flex; align-items:center; gap:4px; }
+.fl-delta.up { color:var(--green); }
+.fl-delta.down { color:var(--red); }
+
+/* ─────────────────────────────────────────────
+   LOGO BAR
+───────────────────────────────────────────── */
+.logo-bar { border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:40px; background:var(--bg); }
+.logo-bar-inner { max-width:1280px; margin:0 auto; }
+.lb-label { text-align:center; font-size:13px; color:var(--text3); font-weight:500; margin-bottom:28px; letter-spacing:.04em; text-transform:uppercase; }
+.logos { display:flex; align-items:center; justify-content:center; gap:48px; flex-wrap:wrap; }
+.logo-item {
+  font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:700;
+  color:var(--border2); letter-spacing:-0.5px; transition:color .2s;
+}
+.logo-item:hover { color:var(--text3); }
+
+/* ─────────────────────────────────────────────
+   STATS
+───────────────────────────────────────────── */
+.stats-section { padding:80px 40px; background:var(--navy); }
+.stats-inner { max-width:1280px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:rgba(255,255,255,.08); border-radius:16px; overflow:hidden; }
+.stat-item { background:var(--navy); padding:40px 36px; }
+.stat-n { font-family:'Bricolage Grotesque',sans-serif; font-size:52px; font-weight:800; color:#fff; line-height:1; letter-spacing:-2px; }
+.stat-n span { color:#6B9FFF; }
+.stat-d { font-size:14px; color:rgba(255,255,255,.45); margin-top:8px; font-weight:500; }
+.stat-delta { font-size:12px; color:#6BFFA4; font-weight:600; margin-top:6px; display:flex; align-items:center; gap:4px; }
+
+/* ─────────────────────────────────────────────
+   SECTION COMMONS
+───────────────────────────────────────────── */
+.section { padding:100px 40px; max-width:1280px; margin:0 auto; }
+.section-alt { background:var(--bg2); }
+.section-alt-inner { max-width:1280px; margin:0 auto; padding:100px 40px; }
+.label { font-size:12px; font-weight:700; color:var(--brand); letter-spacing:.08em; text-transform:uppercase; margin-bottom:12px; display:block; }
+h2.hd {
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:clamp(34px,3.8vw,52px); font-weight:800;
+  letter-spacing:-1.5px; line-height:1.1; color:var(--navy);
+  margin-bottom:16px;
+}
+h2.hd span { color:var(--brand); }
+.sub-copy { font-size:17px; color:var(--text2); line-height:1.75; max-width:520px; font-weight:400; }
+.sub-copy.center { margin:0 auto; text-align:center; }
+.section-header { text-align:center; margin-bottom:64px; }
+
+/* ─────────────────────────────────────────────
+   3-PHASE TABS
+───────────────────────────────────────────── */
+.phase-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:48px; }
+.ptab {
+  padding:24px 28px; border-radius:var(--radius); border:1.5px solid var(--border);
+  background:#fff; cursor:pointer; transition:all .2s; position:relative; overflow:hidden;
+}
+.ptab::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:transparent; transition:background .2s; }
+.ptab.active { border-color:var(--brand); background:var(--brand-light); box-shadow:0 4px 20px rgba(0,87,255,.1); }
+.ptab.active::before { background:var(--brand); }
+.ptab-num { font-size:11px; font-weight:700; color:var(--text3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+.ptab.active .ptab-num { color:var(--brand); }
+.ptab-title { font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.ptab.active .ptab-title { color:var(--navy); }
+.ptab-desc { font-size:13px; color:var(--text3); line-height:1.6; }
+.ptab.active .ptab-desc { color:var(--text2); }
+
+/* Phase content panels */
+.phase-panel { display:none; }
+.phase-panel.active { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+.panel-text h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:32px; font-weight:800; letter-spacing:-1px; color:var(--navy); margin-bottom:14px; line-height:1.2; }
+.panel-text p { font-size:16px; color:var(--text2); line-height:1.75; margin-bottom:28px; }
+.feat-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.feat-list li { display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--text2); line-height:1.5; }
+.feat-list li .check { width:18px; height:18px; border-radius:50%; background:var(--brand-light); border:1px solid var(--brand-mid); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; font-size:10px; color:var(--brand); }
+
+/* Panel mockups */
+.panel-visual { position:relative; }
+.card-ui {
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg); overflow:hidden;
+}
+.cui-header { background:var(--bg2); border-bottom:1px solid var(--border); padding:14px 20px; display:flex; align-items:center; gap:8px; }
+.cui-dots { display:flex; gap:5px; }
+.cui-dot { width:10px; height:10px; border-radius:50%; }
+.cui-title { font-size:12px; font-weight:600; color:var(--text3); margin-left:8px; }
+.cui-body { padding:20px; }
+
+/* SWOT builder */
+.swot-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.swot-cell { border-radius:8px; padding:12px 14px; }
+.swot-cell .sc-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+.swot-cell .sc-value { font-size:12px; line-height:1.5; }
+.swot-cell.strength { background:var(--green-bg); border:1px solid rgba(0,135,90,.15); }
+.swot-cell.strength .sc-label { color:var(--green); }
+.swot-cell.weakness { background:var(--red-bg); border:1px solid rgba(217,45,32,.12); }
+.swot-cell.weakness .sc-label { color:var(--red); }
+.swot-cell.opportunity { background:var(--brand-light); border:1px solid var(--brand-mid); }
+.swot-cell.opportunity .sc-label { color:var(--brand); }
+.swot-cell.threat { background:var(--amber-bg); border:1px solid rgba(181,71,8,.15); }
+.swot-cell.threat .sc-label { color:var(--amber); }
+.generate-btn { width:100%; background:var(--brand); color:#fff; border:none; border-radius:8px; padding:12px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; margin-bottom:14px; font-family:inherit; }
+.generate-btn:hover { background:var(--brand-dark); }
+.script-output-box { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.sob-line { display:flex; gap:8px; margin-bottom:9px; align-items:flex-start; }
+.sob-line:last-child { margin-bottom:0; }
+.sob-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.sob-text { font-size:12px; color:var(--text2); line-height:1.55; }
+.sob-text strong { color:var(--text); font-weight:600; }
+
+/* Live emotion UI */
+.emo-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:14px; }
+.emo-meter { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.em-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.em-label { font-size:12px; font-weight:600; color:var(--text); }
+.em-val { font-family:'Bricolage Grotesque',sans-serif; font-size:20px; font-weight:700; }
+.em-bar { height:6px; background:var(--border); border-radius:100px; overflow:hidden; }
+.em-fill { height:100%; border-radius:100px; }
+.objection-card { background:var(--amber-bg); border:1px solid rgba(181,71,8,.2); border-radius:10px; padding:14px; margin-bottom:10px; }
+.oc-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.oc-badge { background:var(--amber); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; }
+.oc-time { font-size:11px; color:var(--text3); }
+.oc-text { font-size:12px; color:var(--text2); margin-bottom:6px; }
+.oc-response { display:flex; gap:6px; align-items:flex-start; background:#fff; border-radius:6px; padding:8px 10px; border:1px solid rgba(181,71,8,.1); }
+.ocr-label { font-size:10px; font-weight:700; color:var(--brand); white-space:nowrap; }
+.ocr-text { font-size:11px; color:var(--text2); line-height:1.5; }
+
+/* Post-call scorecard */
+.score-hero { display:flex; align-items:center; gap:20px; margin-bottom:16px; padding:16px; background:var(--bg2); border-radius:10px; border:1px solid var(--border); }
+.score-circle { width:72px; height:72px; border-radius:50%; background:var(--brand); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.sc-num { font-family:'Bricolage Grotesque',sans-serif; font-size:28px; font-weight:800; color:#fff; line-height:1; }
+.score-info h4 { font-size:15px; font-weight:700; color:var(--text); }
+.score-info p { font-size:13px; color:var(--text3); margin-top:2px; }
+.score-delta { font-size:12px; font-weight:600; color:var(--green); margin-top:4px; }
+.score-bars { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.sb-row { display:flex; align-items:center; gap:10px; }
+.sb-label { font-size:12px; color:var(--text2); width:110px; flex-shrink:0; }
+.sb-track { flex:1; height:6px; background:var(--border); border-radius:100px; overflow:hidden; }
+.sb-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--brand),#6B9FFF); }
+.sb-val { font-size:12px; font-weight:600; color:var(--text); width:28px; text-align:right; }
+.insight-row { display:flex; gap:8px; align-items:flex-start; padding:8px 10px; background:var(--brand-light); border-radius:8px; border:1px solid var(--brand-mid); }
+.ir-icon { font-size:14px; flex-shrink:0; }
+.ir-text { font-size:12px; color:var(--text2); line-height:1.5; }
+.ir-text strong { color:var(--brand); font-weight:600; }
+
+/* ─────────────────────────────────────────────
+   FEATURES GRID
+───────────────────────────────────────────── */
+.features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.feature-card {
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:32px 28px; transition:all .25s;
+}
+.feature-card:hover { border-color:var(--brand-mid); transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+.fc-icon { width:44px; height:44px; border-radius:10px; background:var(--brand-light); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:20px; }
+.fc-title { font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:700; color:var(--navy); margin-bottom:10px; }
+.fc-desc { font-size:14px; color:var(--text2); line-height:1.7; }
+
+/* ─────────────────────────────────────────────
+   PHONE LINE SECTION
+───────────────────────────────────────────── */
+.phone-section { background:var(--navy); padding:100px 40px; }
+.phone-inner { max-width:1280px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.phone-text .label { color:#6B9FFF; }
+.phone-text h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(36px,4vw,52px); font-weight:800; letter-spacing:-1.5px; line-height:1.1; color:#fff; margin-bottom:16px; }
+.phone-text h2 span { color:#6B9FFF; }
+.phone-text p { font-size:17px; color:rgba(255,255,255,.55); line-height:1.75; margin-bottom:40px; }
+.spec-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:40px; }
+.spec-item { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:var(--radius); padding:20px; transition:all .2s; }
+.spec-item:hover { background:rgba(255,255,255,.08); border-color:rgba(107,159,255,.4); }
+.si-val { font-family:'Bricolage Grotesque',sans-serif; font-size:32px; font-weight:800; color:#fff; line-height:1; }
+.si-unit { font-size:14px; font-weight:500; color:rgba(255,255,255,.3); }
+.si-label { font-size:12px; color:rgba(255,255,255,.4); margin-top:6px; font-weight:500; }
+.btn-white { background:#fff; color:var(--navy); padding:14px 28px; border-radius:10px; font-size:15px; font-weight:700; text-decoration:none; transition:all .2s; display:inline-flex; align-items:center; gap:8px; }
+.btn-white:hover { background:var(--brand-light); color:var(--brand); transform:translateY(-2px); box-shadow:0 8px 32px rgba(255,255,255,.15); }
+.btn-white-ghost { border:1.5px solid rgba(255,255,255,.2); color:rgba(255,255,255,.7); padding:13px 28px; border-radius:10px; font-size:15px; font-weight:600; text-decoration:none; transition:all .2s; display:inline-flex; align-items:center; gap:8px; }
+.btn-white-ghost:hover { border-color:rgba(255,255,255,.5); color:#fff; }
+
+/* Phone dashboard */
+.phone-dashboard { background:#fff; border-radius:var(--radius-lg); box-shadow:0 32px 100px rgba(0,0,0,.4); overflow:hidden; }
+.pd-header { background:var(--navy2); padding:16px 20px; display:flex; align-items:center; justify-content:space-between; }
+.pd-brand { display:flex; align-items:center; gap:8px; }
+.pd-dot { width:10px; height:10px; border-radius:50%; }
+.pd-number { font-family:'Bricolage Grotesque',sans-serif; font-size:15px; font-weight:700; color:#fff; }
+.pd-active { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:#6BFFA4; }
+.pd-active::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; animation:blink 1.5s infinite; }
+.pd-body { padding:20px; }
+.pd-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.pds { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:14px 12px; text-align:center; }
+.pds-v { font-family:'Bricolage Grotesque',sans-serif; font-size:22px; font-weight:800; color:var(--text); }
+.pds-l { font-size:10px; color:var(--text3); margin-top:3px; text-transform:uppercase; letter-spacing:.06em; font-weight:600; }
+.pd-reps { display:flex; flex-direction:column; gap:8px; }
+.rep-row { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#fff; }
+.rep-av { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+.rep-info { flex:1; }
+.rep-name { font-size:13px; font-weight:600; color:var(--text); }
+.rep-detail { font-size:11px; color:var(--text3); margin-top:1px; }
+.rep-score { font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:700; }
+.rep-status { font-size:11px; font-weight:600; }
+.usage-bar { margin-top:16px; }
+.ub-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:12px; }
+.ub-label { font-weight:600; color:var(--text); }
+.ub-count { color:var(--text3); }
+.ub-track { height:8px; background:var(--border); border-radius:100px; overflow:hidden; }
+.ub-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--brand),#6B9FFF); width:56%; }
+
+/* ─────────────────────────────────────────────
+   TESTIMONIALS
+───────────────────────────────────────────── */
+.testimonials { padding:100px 40px; background:var(--bg2); }
+.testimonials-inner { max-width:1280px; margin:0 auto; }
+.tgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.tcard { background:#fff; border:1px solid var(--border); border-radius:var(--radius-lg); padding:36px 32px; transition:all .25s; }
+.tcard:hover { border-color:var(--brand-mid); transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+.tcard-stars { color:#F5A623; font-size:14px; letter-spacing:3px; margin-bottom:16px; }
+.tcard-q { font-size:16px; color:var(--text); line-height:1.7; margin-bottom:24px; font-weight:400; }
+.tcard-q strong { color:var(--navy); font-weight:700; }
+.tcard-author { display:flex; align-items:center; gap:12px; border-top:1px solid var(--border); padding-top:20px; }
+.ta-av { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#fff; flex-shrink:0; }
+.ta-name { font-size:14px; font-weight:700; color:var(--text); }
+.ta-role { font-size:12px; color:var(--text3); margin-top:1px; }
+.ta-logo { margin-left:auto; font-family:'Bricolage Grotesque',sans-serif; font-size:14px; font-weight:700; color:var(--border2); }
+
+/* ─────────────────────────────────────────────
+   PRICING
+───────────────────────────────────────────── */
+.pricing-section { padding:100px 40px; max-width:1280px; margin:0 auto; }
+.toggle-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:56px; margin-top:16px; }
+.toggle-opt { font-size:14px; font-weight:600; color:var(--text2); }
+.toggle-opt.active { color:var(--text); }
+.toggle-pill { width:44px; height:24px; background:var(--brand); border-radius:100px; cursor:pointer; position:relative; }
+.toggle-thumb { width:18px; height:18px; background:#fff; border-radius:50%; position:absolute; top:3px; left:3px; transition:left .2s; }
+.save-badge { background:var(--green-bg); color:var(--green); border:1px solid rgba(0,135,90,.2); font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; }
+.pricing-cards { display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:880px; margin:0 auto; }
+.pcard { background:#fff; border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:40px 36px; position:relative; transition:all .25s; }
+.pcard:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+.pcard.featured { background:var(--navy); border-color:transparent; box-shadow:var(--shadow-xl); }
+.pcard.featured:hover { transform:translateY(-6px); }
+.pc-tier { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:16px; display:block; }
+.pcard .pc-tier { color:var(--brand); }
+.pcard.featured .pc-tier { color:#6B9FFF; }
+.pc-price { font-family:'Bricolage Grotesque',sans-serif; font-size:64px; font-weight:800; letter-spacing:-3px; line-height:1; }
+.pcard .pc-price { color:var(--navy); }
+.pcard.featured .pc-price { color:#fff; }
+.pc-price sup { font-size:22px; font-weight:700; letter-spacing:0; vertical-align:super; }
+.pc-price sub { font-size:16px; font-weight:500; letter-spacing:0; opacity:.5; font-family:'Plus Jakarta Sans',sans-serif; }
+.pc-sub { font-size:15px; margin:10px 0 28px; }
+.pcard .pc-sub { color:var(--text2); }
+.pcard.featured .pc-sub { color:rgba(255,255,255,.5); }
+/* Phone line highlight */
+.phl { border-radius:10px; padding:14px 16px; margin-bottom:24px; display:flex; gap:12px; align-items:flex-start; }
+.pcard.featured .phl { background:rgba(107,159,255,.1); border:1px solid rgba(107,159,255,.25); }
+.phl-icon { font-size:20px; flex-shrink:0; }
+.phl-name { font-size:13px; font-weight:700; color:#6B9FFF; display:block; }
+.phl-desc { font-size:12px; color:rgba(255,255,255,.4); }
+.pc-divider { border:none; border-top:1px solid; margin-bottom:24px; }
+.pcard .pc-divider { border-color:var(--border); }
+.pcard.featured .pc-divider { border-color:rgba(255,255,255,.1); }
+.pc-feats { list-style:none; display:flex; flex-direction:column; gap:11px; margin-bottom:36px; }
+.pc-feats li { display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.5; }
+.pc-feats li .ck { width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; margin-top:1px; }
+.pcard .pc-feats li { color:var(--text2); }
+.pcard .pc-feats li .ck { background:var(--brand-light); color:var(--brand); border:1px solid var(--brand-mid); }
+.pcard.featured .pc-feats li { color:rgba(255,255,255,.65); }
+.pcard.featured .pc-feats li .ck { background:rgba(107,159,255,.15); color:#6B9FFF; border:1px solid rgba(107,159,255,.3); }
+.pc-feats li strong { font-weight:600; }
+.pcard .pc-feats li strong { color:var(--text); }
+.pcard.featured .pc-feats li strong { color:#fff; }
+.pc-btn { display:block; width:100%; text-align:center; padding:14px; border-radius:10px; font-size:14px; font-weight:700; text-decoration:none; transition:all .25s; }
+.pcard .pc-btn { background:var(--brand); color:#fff; box-shadow:0 2px 12px rgba(0,87,255,.25); }
+.pcard .pc-btn:hover { background:var(--brand-dark); transform:translateY(-1px); box-shadow:0 6px 24px rgba(0,87,255,.35); }
+.pcard.featured .pc-btn { background:#fff; color:var(--navy); }
+.pcard.featured .pc-btn:hover { background:var(--brand); color:#fff; }
+.pcard.most-pop::after {
+  content:'Most Popular';
+  position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  background:var(--brand); color:#fff;
+  font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  padding:5px 16px; border-radius:100px;
+  white-space:nowrap;
+}
+/* Enterprise row */
+.enterprise-row {
+  max-width:880px; margin:20px auto 0;
+  background:var(--bg2); border:1.5px solid var(--border);
+  border-radius:var(--radius-lg); padding:32px 40px;
+  display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;
+}
+.er-left .er-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--brand); margin-bottom:6px; }
+.er-left h3 { font-family:'Bricolage Grotesque',sans-serif; font-size:22px; font-weight:800; color:var(--navy); letter-spacing:-.5px; margin-bottom:6px; }
+.er-left p { font-size:14px; color:var(--text2); }
+.er-btns { display:flex; gap:10px; flex-shrink:0; flex-wrap:wrap; }
+.btn-call { background:var(--navy); color:#fff; padding:12px 24px; border-radius:8px; font-size:14px; font-weight:700; text-decoration:none; transition:all .2s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+.btn-call:hover { background:var(--brand); }
+.btn-learn { border:1.5px solid var(--border2); color:var(--text); padding:11px 22px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; transition:all .2s; }
+.btn-learn:hover { border-color:var(--brand); color:var(--brand); }
+
+/* ─────────────────────────────────────────────
+   FAQ
+───────────────────────────────────────────── */
+.faq-section { padding:80px 40px; background:var(--bg2); border-top:1px solid var(--border); }
+.faq-inner { max-width:760px; margin:0 auto; }
+.faq-header { text-align:center; margin-bottom:48px; }
+.faq-item { background:#fff; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:10px; overflow:hidden; transition:box-shadow .2s; }
+.faq-item:hover { box-shadow:var(--shadow-sm); }
+.faq-item.open { box-shadow:var(--shadow-md); border-color:var(--brand-mid); }
+.faq-q { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; cursor:pointer; }
+.faq-q-text { font-size:15px; font-weight:600; color:var(--text); padding-right:16px; }
+.faq-icon { width:24px; height:24px; border-radius:50%; border:1.5px solid var(--border2); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .3s; color:var(--text3); font-size:16px; }
+.faq-item.open .faq-icon { background:var(--brand); border-color:var(--brand); color:#fff; transform:rotate(45deg); }
+.faq-a { font-size:14px; color:var(--text2); line-height:1.75; max-height:0; overflow:hidden; transition:max-height .4s ease, padding .3s; padding:0 24px; }
+.faq-item.open .faq-a { max-height:200px; padding:0 24px 20px; }
+
+/* ─────────────────────────────────────────────
+   FINAL CTA
+───────────────────────────────────────────── */
+.final-cta { background:var(--brand); padding:100px 40px; text-align:center; position:relative; overflow:hidden; }
+.final-cta::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(255,255,255,.08),transparent);
+  pointer-events:none;
+}
+.final-cta-inner { max-width:680px; margin:0 auto; position:relative; }
+.final-cta .label { color:rgba(255,255,255,.6); }
+.final-cta h2 { font-family:'Bricolage Grotesque',sans-serif; font-size:clamp(36px,5vw,60px); font-weight:800; letter-spacing:-2px; color:#fff; line-height:1.1; margin-bottom:16px; }
+.final-cta p { font-size:18px; color:rgba(255,255,255,.7); line-height:1.7; margin-bottom:40px; }
+.final-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:24px; }
+.fine { font-size:13px; color:rgba(255,255,255,.45); }
+
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+footer { background:var(--navy); padding:64px 40px 32px; }
+.footer-inner { max-width:1280px; margin:0 auto; }
+.footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:48px; padding-bottom:48px; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:32px; }
+.foot-brand p { font-size:14px; color:rgba(255,255,255,.35); line-height:1.7; max-width:240px; margin-top:12px; }
+.foot-nav h5 { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:16px; }
+.foot-nav ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.foot-nav ul a { font-size:14px; color:rgba(255,255,255,.45); text-decoration:none; transition:color .2s; }
+.foot-nav ul a:hover { color:rgba(255,255,255,.8); }
+.footer-bottom { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.footer-bottom p { font-size:13px; color:rgba(255,255,255,.25); }
+.footer-legal { display:flex; gap:20px; }
+.footer-legal a { font-size:13px; color:rgba(255,255,255,.25); text-decoration:none; transition:color .2s; }
+.footer-legal a:hover { color:rgba(255,255,255,.55); }
+
+/* ─────────────────────────────────────────────
+   SCROLL REVEAL
+───────────────────────────────────────────── */
+.reveal { opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+.reveal.vis { opacity:1; transform:translateY(0); }
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────── */
+@media(max-width:1024px){
+  nav { padding:0 20px; }
+  .nav-links { display:none; }
+  .hero { grid-template-columns:1fr; padding:120px 20px 60px; gap:48px; }
+  .hero-blob { display:none; }
+  .stats-inner { grid-template-columns:1fr 1fr; }
+  .section, .section-alt-inner, .pricing-section { padding:70px 20px; }
+  .phase-tabs { grid-template-columns:1fr; }
+  .phase-panel.active { grid-template-columns:1fr; }
+  .features-grid { grid-template-columns:1fr; }
+  .phone-inner { grid-template-columns:1fr; padding:70px 20px; gap:48px; }
+  .phone-section { padding:0; }
+  .tgrid { grid-template-columns:1fr; }
+  .pricing-cards { grid-template-columns:1fr; max-width:480px; }
+  .enterprise-row { flex-direction:column; }
+  .footer-top { grid-template-columns:1fr 1fr; }
+  footer { padding:48px 20px 28px; }
+  .logo-bar { padding:32px 20px; }
+  .testimonials { padding:70px 20px; }
+  .faq-section { padding:60px 20px; }
+  .final-cta { padding:70px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAV ══════════ -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">V</div>
+    <span class="nav-logo-name">Velox AI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#platform">Platform</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#phone">Phone Lines</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#enterprise">Enterprise</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#" class="nav-signin">Sign in</a>
+    <a href="#" class="nav-demo">Book a demo</a>
+    <a href="#pricing" class="nav-cta">Start free trial</a>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<div style="background:var(--bg); position:relative;">
+  <div class="hero">
+    <div class="hero-blob"></div>
+
+    <!-- LEFT -->
+    <div>
+      <div class="hero-eyebrow"><div class="hero-eyebrow-dot"></div>AI-Powered Sales Intelligence</div>
+      <h1>Close more deals with <span class="highlight">AI coaching</span> on every call</h1>
+      <p class="hero-sub">Velox AI generates your script before the call, coaches your reps live with emotion detection, and delivers deep analysis after — so every conversation makes your team smarter.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-primary">Start free trial <span>→</span></a>
+        <a href="#" class="btn-secondary">Watch 2-min demo ▶</a>
+      </div>
+      <div class="social-proof">
+        <div class="avatar-stack">
+          <div class="av" style="background:#3B6EE8">JR</div>
+          <div class="av" style="background:#E83B6E">SM</div>
+          <div class="av" style="background:#3BE89A;color:var(--navy)">DK</div>
+          <div class="av" style="background:#E8993B">AW</div>
+        </div>
+        <div>
+          <div class="sp-stars">★★★★★</div>
+          <div class="sp-text"><strong>4.9/5</strong> from 2,400+ sales professionals</div>
+        </div>
+        <div style="width:1px;height:28px;background:var(--border)"></div>
+        <div class="sp-text"><strong>No credit card</strong> required</div>
+      </div>
+    </div>
+
+    <!-- RIGHT - Dashboard -->
+    <div class="hero-visual reveal">
+      <div class="dashboard">
+        <div class="dash-titlebar">
+          <div class="dtb-dots">
+            <div class="dtb-dot" style="background:#FF5F57"></div>
+            <div class="dtb-dot" style="background:#FEBC2E"></div>
+            <div class="dtb-dot" style="background:#28C840"></div>
+          </div>
+          <div class="dtb-url">app.velox.ai/call/live</div>
+        </div>
+        <div class="dash-body">
+          <div class="dash-header">
+            <div class="dash-title">Live Call — Meridian Group · Sarah Chen</div>
+            <div class="dash-live">Recording live</div>
+          </div>
+          <!-- Waveform -->
+          <div class="wave-container" id="wv"></div>
+          <!-- Emotions -->
+          <div class="emotion-row">
+            <div class="emo-card">
+              <div class="emo-val" style="color:var(--green)">84</div>
+              <div class="emo-lbl">Interest</div>
+            </div>
+            <div class="emo-card">
+              <div class="emo-val" style="color:var(--red)">32</div>
+              <div class="emo-lbl">Skepticism</div>
+            </div>
+            <div class="emo-card">
+              <div class="emo-val" style="color:var(--brand)">71</div>
+              <div class="emo-lbl">Trust</div>
+            </div>
+            <div class="emo-card">
+              <div class="emo-val" style="color:var(--amber)">60</div>
+              <div class="emo-lbl">Urgency</div>
+            </div>
+          </div>
+          <!-- Alert -->
+          <div class="coach-alert">
+            <div class="ca-header">
+              <div class="ca-badge">⚡ Price Objection Detected</div>
+              <div class="ca-time">6:24 into call</div>
+            </div>
+            <div class="ca-text"><strong>Suggested:</strong> "Most clients recover their investment in under 60 days. Can I show you the ROI model based on your team?"</div>
+          </div>
+          <!-- Script hints -->
+          <div class="script-hint">
+            <div class="sh-icon" style="background:var(--green-bg)">🎯</div>
+            <div class="sh-text"><b>Buying signal</b> — Prospect said "when would we get started?" Move toward close.</div>
+          </div>
+          <div class="script-hint">
+            <div class="sh-icon" style="background:var(--brand-light)">📊</div>
+            <div class="sh-text"><b>Next:</b> Send the 1-page ROI doc on-demand — button ready below.</div>
+          </div>
+        </div>
+      </div>
+      <!-- Floating pills -->
+      <div class="float" style="bottom:-16px;left:-28px;transform:rotate(-2deg)">
+        <div class="fl-val">89<small style="font-size:16px">%</small></div>
+        <div class="fl-sub">Call Score</div>
+        <div class="fl-delta up">▲ +12 this week</div>
+      </div>
+      <div class="float" style="top:24px;right:-24px;transform:rotate(1.5deg)">
+        <div style="font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Pro Plan</div>
+        <div class="fl-val" style="font-size:20px">5,000 min</div>
+        <div class="fl-sub">+ dedicated number</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LOGO BAR ══════════ -->
+<div class="logo-bar">
+  <div class="logo-bar-inner">
+    <div class="lb-label">Trusted by sales teams at leading companies</div>
+    <div class="logos">
+      <div class="logo-item">Meridian</div>
+      <div class="logo-item">NovaTech</div>
+      <div class="logo-item">Apex Group</div>
+      <div class="logo-item">Fieldlink</div>
+      <div class="logo-item">Orbitco</div>
+      <div class="logo-item">Trellis</div>
+      <div class="logo-item">Vantage</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STATS ══════════ -->
+<div class="stats-section">
+  <div class="stats-inner reveal">
+    <div class="stat-item">
+      <div class="stat-n">41<span>%</span></div>
+      <div class="stat-d">Average win rate increase</div>
+      <div class="stat-delta">↑ In first 90 days</div>
+    </div>
+    <div class="stat-item" style="transition-delay:.08s">
+      <div class="stat-n">2.8<span>×</span></div>
+      <div class="stat-d">Faster rep onboarding</div>
+      <div class="stat-delta">↑ Compared to manual coaching</div>
+    </div>
+    <div class="stat-item" style="transition-delay:.16s">
+      <div class="stat-n">18<span>k+</span></div>
+      <div class="stat-d">Reps coached on platform</div>
+      <div class="stat-delta">↑ Growing 40% YoY</div>
+    </div>
+    <div class="stat-item" style="transition-delay:.24s">
+      <div class="stat-n">$2.1<span>B</span></div>
+      <div class="stat-d">Pipeline influenced</div>
+      <div class="stat-delta">↑ Tracked in 2024</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 3-PHASE PLATFORM ══════════ -->
+<div class="section" id="platform">
+  <div class="section-header reveal">
+    <span class="label">The Velox Intelligence Loop</span>
+    <h2 class="hd">One platform. <span>Three unfair advantages.</span></h2>
+    <p class="sub-copy center">The only sales coaching platform that works before, during, and after every call — turning each conversation into a permanent competitive advantage.</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="phase-tabs reveal" style="transition-delay:.1s">
+    <div class="ptab active" onclick="switchTab(0)">
+      <div class="ptab-num">01 — Pre-Call</div>
+      <div class="ptab-title">AI Script Builder</div>
+      <div class="ptab-desc">Generate a personalized, SWOT-powered call script in seconds before you dial.</div>
+    </div>
+    <div class="ptab" onclick="switchTab(1)">
+      <div class="ptab-num">02 — During Call</div>
+      <div class="ptab-title">Live Coaching</div>
+      <div class="ptab-desc">Real-time emotion detection, objection handling, and next-action prompts.</div>
+    </div>
+    <div class="ptab" onclick="switchTab(2)">
+      <div class="ptab-num">03 — Post-Call</div>
+      <div class="ptab-title">Deep Analysis</div>
+      <div class="ptab-desc">Full call scoring, keyword intelligence, and a personalized rep growth plan.</div>
+    </div>
+  </div>
+
+  <!-- Panel 0: Pre-call -->
+  <div class="phase-panel active reveal" id="panel-0" style="transition-delay:.15s">
+    <div class="panel-text">
+      <h3>Walk into every call with a winning script</h3>
+      <p>Enter your company's strengths and weaknesses alongside your target's profile. Velox AI synthesizes a fully personalized, objection-ready call script — tailored to the exact buyer — in under 10 seconds.</p>
+      <ul class="feat-list">
+        <li><span class="check">✓</span>SWOT-driven script generation from your real competitive data</li>
+        <li><span class="check">✓</span>Pre-arms reps for the top 3 objections most likely to arise</li>
+        <li><span class="check">✓</span>Adjusts tone and language to match each buyer persona</li>
+        <li><span class="check">✓</span>Includes competitor battle card and ROI talking points</li>
+        <li><span class="check">✓</span>One-click update as your market landscape shifts</li>
+      </ul>
+    </div>
+    <div class="panel-visual">
+      <div class="card-ui">
+        <div class="cui-header">
+          <div class="cui-dots">
+            <div class="cui-dot" style="background:#FF5F57"></div>
+            <div class="cui-dot" style="background:#FEBC2E"></div>
+            <div class="cui-dot" style="background:#28C840"></div>
+          </div>
+          <div class="cui-title">Velox Script Builder — Pre-Call Intelligence</div>
+        </div>
+        <div class="cui-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Your Company</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">Apex Solutions</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Target Account</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">Meridian Group</div>
+            </div>
+          </div>
+          <div class="swot-grid">
+            <div class="swot-cell strength"><div class="sc-label">Strength</div><div class="sc-value">3× faster onboarding, 99.9% uptime SLA</div></div>
+            <div class="swot-cell weakness"><div class="sc-label">Weakness</div><div class="sc-value">Higher price point vs. legacy incumbents</div></div>
+            <div class="swot-cell opportunity"><div class="sc-label">Opportunity</div><div class="sc-value">Scaling 40% YoY, outgrown current tools</div></div>
+            <div class="swot-cell threat"><div class="sc-label">Concern</div><div class="sc-value">CFO budget scrutiny, needs ROI justification</div></div>
+          </div>
+          <button class="generate-btn">⚡ Generate Script</button>
+          <div class="script-output-box">
+            <div class="sob-line"><div class="sob-dot" style="background:var(--brand)"></div><div class="sob-text"><strong>Open:</strong> "I saw Meridian just hit 40% growth — exactly the stage where legacy tools become the bottleneck..."</div></div>
+            <div class="sob-line"><div class="sob-dot" style="background:var(--green)"></div><div class="sob-text"><strong>Lead with:</strong> 3× onboarding speed — addresses Q3 disruption concern directly</div></div>
+            <div class="sob-line"><div class="sob-dot" style="background:var(--amber)"></div><div class="sob-text"><strong>Pre-empt price:</strong> "We're priced higher intentionally — here's the 60-day ROI math..."</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 1: Live -->
+  <div class="phase-panel" id="panel-1">
+    <div class="panel-text">
+      <h3>Your AI coach is on every single call</h3>
+      <p>Velox reads your prospect's emotional state in real time — surfacing skepticism, excitement, and buying intent the moment it appears — so your reps respond confidently instead of guessing.</p>
+      <ul class="feat-list">
+        <li><span class="check">✓</span>6-dimension live emotion and sentiment analysis</li>
+        <li><span class="check">✓</span>Objection classified and responded to in under 2 seconds</li>
+        <li><span class="check">✓</span>Competitor mentions trigger instant battle card overlay</li>
+        <li><span class="check">✓</span>Talk/listen ratio and filler word coaching</li>
+        <li><span class="check">✓</span>Silent coaching — invisible to your prospect</li>
+      </ul>
+    </div>
+    <div class="panel-visual">
+      <div class="card-ui">
+        <div class="cui-header">
+          <div class="cui-dots">
+            <div class="cui-dot" style="background:#FF5F57"></div>
+            <div class="cui-dot" style="background:#FEBC2E"></div>
+            <div class="cui-dot" style="background:#28C840"></div>
+          </div>
+          <div class="cui-title">Live Coaching — 7:14 into call</div>
+        </div>
+        <div class="cui-body">
+          <div class="emo-grid">
+            <div class="emo-meter">
+              <div class="em-top"><div class="em-label">Interest</div><div class="em-val" style="color:var(--green)">84</div></div>
+              <div class="em-bar"><div class="em-fill" style="width:84%;background:var(--green)"></div></div>
+            </div>
+            <div class="emo-meter">
+              <div class="em-top"><div class="em-label">Trust</div><div class="em-val" style="color:var(--brand)">71</div></div>
+              <div class="em-bar"><div class="em-fill" style="width:71%;background:var(--brand)"></div></div>
+            </div>
+            <div class="emo-meter">
+              <div class="em-top"><div class="em-label">Skepticism</div><div class="em-val" style="color:var(--red)">32</div></div>
+              <div class="em-bar"><div class="em-fill" style="width:32%;background:var(--red)"></div></div>
+            </div>
+            <div class="emo-meter">
+              <div class="em-top"><div class="em-label">Urgency</div><div class="em-val" style="color:var(--amber)">61</div></div>
+              <div class="em-bar"><div class="em-fill" style="width:61%;background:var(--amber)"></div></div>
+            </div>
+          </div>
+          <div class="objection-card">
+            <div class="oc-header"><div class="oc-badge">Price Objection</div><div class="oc-time">4:22</div></div>
+            <div class="oc-text">"This is more than what we have budgeted right now."</div>
+            <div class="oc-response">
+              <div class="ocr-label">AI →</div>
+              <div class="ocr-text">"Most clients recover costs in under 60 days. Want me to walk through the ROI model for your team size?"</div>
+            </div>
+          </div>
+          <div class="objection-card" style="background:var(--brand-light);border:1px solid var(--brand-mid)">
+            <div class="oc-header"><div class="oc-badge" style="background:var(--brand)">🎯 Buying Signal</div><div class="oc-time">7:08</div></div>
+            <div class="oc-text" style="color:var(--text)">"When would we be able to get started?"</div>
+            <div class="oc-response" style="border:1px solid var(--brand-mid)">
+              <div class="ocr-label">AI →</div>
+              <div class="ocr-text">Strong intent detected — pivot to close. Mention 2-week onboarding timeline and propose next step.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 2: Post-call -->
+  <div class="phase-panel" id="panel-2">
+    <div class="panel-text">
+      <h3>Every call produces a full growth plan</h3>
+      <p>Velox scores every call across 40+ competency dimensions, extracts buyer intent keywords, and generates a personalized coaching roadmap for each rep — automatically sent to both rep and manager.</p>
+      <ul class="feat-list">
+        <li><span class="check">✓</span>40+ dimension competency scoring with benchmarks</li>
+        <li><span class="check">✓</span>Moment-level transcript with AI commentary</li>
+        <li><span class="check">✓</span>Buyer intent keyword extraction and deal risk scoring</li>
+        <li><span class="check">✓</span>Automated manager digest — saves 4+ hours per week</li>
+        <li><span class="check">✓</span>Personalized rep growth roadmap with assigned modules</li>
+      </ul>
+    </div>
+    <div class="panel-visual">
+      <div class="card-ui">
+        <div class="cui-header">
+          <div class="cui-dots">
+            <div class="cui-dot" style="background:#FF5F57"></div>
+            <div class="cui-dot" style="background:#FEBC2E"></div>
+            <div class="cui-dot" style="background:#28C840"></div>
+          </div>
+          <div class="cui-title">Post-Call Analysis — Jordan Rivera</div>
+        </div>
+        <div class="cui-body">
+          <div class="score-hero">
+            <div class="score-circle"><div class="sc-num">87</div></div>
+            <div class="score-info">
+              <h4>Excellent Call Performance</h4>
+              <p>Top 8% of your team · Meridian Group · 18 min</p>
+              <div class="score-delta">▲ +11 from last call average</div>
+            </div>
+          </div>
+          <div class="score-bars">
+            <div class="sb-row"><div class="sb-label">Discovery</div><div class="sb-track"><div class="sb-fill" style="width:92%"></div></div><div class="sb-val">92</div></div>
+            <div class="sb-row"><div class="sb-label">Objection Handling</div><div class="sb-track"><div class="sb-fill" style="width:79%"></div></div><div class="sb-val">79</div></div>
+            <div class="sb-row"><div class="sb-label">Closing Attempts</div><div class="sb-track"><div class="sb-fill" style="width:84%"></div></div><div class="sb-val">84</div></div>
+            <div class="sb-row"><div class="sb-label">Talk/Listen Ratio</div><div class="sb-track"><div class="sb-fill" style="width:68%"></div></div><div class="sb-val">68</div></div>
+          </div>
+          <div class="insight-row">
+            <div class="ir-icon">💡</div>
+            <div class="ir-text"><strong>Key insight:</strong> Missed close attempt at 7:08 when prospect asked about onboarding timeline — prime buying signal. Practice "direct close" drill in module 4B.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FEATURES GRID ══════════ -->
+<div class="section-alt">
+  <div class="section-alt-inner">
+    <div class="section-header reveal">
+      <span class="label">Platform Capabilities</span>
+      <h2 class="hd">Everything your team needs to <span>win more</span></h2>
+      <p class="sub-copy center">Velox replaces your scattered stack of coaching tools, dialers, and recording software with one intelligent, integrated platform.</p>
+    </div>
+    <div class="features-grid reveal" id="features" style="transition-delay:.1s">
+      <div class="feature-card">
+        <div class="fc-icon">🧠</div>
+        <div class="fc-title">SWOT-Powered Script Builder</div>
+        <div class="fc-desc">Input your company and prospect data — Velox generates a complete, objection-ready call script personalized to each buyer in under 10 seconds.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon">❤️</div>
+        <div class="fc-title">Live Emotion Detection</div>
+        <div class="fc-desc">Our proprietary 6-dimension emotion engine reads interest, trust, urgency, and skepticism in real time — so reps always know how the prospect truly feels.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon">⚡</div>
+        <div class="fc-title">Real-Time Objection Handling</div>
+        <div class="fc-desc">The moment an objection is detected, Velox classifies it and surfaces the proven response — price, competitor, timing, and 20+ other objection types.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon">📊</div>
+        <div class="fc-title">40-Dimension Call Scoring</div>
+        <div class="fc-desc">Every call is automatically scored across discovery, objection handling, closing technique, talk ratio, and 36 more competencies mapped to your playbook.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon">📞</div>
+        <div class="fc-title">Dedicated Business Phone Line</div>
+        <div class="fc-desc">Every Pro plan includes a professional dedicated number with 5,000 minutes. No third-party dialer needed — Velox is your complete calling infrastructure.</div>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon">🎯</div>
+        <div class="fc-title">Personalized Growth Roadmaps</div>
+        <div class="fc-desc">After every call, each rep receives a prioritized coaching plan with specific module assignments, peer benchmarks, and a clear path to their next performance level.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PHONE LINE ══════════ -->
+<div class="phone-section" id="phone">
+  <div class="phone-inner">
+    <div class="phone-text">
+      <span class="label">Dedicated Phone Infrastructure</span>
+      <h2>Your team's own <span>business phone line.</span> Included.</h2>
+      <p>Every Pro plan comes with a real, dedicated US business number backed by carrier-grade infrastructure — fully integrated with Velox AI coaching. No Twilio account. No third-party dialer. Just one platform.</p>
+      <div class="spec-grid">
+        <div class="spec-item">
+          <div class="si-val">5,000 <span class="si-unit">min</span></div>
+          <div class="si-label">Monthly minutes included</div>
+        </div>
+        <div class="spec-item">
+          <div class="si-val">3 <span class="si-unit">seats</span></div>
+          <div class="si-label">Users on Pro plan</div>
+        </div>
+        <div class="spec-item">
+          <div class="si-val">1 <span class="si-unit">number</span></div>
+          <div class="si-label">Dedicated business line</div>
+        </div>
+        <div class="spec-item">
+          <div class="si-val">99.9<span class="si-unit">%</span></div>
+          <div class="si-label">Uptime SLA guaranteed</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a href="#pricing" class="btn-white">Get your line — $200/mo →</a>
+        <a href="#" class="btn-white-ghost">See all integrations</a>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="phone-dashboard">
+        <div class="pd-header">
+          <div class="pd-brand">
+            <div style="width:8px;height:8px;border-radius:50%;background:#6B9FFF"></div>
+            <div class="pd-number">+1 (888) 924-7731</div>
+          </div>
+          <div class="pd-active">3 reps active</div>
+        </div>
+        <div class="pd-body">
+          <div class="pd-stats">
+            <div class="pds"><div class="pds-v">2,841</div><div class="pds-l">Min Used</div></div>
+            <div class="pds"><div class="pds-v">2,159</div><div class="pds-l">Remaining</div></div>
+            <div class="pds"><div class="pds-v">47</div><div class="pds-l">Today</div></div>
+          </div>
+          <div class="pd-reps">
+            <div class="rep-row">
+              <div class="rep-av" style="background:linear-gradient(135deg,#3B6EE8,#6B9FFF)">JR</div>
+              <div class="rep-info"><div class="rep-name">Jordan Rivera</div><div class="rep-detail">Meridian Group · Ended 4 min ago · 18 min</div></div>
+              <div style="text-align:right"><div class="rep-score" style="color:var(--green)">91</div><div class="rep-status" style="color:var(--text3)">Scored</div></div>
+            </div>
+            <div class="rep-row">
+              <div class="rep-av" style="background:linear-gradient(135deg,#E83B6E,#FF9FBF)">SM</div>
+              <div class="rep-info"><div class="rep-name">Sara Malone</div><div class="rep-detail">NovaTech Inc. · On call · 8:24 elapsed</div></div>
+              <div style="text-align:right"><div class="rep-score" style="color:var(--brand)">📞</div><div class="rep-status" style="color:var(--brand)">Live</div></div>
+            </div>
+            <div class="rep-row">
+              <div class="rep-av" style="background:linear-gradient(135deg,#1a6b3a,#3BE89A)">DK</div>
+              <div class="rep-info"><div class="rep-name">David Kim</div><div class="rep-detail">Apex Group · Ended 12 min ago · 22 min</div></div>
+              <div style="text-align:right"><div class="rep-score" style="color:var(--green)">88</div><div class="rep-status" style="color:var(--text3)">Scored</div></div>
+            </div>
+          </div>
+          <div class="usage-bar">
+            <div class="ub-header">
+              <div class="ub-label">Monthly Minutes</div>
+              <div class="ub-count">2,841 / 5,000 used</div>
+            </div>
+            <div class="ub-track"><div class="ub-fill"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TESTIMONIALS ══════════ -->
+<div class="testimonials">
+  <div class="testimonials-inner">
+    <div class="section-header reveal">
+      <span class="label">Customer Stories</span>
+      <h2 class="hd">Teams that switched never <span>looked back</span></h2>
+      <p class="sub-copy center">From solo reps to 50-person revenue orgs, Velox AI has become the unfair advantage that leading sales teams refuse to give up.</p>
+    </div>
+    <div class="tgrid">
+      <div class="tcard reveal">
+        <div class="tcard-stars">★★★★★</div>
+        <blockquote class="tcard-q">"The pre-call script builder changed everything. We stopped winging discovery and started <strong>leading with exactly the right value prop</strong> for each prospect. Win rate up 38% in 90 days."</blockquote>
+        <div class="tcard-author">
+          <div class="ta-av" style="background:linear-gradient(135deg,#3B6EE8,#6B9FFF)">JR</div>
+          <div><div class="ta-name">Jordan Rivera</div><div class="ta-role">VP of Sales · Nexus Cloud</div></div>
+          <div class="ta-logo">NexusCloud</div>
+        </div>
+      </div>
+      <div class="tcard reveal" style="transition-delay:.1s">
+        <div class="tcard-stars">★★★★★</div>
+        <blockquote class="tcard-q">"We replaced three separate tools — dialer, coaching, and recording — with Velox. The <strong>integrated phone line and live objection handling</strong> alone is worth the $200. We'd pay 3× for this."</blockquote>
+        <div class="tcard-author">
+          <div class="ta-av" style="background:linear-gradient(135deg,#E83B6E,#FF9FBF)">SM</div>
+          <div><div class="ta-name">Sarah Malone</div><div class="ta-role">CRO · Fieldlink Technologies</div></div>
+          <div class="ta-logo">Fieldlink</div>
+        </div>
+      </div>
+      <div class="tcard reveal" style="transition-delay:.2s">
+        <div class="tcard-stars">★★★★★</div>
+        <blockquote class="tcard-q">"Post-call analysis flagged that our reps were pitching 4 minutes too early. One change. <strong>31% improvement in close rate.</strong> In a single month. I've never seen anything move a metric that fast."</blockquote>
+        <div class="tcard-author">
+          <div class="ta-av" style="background:linear-gradient(135deg,#1a6b3a,#3BE89A)">DK</div>
+          <div><div class="ta-name">David Kim</div><div class="ta-role">Sales Director · Orbit SaaS</div></div>
+          <div class="ta-logo">OrbitSaaS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PRICING ══════════ -->
+<div class="pricing-section" id="pricing">
+  <div class="section-header reveal">
+    <span class="label">Transparent Pricing</span>
+    <h2 class="hd">Simple pricing. <span>No surprises.</span></h2>
+    <p class="sub-copy center">Everything your team needs to close more deals, in one plan. No hidden fees, no per-minute charges, no feature gates.</p>
+  </div>
+  <div class="toggle-row">
+    <div class="toggle-opt active">Monthly</div>
+    <div class="toggle-pill" onclick="toggleBilling(this)"><div class="toggle-thumb"></div></div>
+    <div class="toggle-opt">Annual</div>
+    <div class="save-badge">Save 20%</div>
+  </div>
+
+  <div class="pricing-cards">
+    <!-- Starter -->
+    <div class="pcard reveal">
+      <span class="pc-tier">Starter</span>
+      <div class="pc-price"><sup>$</sup>79<sub>/mo</sub></div>
+      <p class="pc-sub">For individual reps getting started with AI coaching.</p>
+      <hr class="pc-divider">
+      <ul class="pc-feats">
+        <li><span class="ck">✓</span><span><strong>1 user seat</strong></span></li>
+        <li><span class="ck">✓</span>Script Builder — 10 scripts/month</li>
+        <li><span class="ck">✓</span>Call recording & transcription</li>
+        <li><span class="ck">✓</span>Basic post-call scoring</li>
+        <li><span class="ck">✓</span>500 call minutes/month</li>
+        <li><span class="ck" style="opacity:.3;background:var(--bg2);color:var(--text3);border-color:var(--border)">✗</span><span style="opacity:.4">Dedicated phone number</span></li>
+        <li><span class="ck" style="opacity:.3;background:var(--bg2);color:var(--text3);border-color:var(--border)">✗</span><span style="opacity:.4">Live emotion detection</span></li>
+        <li><span class="ck" style="opacity:.3;background:var(--bg2);color:var(--text3);border-color:var(--border)">✗</span><span style="opacity:.4">Real-time coaching prompts</span></li>
+      </ul>
+      <a href="#" class="pc-btn">Start free — 14 days</a>
+    </div>
+
+    <!-- Pro -->
+    <div class="pcard featured most-pop reveal" style="transition-delay:.1s">
+      <span class="pc-tier">Pro</span>
+      <div class="pc-price"><sup>$</sup>200<sub>/mo</sub></div>
+      <p class="pc-sub">The complete Velox platform for your whole team.</p>
+      <!-- Phone highlight -->
+      <div class="phl">
+        <div class="phl-icon">📞</div>
+        <div>
+          <span class="phl-name">Dedicated Business Phone Line Included</span>
+          <span class="phl-desc">5,000 min · 3 users · 1 dedicated number · 99.9% uptime</span>
+        </div>
+      </div>
+      <hr class="pc-divider">
+      <ul class="pc-feats">
+        <li><span class="ck">✓</span><span><strong>3 user seats</strong></span></li>
+        <li><span class="ck">✓</span><span><strong>Dedicated US business phone number</strong></span></li>
+        <li><span class="ck">✓</span><span><strong>5,000 call minutes/month</strong></span></li>
+        <li><span class="ck">✓</span>Unlimited script generation</li>
+        <li><span class="ck">✓</span>Live emotion & sentiment detection</li>
+        <li><span class="ck">✓</span>Real-time objection coaching</li>
+        <li><span class="ck">✓</span>Full 40-dimension call scoring</li>
+        <li><span class="ck">✓</span>Rep growth roadmaps + manager digest</li>
+        <li><span class="ck">✓</span>CRM integrations (Salesforce, HubSpot)</li>
+      </ul>
+      <a href="#" class="pc-btn">Start free — 14 days</a>
+    </div>
+  </div>
+
+  <!-- Enterprise -->
+  <div class="enterprise-row reveal" style="transition-delay:.15s" id="enterprise">
+    <div class="er-left">
+      <div class="er-label">Enterprise</div>
+      <h3>Need a full-scale revenue intelligence system?</h3>
+      <p>Custom seats, unlimited minutes, white-glove onboarding, SSO, private cloud, and a dedicated success team. Built around your revenue motion.</p>
+    </div>
+    <div class="er-btns">
+      <a href="tel:+18889247731" class="btn-call">📞 Call us to discuss</a>
+      <a href="#" class="btn-learn">Learn more →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FAQ ══════════ -->
+<div class="faq-section">
+  <div class="faq-inner">
+    <div class="faq-header reveal">
+      <span class="label">FAQ</span>
+      <h2 class="hd">Common questions</h2>
+    </div>
+    <div class="faq-item open reveal">
+      <div class="faq-q" onclick="faqToggle(this)">
+        <span class="faq-q-text">What's included with the dedicated phone line?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Every Pro plan includes one dedicated US business phone number with 5,000 minutes per month shared across your 3 user seats. Calls are automatically routed through Velox AI for real-time coaching and are recorded, transcribed, and analyzed automatically. Additional minutes are available at simple per-minute rates with no contracts.</div>
+    </div>
+    <div class="faq-item reveal" style="transition-delay:.05s">
+      <div class="faq-q" onclick="faqToggle(this)">
+        <span class="faq-q-text">How does the SWOT-driven script builder work?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">You provide your company's strengths, weaknesses, and your target prospect's profile (industry, size, pain points, known objections). Velox AI cross-references this against its trained sales model to generate a full call script — opening, discovery questions, value positioning, pre-emptive objection handling, and suggested close. Scripts update automatically as you refine your competitive data.</div>
+    </div>
+    <div class="faq-item reveal" style="transition-delay:.1s">
+      <div class="faq-q" onclick="faqToggle(this)">
+        <span class="faq-q-text">Is the live coaching visible to my prospect?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Never. Live coaching cards appear only in the rep's browser overlay or mobile sidebar. Your prospect hears nothing and sees nothing from their side of the call. From their perspective, your rep sounds exceptionally well-prepared and naturally responsive — because they are.</div>
+    </div>
+    <div class="faq-item reveal" style="transition-delay:.15s">
+      <div class="faq-q" onclick="faqToggle(this)">
+        <span class="faq-q-text">What CRMs and tools does Velox integrate with?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Velox integrates natively with Salesforce, HubSpot, Pipedrive, and Zoho CRM. We also connect with Zoom, Google Meet, and most VOIP platforms via our API. On the Pro plan, Velox replaces your need for a separate dialer with the included phone line. Enterprise clients can request custom integrations and webhook-based automations.</div>
+    </div>
+    <div class="faq-item reveal" style="transition-delay:.2s">
+      <div class="faq-q" onclick="faqToggle(this)">
+        <span class="faq-q-text">How is Enterprise different from Pro?</span>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Enterprise is for revenue organizations with 10+ reps, advanced security requirements, or custom automation needs. It includes unlimited seats, unlimited call minutes, custom AI model fine-tuning on your specific product and playbook, SSO and SAML support, private cloud deployment options, a dedicated Customer Success Engineer, and a guaranteed uptime SLA. Pricing is custom — call us.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FINAL CTA ══════════ -->
+<div class="final-cta">
+  <div class="final-cta-inner">
+    <span class="label reveal">Ready to close more deals?</span>
+    <h2 class="reveal" style="transition-delay:.05s">Your AI sales coach<br>is ready to go</h2>
+    <p class="reveal" style="transition-delay:.1s">Start your 14-day free trial. Your dedicated phone line is set up in minutes. Full Pro access from day one. No credit card required.</p>
+    <div class="final-actions reveal" style="transition-delay:.15s">
+      <a href="#pricing" class="btn-white" style="font-size:15px;padding:14px 32px">Start free trial →</a>
+      <a href="tel:+18889247731" class="btn-white-ghost" style="font-size:15px;padding:14px 32px">📞 Call Enterprise Sales</a>
+    </div>
+    <p class="fine reveal" style="transition-delay:.2s">14-day free trial · No credit card · Cancel anytime · Setup in 15 minutes</p>
+  </div>
+</div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="foot-brand">
+        <a href="#" class="nav-logo" style="text-decoration:none">
+          <div class="nav-logo-mark">V</div>
+          <span class="nav-logo-name" style="color:#fff">Velox AI</span>
+        </a>
+        <p>The AI sales intelligence platform that coaches your team before, during, and after every call.</p>
+      </div>
+      <div class="foot-nav">
+        <h5>Platform</h5>
+        <ul>
+          <li><a href="#">Script Builder</a></li>
+          <li><a href="#">Live Coaching</a></li>
+          <li><a href="#">Emotion Detection</a></li>
+          <li><a href="#">Call Analysis</a></li>
+          <li><a href="#">Phone Lines</a></li>
+        </ul>
+      </div>
+      <div class="foot-nav">
+        <h5>Solutions</h5>
+        <ul>
+          <li><a href="#">For Sales Teams</a></li>
+          <li><a href="#">For Managers</a></li>
+          <li><a href="#">For Enterprise</a></li>
+          <li><a href="#">Integrations</a></li>
+        </ul>
+      </div>
+      <div class="foot-nav">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Customers</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="foot-nav">
+        <h5>Support</h5>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Status</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Velox AI, Inc. All rights reserved.</p>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+        <a href="#">DPA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ SCRIPTS ══════════ -->
+<script>
+// Waveform
+const wvc = document.getElementById('wv');
+for(let i=0;i<40;i++){
+  const b=document.createElement('div'); b.className='wave-b';
+  const h=Math.random()*65+20;
+  b.style.cssText=`height:${h}%;animation-delay:${(Math.random()*1).toFixed(2)}s;animation-duration:${(.6+Math.random()*.8).toFixed(2)}s`;
+  wvc.appendChild(b);
+}
+
+// Phase tab switching
+function switchTab(idx){
+  document.querySelectorAll('.ptab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.phase-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+
+// FAQ
+function faqToggle(el){
+  const item=el.parentElement;
+  const open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!open) item.classList.add('open');
+}
+
+// Billing toggle
+let annual=false;
+function toggleBilling(el){
+  annual=!annual;
+  el.querySelector('.toggle-thumb').style.left=annual?'23px':'3px';
+  // Update prices
+  const prices=document.querySelectorAll('.pc-price');
+  if(prices.length>=2){
+    prices[0].innerHTML=annual?'<sup>$</sup>63<sub>/mo</sub>':'<sup>$</sup>79<sub>/mo</sub>';
+    prices[1].innerHTML=annual?'<sup>$</sup>160<sub>/mo</sub>':'<sup>$</sup>200<sub>/mo</sub>';
+  }
+  document.querySelectorAll('.toggle-opt').forEach((o,i)=>o.classList.toggle('active',annual?i===1:i===0));
+}
+
+// Scroll reveal
+const revEls=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('vis'); });
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+revEls.forEach(r=>obs.observe(r));
+
+// Animate score bars on scroll
+const barObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.sb-fill,.em-fill,.ub-fill').forEach(b=>{
+        const w=b.style.width; b.style.width='0';
+        b.style.transition='width 1.2s cubic-bezier(.16,1,.3,1) .2s';
+        requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=w));
+      });
+    }
+  });
+},{threshold:.3});
+document.querySelectorAll('.card-ui,.phone-dashboard').forEach(c=>barObs.observe(c));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
+  });
+});
+</script>
+</body>
+</html>

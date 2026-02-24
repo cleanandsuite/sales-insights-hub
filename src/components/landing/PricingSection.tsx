@@ -1,263 +1,167 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Check, Clock, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { usePricingAvailability } from "@/hooks/usePricingAvailability";
+import { useState } from 'react';
+import { Check, X } from 'lucide-react';
 
-// Countdown timer component
-function CountdownTimer({ deadline }: { deadline: Date }) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date().getTime();
-      const target = deadline.getTime();
-      const difference = target - now;
-
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000),
-        });
-      }
-    };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(timer);
-  }, [deadline]);
-
-  return (
-    <div className="flex items-center justify-center gap-2 text-sm font-semibold">
-      <Clock className="h-4 w-4 text-destructive" />
-      <div className="flex gap-1">
-        <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs">{timeLeft.days}d</span>
-        <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs">{timeLeft.hours}h</span>
-        <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs">
-          {timeLeft.minutes}m
-        </span>
-        <span className="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs">
-          {timeLeft.seconds}s
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// Comparison table data
-const comparisonData = [
-  { feature: "Setup Time", sellsig: "60 seconds", gong: "2-4 weeks", chorus: "1-2 weeks", fireflies: "10 minutes" },
-  { feature: "Price (per user/mo)", sellsig: "$29", gong: "$100-300", chorus: "$80-200", fireflies: "$19" },
-  {
-    feature: "Live Coaching",
-    sellsig: "✓ Real-time",
-    gong: "Post-call only",
-    chorus: "Post-call only",
-    fireflies: "✗",
-  },
-  {
-    feature: "AI Deal Insights",
-    sellsig: "✓ Included",
-    gong: "✓ Enterprise",
-    chorus: "✓ Enterprise",
-    fireflies: "Limited",
-  },
-  { feature: "Credit Card Setup", sellsig: "✗ Card required", gong: "✗", chorus: "✗", fireflies: "✓" },
-];
+interface PricingSectionProps {}
 
 export function PricingSection() {
-  const { availability, loading: availabilityLoading } = usePricingAvailability();
+  const [annual, setAnnual] = useState(false);
 
   const handleStartTrial = () => {
-    window.open("https://buy.stripe.com/fZu6oG1zi7O7euubi69k400", "_blank");
+    window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank');
   };
 
-  const handleJoinWaitlist = () => {
-    toast.info("You've been added to our waitlist! We'll notify you when spots open up.");
-  };
+  const starterPrice = annual ? 63 : 79;
+  const proPrice = annual ? 160 : 200;
 
-  const singleUserAvailable = availability?.singleUser.available ?? true;
-  const deadline = availability?.deadline ?? new Date("2026-01-31");
-
-  const pricingTiers = [
-    {
-      name: "Single User",
-      description: "Perfect for individual sales reps",
-      trialPrice: "$0",
-      trialPeriod: "14 days",
-      price: "$29",
-      pricePeriod: "/mo",
-      priceNote: "Grandfathered forever (Reg. $49/mo)",
-      features: [
-        "Unlimited call recordings",
-        "AI transcription & analysis",
-        "Live coaching suggestions",
-        "Lead intelligence",
-        "Deal insights",
-        "Email support",
-      ],
-      cta: "Start Free 14-Day Trial",
-      popular: true,
-      available: singleUserAvailable,
-    },
-    {
-      name: "Enterprise",
-      description: "For scaling sales organizations",
-      trialPrice: null,
-      trialPeriod: null,
-      price: "$99",
-      pricePeriod: "/user/mo",
-      priceNote: "Contact for volume discounts",
-      features: [
-        "Everything in Single User",
-        "Team analytics dashboard",
-        "Manager performance reports",
-        "Lead assignment & routing",
-        "Custom playbooks",
-        "Priority support",
-      ],
-      cta: "Coming Soon",
-      popular: false,
-      available: false,
-    },
+  const starterFeatures = [
+    { text: '1 user seat', included: true, bold: true },
+    { text: 'Script Builder — 10 scripts/month', included: true },
+    { text: 'Call recording & transcription', included: true },
+    { text: 'Basic post-call scoring', included: true },
+    { text: '500 call minutes/month', included: true },
+    { text: 'Dedicated phone number', included: false },
+    { text: 'Live emotion detection', included: false },
+    { text: 'Real-time coaching prompts', included: false },
   ];
 
-  if (availabilityLoading) {
-    return (
-      <section className="py-20 bg-background" id="pricing">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const proFeatures = [
+    { text: '3 user seats', bold: true },
+    { text: 'Dedicated US business phone number', bold: true },
+    { text: '5,000 call minutes/month', bold: true },
+    { text: 'Unlimited script generation' },
+    { text: 'Live emotion & sentiment detection' },
+    { text: 'Real-time objection coaching' },
+    { text: 'Full 40-dimension call scoring' },
+    { text: 'Rep growth roadmaps + manager digest' },
+    { text: 'CRM integrations (Salesforce, HubSpot)' },
+  ];
 
   return (
-    <section className="py-20 md:py-24 bg-muted/30" id="pricing">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Simple, <span className="text-primary">Transparent</span> Pricing
+    <section className="py-24 px-4 md:px-10" id="pricing">
+      <div className="max-w-[1280px] mx-auto">
+        <div className="text-center mb-4">
+          <span className="text-xs font-bold text-[#0057FF] tracking-[.08em] uppercase mb-3 block">
+            Transparent Pricing
+          </span>
+          <h2 className="font-bricolage text-[clamp(34px,3.8vw,52px)] font-extrabold tracking-[-1.5px] leading-[1.1] text-[#0A1628] mb-4">
+            Simple pricing. <span className="text-[#0057FF]">No surprises.</span>
           </h2>
-          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Start with a 14-day free trial. No charge until you see the value.
+          <p className="text-[17px] text-[#3B4A63] leading-[1.75] max-w-[520px] mx-auto">
+            Everything your team needs to close more deals, in one plan. No hidden fees, no per-minute charges, no feature gates.
           </p>
+        </div>
 
-          {/* Urgency Banner */}
-          {!availability?.isDeadlinePassed && singleUserAvailable && (
-            <div className="mt-6 inline-block">
-              <div className="bg-destructive text-destructive-foreground px-6 py-3 rounded-lg shadow-md">
-                <p className="text-base font-bold mb-1">
-                  ⏰ First {availability?.singleUser.spotsRemaining ?? 100} Users – Ends Jan 31
-                </p>
-                <CountdownTimer deadline={deadline} />
+        {/* Toggle */}
+        <div className="flex items-center justify-center gap-3 mb-14 mt-4">
+          <span className={`text-sm font-semibold ${!annual ? 'text-[#0A1628]' : 'text-[#3B4A63]'}`}>Monthly</span>
+          <button
+            onClick={() => setAnnual(!annual)}
+            className="w-11 h-6 bg-[#0057FF] rounded-full relative cursor-pointer"
+          >
+            <div
+              className="w-[18px] h-[18px] bg-white rounded-full absolute top-[3px] transition-[left] duration-200"
+              style={{ left: annual ? '23px' : '3px' }}
+            />
+          </button>
+          <span className={`text-sm font-semibold ${annual ? 'text-[#0A1628]' : 'text-[#3B4A63]'}`}>Annual</span>
+          <span className="bg-[#E3F5EE] text-[#00875A] border border-[rgba(0,135,90,.2)] text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+            Save 20%
+          </span>
+        </div>
+
+        {/* Cards */}
+        <div className="grid md:grid-cols-2 gap-5 max-w-[880px] mx-auto">
+          {/* Starter */}
+          <div className="bg-white border-[1.5px] border-[#E4E8F0] rounded-[20px] p-10 relative transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(10,22,40,.12)]">
+            <span className="text-[11px] font-bold tracking-[.1em] uppercase text-[#0057FF] block mb-4">Starter</span>
+            <div className="font-bricolage text-[64px] font-extrabold tracking-[-3px] leading-none text-[#0A1628]">
+              <sup className="text-[22px] font-bold tracking-normal align-super">$</sup>
+              {starterPrice}
+              <sub className="text-base font-medium tracking-normal opacity-50 font-jakarta">/mo</sub>
+            </div>
+            <p className="text-[15px] text-[#3B4A63] mt-2.5 mb-7">For individual reps getting started with AI coaching.</p>
+            <hr className="border-[#E4E8F0] mb-6" />
+            <ul className="flex flex-col gap-[11px] mb-9">
+              {starterFeatures.map((f) => (
+                <li key={f.text} className="flex gap-2.5 items-start text-sm text-[#3B4A63]">
+                  {f.included ? (
+                    <span className="w-[18px] h-[18px] rounded-full bg-[#EEF3FF] border border-[#D0DCFF] flex items-center justify-center text-[10px] text-[#0057FF] shrink-0 mt-0.5">
+                      <Check className="w-2.5 h-2.5" />
+                    </span>
+                  ) : (
+                    <span className="w-[18px] h-[18px] rounded-full bg-[#F7F9FC] border border-[#E4E8F0] flex items-center justify-center text-[10px] text-[#6B7A99] shrink-0 mt-0.5 opacity-30">
+                      <X className="w-2.5 h-2.5" />
+                    </span>
+                  )}
+                  <span className={f.included ? '' : 'opacity-40'}>{f.bold ? <strong className="text-[#0A1628] font-semibold">{f.text}</strong> : f.text}</span>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={handleStartTrial}
+              className="block w-full text-center py-3.5 rounded-[10px] text-sm font-bold bg-[#0057FF] text-white shadow-[0_2px_12px_rgba(0,87,255,.25)] hover:bg-[#003FBB] hover:-translate-y-[1px] hover:shadow-[0_6px_24px_rgba(0,87,255,.35)] transition-all"
+            >
+              Start free — 14 days
+            </button>
+          </div>
+
+          {/* Pro */}
+          <div className="bg-[#0A1628] border-[1.5px] border-transparent rounded-[20px] p-10 relative shadow-[0_24px_80px_rgba(10,22,40,.14)] transition-all duration-200 hover:-translate-y-1.5">
+            {/* Most Popular badge */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0057FF] text-white text-[11px] font-bold tracking-[.06em] uppercase px-4 py-1.5 rounded-full whitespace-nowrap">
+              Most Popular
+            </div>
+            <span className="text-[11px] font-bold tracking-[.1em] uppercase text-[#6B9FFF] block mb-4">Pro</span>
+            <div className="font-bricolage text-[64px] font-extrabold tracking-[-3px] leading-none text-white">
+              <sup className="text-[22px] font-bold tracking-normal align-super">$</sup>
+              {proPrice}
+              <sub className="text-base font-medium tracking-normal opacity-50 font-jakarta">/mo</sub>
+            </div>
+            <p className="text-[15px] text-white/50 mt-2.5 mb-7">The complete SellSig platform for your whole team.</p>
+            {/* Phone highlight */}
+            <div className="bg-[rgba(107,159,255,.1)] border border-[rgba(107,159,255,.25)] rounded-[10px] p-4 mb-6 flex gap-3 items-start">
+              <span className="text-xl shrink-0">📞</span>
+              <div>
+                <span className="text-[13px] font-bold text-[#6B9FFF] block">Dedicated Business Phone Line Included</span>
+                <span className="text-xs text-white/40">5,000 min · 3 users · 1 dedicated number · 99.9% uptime</span>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
-          {pricingTiers.map((tier) => (
-            <Card
-              key={tier.name}
-              className={`relative bg-card rounded-lg border shadow-md ${tier.popular ? "border-primary ring-2 ring-primary/20" : "border-border"}`}
+            <hr className="border-white/10 mb-6" />
+            <ul className="flex flex-col gap-[11px] mb-9">
+              {proFeatures.map((f) => (
+                <li key={f.text} className="flex gap-2.5 items-start text-sm text-white/[.65]">
+                  <span className="w-[18px] h-[18px] rounded-full bg-[rgba(107,159,255,.15)] border border-[rgba(107,159,255,.3)] flex items-center justify-center text-[10px] text-[#6B9FFF] shrink-0 mt-0.5">
+                    <Check className="w-2.5 h-2.5" />
+                  </span>
+                  {f.bold ? <strong className="text-white font-semibold">{f.text}</strong> : f.text}
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={handleStartTrial}
+              className="block w-full text-center py-3.5 rounded-[10px] text-sm font-bold bg-white text-[#0A1628] hover:bg-[#0057FF] hover:text-white transition-all"
             >
-              {tier.popular && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-destructive text-destructive-foreground font-semibold">
-                  🔥 Most Popular
-                </Badge>
-              )}
-
-              <CardHeader className="pb-4 pt-8">
-                <CardTitle className="text-xl font-bold text-foreground">{tier.name}</CardTitle>
-                <p className="text-sm text-muted-foreground">{tier.description}</p>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                {/* Pricing */}
-                <div>
-                  {tier.trialPrice && (
-                    <div className="mb-2">
-                      <span className="text-3xl font-bold text-foreground">{tier.trialPrice}</span>
-                      <span className="text-muted-foreground ml-2">for {tier.trialPeriod}</span>
-                    </div>
-                  )}
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-foreground">{tier.price}</span>
-                    <span className="text-muted-foreground">{tier.pricePeriod}</span>
-                  </div>
-                  {tier.priceNote && <p className="text-sm text-accent font-medium mt-1">{tier.priceNote}</p>}
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-3">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-sm text-foreground">
-                      <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Check className="h-3 w-3 text-primary" />
-                      </div>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-
-              <CardFooter className="pb-6">
-                <Button
-                  className={`w-full font-semibold py-5 rounded-lg ${
-                    tier.available ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md" : ""
-                  }`}
-                  variant={tier.available ? "default" : "outline"}
-                  onClick={() => (tier.available ? handleStartTrial() : handleJoinWaitlist())}
-                  disabled={!tier.available}
-                >
-                  {tier.cta}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-
-        {/* Comparison Table */}
-        <div className="max-w-5xl mx-auto">
-          <h3 className="text-2xl font-bold text-foreground text-center mb-8">How We Compare</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full bg-card rounded-lg border border-border shadow-md">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left p-4 font-semibold text-foreground">Feature</th>
-                  <th className="text-center p-4 font-semibold text-primary bg-primary/5">SellSig</th>
-                  <th className="text-center p-4 font-semibold text-muted-foreground">Gong</th>
-                  <th className="text-center p-4 font-semibold text-muted-foreground">Chorus</th>
-                  <th className="text-center p-4 font-semibold text-muted-foreground">Fireflies</th>
-                </tr>
-              </thead>
-              <tbody>
-                {comparisonData.map((row, idx) => (
-                  <tr key={idx} className={idx !== comparisonData.length - 1 ? "border-b border-border" : ""}>
-                    <td className="p-4 text-sm text-foreground font-medium">{row.feature}</td>
-                    <td className="p-4 text-sm text-center text-primary font-semibold bg-primary/5">{row.sellsig}</td>
-                    <td className="p-4 text-sm text-center text-muted-foreground">{row.gong}</td>
-                    <td className="p-4 text-sm text-center text-muted-foreground">{row.chorus}</td>
-                    <td className="p-4 text-sm text-center text-muted-foreground">{row.fireflies}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              Start free — 14 days
+            </button>
           </div>
         </div>
 
-        <p className="text-center text-sm text-muted-foreground mt-8">
-          Card required upfront — no charge until day 15. Cancel anytime.
-        </p>
+        {/* Enterprise row */}
+        <div className="max-w-[880px] mx-auto mt-5 bg-[#F7F9FC] border-[1.5px] border-[#E4E8F0] rounded-[20px] p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6" id="enterprise">
+          <div>
+            <div className="text-[11px] font-bold tracking-[.1em] uppercase text-[#0057FF] mb-1.5">Enterprise</div>
+            <h3 className="font-bricolage text-[22px] font-extrabold text-[#0A1628] tracking-[-0.5px] mb-1.5">Need a full-scale revenue intelligence system?</h3>
+            <p className="text-sm text-[#3B4A63]">Custom seats, unlimited minutes, white-glove onboarding, SSO, private cloud, and a dedicated success team.</p>
+          </div>
+          <div className="flex gap-2.5 flex-wrap shrink-0">
+            <a href="tel:+18889247731" className="bg-[#0A1628] text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#0057FF] transition-colors inline-flex items-center gap-1.5 whitespace-nowrap">
+              📞 Call us to discuss
+            </a>
+            <a href="#" className="border-[1.5px] border-[#D0D7E6] text-[#0A1628] px-5 py-2.5 rounded-lg text-sm font-semibold hover:border-[#0057FF] hover:text-[#0057FF] transition-all">
+              Learn more →
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   );

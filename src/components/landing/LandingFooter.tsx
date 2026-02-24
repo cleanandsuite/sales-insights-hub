@@ -1,33 +1,69 @@
 import { Link } from 'react-router-dom';
-import { SellSigLogo } from '@/components/ui/SellSigLogo';
+
+const footerLinks = {
+  Platform: ['Script Builder', 'Live Coaching', 'Emotion Detection', 'Call Analysis', 'Phone Lines'],
+  Solutions: ['For Sales Teams', 'For Managers', 'For Enterprise'],
+  Company: ['About', 'Blog', 'Customers', 'Careers', 'Press'],
+  Support: [
+    { label: 'Documentation', to: '/support' },
+    { label: 'Status' },
+    { label: 'Security' },
+    { label: 'Privacy', to: '/privacy' },
+    { label: 'Contact', to: '/support' },
+  ],
+};
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-gray-200 py-8 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="[&_span]:!text-gray-900 [&_.text-white]:!text-gray-900 [&_.text-blue-500]:!text-blue-600 [&_.text-blue-400]:!text-blue-600 [&_.text-muted-foreground]:!text-gray-400 [&_div.border]:!border-gray-200 [&_div.bg-primary\\/10]:!bg-blue-50">
-            <SellSigLogo variant="default" showTagline={false} linkTo="/" size="sm" />
+    <footer className="bg-[#0A1628] py-16 px-4 md:px-10 border-t border-white/[.08]">
+      <div className="max-w-[1280px] mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-10 mb-12">
+          {/* Brand */}
+          <div className="col-span-2">
+            <Link to="/" className="flex items-center gap-2 no-underline mb-4">
+              <div className="w-8 h-8 bg-[#0057FF] rounded-lg flex items-center justify-center font-bricolage font-extrabold text-white text-base tracking-[-1px]">
+                S
+              </div>
+              <span className="font-bricolage font-bold text-xl tracking-[-0.5px] text-white">SellSig</span>
+            </Link>
+            <p className="text-sm text-white/40 leading-relaxed max-w-[280px]">
+              The AI sales intelligence platform that coaches your team before, during, and after every call.
+            </p>
           </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-6 text-sm">
-            <Link to="/support" className="text-gray-500 hover:text-gray-900 transition-colors">
-              Support
-            </Link>
-            <Link to="/privacy" className="text-gray-500 hover:text-gray-900 transition-colors">
-              Privacy Policy
-            </Link>
-            <Link to="/terms" className="text-gray-500 hover:text-gray-900 transition-colors">
-              Terms of Service
-            </Link>
-          </div>
+          {/* Link columns */}
+          {Object.entries(footerLinks).map(([title, links]) => (
+            <div key={title}>
+              <h5 className="text-xs font-bold text-white/60 tracking-[.08em] uppercase mb-4">{title}</h5>
+              <ul className="space-y-2.5">
+                {links.map((link) => {
+                  const item = typeof link === 'string' ? { label: link } : link;
+                  return (
+                    <li key={item.label}>
+                      {item.to ? (
+                        <Link to={item.to} className="text-sm text-white/35 hover:text-white/70 transition-colors">
+                          {item.label}
+                        </Link>
+                      ) : (
+                        <span className="text-sm text-white/35 cursor-default">{item.label}</span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
 
-          {/* Copyright */}
-          <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} SellSig. All rights reserved.
-          </p>
+        {/* Bottom bar */}
+        <div className="border-t border-white/[.08] pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-white/25">© {new Date().getFullYear()} SellSig, Inc. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link to="/privacy" className="text-xs text-white/25 hover:text-white/50 transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="text-xs text-white/25 hover:text-white/50 transition-colors">Terms of Service</Link>
+            <span className="text-xs text-white/25 cursor-default">Cookie Policy</span>
+            <span className="text-xs text-white/25 cursor-default">DPA</span>
+          </div>
         </div>
       </div>
     </footer>
