@@ -8,12 +8,11 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Phone, Loader2, AlertTriangle } from 'lucide-react';
+import { Phone, Loader2, AlertTriangle, Delete } from 'lucide-react';
 import { useCallLimits } from '@/hooks/useCallLimits';
 import { CallLimitIndicator } from './CallLimitIndicator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
 
 interface CallDialogProps {
   open: boolean;
@@ -21,6 +20,13 @@ interface CallDialogProps {
   onStartCall: (phoneNumber: string) => void;
   isConnecting?: boolean;
 }
+
+const dialPadKeys = [
+  [{ digit: '1', letters: '' }, { digit: '2', letters: 'ABC' }, { digit: '3', letters: 'DEF' }],
+  [{ digit: '4', letters: 'GHI' }, { digit: '5', letters: 'JKL' }, { digit: '6', letters: 'MNO' }],
+  [{ digit: '7', letters: 'PQRS' }, { digit: '8', letters: 'TUV' }, { digit: '9', letters: 'WXYZ' }],
+  [{ digit: '*', letters: '' }, { digit: '0', letters: '+' }, { digit: '#', letters: '' }],
+];
 
 export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: CallDialogProps) {
   const navigate = useNavigate();
@@ -42,76 +48,156 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
     }
   };
 
-  const formatPhoneDisplay = (value: string) => {
-    // Remove non-digits except +
-    const cleaned = value.replace(/[^\d+]/g, '');
-    return cleaned;
+  const handleDigitPress = (digit: string) => {
+    setPhoneNumber(prev => prev + digit);
+  };
+
+  const handleBackspace = () => {
+    setPhoneNumber(prev => prev.slice(0, -1));
+  };
+
+  const handleLongPressZero = () => {
+    setPhoneNumber(prev => prev + '+');
+  };
+
+  const formatDisplay = (num: string) => {
+    const digits = num.replace(/[^\d+*#]/g, '');
+    if (digits.startsWith('+1') && digits.length > 2) {
+      const rest = digits.slice(2);
+      if (rest.length <= 3) return `+1 (${rest}`;
+      if (rest.length <= 6) return `+1 (${rest.slice(0, 3)}) ${rest.slice(3)}`;
+      return `+1 (${rest.slice(0, 3)}) ${rest.slice(3, 6)}-${rest.slice(6, 10)}`;
+    }
+    return digits;
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Phone className="h-5 w-5 text-primary" />
-            Start a Call
+      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-center text-lg font-semibold">
+            New Call
           </DialogTitle>
-          <DialogDescription>
-            Enter a phone number to start a call with real-time transcription.
+          <DialogDescription className="text-center text-sm">
+            Enter a number to dial
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="+1 (555) 123-4567"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(formatPhoneDisplay(e.target.value))}
-              className="text-lg font-mono"
-              autoFocus
-            />
-            <p className="text-xs text-muted-foreground">
-              Include country code for international calls
-            </p>
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          {/* Phone number display */}
+          <div className="px-6 py-4 text-center min-h-[72px] flex items-center justify-center">
+            <span className={cn(
+              'font-mono tracking-wider transition-all',
+              phoneNumber.length > 12 ? 'text-xl' : 'text-2xl',
+              phoneNumber ? 'text-foreground' : 'text-muted-foreground'
+            )}>
+              {phoneNumber ? formatDisplay(phoneNumber) : '+1 (___) ___-____'}
+            </span>
+          </div>
+
+          {/* Dial pad grid */}
+          <div className="px-6 pb-2">
+            <div className="grid grid-cols-3 gap-2">
+              {dialPadKeys.flat().map(({ digit, letters }) => (
+                <button
+                  key={digit}
+                  type="button"
+                  onClick={() => handleDigitPress(digit)}
+                  onDoubleClick={digit === '0' ? handleLongPressZero : undefined}
+                  className={cn(
+                    'flex flex-col items-center justify-center rounded-full h-16 w-16 mx-auto',
+                    'bg-muted/50 hover:bg-muted active:bg-muted/80 transition-colors',
+                    'select-none cursor-pointer'
+                  )}
+                >
+                  <span className="text-2xl font-semibold text-foreground leading-none">{digit}</span>
+                  {letters && (
+                    <span className="text-[10px] font-medium text-muted-foreground tracking-widest mt-0.5">
+                      {letters}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Action row: backspace, call, cancel */}
+          <div className="px-6 pb-3 pt-2 flex items-center justify-center gap-6">
+            {/* Empty spacer for balance */}
+            <div className="w-14" />
+
+            {/* Call button */}
+            <Button
+              type="submit"
+              disabled={!phoneNumber.trim() || isConnecting || (!canMakeCall && limitEnforced)}
+              className={cn(
+                'h-16 w-16 rounded-full p-0',
+                'bg-primary hover:bg-primary/90 active:bg-primary/80',
+                'text-primary-foreground shadow-lg shadow-primary/30'
+              )}
+            >
+              {isConnecting ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Phone className="h-6 w-6" />
+              )}
+            </Button>
+
+            {/* Backspace */}
+            <button
+              type="button"
+              onClick={handleBackspace}
+              className={cn(
+                'h-14 w-14 flex items-center justify-center rounded-full',
+                'hover:bg-muted/50 transition-colors',
+                !phoneNumber && 'opacity-0 pointer-events-none'
+              )}
+            >
+              <Delete className="h-5 w-5 text-muted-foreground" />
+            </button>
           </div>
 
           {/* Call Limit Indicator */}
           {!isLoading && (
-            <CallLimitIndicator
-              callsToday={callsToday}
-              dailyLimit={dailyLimit}
-              warmupDay={warmupDay}
-              enforced={limitEnforced}
-            />
+            <div className="px-6 pb-3">
+              <CallLimitIndicator
+                callsToday={callsToday}
+                dailyLimit={dailyLimit}
+                warmupDay={warmupDay}
+                enforced={limitEnforced}
+              />
+            </div>
           )}
 
           {/* Warning when at limit */}
           {!canMakeCall && limitEnforced && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                You've reached your daily call limit. This helps maintain your number's reputation during warmup.
-              </AlertDescription>
-            </Alert>
+            <div className="px-6 pb-3">
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  Daily call limit reached. Helps maintain number reputation during warmup.
+                </AlertDescription>
+              </Alert>
+            </div>
           )}
 
-          {/* Warning when near limit */}
           {canMakeCall && isNearLimit && (
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                You're approaching your daily call limit. Consider pacing your calls to maintain number reputation.
-              </AlertDescription>
-            </Alert>
+            <div className="px-6 pb-3">
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  Approaching daily call limit. Pace your calls to maintain number reputation.
+                </AlertDescription>
+              </Alert>
+            </div>
           )}
 
-          <div className="flex justify-end gap-2">
+          {/* Cancel */}
+          <div className="px-6 pb-6">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
+              className="w-full text-muted-foreground"
               onClick={() => {
                 onOpenChange(false);
                 navigate('/dashboard');
@@ -119,23 +205,6 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
               disabled={isConnecting}
             >
               Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={!phoneNumber.trim() || isConnecting || (!canMakeCall && limitEnforced)}
-              className="gap-2"
-            >
-              {isConnecting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Connecting...
-                </>
-              ) : (
-                <>
-                  <Phone className="h-4 w-4" />
-                  Call
-                </>
-              )}
             </Button>
           </div>
         </form>
