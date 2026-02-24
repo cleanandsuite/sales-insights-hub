@@ -17,7 +17,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-jakarta landing-grid-bg">
+    <div className="min-h-screen bg-white font-jakarta landing-grid-bg overflow-x-hidden">
       <LandingHeader onStartTrialClick={handleStartTrialClick} />
 
       <main>
