@@ -1,8 +1,8 @@
 const stats = [
-  { value: '41', suffix: '%', label: 'Win rate increase', delta: '▲ Avg across all teams' },
-  { value: '2.8', suffix: '×', label: 'Faster rep onboarding', delta: '▲ vs. industry benchmark' },
-  { value: '18k', suffix: '+', label: 'Reps coached to date', delta: '▲ Growing monthly' },
-  { value: '$2.1', suffix: 'B', label: 'Pipeline influenced', delta: '▲ Last 12 months' },
+  { value: '41', suffix: '%', label: 'Average win rate increase', delta: '↑ In first 90 days' },
+  { value: '2.8', suffix: '×', label: 'Faster rep onboarding', delta: '↑ Compared to manual coaching' },
+  { value: '18', suffix: 'k+', label: 'Reps coached on platform', delta: '↑ Growing 40% YoY' },
+  { value: '$2.1', suffix: 'B', label: 'Pipeline influenced', delta: '↑ Tracked in 2024' },
 ];
 
 export function StatsSection() {

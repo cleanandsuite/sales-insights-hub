@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 
-interface PricingSectionProps {}
-
 export function PricingSection() {
   const [annual, setAnnual] = useState(false);
 
@@ -151,7 +149,7 @@ export function PricingSection() {
           <div>
             <div className="text-[11px] font-bold tracking-[.1em] uppercase text-[#0057FF] mb-1.5">Enterprise</div>
             <h3 className="font-bricolage text-[22px] font-extrabold text-[#0A1628] tracking-[-0.5px] mb-1.5">Need a full-scale revenue intelligence system?</h3>
-            <p className="text-sm text-[#3B4A63]">Custom seats, unlimited minutes, white-glove onboarding, SSO, private cloud, and a dedicated success team.</p>
+            <p className="text-sm text-[#3B4A63]">Custom seats, unlimited minutes, white-glove onboarding, SSO, private cloud, and a dedicated success team. Built around your revenue motion.</p>
           </div>
           <div className="flex gap-2.5 flex-wrap shrink-0">
             <a href="tel:+18889247731" className="bg-[#0A1628] text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-[#0057FF] transition-colors inline-flex items-center gap-1.5 whitespace-nowrap">

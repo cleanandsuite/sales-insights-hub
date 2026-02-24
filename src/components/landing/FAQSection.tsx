@@ -3,23 +3,23 @@ import { useState } from 'react';
 const faqs = [
   {
     q: "What's included with the dedicated phone line?",
-    a: "Every Pro plan includes one dedicated US business phone number with 5,000 minutes per month shared across your 3 user seats. Calls are automatically routed through SellSig AI for real-time coaching and are recorded, transcribed, and analyzed automatically.",
+    a: "Every Pro plan includes one dedicated US business phone number with 5,000 minutes per month shared across your 3 user seats. Calls are automatically routed through SellSig AI for real-time coaching and are recorded, transcribed, and analyzed automatically. Additional minutes are available at simple per-minute rates with no contracts.",
   },
   {
     q: 'How does the SWOT-driven script builder work?',
-    a: "You provide your company's strengths, weaknesses, and your target prospect's profile. SellSig cross-references this against its trained sales model to generate a full call script — opening, discovery questions, value positioning, pre-emptive objection handling, and suggested close.",
+    a: "You provide your company's strengths, weaknesses, and your target prospect's profile (industry, size, pain points, known objections). SellSig AI cross-references this against its trained sales model to generate a full call script — opening, discovery questions, value positioning, pre-emptive objection handling, and suggested close. Scripts update automatically as you refine your competitive data.",
   },
   {
     q: 'Is the live coaching visible to my prospect?',
-    a: "Never. Live coaching cards appear only in the rep's browser overlay or mobile sidebar. Your prospect hears nothing and sees nothing from their side of the call.",
+    a: "Never. Live coaching cards appear only in the rep's browser overlay or mobile sidebar. Your prospect hears nothing and sees nothing from their side of the call. From their perspective, your rep sounds exceptionally well-prepared and naturally responsive — because they are.",
   },
   {
     q: 'What CRMs and tools does SellSig integrate with?',
-    a: 'SellSig integrates natively with Salesforce, HubSpot, Pipedrive, and Zoho CRM. We also connect with Zoom, Google Meet, and most VOIP platforms via our API. Enterprise clients can request custom integrations.',
+    a: 'SellSig integrates natively with Salesforce, HubSpot, Pipedrive, and Zoho CRM. We also connect with Zoom, Google Meet, and most VOIP platforms via our API. On the Pro plan, SellSig replaces your need for a separate dialer with the included phone line. Enterprise clients can request custom integrations and webhook-based automations.',
   },
   {
     q: 'How is Enterprise different from Pro?',
-    a: 'Enterprise is for revenue organizations with 10+ reps, advanced security requirements, or custom automation needs. It includes unlimited seats, unlimited call minutes, custom AI model fine-tuning, SSO/SAML, private cloud deployment, and a dedicated Customer Success Engineer.',
+    a: 'Enterprise is for revenue organizations with 10+ reps, advanced security requirements, or custom automation needs. It includes unlimited seats, unlimited call minutes, custom AI model fine-tuning on your specific product and playbook, SSO and SAML support, private cloud deployment options, a dedicated Customer Success Engineer, and a guaranteed uptime SLA. Pricing is custom — call us.',
   },
 ];
 
