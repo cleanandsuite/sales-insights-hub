@@ -28,7 +28,7 @@ export function PhoneLineSection({ onStartTrialClick }: PhoneLineSectionProps) {
             Your team's own <span className="text-[#6B9FFF]">business phone line.</span> Included.
           </h2>
           <p className="text-[17px] text-white/[.55] leading-[1.75] mb-10">
-            Every Pro plan comes with a real, dedicated US business number backed by carrier-grade infrastructure — fully integrated with SellSig AI coaching. No Twilio. No third-party dialer.
+            Every Pro plan comes with a real, dedicated US business number backed by carrier-grade infrastructure — fully integrated with SellSig AI coaching. No Twilio account. No third-party dialer. Just one platform.
           </p>
           <div className="grid grid-cols-2 gap-3 mb-10">
             {specs.map((s) => (

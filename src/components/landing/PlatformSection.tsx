@@ -2,19 +2,19 @@ import { useState } from 'react';
 
 const tabs = [
   {
-    num: 'Phase 01',
-    title: 'Pre-Call Preparation',
-    desc: 'AI-generated scripts tailored to each prospect using SWOT intelligence.',
+    num: '01 — Pre-Call',
+    title: 'AI Script Builder',
+    desc: 'Generate a personalized, SWOT-powered call script in seconds before you dial.',
   },
   {
-    num: 'Phase 02',
-    title: 'Live Call Coaching',
-    desc: 'Real-time emotion detection, objection handling, and buying signal alerts.',
+    num: '02 — During Call',
+    title: 'Live Coaching',
+    desc: 'Real-time emotion detection, objection handling, and next-action prompts.',
   },
   {
-    num: 'Phase 03',
-    title: 'Post-Call Analysis',
-    desc: '40-dimension scoring, growth roadmaps, and automated manager digests.',
+    num: '03 — Post-Call',
+    title: 'Deep Analysis',
+    desc: 'Full call scoring, keyword intelligence, and a personalized rep growth plan.',
   },
 ];
 
@@ -23,17 +23,18 @@ function PreCallPanel() {
     <div className="grid md:grid-cols-2 gap-16 items-center">
       <div>
         <h3 className="font-bricolage text-[clamp(24px,3vw,32px)] font-extrabold tracking-[-1px] text-[#0A1628] mb-3.5 leading-tight">
-          Walk into every call with the perfect script
+          Walk into every call with a winning script
         </h3>
         <p className="text-base text-[#3B4A63] leading-[1.75] mb-7">
-          Input your company's strengths and your prospect's profile. SellSig generates a full discovery-to-close script — personalized, objection-ready, updated in real time.
+          Enter your company's strengths and weaknesses alongside your target's profile. SellSig synthesizes a fully personalized, objection-ready call script — tailored to the exact buyer — in under 10 seconds.
         </p>
         <ul className="flex flex-col gap-2.5">
           {[
-            'SWOT-driven competitive positioning',
-            'Auto-generated discovery questions',
-            'Pre-emptive objection handlers',
-            'Tailored value propositions per buyer persona',
+            'SWOT-driven script generation from your real competitive data',
+            'Pre-arms reps for the top 3 objections most likely to arise',
+            'Adjusts tone and language to match each buyer persona',
+            'Includes competitor battle card and ROI talking points',
+            'One-click update as your market landscape shifts',
           ].map((item) => (
             <li key={item} className="flex gap-2.5 items-start text-sm text-[#3B4A63]">
               <span className="w-[18px] h-[18px] rounded-full bg-[#EEF3FF] border border-[#D0DCFF] flex items-center justify-center text-[10px] text-[#0057FF] shrink-0 mt-0.5">✓</span>
@@ -49,37 +50,48 @@ function PreCallPanel() {
             <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
           </div>
-          <span className="text-xs text-[#6B7A99] ml-2 font-semibold">SWOT Script Builder</span>
+          <span className="text-xs text-[#6B7A99] ml-2 font-semibold">SellSig Script Builder — Pre-Call Intelligence</span>
         </div>
         <div className="p-5">
+          {/* Company/Target inputs */}
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="bg-[#F7F9FC] border border-[#E4E8F0] rounded-lg p-2.5">
+              <div className="text-[10px] font-bold uppercase tracking-[.08em] text-[#6B7A99] mb-0.5">Your Company</div>
+              <div className="text-[13px] font-semibold text-[#0A1628]">Apex Solutions</div>
+            </div>
+            <div className="bg-[#F7F9FC] border border-[#E4E8F0] rounded-lg p-2.5">
+              <div className="text-[10px] font-bold uppercase tracking-[.08em] text-[#6B7A99] mb-0.5">Target Account</div>
+              <div className="text-[13px] font-semibold text-[#0A1628]">Meridian Group</div>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="bg-[#E3F5EE] border border-[rgba(0,135,90,.15)] rounded-lg p-3">
               <div className="text-[10px] font-bold uppercase tracking-[.08em] text-[#00875A] mb-1.5">Strength</div>
-              <div className="text-xs text-[#3B4A63] leading-snug">Fastest onboarding in market (2 days vs 14 avg)</div>
+              <div className="text-xs text-[#3B4A63] leading-snug">3× faster onboarding, 99.9% uptime SLA</div>
             </div>
             <div className="bg-[#FEF0EF] border border-[rgba(217,45,32,.12)] rounded-lg p-3">
               <div className="text-[10px] font-bold uppercase tracking-[.08em] text-[#D92D20] mb-1.5">Weakness</div>
-              <div className="text-xs text-[#3B4A63] leading-snug">No native Slack integration yet</div>
+              <div className="text-xs text-[#3B4A63] leading-snug">Higher price point vs. legacy incumbents</div>
             </div>
             <div className="bg-[#EEF3FF] border border-[#D0DCFF] rounded-lg p-3">
               <div className="text-[10px] font-bold uppercase tracking-[.08em] text-[#0057FF] mb-1.5">Opportunity</div>
-              <div className="text-xs text-[#3B4A63] leading-snug">Prospect's contract expires in Q2</div>
+              <div className="text-xs text-[#3B4A63] leading-snug">Scaling 40% YoY, outgrown current tools</div>
             </div>
             <div className="bg-[#FEF6EE] border border-[rgba(181,71,8,.15)] rounded-lg p-3">
-              <div className="text-[10px] font-bold uppercase tracking-[.08em] text-[#B54708] mb-1.5">Threat</div>
-              <div className="text-xs text-[#3B4A63] leading-snug">Competitor already in POC stage</div>
+              <div className="text-[10px] font-bold uppercase tracking-[.08em] text-[#B54708] mb-1.5">Concern</div>
+              <div className="text-xs text-[#3B4A63] leading-snug">CFO budget scrutiny, needs ROI justification</div>
             </div>
           </div>
           <button className="w-full bg-[#0057FF] text-white rounded-lg py-3 text-[13px] font-semibold mb-3.5 hover:bg-[#003FBB] transition-colors">
-            Generate Call Script →
+            ⚡ Generate Script
           </button>
           <div className="bg-[#F7F9FC] border border-[#E4E8F0] rounded-lg p-3.5 space-y-2">
             {[
-              { color: '#0057FF', text: 'Open with Q2 deadline — ask about renewal timeline' },
-              { color: '#00875A', text: 'Lead with 2-day onboarding vs their current 3-week setup' },
-              { color: '#B54708', text: 'Pre-empt Slack concern — mention API + Zapier workaround' },
-            ].map((line) => (
-              <div key={line.text} className="flex gap-2 items-start">
+              { color: '#0057FF', text: <><strong className="text-[#0A1628] font-semibold">Open:</strong> "I saw Meridian just hit 40% growth — exactly the stage where legacy tools become the bottleneck..."</> },
+              { color: '#00875A', text: <><strong className="text-[#0A1628] font-semibold">Lead with:</strong> 3× onboarding speed — addresses Q3 disruption concern directly</> },
+              { color: '#B54708', text: <><strong className="text-[#0A1628] font-semibold">Pre-empt price:</strong> "We're priced higher intentionally — here's the 60-day ROI math..."</> },
+            ].map((line, i) => (
+              <div key={i} className="flex gap-2 items-start">
                 <div className="w-2 h-2 rounded-full shrink-0 mt-1" style={{ background: line.color }} />
                 <span className="text-xs text-[#3B4A63] leading-snug">{line.text}</span>
               </div>
@@ -93,8 +105,8 @@ function PreCallPanel() {
 
 function LiveCoachingPanel() {
   const emotions = [
-    { label: 'Interest', value: 78, color: '#0057FF' },
-    { label: 'Trust', value: 65, color: '#00875A' },
+    { label: 'Interest', value: 84, color: '#00875A' },
+    { label: 'Trust', value: 71, color: '#0057FF' },
     { label: 'Skepticism', value: 32, color: '#D92D20' },
     { label: 'Urgency', value: 61, color: '#B54708' },
   ];
@@ -103,17 +115,18 @@ function LiveCoachingPanel() {
     <div className="grid md:grid-cols-2 gap-16 items-center">
       <div>
         <h3 className="font-bricolage text-[clamp(24px,3vw,32px)] font-extrabold tracking-[-1px] text-[#0A1628] mb-3.5 leading-tight">
-          Coach your reps while the deal is still alive
+          Your AI coach is on every single call
         </h3>
         <p className="text-base text-[#3B4A63] leading-[1.75] mb-7">
-          SellSig listens to every word and detects emotion shifts, objections, and buying signals in real time — then surfaces exactly what to say next.
+          SellSig reads your prospect's emotional state in real time — surfacing skepticism, excitement, and buying intent the moment it appears — so your reps respond confidently instead of guessing.
         </p>
         <ul className="flex flex-col gap-2.5">
           {[
-            '6-dimension emotion engine runs in real time',
-            'Objection classification with proven responses',
-            'Buying signal alerts with close recommendations',
-            'Manager-visible live feed for shadow coaching',
+            '6-dimension live emotion and sentiment analysis',
+            'Objection classified and responded to in under 2 seconds',
+            'Competitor mentions trigger instant battle card overlay',
+            'Talk/listen ratio and filler word coaching',
+            'Silent coaching — invisible to your prospect',
           ].map((item) => (
             <li key={item} className="flex gap-2.5 items-start text-sm text-[#3B4A63]">
               <span className="w-[18px] h-[18px] rounded-full bg-[#EEF3FF] border border-[#D0DCFF] flex items-center justify-center text-[10px] text-[#0057FF] shrink-0 mt-0.5">✓</span>
@@ -129,7 +142,7 @@ function LiveCoachingPanel() {
             <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
           </div>
-          <span className="text-xs text-[#6B7A99] ml-2 font-semibold">Live Coaching — Active Call</span>
+          <span className="text-xs text-[#6B7A99] ml-2 font-semibold">Live Coaching — 7:14 into call</span>
         </div>
         <div className="p-5">
           <div className="grid grid-cols-2 gap-2 mb-3.5">
@@ -154,7 +167,7 @@ function LiveCoachingPanel() {
             <p className="text-xs text-[#3B4A63] mb-1.5">"This is more than what we have budgeted right now."</p>
             <div className="flex gap-1.5 items-start bg-white rounded-md p-2 border border-[rgba(181,71,8,.1)]">
               <span className="text-[10px] font-bold text-[#0057FF] whitespace-nowrap">AI →</span>
-              <span className="text-[11px] text-[#3B4A63] leading-snug">"Most clients recover costs in under 60 days. Want me to walk through the ROI model?"</span>
+              <span className="text-[11px] text-[#3B4A63] leading-snug">"Most clients recover costs in under 60 days. Want me to walk through the ROI model for your team size?"</span>
             </div>
           </div>
           {/* Buying signal card */}
@@ -166,7 +179,7 @@ function LiveCoachingPanel() {
             <p className="text-xs text-[#0A1628] mb-1.5">"When would we be able to get started?"</p>
             <div className="flex gap-1.5 items-start bg-white rounded-md p-2 border border-[#D0DCFF]">
               <span className="text-[10px] font-bold text-[#0057FF] whitespace-nowrap">AI →</span>
-              <span className="text-[11px] text-[#3B4A63] leading-snug">Strong intent detected — pivot to close. Mention 2-week onboarding timeline.</span>
+              <span className="text-[11px] text-[#3B4A63] leading-snug">Strong intent detected — pivot to close. Mention 2-week onboarding timeline and propose next step.</span>
             </div>
           </div>
         </div>
@@ -190,7 +203,7 @@ function PostCallPanel() {
           Every call produces a full growth plan
         </h3>
         <p className="text-base text-[#3B4A63] leading-[1.75] mb-7">
-          SellSig scores every call across 40+ competency dimensions, extracts buyer intent keywords, and generates a personalized coaching roadmap automatically.
+          SellSig scores every call across 40+ competency dimensions, extracts buyer intent keywords, and generates a personalized coaching roadmap for each rep — automatically sent to both rep and manager.
         </p>
         <ul className="flex flex-col gap-2.5">
           {[
@@ -244,7 +257,7 @@ function PostCallPanel() {
           <div className="flex gap-2 items-start p-2.5 bg-[#EEF3FF] rounded-lg border border-[#D0DCFF]">
             <span className="text-sm shrink-0">💡</span>
             <span className="text-xs text-[#3B4A63] leading-snug">
-              <strong className="text-[#0057FF] font-semibold">Key insight:</strong> Missed close attempt at 7:08 when prospect asked about onboarding timeline — prime buying signal.
+              <strong className="text-[#0057FF] font-semibold">Key insight:</strong> Missed close attempt at 7:08 when prospect asked about onboarding timeline — prime buying signal. Practice "direct close" drill in module 4B.
             </span>
           </div>
         </div>
@@ -264,10 +277,10 @@ export function PlatformSection() {
             The SellSig Intelligence Loop
           </span>
           <h2 className="font-bricolage text-[clamp(34px,3.8vw,52px)] font-extrabold tracking-[-1.5px] leading-[1.1] text-[#0A1628] mb-4">
-            Three phases. <span className="text-[#0057FF]">One platform.</span>
+            One platform. <span className="text-[#0057FF]">Three unfair advantages.</span>
           </h2>
           <p className="text-[17px] text-[#3B4A63] leading-[1.75] max-w-[520px] mx-auto">
-            Before, during, and after every call — SellSig makes your team sharper at every stage.
+            The only sales coaching platform that works before, during, and after every call — turning each conversation into a permanent competitive advantage.
           </p>
         </div>
 

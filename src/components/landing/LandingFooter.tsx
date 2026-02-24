@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const footerLinks = {
   Platform: ['Script Builder', 'Live Coaching', 'Emotion Detection', 'Call Analysis', 'Phone Lines'],
-  Solutions: ['For Sales Teams', 'For Managers', 'For Enterprise'],
+  Solutions: ['For Sales Teams', 'For Managers', 'For Enterprise', 'Integrations'],
   Company: ['About', 'Blog', 'Customers', 'Careers', 'Press'],
   Support: [
     { label: 'Documentation', to: '/support' },

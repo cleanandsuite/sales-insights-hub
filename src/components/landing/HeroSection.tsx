@@ -43,7 +43,7 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
 
           {/* Subheadline */}
           <p className="text-lg text-[#3B4A63] leading-[1.7] max-w-[460px] mb-10">
-            SellSig generates your script before the call, coaches your reps live with emotion detection, and delivers deep analysis after — so every conversation makes your team smarter.
+            SellSig generates your script before the call, coaches your reps live with emotion detection, and delivers deep analysis after — so every conversation makes your team permanently better.
           </p>
 
           {/* CTAs */}
@@ -92,15 +92,16 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
         <div className="relative z-[2] hidden md:block">
           {/* Floating stat pill - Call Score */}
           <div className="absolute -left-8 top-6 bg-white border border-[#E4E8F0] rounded-xl shadow-[0_12px_48px_rgba(10,22,40,.12)] py-3.5 px-[18px] z-10">
-            <div className="font-bricolage text-[26px] font-extrabold text-[#0A1628] leading-none">89%</div>
+            <div className="font-bricolage text-[26px] font-extrabold text-[#0A1628] leading-none">89<small className="text-base">%</small></div>
             <div className="text-[11px] text-[#6B7A99] mt-0.5 font-medium">Call Score</div>
             <div className="text-xs font-semibold text-[#00875A] mt-1 flex items-center gap-1">▲ +12 this week</div>
           </div>
 
           {/* Floating stat pill - Pro Plan */}
           <div className="absolute -right-4 -bottom-4 bg-white border border-[#E4E8F0] rounded-xl shadow-[0_12px_48px_rgba(10,22,40,.12)] py-3.5 px-[18px] z-10">
-            <div className="text-[11px] font-bold text-[#0057FF] tracking-[.06em] uppercase">Pro Plan</div>
-            <div className="font-bricolage text-[26px] font-extrabold text-[#0A1628] leading-none mt-1">5,000 <span className="text-sm font-medium text-[#6B7A99]">min</span></div>
+            <div className="text-[11px] font-bold text-[#0057FF] tracking-[.06em] uppercase mb-1">Pro Plan</div>
+            <div className="font-bricolage text-xl font-extrabold text-[#0A1628] leading-none">5,000 min</div>
+            <div className="text-[11px] text-[#6B7A99] mt-0.5 font-medium">+ dedicated number</div>
           </div>
 
           <div className="bg-white border border-[#E4E8F0] rounded-[20px] shadow-[0_24px_80px_rgba(10,22,40,.14)] overflow-hidden">
@@ -146,7 +147,7 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
                 {[
                   { label: 'Interest', value: 84, color: '#0057FF' },
                   { label: 'Skepticism', value: 32, color: '#D92D20' },
-                  { label: 'Trust', value: 71, color: '#00875A' },
+                  { label: 'Trust', value: 71, color: '#0057FF' },
                   { label: 'Urgency', value: 60, color: '#B54708' },
                 ].map((e) => (
                   <div key={e.label} className="bg-[#F7F9FC] border border-[#E4E8F0] rounded-lg p-2.5 text-center">
@@ -161,18 +162,18 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
               {/* Coaching alert */}
               <div className="bg-[#EEF3FF] border border-[#D0DCFF] rounded-[10px] p-3.5 mb-3.5">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="bg-[#0057FF] text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-[.04em]">⚡ COACHING</span>
+                  <span className="bg-[#0057FF] text-white text-[10px] font-bold px-2 py-0.5 rounded-full tracking-[.04em]">⚡ Price Objection Detected</span>
                   <span className="text-[11px] text-[#6B7A99]">6:24 into call</span>
                 </div>
                 <p className="text-[13px] text-[#0A1628] leading-relaxed">
-                  Suggested: "<strong className="text-[#0057FF]">Most clients recover their investment in under 60 days.</strong> Can I show you the ROI model based on your team?"
+                  <strong className="text-[#0057FF]">Suggested:</strong> "Most clients recover their investment in under 60 days. Can I show you the ROI model based on your team?"
                 </p>
               </div>
 
               {/* Script hints */}
               <div className="space-y-1">
                 <div className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-[#F7F9FC] transition-colors">
-                  <div className="w-[22px] h-[22px] rounded-md bg-[#EEF3FF] flex items-center justify-center text-xs shrink-0">🎯</div>
+                  <div className="w-[22px] h-[22px] rounded-md bg-[#E3F5EE] flex items-center justify-center text-xs shrink-0">🎯</div>
                   <span className="text-xs text-[#3B4A63] leading-snug">
                     <b className="text-[#0A1628] font-semibold">Buying signal</b> — Prospect said "when would we get started?" Move toward close.
                   </span>
@@ -180,7 +181,7 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
                 <div className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-[#F7F9FC] transition-colors">
                   <div className="w-[22px] h-[22px] rounded-md bg-[#EEF3FF] flex items-center justify-center text-xs shrink-0">📊</div>
                   <span className="text-xs text-[#3B4A63] leading-snug">
-                    Next: <b className="text-[#0A1628] font-semibold">Send the 1-page ROI doc</b> on-demand — button ready below.
+                    <b className="text-[#0A1628] font-semibold">Next:</b> Send the 1-page ROI doc on-demand — button ready below.
                   </span>
                 </div>
               </div>
