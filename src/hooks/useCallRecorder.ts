@@ -6,6 +6,7 @@ interface TranscriptSegment {
   speaker: 'user' | 'remote';
   timestamp: number;
   isFinal: boolean;
+  turnOrder?: number;
 }
 
 interface UseCallRecorderReturn {
@@ -246,21 +247,25 @@ export function useCallRecorder(): UseCallRecorderReturn {
           }
 
           // Handle Turn messages (contains transcript)
+          // AssemblyAI v3 Turn messages are cumulative per turn_order —
+          // each message contains the FULL transcript for that turn, not a delta.
           if (data.type === 'Turn' && data.transcript) {
-            console.log('[CALL_RECORDER] Got transcript:', data.transcript);
+            const turnOrder = data.turn_order ?? -1;
+            const isFinal = data.end_of_turn === true;
+            console.log('[CALL_RECORDER] Got transcript turn', turnOrder, 'final:', isFinal, data.transcript.slice(0, 60));
+
             const segment: TranscriptSegment = {
               text: data.transcript,
-              speaker: 'remote', // We could try to differentiate based on channel analysis
+              speaker: 'remote',
               timestamp: Date.now(),
-              isFinal: data.end_of_turn === true
+              isFinal,
+              turnOrder,
             };
 
             setTranscripts(prev => {
-              // Replace partial with final, or add new
-              if (segment.isFinal) {
-                return [...prev.filter(t => t.isFinal), segment];
-              }
-              return [...prev.filter(t => t.isFinal), segment];
+              // Remove any existing segment with the same turnOrder (replaces partial with updated/final)
+              const filtered = prev.filter(t => t.turnOrder !== turnOrder);
+              return [...filtered, segment];
             });
           }
 
