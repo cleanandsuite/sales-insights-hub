@@ -1,132 +1,172 @@
 
-## Landing Page Redesign — CompleteSEO Inspired
 
-### Visual Direction (from the reference screenshot)
-The CompleteSEO site uses:
-- **White / very light gray background** — no dark themes
-- **Bold, heavy black sans-serif headings** — large, tight tracking
-- **Single blue accent color** — used for CTAs, links, and highlighted text
-- **Announcement bar** — thin top banner with a message and link
-- **Clean white nav** — logo left, links center, phone + CTA button right
-- **Star rating badge** above the hero headline (Google 5.0 stars)
-- **Large centered headline** with a big blue rounded CTA button below
-- **3 trust stats** displayed in a horizontal row below the CTA (icon + bold stat + description)
-- **Blue wave/curve divider** separating the hero from the next section
-- **"How it works" section** — left: large bold heading + body copy + 3 checkmark bullet points; right: screenshot/image
-- **No heavy gradients, no dark backgrounds, no glow effects**
+# Landing Page Redesign — Velox AI Design System
+
+## Overview
+
+Complete redesign of the SellSig landing page to match the uploaded HTML template. This is a significant visual overhaul that introduces a new design language: Plus Jakarta Sans typography, blue brand (#0057FF), subtle grid background, interactive 3-phase platform tabs, a dedicated phone line section, FAQ accordion, and a polished pricing layout. The brand name stays "SellSig" (not "Velox AI").
 
 ---
 
-### Section-by-Section Plan
+## Design Tokens
 
-#### 1. `LandingHeader.tsx` — Full redesign
-- **White background** (`bg-white`), `border-b border-gray-200`
-- Logo left-aligned
-- Nav links center: Features, Pricing, Support
-- Right side: phone number text + blue "Get started" button (rounded, filled blue)
-- Mobile: hamburger with white dropdown
+The new design uses these core values:
 
-#### 2. `HeroSection.tsx` — Full redesign
-Remove the dark dashboard mock entirely. Replace with:
-- **Top announcement bar**: `bg-[#1e40af]` (dark blue) full-width banner — "Now with Real-Time Buyer Signal Detection →"
-- **Star rating row**: Google ⭐ 5.0 badge (like the reference's "Voted 5.0 ★★★★★")
-- **Large centered heading**: `text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 leading-tight`
-  - "Close 30% More Deals with Real-Time AI Coaching"
-- **Subheadline**: short paragraph, centered, `text-gray-600`
-- **Big blue CTA button**: "Book a demo" — `bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-10 py-4 text-lg font-bold`
-- **3 Trust stats row** below (horizontal, with icons):
-  - 📈 "2,500+ calls analyzed daily"
-  - ✅ "Trusted by 100+ sales teams since 2022"
-  - 🎯 "Month-to-month. No lock-in."
-- **Blue wave SVG divider** at the bottom of the hero (inline SVG, matching the CompleteSEO wave shape — a gentle upward curve in blue)
-
-#### 3. `ProblemSection.tsx` → Renamed to "How it works" style section
-Replace the dark card grid with a two-column layout:
-- **Left**: Large bold heading ("How real-time coaching produces real pipeline growth") + short paragraph + 3 checkmark bullet items with blue checkmarks
-  - ✅ Find the signals that drive revenue
-  - ✅ Coach reps live, not after the fact
-  - ✅ Turn insights into closed deals
-- **Right**: The `dashboard-preview.jpg` image in a rounded card with a subtle shadow
-- Background: `bg-white`
-
-#### 4. `FeaturesSection.tsx` — Redesign
-Replace vertical card list with a clean 3-column grid:
-- Section badge: small blue pill label "Our Features"
-- Heading: "Everything your sales team needs to win"
-- 3 cards: white background, light gray border, icon top, title, description
-- Cards use `rounded-2xl border border-gray-100 p-6 hover:shadow-md transition`
-
-#### 5. `ComparisonSection.tsx` — Keep but style update
-- White background, clean table
-- Blue header row instead of gray
-- "SellSig" column highlighted with blue left border and blue text
-
-#### 6. `SocialProofSection.tsx` — Redesign
-- **Stats band**: Full-width light blue (`bg-blue-50`) section with 4 large bold stats
-- **Testimonials**: 3 white cards in a grid, clean border, author info at bottom
-- Remove the logo placeholder text row (or replace with "Trusted by teams at" text)
-
-#### 7. `TestimonialsSection.tsx` — Merge into SocialProofSection (remove as standalone)
-The SocialProofSection already has testimonials — remove the standalone single-quote TestimonialsSection.
-
-#### 8. `CTASection.tsx` — Redesign
-- White background with a blue rounded rectangle card inside (not full-bleed gradient)
-- OR: dark blue (`#1e3a8a`) full-width section with white text
-- Centered heading: "Ready to close more deals?"
-- Blue/white CTA button
-- Trust line beneath: "No credit card required · Cancel anytime"
-
-#### 9. `LandingFooter.tsx` — Light redesign
-- White background with gray border top
-- Logo left, links center, copyright right
-- Clean and minimal (keep existing structure, just fix styling)
+```text
+Brand Blue:    #0057FF
+Brand Dark:    #003FBB  
+Brand Light:   #EEF3FF
+Navy:          #0A1628
+Text Primary:  #0A1628
+Text Secondary:#3B4A63
+Text Muted:    #6B7A99
+Border:        #E4E8F0
+Background:    #FFFFFF
+Background 2:  #F7F9FC
+Green:         #00875A
+Red:           #D92D20
+Amber:         #B54708
+Font:          Plus Jakarta Sans + Bricolage Grotesque
+```
 
 ---
 
-### Color Palette
-```
-Background:     #FFFFFF / #F9FAFB
-Text:           #111827 (near black)
-Accent blue:    #2563EB (Tailwind blue-600)
-Light blue:     #EFF6FF (blue-50)
-Border:         #E5E7EB (gray-200)
-Announcement:   #1D4ED8 (blue-700)
-Wave:           #2563EB fill
-```
+## Sections to Build (mapping HTML to React components)
 
-### Typography
-- Headings: `font-black` or `font-extrabold`, `tracking-tight`
-- Body: `font-normal`, `text-gray-600`, `leading-relaxed`
-- All Inter (existing font)
+### 1. LandingHeader.tsx — Full Rewrite
+- Fixed nav bar with backdrop blur, 68px height
+- SellSig logo with blue square mark + brand name (Bricolage Grotesque font)
+- Nav links: Platform, Features, Phone Lines, Pricing, Enterprise (anchor scroll)
+- Right side: Sign in link, "Book a demo" outline button, "Start free trial" blue CTA
+- Mobile: hide nav links, show hamburger menu
 
-### Mobile Strategy
-- Hero stacks to single column
-- "How it works" section: image hides on mobile, text only
-- Features: 1-column stack on mobile, 3-col on desktop
-- All touch targets 48px+
-- Announcement bar wraps text on small screens
+### 2. HeroSection.tsx — Full Rewrite
+- Two-column grid layout (text left, dashboard mockup right)
+- Subtle grid background (60px lines at 35% opacity)
+- Blue gradient blob (radial gradient, decorative)
+- Eyebrow pill: blinking dot + "AI-Powered Sales Intelligence"
+- Headline with Bricolage Grotesque: "Close more deals with **AI coaching** on every call" (blue highlight with underline)
+- Subheadline describing the 3-phase value prop
+- Two CTAs: "Start free trial" (primary blue) + "Watch 2-min demo" (outline)
+- Social proof: avatar stack, 4.9/5 stars, "No credit card required"
+- Right side: Interactive dashboard mockup card showing:
+  - Browser chrome (3 dots + URL bar)
+  - Live call header with recording indicator
+  - Animated waveform bars
+  - Emotion meters (Interest 84, Skepticism 32, Trust 71, Urgency 60)
+  - AI coaching alert card
+  - Script hint rows
+- Two floating stat pills (Call Score 89%, Pro Plan 5,000 min)
 
-### Files to Edit
-1. `src/components/landing/LandingHeader.tsx`
-2. `src/components/landing/HeroSection.tsx`
-3. `src/components/landing/ProblemSection.tsx`
-4. `src/components/landing/FeaturesSection.tsx`
-5. `src/components/landing/ComparisonSection.tsx`
-6. `src/components/landing/SocialProofSection.tsx`
-7. `src/components/landing/TestimonialsSection.tsx`
-8. `src/components/landing/CTASection.tsx`
-9. `src/components/landing/LandingFooter.tsx`
-10. `src/pages/Landing.tsx` (update background from `bg-background` to `bg-white`)
+### 3. LogoBarSection.tsx — New Component
+- Horizontal strip with "Trusted by sales teams at leading companies"
+- Row of company name logos (text-based, Bricolage Grotesque)
 
-### Assets Used
-- `src/assets/dashboard-preview.jpg` — used in the "How it works" right-side image
-- `src/assets/hero-sales-team.jpg` — used in CTA section background or hero visual
-- `src/assets/sales-call.jpg` — used in a feature card
-- `src/assets/sellsig-logo.png` — footer logo
-- The uploaded `image-26.png` is reference only (screenshot of CompleteSEO), NOT embedded
+### 4. StatsSection.tsx — New Component
+- Navy (#0A1628) background
+- 4-column stat grid with large numbers (Bricolage Grotesque)
+- Stats: 41% win rate increase, 2.8x faster onboarding, 18k+ reps coached, $2.1B pipeline
+- Green delta indicators
 
-### What stays the same
-- All copy/messaging
-- Stripe checkout link
-- SellSigLogo component in header
-- Route structure
+### 5. PlatformSection.tsx — New Component (replaces ProblemSection)
+- "The SellSig Intelligence Loop" header
+- 3-phase tab system (Pre-Call, During Call, Post-Call)
+- Each tab click reveals a two-column panel:
+  - **Panel 0 (Pre-Call):** SWOT script builder mockup with company/target inputs, SWOT grid (strength/weakness/opportunity/threat), generate button, script output
+  - **Panel 1 (Live Coaching):** Emotion meters with progress bars, objection card (amber), buying signal card (blue)
+  - **Panel 2 (Post-Call):** Score circle (87), score bars (Discovery 92, Objection Handling 79, etc.), insight row
+- React state manages active tab/panel
+
+### 6. FeaturesSection.tsx — Rewrite
+- "Platform Capabilities" label
+- "Everything your team needs to win more" headline
+- 3x2 grid of feature cards with emoji icons:
+  - SWOT Script Builder, Live Emotion Detection, Real-Time Objection Handling
+  - 40-Dimension Call Scoring, Dedicated Business Phone Line, Personalized Growth Roadmaps
+- Hover: border turns blue, translateY(-4px), shadow
+
+### 7. PhoneLineSection.tsx — New Component
+- Navy background section
+- Left: headline "Your team's own business phone line. Included."
+- Spec grid (5,000 min, 3 seats, 1 number, 99.9% uptime)
+- Two CTAs (white solid + ghost outline)
+- Right: Phone dashboard mockup card with:
+  - Dark header with phone number
+  - 3-column stats
+  - Rep rows with avatars, scores, live/scored status
+  - Usage bar (minutes used/remaining)
+
+### 8. TestimonialsSection.tsx — Rewrite (replaces SocialProofSection)
+- "Customer Stories" header
+- 3-column testimonial cards with star ratings, quotes, author avatars
+- Hover: translateY(-4px), blue border, shadow
+
+### 9. PricingSection.tsx — Rewrite
+- Monthly/Annual toggle pill with "Save 20%" badge
+- Two pricing cards side by side:
+  - **Starter** ($79/mo): white card, limited features, crossed-out items
+  - **Pro** ($200/mo): navy featured card, "Most Popular" badge, phone line highlight, full features
+- Enterprise row below with call-to-action
+- Toggle switches prices (79->63, 200->160 for annual)
+
+### 10. FAQSection.tsx — New Component
+- Accordion-style FAQ with 5 questions
+- Click to expand/collapse, only one open at a time
+
+### 11. FinalCTASection.tsx — Rewrite
+- Navy gradient background
+- "Your AI sales coach is ready to go" headline
+- Two CTAs: Start free trial + Call Enterprise Sales
+- Fine print: "14-day free trial, no credit card, cancel anytime"
+
+### 12. LandingFooter.tsx — Rewrite
+- Navy background footer
+- 5-column grid: Brand description + Platform/Solutions/Company/Support link columns
+- Bottom bar: copyright + legal links
+
+---
+
+## Files to Create
+- `src/components/landing/LogoBarSection.tsx`
+- `src/components/landing/StatsSection.tsx`
+- `src/components/landing/PlatformSection.tsx`
+- `src/components/landing/PhoneLineSection.tsx`
+- `src/components/landing/FAQSection.tsx`
+
+## Files to Rewrite
+- `src/components/landing/LandingHeader.tsx`
+- `src/components/landing/HeroSection.tsx`
+- `src/components/landing/FeaturesSection.tsx`
+- `src/components/landing/CTASection.tsx` (renamed to FinalCTASection logic)
+- `src/components/landing/SocialProofSection.tsx` (becomes TestimonialsSection content)
+- `src/components/landing/LandingFooter.tsx`
+- `src/pages/Landing.tsx` (new section ordering)
+- `src/components/landing/PricingSection.tsx`
+
+## Files to Remove/Empty
+- `src/components/landing/ProblemSection.tsx` (replaced by PlatformSection)
+- `src/components/landing/ComparisonSection.tsx` (merged into pricing)
+- `src/components/landing/TestimonialsSection.tsx` (already empty, stays)
+
+## CSS/Font Changes
+- Add Plus Jakarta Sans + Bricolage Grotesque to `index.html` Google Fonts link
+- Add landing-specific utility classes to `src/index.css` for the grid background, waveform animation, reveal animations, and section styles
+
+## What Stays the Same
+- Brand name: "SellSig" (not Velox AI)
+- Stripe checkout link for trial CTA
+- Route structure (/ -> Landing for unauthenticated)
+- SellSigLogo component (used in nav)
+- All dashboard/app pages remain unchanged
+- Auth flow unchanged
+
+---
+
+## Implementation Order
+1. Add Google Fonts (Plus Jakarta Sans + Bricolage Grotesque) to index.html
+2. Add new CSS utility classes to index.css
+3. Create new section components (LogoBar, Stats, Platform, PhoneLine, FAQ)
+4. Rewrite existing components (Header, Hero, Features, Pricing, Testimonials, CTA, Footer)
+5. Update Landing.tsx to compose all sections in the correct order
+6. Clean up removed/unused components
+
