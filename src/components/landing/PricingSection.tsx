@@ -1,228 +1,203 @@
-/**
- * SellSig Pricing Section - 3-Tier Pricing
- * 
- * Design specs from: nova-hero-mockup.md
- */
-
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Check, Sparkles } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
-
-const pricingTiers = [
-  {
-    name: 'Starter',
-    description: 'Perfect for individual sales reps',
-    price: '$25',
-    period: '/mo',
-    priceNote: '200 AI coaching minutes',
-    features: [
-      'Unlimited call recordings',
-      'AI transcription & analysis',
-      'Live coaching suggestions',
-      '200 AI minutes/month',
-      'Basic analytics',
-      'Email support'
-    ],
-    cta: 'Start Free Trial',
-    popular: false,
-    accentColor: '#2563EB'
-  },
-  {
-    name: 'Pro',
-    description: 'For serious sales professionals',
-    price: '$55',
-    period: '/mo',
-    priceNote: 'Unlimited AI coaching',
-    features: [
-      'Everything in Starter',
-      'Unlimited AI coaching minutes',
-      '5 AI Coach Personalities',
-      'Smart Coaching Engine',
-      'Advanced analytics',
-      'Team leaderboards',
-      'Priority support',
-      'CRM integrations'
-    ],
-    cta: 'Start Free Trial',
-    popular: true,
-    accentColor: '#7C3AED'
-  },
-  {
-    name: 'Enterprise',
-    description: 'For scaling organizations',
-    price: '$150',
-    period: '/user/mo',
-    priceNote: 'Contact for volume discounts',
-    features: [
-      'Everything in Pro',
-      'Dedicated account manager',
-      'Custom integrations',
-      'SLA guarantees',
-      'Advanced security',
-      'API access',
-      '24/7 phone support',
-      'Custom training'
-    ],
-    cta: 'Contact Sales',
-    popular: false,
-    accentColor: '#10B981'
-  }
-];
+import { Check, ArrowRight } from 'lucide-react';
 
 interface PricingSectionProps {
   onStartTrialClick: () => void;
 }
 
+const tiers = [
+  {
+    name: 'Growth',
+    description: 'For teams getting started with revenue intelligence',
+    price: '$99',
+    period: '/user/mo',
+    annualNote: 'Billed annually. $119/mo billed monthly.',
+    features: [
+      'Unlimited call recording & transcription',
+      'AI coaching suggestions (200 mins/mo)',
+      'Basic conversation analytics',
+      'Team performance dashboards',
+      'Salesforce & HubSpot integration',
+      'Email support',
+    ],
+    cta: 'Start free trial',
+    highlighted: false,
+  },
+  {
+    name: 'Professional',
+    description: 'For revenue teams that need to win consistently',
+    price: '$249',
+    period: '/user/mo',
+    annualNote: 'Billed annually. $299/mo billed monthly.',
+    badge: 'Most popular',
+    features: [
+      'Everything in Growth, plus:',
+      'Unlimited AI coaching minutes',
+      'Real-time live call coaching',
+      'Revenue forecasting & deal intelligence',
+      'Custom coaching playbooks',
+      'Team leaderboards & gamification',
+      'Advanced analytics & reporting',
+      'API access',
+      'Priority support with dedicated CSM',
+    ],
+    cta: 'Start free trial',
+    highlighted: true,
+  },
+  {
+    name: 'Enterprise',
+    description: 'For organizations that run on revenue intelligence',
+    price: 'Custom',
+    period: '',
+    annualNote: 'Volume pricing for 50+ seats',
+    features: [
+      'Everything in Professional, plus:',
+      'Custom AI model training on your data',
+      'SSO / SAML authentication',
+      'Dedicated infrastructure',
+      'Custom integrations & webhooks',
+      'SLA guarantees (99.99% uptime)',
+      '24/7 phone support',
+      'Quarterly business reviews',
+      'Custom onboarding & training',
+    ],
+    cta: 'Talk to sales',
+    highlighted: false,
+  },
+];
+
 export function PricingSection({ onStartTrialClick }: PricingSectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Section header animation
-      gsap.fromTo('.pricing-header',
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'easeOut',
-          scrollTrigger: {
-            trigger: '.pricing-header',
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-
-      // Pricing cards stagger animation
-      gsap.fromTo('.pricing-card',
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.15,
-          ease: 'easeOut',
-          scrollTrigger: {
-            trigger: '.pricing-grid',
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <section 
-      ref={sectionRef}
-      className="relative bg-white py-16 md:py-24 overflow-hidden"
-    >
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="pricing-header text-center mb-12 md:mb-16">
-          <p className="font-mono text-xs font-bold text-gray-500 tracking-[0.1em] mb-4">
-            PRICING
+    <section className="py-20 md:py-28 bg-white" id="pricing">
+      <div className="max-w-[1200px] mx-auto px-6">
+        {/* Section header */}
+        <div className="max-w-[640px] mx-auto text-center mb-16">
+          <p className="text-[13px] font-semibold text-gray-400 uppercase tracking-[0.08em] mb-4">
+            Pricing
           </p>
-          <h2 className="text-[28px] md:text-[40px] font-bold text-[#0F172A] leading-[1.2] mb-3">
-            Simple, Transparent Pricing
+          <h2 className="text-[32px] md:text-[40px] font-bold text-[#0f172a] leading-[1.15] tracking-[-0.02em] mb-4">
+            Invest in revenue, not cost
           </h2>
-          <p className="text-[18px] text-gray-600">
-            Start with a 14-day free trial. No credit card required.
+          <p className="text-[16px] text-gray-500 leading-relaxed">
+            SellSig pays for itself with one additional closed deal per quarter.
+            Every plan includes a 14-day free trial.
           </p>
         </div>
 
-        {/* Pricing Cards Grid */}
-        <div className="pricing-grid grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {pricingTiers.map((tier, index) => (
-            <div 
-              key={index}
-              className={`pricing-card relative bg-white rounded-[24px] p-8 border transition-all duration-200 hover:-translate-y-1 shadow-sm ${
-                tier.popular 
-                  ? 'border-[#7C3AED] shadow-lg shadow-[#7C3AED]/20' 
-                  : 'border-gray-200 hover:border-gray-300'
+        {/* Pricing cards */}
+        <div className="grid md:grid-cols-3 gap-6 max-w-[1080px] mx-auto mb-12">
+          {tiers.map((tier, idx) => (
+            <div
+              key={idx}
+              className={`relative rounded-xl p-8 flex flex-col ${
+                tier.highlighted
+                  ? 'bg-[#0f172a] text-white ring-1 ring-[#0f172a] shadow-[0_8px_40px_rgba(15,23,42,0.15)]'
+                  : 'bg-white border border-gray-200/80'
               }`}
             >
-              {/* Popular badge */}
-              {tier.popular && (
-                <div 
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-semibold text-white flex items-center gap-1"
-                  style={{ backgroundColor: tier.accentColor }}
-                >
-                  <Sparkles className="w-3 h-3" />
-                  Most Popular
+              {/* Badge */}
+              {tier.badge && (
+                <div className="absolute -top-3 left-8 inline-flex items-center px-3 py-1 rounded-full bg-blue-600 text-white text-[12px] font-semibold">
+                  {tier.badge}
                 </div>
               )}
 
               {/* Plan name */}
-              <h3 className="text-xl font-semibold text-[#0F172A] mb-2">
+              <h3
+                className={`text-[18px] font-semibold mb-1 ${
+                  tier.highlighted ? 'text-white' : 'text-[#0f172a]'
+                }`}
+              >
                 {tier.name}
               </h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p
+                className={`text-[14px] mb-6 ${
+                  tier.highlighted ? 'text-gray-400' : 'text-gray-500'
+                }`}
+              >
                 {tier.description}
               </p>
 
               {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[40px] font-bold text-[#0F172A]">
-                    {tier.price}
-                  </span>
-                  <span className="text-gray-500">
+              <div className="mb-1">
+                <span
+                  className={`text-[40px] font-bold tracking-tight ${
+                    tier.highlighted ? 'text-white' : 'text-[#0f172a]'
+                  }`}
+                >
+                  {tier.price}
+                </span>
+                {tier.period && (
+                  <span
+                    className={`text-[15px] ml-1 ${
+                      tier.highlighted ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  >
                     {tier.period}
                   </span>
-                </div>
-                <p 
-                  className="text-sm font-medium mt-1"
-                  style={{ color: tier.accentColor }}
-                >
-                  {tier.priceNote}
-                </p>
+                )}
               </div>
+              <p
+                className={`text-[13px] mb-8 ${
+                  tier.highlighted ? 'text-gray-500' : 'text-gray-400'
+                }`}
+              >
+                {tier.annualNote}
+              </p>
 
-              {/* Features list */}
-              <ul className="space-y-3 mb-8">
-                {tier.features.map((feature, fIndex) => (
-                  <li 
-                    key={fIndex} 
-                    className="flex items-start gap-3 text-sm text-gray-600"
-                  >
-                    <Check 
-                      className="w-5 h-5 shrink-0" 
-                      style={{ color: tier.accentColor }} 
+              {/* CTA */}
+              <button
+                onClick={onStartTrialClick}
+                className={`group w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg text-[14px] font-medium transition-all mb-8 ${
+                  tier.highlighted
+                    ? 'bg-white text-[#0f172a] hover:bg-gray-100'
+                    : 'bg-[#0f172a] text-white hover:bg-[#1e293b]'
+                }`}
+              >
+                {tier.cta}
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              </button>
+
+              {/* Features */}
+              <ul className="space-y-3 flex-1">
+                {tier.features.map((feature, fIdx) => (
+                  <li key={fIdx} className="flex items-start gap-3">
+                    <Check
+                      className={`w-4 h-4 mt-0.5 shrink-0 ${
+                        tier.highlighted ? 'text-blue-400' : 'text-gray-400'
+                      }`}
                     />
-                    {feature}
+                    <span
+                      className={`text-[14px] leading-snug ${
+                        tier.highlighted ? 'text-gray-300' : 'text-gray-500'
+                      } ${fIdx === 0 && idx > 0 ? 'font-medium' : ''}`}
+                    >
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
-
-              {/* CTA Button */}
-              <button
-                onClick={onStartTrialClick}
-                className={`w-full py-3 px-6 rounded-[12px] font-semibold text-[16px] transition-all duration-200 hover:scale-[1.02] ${
-                  tier.popular
-                    ? 'text-white'
-                    : 'bg-gray-50 text-[#0F172A] border border-gray-200 hover:bg-gray-100'
-                }`}
-                style={{
-                  backgroundColor: tier.popular ? tier.accentColor : undefined
-                }}
-              >
-                {tier.cta}
-              </button>
             </div>
           ))}
         </div>
 
-        {/* Bottom note */}
-        <p className="text-center text-sm text-gray-500 mt-12">
-          All plans include a 14-day free trial. Cancel anytime.
-        </p>
+        {/* ROI callout */}
+        <div className="max-w-[720px] mx-auto text-center">
+          <div className="rounded-xl border border-gray-200/80 bg-gray-50/50 p-8">
+            <p className="text-[15px] text-gray-600 leading-relaxed mb-4">
+              The average SellSig customer sees a{' '}
+              <span className="font-semibold text-[#0f172a]">12x return on investment</span>{' '}
+              within the first 90 days. One additional closed deal per quarter pays for
+              your entire team's licenses.
+            </p>
+            <button
+              onClick={onStartTrialClick}
+              className="group inline-flex items-center gap-2 text-[14px] font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              Calculate your ROI
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );

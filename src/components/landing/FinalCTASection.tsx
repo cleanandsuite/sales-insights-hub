@@ -1,167 +1,62 @@
-/**
- * SellSig Final CTA Section - Last Push
- * 
- * Design specs from: nova-hero-mockup.md
- */
-
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, CheckCircle, Sparkles, Users, TrendingUp, Target, Clock, Zap } from 'lucide-react';
-
-gsap.registerPlugin(ScrollTrigger);
+import { ArrowRight } from 'lucide-react';
 
 interface FinalCTASectionProps {
   onStartTrialClick: () => void;
 }
 
 export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Content animation
-      gsap.fromTo('.cta-content > *',
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: 'easeOut',
-          scrollTrigger: {
-            trigger: '.cta-content',
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-
-      // Stats animation
-      gsap.fromTo('.cta-stat',
-        { opacity: 0, scale: 0.9 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: 'easeOut',
-          scrollTrigger: {
-            trigger: '.cta-stats',
-            start: 'top 85%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <section 
-      ref={sectionRef}
-      className="relative bg-gray-50 py-16 md:py-24 overflow-hidden"
-    >
-      {/* Background gradient mesh - removed for white theme */}
-
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="cta-content max-w-3xl mx-auto text-center space-y-8">
-          {/* Badge */}
-          <div 
-            className="inline-flex items-center rounded-full px-4 py-2 border"
-            style={{
-              background: 'rgba(124,58,237,0.2)',
-              borderColor: 'rgba(124,58,237,0.3)',
-            }}
-          >
-            <Users className="w-4 h-4 text-[#A78BFA] mr-2" />
-            <span className="text-sm font-semibold text-[#A78BFA]">
-              Join 500+ reps becoming rejection-proof
-            </span>
-          </div>
-
+    <section className="py-20 md:py-28 bg-[#0f172a]">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="max-w-[640px] mx-auto text-center">
           {/* Headline */}
-          <h2 className="text-[32px] md:text-[48px] font-bold text-[#0F172A] leading-tight">
-            Ready to Give Your Team{' '}
-            <span 
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage: 'linear-gradient(90deg, #3B82F6, #7C3AED, #A78BFA)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              the Edge?
-            </span>
+          <h2 className="text-[32px] md:text-[44px] font-bold text-white leading-[1.12] tracking-[-0.02em] mb-5">
+            Start closing more deals today
           </h2>
 
-          {/* Subheadline */}
-          <p className="text-[18px] text-gray-600 max-w-xl mx-auto">
-            Join sales leaders who use SellSig to transform sales calls into 
-            consistent wins. Start your 14-day free trial today.
+          {/* Subtext */}
+          <p className="text-[17px] text-gray-400 leading-relaxed mb-10 max-w-[480px] mx-auto">
+            Join the revenue teams that use SellSig to turn every conversation
+            into a competitive advantage. Free for 14 days.
           </p>
 
-          {/* CTA Button */}
-          <div className="pt-4">
+          {/* CTA */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
             <button
               onClick={onStartTrialClick}
-              className="group relative inline-flex items-center gap-3 font-semibold text-[18px] px-8 py-4 rounded-[24px] text-white overflow-hidden transition-all duration-200 hover:scale-105"
-              style={{
-                background: 'linear-gradient(90deg, #2563EB, #3B82F6)',
-                boxShadow: '0 0 40px rgba(37,99,235,0.4)',
-              }}
+              className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white text-[#0f172a] text-[15px] font-semibold rounded-lg hover:bg-gray-100 transition-colors"
             >
-              <span className="relative z-10 flex items-center gap-3">
-                Start Your Free Trial
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </span>
+              Start your free trial
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
             </button>
-
-            {/* Trust badges */}
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-6 text-sm text-gray-600">
-              <span className="flex items-center gap-1">
-                <CheckCircle className="w-4 h-4 text-[#10B981]" />
-                14-day free trial
-              </span>
-              <span className="flex items-center gap-1">
-                <CheckCircle className="w-4 h-4 text-[#10B981]" />
-                No credit card required
-              </span>
-              <span className="flex items-center gap-1">
-                <CheckCircle className="w-4 h-4 text-[#10B981]" />
-                Full access to AI coaching
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Row */}
-        <div className="cta-stats grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-3xl mx-auto mt-16">
-          {[
-            { icon: TrendingUp, stat: '+35%', label: 'Revenue Growth', color: '#10B981' },
-            { icon: Target, stat: '95%', label: 'Forecast Accuracy', color: '#3B82F6' },
-            { icon: Clock, stat: '40%', label: 'Time Saved', color: '#7C3AED' },
-            { icon: Zap, stat: '2x', label: 'Deal Velocity', color: '#F59E0B' },
-          ].map((item, index) => (
-            <div 
-              key={index}
-              className="cta-stat bg-white rounded-[16px] p-4 md:p-6 border border-gray-200 text-center shadow-sm"
+            <button
+              onClick={onStartTrialClick}
+              className="inline-flex items-center gap-2.5 px-8 py-4 text-gray-400 text-[15px] font-medium rounded-lg border border-gray-700 hover:border-gray-600 hover:text-gray-300 transition-all"
             >
-              <item.icon 
-                className="w-6 h-6 mx-auto mb-2" 
-                style={{ color: item.color }} 
-              />
-              <p 
-                className="text-[28px] md:text-[36px] font-bold font-mono text-[#0F172A]"
-              >
-                {item.stat}
-              </p>
-              <p className="text-xs md:text-sm text-gray-500">
-                {item.label}
-              </p>
-            </div>
-          ))}
+              Talk to sales
+            </button>
+          </div>
+
+          {/* Trust line */}
+          <p className="text-[13px] text-gray-500">
+            No credit card required &middot; 14-day free trial &middot; Cancel anytime
+          </p>
+
+          {/* Bottom stats */}
+          <div className="grid grid-cols-3 gap-8 max-w-[480px] mx-auto mt-16 pt-12 border-t border-gray-800">
+            {[
+              { value: '2,000+', label: 'Revenue teams' },
+              { value: '4.9/5', label: 'Customer rating' },
+              { value: '<5 min', label: 'Setup time' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-[22px] font-bold text-white tracking-tight">
+                  {stat.value}
+                </div>
+                <div className="text-[12px] text-gray-500 mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

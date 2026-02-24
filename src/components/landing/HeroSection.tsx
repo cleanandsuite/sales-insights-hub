@@ -1,10 +1,4 @@
-/**
- * SellSig - Modern Cloud Phone Hero Section
- * Clean communications platform look
- */
-
-import { useState } from 'react';
-import { Phone, PhoneCall, MessageSquare, Mic, MicOff, Volume2, Video, Users, Zap, ArrowRight, Check, Shield, Headphones } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface HeroSectionProps {
   onStartTrialClick: () => void;
@@ -12,224 +6,216 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ onStartTrialClick, onWatchDemoClick }: HeroSectionProps) {
-  const [dialValue, setDialValue] = useState('');
-  const [isDialing, setIsDialing] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-
-  const dialPad = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['*', '0', '#'],
-  ];
-
-  const handleDial = (digit: string) => {
-    setDialValue(prev => prev + digit);
-  };
-
-  const handleCall = () => {
-    if (dialValue.length > 0) {
-      setIsDialing(true);
-    }
-  };
-
-  const features = [
-    { icon: PhoneCall, title: 'Crystal Clear Calls', desc: 'HD voice quality powered by AI noise cancellation' },
-    { icon: MessageSquare, title: 'Smart SMS', desc: 'Text with AI-assisted responses and templates' },
-    { icon: Users, title: 'Team Collaboration', desc: 'Shared inboxes and presence indicators' },
-    { icon: Shield, title: 'Enterprise Security', desc: 'End-to-end encryption and compliance ready' },
+  const logos = [
+    'Salesforce', 'HubSpot', 'Stripe', 'Figma', 'Notion', 'Linear',
   ];
 
   return (
-    <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }} />
-      </div>
+    <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50/80 via-white to-white" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-br from-blue-50 via-indigo-50/50 to-transparent rounded-full blur-3xl opacity-60" />
 
-      {/* Glow Effects */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+      <div className="relative max-w-[1200px] mx-auto px-6">
+        <div className="max-w-[720px] mx-auto text-center">
+          {/* Eyebrow */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0f172a]/[0.04] border border-[#0f172a]/[0.06] mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[13px] font-medium text-gray-600">
+              Now with real-time AI coaching on every call
+            </span>
+          </div>
 
-      <div className="container mx-auto px-4 py-20 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
-          {/* LEFT: Copy */}
-          <div className="space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center rounded-full px-4 py-2 bg-blue-500/10 border border-blue-500/30">
-              <Zap className="w-4 h-4 text-blue-400 mr-2" />
-              <span className="text-sm font-medium text-blue-300">AI-Powered Business Phone</span>
+          {/* Headline */}
+          <h1 className="text-[40px] md:text-[56px] lg:text-[64px] font-bold text-[#0f172a] leading-[1.08] tracking-[-0.03em] mb-6">
+            Turn every conversation{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              into revenue
+            </span>
+          </h1>
+
+          {/* Subheadline */}
+          <p className="text-[17px] md:text-[19px] text-gray-500 leading-relaxed max-w-[560px] mx-auto mb-10">
+            SellSig is the revenue intelligence platform that coaches your
+            reps in real-time, surfaces deal risks before they stall, and
+            gives leaders the visibility to forecast with confidence.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+            <button
+              onClick={onStartTrialClick}
+              className="group inline-flex items-center gap-2.5 px-7 py-3.5 bg-[#0f172a] text-white text-[15px] font-medium rounded-lg hover:bg-[#1e293b] transition-all"
+            >
+              Start free trial
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+            <button
+              onClick={onWatchDemoClick}
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 text-gray-600 text-[15px] font-medium rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+            >
+              Watch demo
+            </button>
+          </div>
+
+          {/* Trust line */}
+          <p className="text-[13px] text-gray-400 mb-16">
+            Free 14-day trial &middot; No credit card required &middot; Setup in 5 minutes
+          </p>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-8 max-w-[520px] mx-auto mb-20">
+            {[
+              { value: '40%', label: 'Higher win rates' },
+              { value: '2.4x', label: 'Deal velocity' },
+              { value: '67%', label: 'Less ramp time' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-[28px] md:text-[32px] font-bold text-[#0f172a] tracking-tight">
+                  {stat.value}
+                </div>
+                <div className="text-[13px] text-gray-400 mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Product preview */}
+        <div className="relative max-w-[960px] mx-auto">
+          <div className="relative rounded-xl border border-gray-200/80 bg-white shadow-[0_8px_40px_rgba(0,0,0,0.06)] overflow-hidden">
+            {/* Browser chrome */}
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-gray-200" />
+                <div className="w-3 h-3 rounded-full bg-gray-200" />
+                <div className="w-3 h-3 rounded-full bg-gray-200" />
+              </div>
+              <div className="flex-1 mx-8">
+                <div className="max-w-[280px] mx-auto h-6 rounded-md bg-gray-100 flex items-center justify-center">
+                  <span className="text-[11px] text-gray-400">app.sellsig.com/dashboard</span>
+                </div>
+              </div>
             </div>
 
-            {/* Headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-              The phone system{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                your team deserves
+            {/* Dashboard mockup */}
+            <div className="p-6 md:p-8 bg-gradient-to-br from-[#f8fafc] to-white">
+              <div className="grid grid-cols-12 gap-4">
+                {/* Sidebar hint */}
+                <div className="hidden md:block col-span-2">
+                  <div className="space-y-3">
+                    <div className="h-8 rounded-lg bg-[#0f172a] opacity-90" />
+                    <div className="space-y-2 pt-4">
+                      {[0.7, 0.5, 0.6, 0.4, 0.55, 0.45].map((w, i) => (
+                        <div
+                          key={i}
+                          className={`h-4 rounded bg-gray-100 ${i === 0 ? 'bg-blue-50' : ''}`}
+                          style={{ width: `${w * 100}%` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main content area */}
+                <div className="col-span-12 md:col-span-10">
+                  {/* KPI row */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    {[
+                      { label: 'Pipeline', value: '$2.4M', change: '+12%', up: true },
+                      { label: 'Win Rate', value: '34%', change: '+8%', up: true },
+                      { label: 'Avg Deal', value: '$48K', change: '+15%', up: true },
+                      { label: 'Forecast', value: '$1.8M', change: '92% conf', up: true },
+                    ].map((kpi) => (
+                      <div
+                        key={kpi.label}
+                        className="rounded-lg border border-gray-100 bg-white p-4"
+                      >
+                        <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
+                          {kpi.label}
+                        </div>
+                        <div className="text-[20px] font-semibold text-[#0f172a] mt-1">
+                          {kpi.value}
+                        </div>
+                        <div className="text-[12px] font-medium text-emerald-600 mt-0.5">
+                          {kpi.change}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Charts row */}
+                  <div className="grid grid-cols-5 gap-3">
+                    {/* Revenue chart placeholder */}
+                    <div className="col-span-3 rounded-lg border border-gray-100 bg-white p-4 h-[160px] flex flex-col">
+                      <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-auto">
+                        Revenue Trend
+                      </div>
+                      <div className="flex items-end gap-[3px] h-[80px]">
+                        {[40, 55, 45, 60, 50, 70, 65, 80, 75, 90, 85, 95].map((h, i) => (
+                          <div
+                            key={i}
+                            className="flex-1 rounded-sm bg-gradient-to-t from-blue-500 to-blue-400 opacity-80"
+                            style={{ height: `${h}%` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* AI coaching card */}
+                    <div className="col-span-2 rounded-lg border border-gray-100 bg-white p-4 h-[160px] flex flex-col">
+                      <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
+                        AI Coaching
+                      </div>
+                      <div className="mt-3 space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                          <div className="text-[12px] text-gray-600">
+                            "Ask about their timeline"
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-blue-400" />
+                          <div className="text-[12px] text-gray-600">
+                            "Mention case study ROI"
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-amber-400" />
+                          <div className="text-[12px] text-gray-600">
+                            "Competitor objection detected"
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-gray-50">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[11px] text-emerald-600 font-medium">Live coaching active</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Subtle glow behind the card */}
+          <div className="absolute -inset-4 -z-10 rounded-2xl bg-gradient-to-b from-blue-100/40 via-indigo-100/20 to-transparent blur-2xl" />
+        </div>
+
+        {/* Logo bar */}
+        <div className="mt-20 text-center">
+          <p className="text-[12px] font-medium text-gray-400 uppercase tracking-[0.1em] mb-6">
+            Trusted by revenue teams at
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            {logos.map((name) => (
+              <span
+                key={name}
+                className="text-[15px] font-semibold text-gray-300 tracking-tight"
+              >
+                {name}
               </span>
-            </h1>
-
-            {/* Subheadline */}
-            <p className="text-xl text-slate-300 max-w-xl">
-              Professional cloud phone with AI coaching built in. 
-              Close more deals while your team makes every call count.
-            </p>
-
-            {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {features.map((feature, i) => (
-                <div key={i} className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white text-sm">{feature.title}</h3>
-                    <p className="text-xs text-slate-400">{feature.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={onStartTrialClick}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-500 transition-all hover:scale-105 shadow-lg shadow-blue-600/25"
-              >
-                Start Free Trial
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
-                onClick={onWatchDemoClick}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white font-semibold rounded-full border border-white/20 hover:bg-white/20 transition-all"
-              >
-                Watch Demo
-              </button>
-            </div>
-
-            {/* Trust */}
-            <div className="flex items-center gap-4 text-sm text-slate-400">
-              <div className="flex -space-x-2">
-                {[1,2,3,4,5].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 border-2 border-slate-900" />
-                ))}
-              </div>
-              <span>Join 2,000+ businesses</span>
-            </div>
+            ))}
           </div>
-
-          {/* RIGHT: Phone Interface */}
-          <div className="relative">
-            {/* Main Phone App */}
-            <div className="bg-slate-800 rounded-[2.5rem] p-6 shadow-2xl border border-slate-700 max-w-sm mx-auto">
-              {/* Phone Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <Phone className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">SellSig</h3>
-                    <p className="text-xs text-green-400 flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                      Online
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                    <Users className="w-4 h-4 text-slate-300" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Dial Display */}
-              <div className="bg-slate-900 rounded-2xl p-6 mb-6 min-h-[120px] flex flex-col items-center justify-center">
-                {dialValue ? (
-                  <div className="text-4xl font-mono text-white tracking-widest">
-                    {dialValue}
-                  </div>
-                ) : (
-                  <div className="text-slate-500 text-center">
-                    <p className="text-lg">Enter number to call</p>
-                  </div>
-                )}
-                {isDialing && (
-                  <div className="mt-4 flex items-center gap-2 text-green-400">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
-                    Connecting...
-                  </div>
-                )}
-              </div>
-
-              {/* Dial Pad */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                {dialPad.map((row, rowI) => 
-                  row.map((digit, colI) => (
-                    <button
-                      key={`${rowI}-${colI}`}
-                      onClick={() => handleDial(digit)}
-                      className="w-16 h-16 rounded-full bg-slate-700 hover:bg-slate-600 text-white text-xl font-medium transition-all hover:scale-105 flex items-center justify-center"
-                    >
-                      {digit}
-                    </button>
-                  ))
-                )}
-              </div>
-
-              {/* Call Actions */}
-              <div className="flex items-center justify-center gap-4">
-                <button 
-                  onClick={() => setIsMuted(!isMuted)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isMuted ? 'bg-red-500' : 'bg-slate-700 hover:bg-slate-600'}`}
-                >
-                  {isMuted ? <MicOff className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
-                </button>
-                
-                <button
-                  onClick={handleCall}
-                  disabled={dialValue.length === 0}
-                  className="w-20 h-20 rounded-full bg-green-500 hover:bg-green-400 flex items-center justify-center transition-all hover:scale-105 shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <PhoneCall className="w-8 h-8 text-white" />
-                </button>
-                
-                <button className="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-all">
-                  <Volume2 className="w-5 h-5 text-white" />
-                </button>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex justify-center gap-6 mt-6">
-                <button className="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors">
-                  <MessageSquare className="w-5 h-5" />
-                  <span className="text-xs">Messages</span>
-                </button>
-                <button className="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors">
-                  <Users className="w-5 h-5" />
-                  <span className="text-xs">Contacts</span>
-                </button>
-                <button className="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors">
-                  <Headphones className="w-5 h-5" />
-                  <span className="text-xs">History</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Floating Elements */}
-            <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-              AI Coaching Active
-            </div>
-            <div className="absolute -bottom-4 -left-4 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg flex items-center gap-2">
-              <Shield className="w-4 h-4" />
-              Encrypted
-            </div>
-          </div>
-
         </div>
       </div>
     </section>
