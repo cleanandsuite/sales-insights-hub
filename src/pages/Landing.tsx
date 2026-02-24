@@ -1,10 +1,13 @@
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { HeroSection } from '@/components/landing/HeroSection';
-import { ProblemSection } from '@/components/landing/ProblemSection';
+import { LogoBarSection } from '@/components/landing/LogoBarSection';
+import { StatsSection } from '@/components/landing/StatsSection';
+import { PlatformSection } from '@/components/landing/PlatformSection';
 import { FeaturesSection } from '@/components/landing/FeaturesSection';
-import { ComparisonSection } from '@/components/landing/ComparisonSection';
+import { PhoneLineSection } from '@/components/landing/PhoneLineSection';
 import { SocialProofSection } from '@/components/landing/SocialProofSection';
-import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
+import { PricingSection } from '@/components/landing/PricingSection';
+import { FAQSection } from '@/components/landing/FAQSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 
@@ -14,16 +17,19 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white font-jakarta landing-grid-bg">
       <LandingHeader onStartTrialClick={handleStartTrialClick} />
 
       <main>
         <HeroSection onStartTrialClick={handleStartTrialClick} />
-        <ProblemSection />
+        <LogoBarSection />
+        <StatsSection />
+        <PlatformSection />
         <FeaturesSection />
-        <ComparisonSection />
+        <PhoneLineSection onStartTrialClick={handleStartTrialClick} />
         <SocialProofSection />
-        <TestimonialsSection />
+        <PricingSection />
+        <FAQSection />
         <CTASection onStartTrialClick={handleStartTrialClick} />
       </main>
 

@@ -1,4 +1,4 @@
-// Testimonials merged into SocialProofSection — this file is intentionally empty for backwards compatibility.
+// Testimonials content is now in SocialProofSection.tsx
 export function TestimonialsSection() {
   return null;
 }
