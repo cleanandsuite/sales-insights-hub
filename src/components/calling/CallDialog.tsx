@@ -29,6 +29,16 @@ const dialPadKeys = [
 ];
 
 export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: CallDialogProps) {
+  // Handle keyboard input for dial pad
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ('0123456789*#+'.includes(e.key)) {
+      e.preventDefault();
+      setPhoneNumber(prev => prev + e.key);
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      setPhoneNumber(prev => prev.slice(0, -1));
+    }
+  };
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
   const {
@@ -73,7 +83,7 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-sm p-0 gap-0 overflow-hidden" onKeyDown={handleKeyDown}>
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="text-center text-lg font-semibold">
             New Call
