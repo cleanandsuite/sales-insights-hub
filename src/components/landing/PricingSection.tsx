@@ -43,12 +43,10 @@ export function PricingSection() {
   ];
 
   const enterpriseFeatures = [
-    { icon: Shield, title: 'Custom Integrations & Offline Mode', desc: 'Private-cloud, on-premise, or offline deployments with full data residency and compliance controls (SOC 2 Type II in progress).' },
-    { icon: Users, title: 'Unlimited Seats', desc: 'No artificial caps — add as many team members as needed. Volume pricing available for 50+ seats.' },
-    { icon: Phone, title: 'Enterprise-Grade Telephony', desc: 'Leading dialer integration and toll-free number provisioning. 1-800 support included on select plans.' },
-    { icon: BarChart3, title: 'Revenue Intelligence Dashboard', desc: 'Centralized visibility into rep performance, call scoring, coaching coverage, pipeline risk alerts, and forecasting.' },
-    { icon: BarChart3, title: 'Advanced Analytics & Leaderboards', desc: 'Real-time rank tracking, quota attainment, win/loss attribution, and benchmark comparisons against top performers.' },
-    { icon: HeadphonesIcon, title: 'Priority Support & Dedicated Specialist', desc: '24/7 priority SLA, assigned Customer Success Manager, quarterly business reviews, and custom onboarding.' },
+    { icon: BarChart3, title: 'Gamified Performance Ranking System', desc: 'Leaderboards and achievement mechanics drive 300–400% faster skill adoption and create a high-energy, merit-based culture where performance is visible and celebrated.' },
+    { icon: Shield, title: '5 Distinct Elite AI Coaching Systems', desc: 'Adaptive coaching engines matched to individual learning styles — visual, auditory, kinesthetic, reading/writing, and analytical — ensuring every rep receives training that resonates and sticks.' },
+    { icon: Users, title: 'Full-Transparency Management Dashboard', desc: 'Complete visibility into rep activity, time allocation, call performance, and skill progression. Objective, numbers-driven insights eliminate subjectivity and bias.' },
+    { icon: HeadphonesIcon, title: 'Enterprise-Grade Customization & Support', desc: 'Dedicated Account Specialist, priority 24/7 response SLA, quarterly business reviews, custom integrations, and flexible seat scaling.' },
   ];
 
   return (
@@ -188,24 +186,20 @@ export function PricingSection() {
             <div className="md:w-[340px] shrink-0">
               <span className="text-[11px] font-bold tracking-[.1em] uppercase text-[#6B9FFF] block mb-2">Enterprise Plan</span>
               <h3 className="font-bricolage text-[28px] md:text-[32px] font-extrabold text-white tracking-[-1px] leading-[1.15] mb-3">
-                Built for scaling revenue teams
+                Tailored for scaling revenue organizations
               </h3>
               <p className="text-[14px] text-white/50 leading-[1.7] mb-6">
-                Enterprise-grade security, customization, and dedicated support. Everything in Pro, plus:
+                Advanced performance transparency, accelerated team development, and maximum coaching flexibility. Everything in Pro, plus:
               </p>
 
-              <div className="font-bricolage text-white mb-1">
-                <span className="text-[42px] font-extrabold tracking-[-2px]">$199</span>
-                <span className="text-base font-medium opacity-50">/user/mo</span>
-              </div>
-              <p className="text-[12px] text-white/35 mb-6">Billed annually · Min 10 seats · Volume discounts at 50+</p>
+              <p className="text-[13px] text-white/40 mb-6">Minimum 10 seats · Custom pricing & contract terms</p>
 
               <div className="flex flex-col gap-2.5">
                 <a href="tel:+18889247731" className="bg-[#0057FF] text-white px-6 py-3.5 rounded-[10px] text-sm font-bold hover:bg-[#003FBB] transition-colors inline-flex items-center justify-center gap-2 whitespace-nowrap shadow-[0_2px_12px_rgba(0,87,255,.3)]">
                   📞 Contact Sales
                 </a>
                 <a href="mailto:sales@sellsig.com" className="border-[1.5px] border-white/15 text-white/70 px-5 py-2.5 rounded-[10px] text-sm font-semibold hover:border-[#6B9FFF] hover:text-[#6B9FFF] transition-all text-center">
-                  Request a demo →
+                  Request a personalized demo →
                 </a>
               </div>
             </div>
@@ -232,7 +226,7 @@ export function PricingSection() {
               <Shield className="w-3.5 h-3.5 text-[#6B9FFF]" />
               <span className="text-[11px] font-bold text-[#6B9FFF]">SOC 2 Type II in progress</span>
             </div>
-            <span className="text-[11px] text-white/25">All features included — no hidden fees for seats, integrations, or support.</span>
+            <span className="text-[11px] text-white/25">Custom pricing & contract terms — no hidden fees for seats, integrations, or support.</span>
           </div>
         </div>
 
