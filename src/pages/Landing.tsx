@@ -10,6 +10,7 @@ import { PricingSection } from '@/components/landing/PricingSection';
 import { FAQSection } from '@/components/landing/FAQSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import { BuiltBySalesSection } from '@/components/landing/BuiltBySalesSection';
 
 export default function Landing() {
   const handleStartTrialClick = () => {
@@ -30,6 +31,7 @@ export default function Landing() {
         <SocialProofSection />
         <PricingSection />
         <FAQSection />
+        <BuiltBySalesSection />
         <CTASection onStartTrialClick={handleStartTrialClick} />
       </main>
 
