@@ -1,27 +1,27 @@
 const testimonials = [
   {
-    quote: 'The pre-call script builder changed everything. We stopped winging discovery and started <strong>leading with exactly the right value prop</strong> for each prospect. Win rate up 38% in 90 days.',
-    name: 'Jordan Rivera',
-    role: 'VP of Sales · Nexus Cloud',
-    initials: 'JR',
-    gradient: 'from-[#3B6EE8] to-[#6B9FFF]',
-    logo: 'NexusCloud',
-  },
-  {
-    quote: 'We replaced three separate tools — dialer, coaching, and recording — with SellSig. The <strong>integrated phone line and live objection handling</strong> alone is worth the $200. We\'d pay 3× for this.',
+    quote: 'I was skeptical about AI coaching, but SellSig proved me wrong. Closed my biggest deal last quarter — using their objection responses verbatim. <strong>Win rate up 38% in 90 days.</strong>',
     name: 'Sarah Malone',
-    role: 'CRO · Fieldlink Technologies',
+    role: 'Regional Sales Director · TechFlow',
     initials: 'SM',
     gradient: 'from-[#E83B6E] to-[#FF9FBF]',
-    logo: 'Fieldlink',
+    logo: 'TechFlow',
   },
   {
-    quote: 'Post-call analysis flagged that our reps were pitching 4 minutes too early. One change. <strong>31% improvement in close rate.</strong> In a single month. I\'ve never seen anything move a metric that fast.',
-    name: 'David Kim',
-    role: 'Sales Director · Orbit SaaS',
-    initials: 'DK',
+    quote: 'My team went from 18% to 26% close rate in 60 days. That\'s <strong>$340K extra revenue per rep.</strong> We replaced three tools — dialer, coaching, and recording — with one platform.',
+    name: 'James Kim',
+    role: 'VP of Sales · ScaleUp Inc.',
+    initials: 'JK',
     gradient: 'from-[#1a6b3a] to-[#3BE89A]',
-    logo: 'OrbitSaaS',
+    logo: 'ScaleUp',
+  },
+  {
+    quote: 'I felt like a natural closer in my second week. The AI guided me through every objection. <strong>My manager asked what changed — I said I got an AI wingman.</strong>',
+    name: 'Priya Lakshmi',
+    role: 'Account Executive · GrowthCo',
+    initials: 'PL',
+    gradient: 'from-[#3B6EE8] to-[#6B9FFF]',
+    logo: 'GrowthCo',
   },
 ];
 
@@ -37,7 +37,7 @@ export function SocialProofSection() {
             Teams that switched never <span className="text-[#0057FF]">looked back</span>
           </h2>
           <p className="text-[17px] text-[#3B4A63] leading-[1.75] max-w-[520px] mx-auto">
-            From solo reps to 50-person revenue orgs, SellSig has become the unfair advantage that leading sales teams refuse to give up.
+            From solo SDRs to 50-person revenue orgs, SellSig is the unfair advantage leading teams refuse to give up.
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
