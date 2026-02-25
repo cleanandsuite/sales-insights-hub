@@ -45,7 +45,7 @@ export function PhoneLineSection({ onStartTrialClick }: PhoneLineSectionProps) {
               onClick={onStartTrialClick}
               className="bg-white text-[#0A1628] px-7 py-3.5 rounded-[10px] text-[15px] font-bold hover:bg-[#EEF3FF] hover:text-[#0057FF] transition-all hover:-translate-y-0.5 shadow-[0_8px_32px_rgba(255,255,255,.15)] inline-flex items-center gap-2"
             >
-              Get your line — $200/mo →
+              Get Started — $200/mo →
             </button>
             <a
               href="#features"

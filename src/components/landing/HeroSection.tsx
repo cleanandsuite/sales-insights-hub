@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Star, Phone, Zap, BarChart3 } from 'lucide-react';
 import { useMemo } from 'react';
 
 interface HeroSectionProps {
@@ -25,34 +25,33 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
       <div className="max-w-[1280px] mx-auto grid md:grid-cols-2 gap-10 md:gap-20 items-center relative">
         {/* Left content */}
         <div>
-          {/* Eyebrow pill */}
+          {/* ICP pill */}
           <div className="inline-flex items-center gap-2 bg-[#EEF3FF] border border-[#D0DCFF] px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#0057FF] tracking-[.04em] mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-[#0057FF] animate-blink" />
-            AI-Powered Sales Intelligence
+            For SDRs, AEs & Revenue Teams
           </div>
 
           {/* Headline */}
           <h1 className="font-bricolage text-[clamp(44px,4.5vw,64px)] font-extrabold leading-[1.1] tracking-[-2px] text-[#0A1628] mb-6">
-            Close more deals with{' '}
+            Stop getting ghosted on{' '}
             <span className="text-[#0057FF] relative inline-block">
-              AI coaching
+              sales calls
               <span className="absolute left-0 bottom-[-2px] right-0 h-[3px] bg-[#0057FF] rounded-sm opacity-30" />
-            </span>{' '}
-            on every call
+            </span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg text-[#3B4A63] leading-[1.7] max-w-[460px] mb-10">
-            SellSig generates your script before the call, coaches your reps live with emotion detection, and delivers deep analysis after — so every conversation makes your team permanently better.
+          <p className="text-lg text-[#3B4A63] leading-[1.7] max-w-[480px] mb-10">
+            Real-time AI objection handling that turns "no" into "yes" — every single call. Get instant coaching during calls, insights that actually help, and wins that stack up.
           </p>
 
           {/* CTAs */}
-          <div className="flex gap-3 flex-wrap mb-12">
+          <div className="flex gap-3 flex-wrap mb-8">
             <button
               onClick={onStartTrialClick}
               className="bg-[#0057FF] text-white px-7 py-3.5 rounded-[10px] text-[15px] font-semibold shadow-[0_2px_12px_rgba(0,87,255,.25)] hover:bg-[#003FBB] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(0,87,255,.35)] transition-all inline-flex items-center gap-2"
             >
-              Start free trial →
+              Get Started →
             </button>
             <a
               href="#platform"
@@ -60,6 +59,20 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
             >
               Watch 2-min demo ▶
             </a>
+          </div>
+
+          {/* Outcome stats row */}
+          <div className="flex items-center gap-5 flex-wrap mb-6">
+            {[
+              { value: '34%', label: 'more closes' },
+              { value: '40%', label: 'faster ramp' },
+              { value: '92%', label: 'AI success rate' },
+            ].map((s) => (
+              <div key={s.label} className="flex items-center gap-2">
+                <span className="font-bricolage text-lg font-extrabold text-[#0057FF]">{s.value}</span>
+                <span className="text-[13px] text-[#6B7A99] font-medium">{s.label}</span>
+              </div>
+            ))}
           </div>
 
           {/* Social proof */}
@@ -83,7 +96,7 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
               ))}
             </div>
             <span className="text-[13px] text-[#6B7A99] font-medium">
-              <strong className="text-[#0A1628] font-semibold">4.9/5</strong> from 2,400+ sales professionals
+              <strong className="text-[#0A1628] font-semibold">2,000+</strong> sales teams closing more deals
             </span>
           </div>
         </div>
@@ -100,7 +113,7 @@ export function HeroSection({ onStartTrialClick }: HeroSectionProps) {
           {/* Floating stat pill - Pro Plan */}
           <div className="absolute -right-4 -bottom-4 bg-white border border-[#E4E8F0] rounded-xl shadow-[0_12px_48px_rgba(10,22,40,.12)] py-3.5 px-[18px] z-10">
             <div className="text-[11px] font-bold text-[#0057FF] tracking-[.06em] uppercase mb-1">Pro Plan</div>
-            <div className="font-bricolage text-xl font-extrabold text-[#0A1628] leading-none">5,000 min</div>
+            <div className="font-bricolage text-xl font-extrabold text-[#0A1628] leading-none">15,000 min</div>
             <div className="text-[11px] text-[#6B7A99] mt-0.5 font-medium">+ dedicated number</div>
           </div>
 

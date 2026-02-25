@@ -53,14 +53,14 @@ export function PricingSection() {
     <section className="py-24 px-4 md:px-10" id="pricing">
       <div className="max-w-[1280px] mx-auto">
         <div className="text-center mb-4">
-          <span className="text-xs font-bold text-[#0057FF] tracking-[.08em] uppercase mb-3 block">
+           <span className="text-xs font-bold text-[#0057FF] tracking-[.08em] uppercase mb-3 block">
             Transparent Pricing
           </span>
           <h2 className="font-bricolage text-[clamp(34px,3.8vw,52px)] font-extrabold tracking-[-1.5px] leading-[1.1] text-[#0A1628] mb-4">
-            Simple pricing. <span className="text-[#0057FF]">No surprises.</span>
+            Simple pricing. <span className="text-[#0057FF]">Serious ROI.</span>
           </h2>
           <p className="text-[17px] text-[#3B4A63] leading-[1.75] max-w-[520px] mx-auto">
-            Every plan includes a dedicated business phone line with live AI coaching. Most reps pay $50–$100/mo for just a phone line — with no intelligence built in.
+            Every plan includes a dedicated business phone line with live AI coaching. Teams see 34% more closes within 90 days — or we'll work with you until you do.
           </p>
         </div>
 

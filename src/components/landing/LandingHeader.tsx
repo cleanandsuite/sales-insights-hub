@@ -58,7 +58,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
           onClick={onStartTrialClick}
           className="bg-[#0057FF] text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-[#003FBB] hover:-translate-y-[1px] hover:shadow-[0_4px_16px_rgba(0,87,255,.3)] transition-all whitespace-nowrap"
         >
-          Start free trial
+          Get Started
         </button>
       </div>
 
@@ -97,7 +97,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
               onClick={onStartTrialClick}
               className="bg-[#0057FF] text-white text-sm font-semibold py-3 rounded-lg hover:bg-[#003FBB] transition-colors"
             >
-              Start free trial
+              Get Started
             </button>
           </div>
         </div>
