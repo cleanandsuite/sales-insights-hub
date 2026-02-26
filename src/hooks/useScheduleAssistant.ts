@@ -122,6 +122,38 @@ export function useScheduleAssistant() {
     }
   };
 
+  const generateCallEmail = async (callId: string, customPrompt?: string): Promise<EmailScript | null> => {
+    setIsGeneratingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('schedule-assistant', {
+        body: { action: 'generate-call-email', callId, customPrompt }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Email generation failed',
+          description: data.error
+        });
+        return null;
+      }
+
+      return data.emailScript;
+    } catch (error) {
+      console.error('Call email generation error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to generate email',
+        description: 'Please try again'
+      });
+      return null;
+    } finally {
+      setIsGeneratingEmail(false);
+    }
+  };
+
   const generateEmailScript = async (recordingId: string, customPrompt?: string): Promise<EmailScript | null> => {
     setIsGeneratingEmail(true);
     try {
@@ -223,6 +255,7 @@ export function useScheduleAssistant() {
     checkConflicts,
     getAnalytics,
     coachingQuery,
+    generateCallEmail,
     generateEmailScript,
     isExtracting,
     isSuggestingTimes,

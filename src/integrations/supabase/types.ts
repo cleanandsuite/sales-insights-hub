@@ -2474,6 +2474,7 @@ export type Database = {
           meeting_url: string | null
           prep_notes: string | null
           recording_id: string | null
+          reminder_minutes_before: number
           reminder_sent: boolean
           scheduled_at: string
           status: string
@@ -2493,6 +2494,7 @@ export type Database = {
           meeting_url?: string | null
           prep_notes?: string | null
           recording_id?: string | null
+          reminder_minutes_before?: number
           reminder_sent?: boolean
           scheduled_at: string
           status?: string
@@ -2512,6 +2514,7 @@ export type Database = {
           meeting_url?: string | null
           prep_notes?: string | null
           recording_id?: string | null
+          reminder_minutes_before?: number
           reminder_sent?: boolean
           scheduled_at?: string
           status?: string

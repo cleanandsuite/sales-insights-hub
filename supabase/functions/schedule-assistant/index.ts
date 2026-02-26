@@ -443,6 +443,92 @@ ${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
       });
     }
 
+    if (action === "generate-call-email") {
+      const { callId, customPrompt: emailCustomPrompt } = body;
+
+      // Fetch the scheduled call
+      const { data: scheduledCall, error: callError } = await supabase
+        .from("scheduled_calls")
+        .select("*")
+        .eq("id", callId)
+        .eq("user_id", userData.user.id)
+        .single();
+
+      if (callError || !scheduledCall) {
+        return new Response(
+          JSON.stringify({ error: "Scheduled call not found" }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const emailResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert at writing professional sales emails. Create a personalized email for a scheduled call. The email should:
+- Be appropriate for pre-call outreach, meeting confirmation, or agenda sharing
+- Reference the call context and preparation notes
+- Include a clear call-to-action
+- Be professional but warm
+
+Return a JSON object with:
+- subject: Email subject line
+- body: Full email body with greeting, content, and sign-off placeholder [Your Name]
+- tone: The tone used (professional, friendly, etc.)`
+            },
+            {
+              role: "user",
+              content: `Create an email for this scheduled call:
+
+Title: ${scheduledCall.title}
+Contact: ${scheduledCall.contact_name || "the recipient"}
+Contact Email: ${scheduledCall.contact_email || "N/A"}
+Scheduled: ${new Date(scheduledCall.scheduled_at).toLocaleString()}
+Duration: ${scheduledCall.duration_minutes} minutes
+Platform: ${scheduledCall.meeting_provider || "N/A"}
+Meeting Link: ${scheduledCall.meeting_url || "N/A"}
+Prep Notes: ${scheduledCall.prep_notes || "None"}
+${emailCustomPrompt ? `\nCustom Instructions: ${emailCustomPrompt}` : ''}`
+            }
+          ],
+          response_format: { type: "json_object" }
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        if (emailResponse.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded" }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        if (emailResponse.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "AI credits exhausted" }),
+            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        throw new Error("Email generation failed");
+      }
+
+      const emailData = await emailResponse.json();
+      const emailScript = JSON.parse(emailData.choices[0].message.content);
+
+      return new Response(JSON.stringify({
+        success: true,
+        emailScript
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "get-analytics") {
       // Get call timing analytics
       const thirtyDaysAgo = new Date();
