@@ -153,7 +153,7 @@ export default function PaymentComplete() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          navigate('/dashboard?subscription=success&from_checkout=true');
+          navigate('/setup-phone');
           return 0;
         }
         return prev - 1;
@@ -289,11 +289,11 @@ export default function PaymentComplete() {
           </div>
 
           <Button 
-            onClick={() => navigate('/dashboard?subscription=success&from_checkout=true')} 
+            onClick={() => navigate('/setup-phone')} 
             className="mt-6"
             variant="outline"
           >
-            Go to Dashboard Now
+            Set Up Your Phone Line
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </div>
