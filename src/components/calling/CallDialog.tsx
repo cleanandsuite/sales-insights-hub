@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Phone, Loader2, AlertTriangle, Delete } from 'lucide-react';
+import { Phone, PhoneOff, Loader2, AlertTriangle, Delete } from 'lucide-react';
 import { useCallLimits } from '@/hooks/useCallLimits';
 import { CallLimitIndicator } from './CallLimitIndicator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -202,19 +202,20 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
             </div>
           )}
 
-          {/* Cancel */}
+          {/* Hang Up / Cancel */}
           <div className="px-6 pb-6">
             <Button
               type="button"
-              variant="ghost"
-              className="w-full text-muted-foreground"
+              variant="destructive"
+              className="w-full gap-2"
               onClick={() => {
                 onOpenChange(false);
                 navigate('/dashboard');
               }}
               disabled={isConnecting}
             >
-              Cancel
+              <PhoneOff className="h-4 w-4" />
+              Hang Up
             </Button>
           </div>
         </form>
