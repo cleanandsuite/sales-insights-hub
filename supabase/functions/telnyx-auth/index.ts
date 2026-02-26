@@ -6,13 +6,11 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Authenticate user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -37,8 +35,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Parse request body if present
-    let body = {};
+    const userId = data.claims.sub as string;
+
+    let body: any = {};
     try {
       if (req.method === 'POST') {
         body = await req.json();
@@ -47,11 +46,24 @@ Deno.serve(async (req) => {
       // No body or invalid JSON
     }
 
-    const action = (body as any).action;
+    const action = body.action;
 
-    // Get caller ID
+    // ── Query per-user phone line first ──
+    const serviceSupabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { data: phoneLine } = await serviceSupabase
+      .from('user_phone_lines')
+      .select('sip_username, sip_password, phone_number, status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    // Get caller ID action
     if (action === 'get_caller_id') {
-      const callerId = Deno.env.get('TELNYX_CALLER_ID');
+      const callerId = phoneLine?.phone_number || Deno.env.get('TELNYX_CALLER_ID');
       
       if (!callerId) {
         return new Response(
@@ -66,10 +78,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get WebRTC credentials
-    const sipUsername = Deno.env.get('TELNYX_SIP_USERNAME');
-    const sipPassword = Deno.env.get('TELNYX_SIP_PASSWORD');
-    const callerId = Deno.env.get('TELNYX_CALLER_ID');
+    // Return per-user credentials if available, otherwise fall back to global
+    const sipUsername = phoneLine?.sip_username || Deno.env.get('TELNYX_SIP_USERNAME');
+    const sipPassword = phoneLine?.sip_password || Deno.env.get('TELNYX_SIP_PASSWORD');
+    const callerId = phoneLine?.phone_number || Deno.env.get('TELNYX_CALLER_ID');
 
     if (!sipUsername || !sipPassword) {
       console.error('[TELNYX-AUTH] Missing SIP credentials');
@@ -79,8 +91,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Return credentials for WebRTC client
-    // The Telnyx WebRTC SDK uses SIP credentials directly
     return new Response(
       JSON.stringify({
         login: sipUsername,

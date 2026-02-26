@@ -3099,6 +3099,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_phone_lines: {
+        Row: {
+          area_code: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          phone_number: string | null
+          sip_password: string | null
+          sip_username: string | null
+          status: string
+          telnyx_connection_id: string | null
+          telnyx_phone_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          area_code?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          phone_number?: string | null
+          sip_password?: string | null
+          sip_username?: string | null
+          status?: string
+          telnyx_connection_id?: string | null
+          telnyx_phone_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          area_code?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          phone_number?: string | null
+          sip_password?: string | null
+          sip_username?: string | null
+          status?: string
+          telnyx_connection_id?: string | null
+          telnyx_phone_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

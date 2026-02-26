@@ -47,6 +47,7 @@ const Admin = lazy(() => import("./pages/Admin"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
 const Integrations = lazy(() => import("./pages/Integrations"));
+const SetupPhone = lazy(() => import("./pages/SetupPhone"));
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="/account-blocked" element={<AccountBlocked />} />
               <Route path="/success" element={<Success />} />
               <Route path="/payment-complete" element={<PaymentComplete />} />
+              <Route path="/setup-phone" element={<ProtectedRoute><SetupPhone /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/recordings" element={<ProtectedRoute><Recordings /></ProtectedRoute>} />
               <Route path="/recording/:id" element={<ProtectedRoute><RecordingAnalysis /></ProtectedRoute>} />
