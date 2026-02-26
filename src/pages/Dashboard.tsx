@@ -385,7 +385,10 @@ export default function Dashboard() {
       <CallDialog
         open={showCallDialog}
         onOpenChange={setShowCallDialog}
-        onStartCall={(phone) => setActiveCall(phone)}
+        onStartCall={(phone) => {
+          setShowCallDialog(false);
+          setActiveCall(phone);
+        }}
       />
       <DashboardLayout>
         <div className="bg-dashboard-gradient -m-3 sm:-m-4 lg:-m-8 p-3 sm:p-4 lg:p-8 min-h-screen space-y-4 sm:space-y-6">
