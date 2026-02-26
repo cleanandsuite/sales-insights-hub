@@ -17,7 +17,11 @@ import {
   Phone,
   FileText,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  Mail,
+  ExternalLink,
+  Bell,
+  BellOff
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +30,8 @@ import { useToast } from '@/hooks/use-toast';
 import { AIScheduleDialog } from '@/components/schedule/AIScheduleDialog';
 import { ScheduleAnalyticsWidget } from '@/components/schedule/ScheduleAnalyticsWidget';
 import { FollowUpPrompt } from '@/components/schedule/FollowUpPrompt';
+import { ScheduleEmailDialog } from '@/components/schedule/ScheduleEmailDialog';
+import { Switch } from '@/components/ui/switch';
 
 import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
 
@@ -41,6 +47,8 @@ interface ScheduledCall {
   meeting_provider: string | null;
   status: string;
   prep_notes: string | null;
+  reminder_sent?: boolean;
+  reminder_minutes_before?: number;
 }
 
 interface RecentRecording {
@@ -67,7 +75,11 @@ export default function Schedule() {
   const [preSelectedRecordingId, setPreSelectedRecordingId] = useState<string | null>(null);
   const [recentRecording, setRecentRecording] = useState<RecentRecording | null>(null);
   const [conflicts, setConflicts] = useState<{id: string; title: string}[]>([]);
-  
+  const [emailDialogCall, setEmailDialogCall] = useState<ScheduledCall | null>(null);
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [enableReminder, setEnableReminder] = useState(true);
+  const [reminderMinutes, setReminderMinutes] = useState('30');
+
   // Form state
   const [newCall, setNewCall] = useState({
     title: '',
@@ -175,8 +187,10 @@ export default function Schedule() {
           meeting_url: newCall.meetingUrl || null,
           meeting_provider: newCall.meetingProvider || null,
           prep_notes: newCall.prepNotes || null,
-          status: 'scheduled'
-        });
+          status: 'scheduled',
+          reminder_minutes_before: enableReminder ? parseInt(reminderMinutes) : 0,
+          reminder_sent: false
+        } as any);
 
       if (error) throw error;
 
@@ -385,6 +399,29 @@ export default function Schedule() {
                     />
                   </div>
 
+                  {/* Reminder Toggle */}
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-muted-foreground" />
+                      <Label htmlFor="reminder-toggle" className="cursor-pointer">Email Reminder</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {enableReminder && (
+                        <Select value={reminderMinutes} onValueChange={setReminderMinutes}>
+                          <SelectTrigger className="w-[120px] h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="15">15 min before</SelectItem>
+                            <SelectItem value="30">30 min before</SelectItem>
+                            <SelectItem value="60">1 hr before</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <Switch id="reminder-toggle" checked={enableReminder} onCheckedChange={setEnableReminder} />
+                    </div>
+                  </div>
+
                   <Button onClick={handleCreateCall} className="w-full">
                     Schedule Call
                   </Button>
@@ -544,15 +581,49 @@ export default function Schedule() {
                       </div>
                     )}
 
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2 pt-2 flex-wrap">
                       <Button size="sm" className="flex-1">
                         <Phone className="h-3.5 w-3.5 mr-1" />
                         Start Recording
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEmailDialogCall(call);
+                          setIsEmailDialogOpen(true);
+                        }}
+                        title="Generate AI Email"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                      </Button>
+                      {call.contact_email && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            window.open(`mailto:${encodeURIComponent(call.contact_email!)}`, '_blank');
+                          }}
+                          title="Open in Email Client"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      <Button size="sm" variant="outline" title="Notes">
                         <FileText className="h-3.5 w-3.5" />
                       </Button>
                     </div>
+
+                    {/* Reminder indicator */}
+                    {(call.reminder_minutes_before ?? 0) > 0 && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+                        {call.reminder_sent ? (
+                          <><BellOff className="h-3 w-3" /> Reminder sent</>
+                        ) : (
+                          <><Bell className="h-3 w-3 text-primary" /> Reminder {call.reminder_minutes_before}min before</>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -570,6 +641,12 @@ export default function Schedule() {
         onOpenChange={setIsAIDialogOpen}
         onSuccess={fetchCalls}
         preSelectedRecordingId={preSelectedRecordingId}
+      />
+
+      <ScheduleEmailDialog
+        open={isEmailDialogOpen}
+        onOpenChange={setIsEmailDialogOpen}
+        call={emailDialogCall}
       />
     </DashboardLayout>
   );
