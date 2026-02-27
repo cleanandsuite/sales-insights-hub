@@ -31,6 +31,7 @@ import { AIScheduleDialog } from '@/components/schedule/AIScheduleDialog';
 import { ScheduleAnalyticsWidget } from '@/components/schedule/ScheduleAnalyticsWidget';
 import { FollowUpPrompt } from '@/components/schedule/FollowUpPrompt';
 import { ScheduleEmailDialog } from '@/components/schedule/ScheduleEmailDialog';
+import { ScheduleCallCard } from '@/components/schedule/ScheduleCallCard';
 import { Switch } from '@/components/ui/switch';
 
 import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
@@ -541,90 +542,15 @@ export default function Schedule() {
 
               <div className="space-y-3">
                 {selectedDayCalls.map((call) => (
-                  <div
+                  <ScheduleCallCard
                     key={call.id}
-                    className="p-4 rounded-lg bg-muted/50 border border-border/50 space-y-2"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-medium text-foreground">{call.title}</h4>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          {format(new Date(call.scheduled_at), 'h:mm a')}
-                          <span>•</span>
-                          {call.duration_minutes} min
-                        </div>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(call.status)}`}>
-                        {call.status}
-                      </span>
-                    </div>
-
-                    {call.contact_name && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <User className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-foreground">{call.contact_name}</span>
-                      </div>
-                    )}
-
-                    {call.meeting_url && (
-                      <div className="flex items-center gap-2 text-sm">
-                        {getProviderIcon(call.meeting_provider)}
-                        <a 
-                          href={call.meeting_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          Join Meeting
-                        </a>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 pt-2 flex-wrap">
-                      <Button size="sm" className="flex-1">
-                        <Phone className="h-3.5 w-3.5 mr-1" />
-                        Start Recording
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEmailDialogCall(call);
-                          setIsEmailDialogOpen(true);
-                        }}
-                        title="Generate AI Email"
-                      >
-                        <Mail className="h-3.5 w-3.5" />
-                      </Button>
-                      {call.contact_email && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            window.open(`mailto:${encodeURIComponent(call.contact_email!)}`, '_blank');
-                          }}
-                          title="Open in Email Client"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                      <Button size="sm" variant="outline" title="Notes">
-                        <FileText className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-
-                    {/* Reminder indicator */}
-                    {(call.reminder_minutes_before ?? 0) > 0 && (
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
-                        {call.reminder_sent ? (
-                          <><BellOff className="h-3 w-3" /> Reminder sent</>
-                        ) : (
-                          <><Bell className="h-3 w-3 text-primary" /> Reminder {call.reminder_minutes_before}min before</>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                    call={call}
+                    onEmailDialog={(c) => {
+                      setEmailDialogCall(c);
+                      setIsEmailDialogOpen(true);
+                    }}
+                    onStartRecording={() => navigate('/recordings')}
+                  />
                 ))}
               </div>
             </div>
