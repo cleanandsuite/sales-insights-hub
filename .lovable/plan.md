@@ -1,84 +1,130 @@
 
-# Email Integration for Schedule Tab
+
+# Modern Dashboard Redesign: Command Center + Feed + Focus Mode
 
 ## Overview
 
-Add three email capabilities to the Schedule tab: AI-generated email drafts for scheduled calls, "Open in Email Client" buttons (mailto: links), and automated email reminders before calls.
+Replace the current tabbed card-grid dashboard with a modern, single-view "Command Center" layout that combines a smart action bar, activity feed, dynamic bento widgets, and a focus-mode spotlight -- all on one page without tabs.
 
-## Changes
+## Design Concept
 
-### 1. Add Email Actions to Call Cards
+The new dashboard has four distinct zones arranged vertically:
 
-On each scheduled call card in the right sidebar, add two new buttons:
-- **"Email" button** -- Opens a dialog to generate an AI follow-up/prep email for that specific call using the existing `schedule-assistant` edge function's `generate-email` action
-- **"Open in Gmail/Outlook" button** -- Constructs a `mailto:` link pre-filled with the contact email, AI-generated subject/body, and opens the user's default email client
-
-### 2. New Component: `ScheduleEmailDialog`
-
-A dialog that:
-- Accepts a `ScheduledCall` object
-- Calls the `schedule-assistant` edge function to generate an AI email draft based on the call's context (contact name, title, prep notes, and optionally a linked recording)
-- Displays the generated subject and body in editable fields
-- Provides a "Copy to Clipboard" button
-- Provides an "Open in Email Client" button that constructs a `mailto:` link with the draft content
-- Allows custom prompt input for tone/content adjustments and regeneration
-
-### 3. New Edge Function Action: `generate-call-email`
-
-Add a new action to the existing `schedule-assistant` edge function that generates emails for scheduled calls (not just recordings). This action:
-- Accepts `{ action: "generate-call-email", callId: string, customPrompt?: string }`
-- Fetches the scheduled call details (title, contact, date, prep notes)
-- Optionally fetches associated recording transcript if one exists
-- Generates a professional email draft using AI
-- Returns `{ subject, body, tone }`
-
-### 4. Email Reminder System
-
-**Database:**
-- Add `reminder_sent` boolean column to `scheduled_calls` table (default false)
-- Add `reminder_minutes_before` integer column (default 30)
-
-**New Edge Function: `send-schedule-reminders`**
-- Queries `scheduled_calls` where `status = 'scheduled'`, `reminder_sent = false`, and `scheduled_at` is within the next N minutes
-- For each match, generates a brief AI prep email with call context
-- Uses Resend (already configured with `RESEND_API_KEY` secret) to send the reminder to the user's email
-- Marks `reminder_sent = true`
-
-**Cron Job:**
-- Set up a `pg_cron` schedule to invoke `send-schedule-reminders` every 5 minutes
-
-**UI:**
-- Add a reminder toggle and time selector to the "Schedule a Call" dialog and to call cards
-
-### 5. Schedule Page UI Updates
-
-- Add a "Send Email" icon button to each call card alongside existing "Start Recording" and notes buttons
-- When a call has `contact_email`, show a quick "mailto:" icon for one-click email
-- Add reminder status indicator (bell icon) on call cards showing if reminder is set
-
-## Files to Create/Modify
-
-| File | Action |
-|------|--------|
-| `src/components/schedule/ScheduleEmailDialog.tsx` | New -- AI email draft dialog |
-| `src/pages/Schedule.tsx` | Modify -- add email buttons to call cards, reminder toggle |
-| `supabase/functions/schedule-assistant/index.ts` | Modify -- add `generate-call-email` action |
-| `supabase/functions/send-schedule-reminders/index.ts` | New -- cron-triggered reminder sender |
-| `supabase/migrations/` (new) | Add `reminder_sent` and `reminder_minutes_before` columns to `scheduled_calls` |
-| `src/hooks/useScheduleAssistant.ts` | Modify -- add `generateCallEmail` method |
-
-## Technical Details
-
-### mailto: Link Construction
 ```text
-mailto:{contact_email}?subject={encodeURIComponent(subject)}&body={encodeURIComponent(body)}
++--------------------------------------------------------------+
+| COMMAND BAR (greeting + quick actions + AI status inline)     |
++--------------------------------------------------------------+
+| SPOTLIGHT: Focus card -- one rotating priority (next call,    |
+|   hottest deal, coaching tip) with prev/next navigation       |
++----------------------------+---------------------------------+
+| LIVE FEED (60%)            | BENTO WIDGETS (40%)             |
+| Chronological activity     | - KPI sparkline cards           |
+|   stream with inline       | - Revenue mini-chart            |
+|   actions (call, email,    | - Win rate ring                 |
+|   view recording)          | - AI coaching tip               |
++----------------------------+---------------------------------+
 ```
 
-### Reminder Edge Function
-- Uses existing `RESEND_API_KEY` secret for email delivery
-- Queries upcoming calls within configurable window
-- Includes call title, contact info, prep notes, and time in the reminder
-- Rate-limited to prevent duplicate sends via the `reminder_sent` flag
+## Detailed Changes
 
-### AI Email Generation for Calls
-The new `generate-call-email` action differs from the existing `generate-email` (which requires a recording). This one works from scheduled call metadata alone, making it useful for pre-call outreach emails, meeting confirmations, and agenda sharing.
+### 1. Command Bar (replaces DashboardHeader + AIStatusBar + Quote)
+
+A single, compact top strip that merges the greeting, AI status indicator, key metrics, and the Start Call CTA into one row. The daily quote becomes a subtle tooltip on a small icon rather than a full-width block.
+
+- Left: Greeting text (smaller, single line)
+- Center: Inline AI status dot + 3 compact KPI pills (Calls Today, Avg Score, Week Total)
+- Right: Start Call button (same red CTA)
+
+### 2. Spotlight / Focus Mode (new component)
+
+A large, full-width card that cycles through the user's top priorities:
+- **Next scheduled call** (with countdown timer + one-click start)
+- **Hottest deal at risk** (with health indicator + suggested action)
+- **AI coaching insight** (today's top improvement suggestion)
+
+Users click left/right arrows or dots to cycle. Auto-advances every 15 seconds. Shows a subtle progress bar indicating time until next rotation.
+
+### 3. Activity Feed (replaces Recordings Table)
+
+A vertical timeline/feed on the left (60% width on desktop, full-width on mobile) showing recent events in chronological order:
+- Call recordings (with inline play button, score badge, duration)
+- Deal stage changes
+- AI analysis completions
+- Scheduled call reminders
+
+Each feed item is a compact card with:
+- Icon + timestamp (relative)
+- Title + one-line summary
+- Inline action buttons (View Analysis, Start Call, Open Deal)
+- Score/status badge
+
+The feed replaces the table format -- each row becomes a card in the stream.
+
+### 4. Bento Widget Grid (replaces MetricCards + Revenue tab)
+
+The right side (40% width, stacks below feed on mobile) shows a 2x3 grid of small, dense widget cards:
+
+| Widget | Content |
+|--------|---------|
+| Calls Today | Number + sparkline of last 7 days |
+| Avg Score | Number + colored ring indicator |
+| Revenue | Mini bar chart (last 4 months) |
+| Win Rate | Donut/ring with percentage |
+| Pipeline | Value + deal count |
+| AI Tip | One-line coaching suggestion |
+
+Each widget is clickable, navigating to the relevant detail page.
+
+### 5. Remove Tabs
+
+The current Calls/Revenue tab split goes away. Everything is visible at once in the single-view layout. Revenue data is consolidated into the bento widgets and the spotlight rotation.
+
+## Technical Plan
+
+### New Components
+
+| Component | Purpose |
+|-----------|---------|
+| `src/components/dashboard/CommandBar.tsx` | Merged header + AI status + KPIs in one row |
+| `src/components/dashboard/SpotlightCard.tsx` | Rotating focus card with priorities |
+| `src/components/dashboard/ActivityFeed.tsx` | Timeline feed of recent calls/events |
+| `src/components/dashboard/ActivityFeedItem.tsx` | Individual feed item card |
+| `src/components/dashboard/BentoWidget.tsx` | Small metric widget with optional sparkline |
+| `src/components/dashboard/BentoGrid.tsx` | 2-column grid of BentoWidgets |
+
+### Modified Files
+
+| File | Changes |
+|------|---------|
+| `src/pages/Dashboard.tsx` | Complete rewrite of the layout using new components; remove Tabs, keep data fetching logic (useRealKPIs, recordings query) |
+| `src/components/dashboard/index.ts` | Export new components |
+
+### Removed/Deprecated (code stays, just unused)
+
+- `DashboardOverview.tsx` (already unused)
+- The tabs structure in Dashboard.tsx
+
+### Data Flow
+
+- **CommandBar**: Receives `userName`, `kpis`, `onStartCall` -- same data as today
+- **SpotlightCard**: Fetches scheduled calls (from `scheduled_calls`), at-risk deals (from `mockDeals`), and generates a coaching tip from recent scores
+- **ActivityFeed**: Queries `call_recordings` (same as RecordingsTable today) but renders as feed cards instead of a table
+- **BentoGrid**: Receives `kpis` + static revenue/pipeline data (same mock data currently in Revenue tab)
+
+### Responsive Behavior
+
+- **Desktop (lg+)**: Command bar full-width, spotlight full-width, feed + bento side-by-side (60/40)
+- **Tablet (md)**: Same layout but bento drops to 2-column below feed
+- **Mobile (sm)**: Everything stacks vertically: Command bar, spotlight, bento (2-col grid), feed
+
+### Animations
+
+- Spotlight card transitions with a subtle slide + fade
+- Feed items animate in with staggered `fadeIn` (using existing keyframes)
+- Bento widgets use the existing `hover:-translate-y-0.5` lift effect
+- Numbers use the existing `animate-count-up` class
+
+### No Database Changes
+
+This is a pure frontend redesign. All data sources remain the same (Supabase queries for recordings/scores, mock data for revenue/deals).
+
