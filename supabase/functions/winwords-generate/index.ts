@@ -43,18 +43,23 @@ const dealContextSchema = z.object({
 }).optional();
 
 const requestSchema = z.object({
-  scenario: z.enum(['cold_call', 'discovery', 'demo', 'negotiation', 'renewal', 'objection_handling']),
+  scenario: z.enum(['cold_call', 'appointment_setter', 'discovery', 'demo', 'negotiation', 'renewal']),
   persona: personaSchema,
   dealContext: dealContextSchema,
   style: z.enum(['confident', 'consultative', 'urgent', 'collaborative']).optional(),
 });
 
 // Scenario templates for different sales interactions
-const scenarioTemplates = {
+const scenarioTemplates: Record<string, { name: string; sections: string[]; focus: string }> = {
   cold_call: {
     name: "Cold Call",
     sections: ["opening", "value_proposition", "qualifying_questions", "call_to_action", "objection_handlers"],
     focus: "Break the ice quickly and secure a follow-up meeting"
+  },
+  appointment_setter: {
+    name: "Appointment Setter",
+    sections: ["intro_double_tap", "pattern_interrupt", "upfront_contract", "headline_pitch", "downsell_and_close", "schedule_meeting", "post_book_qualification"],
+    focus: "Use the Downsell and Close framework to book meetings at scale"
   },
   discovery: {
     name: "Discovery Call",
@@ -75,11 +80,6 @@ const scenarioTemplates = {
     name: "Renewal Conversation",
     sections: ["relationship_check", "success_review", "expansion_opportunities", "objection_prevention", "commitment"],
     focus: "Celebrate wins and expand the relationship"
-  },
-  objection_handling: {
-    name: "Objection Handling",
-    sections: ["acknowledge", "clarify", "respond", "confirm", "advance"],
-    focus: "Turn objections into opportunities"
   }
 };
 
@@ -228,6 +228,34 @@ IMPORTANT: Naturally weave your company strengths and differentiators into the s
     
     const hasCompanyResearch = !!companyResearch && !!safeCompanyName;
 
+    // Appointment setter specific prompt injection
+    const appointmentSetterContext = scenario === 'appointment_setter' ? `
+
+CRITICAL METHODOLOGY — DOWNSELL AND CLOSE FRAMEWORK:
+You MUST generate the script following the 7-step Downsell and Close methodology:
+
+1. INTRO DOUBLE TAP: Say their name twice with intentional pauses. "Hey [Name]... [Name], this is [Rep]."
+2. PATTERN INTERRUPT: Break their auto-pilot response. Use unexpected honesty or humor. "I know you probably weren't expecting this call..."
+3. UPFRONT CONTRACT: Set expectations and get micro-agreement. "I'll be upfront — I'm not sure if what we do is even a fit. Can I take 30 seconds to explain, and you tell me if it's worth a longer conversation?"
+4. HEADLINE PITCH: One sentence value prop tied to their world. No features, just outcomes.
+5. DOWNSELL AND CLOSE: When they hesitate, go LOWER not higher. "I'm not even asking for a meeting — just 10 minutes to see if it's worth exploring. If not, I'll never call again."
+6. SCHEDULE MEETING: Lock the calendar. Give two options. "Would Thursday at 2 or Friday at 10 work better?"
+7. POST-BOOK QUALIFICATION: Only AFTER booking, ask qualifying questions to prep for the meeting.
+
+DELIVERY GUIDANCE (include as delivery_notes per section):
+- Voice: Late-night FM DJ — low, slow, confident, warm
+- Pacing: Intentional pauses after key phrases. Let silence do the work.
+- Tonality: Downward inflection on statements (certainty). Slight upward only on genuine questions.
+- Energy: Calm authority, not excited salesperson energy.
+
+For EACH section, include:
+- script_lines: array of exact wording options
+- delivery_notes: string with tonality/pacing coaching
+- variations: alternative approaches
+
+Also include section_scores (1-5) rating how well each section follows the methodology.
+` : '';
+
     const systemPrompt = `You are WINWORDS, an elite AI sales coach that generates winning sales scripts. 
 You have analyzed millions of successful sales conversations and know exactly what works.
 
@@ -236,7 +264,7 @@ Your scripts are:
 - Personalized to the buyer's role, industry, and pain points
 - Designed for natural conversation flow
 - Proven to convert based on real data
-
+${appointmentSetterContext}
 Always include:
 1. Multiple opener variations
 2. Key talking points with exact wording
@@ -255,11 +283,15 @@ Format your response as a valid JSON object with this structure:
     "opening": {
       "goal": "What to achieve",
       "variations": ["Option 1", "Option 2", "Option 3"],
+      "script_lines": ["Exact line 1", "Exact line 2"],
+      "delivery_notes": "Tonality and pacing guidance for this section",
       "tip": "AI insight for this section"
     },
     "value_proposition": {
       "goal": "What to achieve",
       "key_points": ["Point 1", "Point 2", "Point 3"],
+      "script_lines": ["Exact line 1"],
+      "delivery_notes": "Delivery coaching",
       "proof_points": ["Statistic or case study"]
     },
     "discovery_questions": {
@@ -279,6 +311,7 @@ Format your response as a valid JSON object with this structure:
       "fallback": "If they resist"
     }
   },
+  ${scenario === 'appointment_setter' ? '"section_scores": { "intro_double_tap": 4, "pattern_interrupt": 5 },' : ''}
   "key_moments": [
     {"moment": "Description", "script": "Exact words to say", "timing": "When to use"}
   ],

@@ -595,6 +595,7 @@ export type Database = {
           quick_skim: Json | null
           recording_id: string
           review_before_calling: string[] | null
+          scheduling_intent: Json | null
           strengths: string[] | null
           suggestions_next_call: string[] | null
           talk_ratio_them: number | null
@@ -627,6 +628,7 @@ export type Database = {
           quick_skim?: Json | null
           recording_id: string
           review_before_calling?: string[] | null
+          scheduling_intent?: Json | null
           strengths?: string[] | null
           suggestions_next_call?: string[] | null
           talk_ratio_them?: number | null
@@ -659,6 +661,7 @@ export type Database = {
           quick_skim?: Json | null
           recording_id?: string
           review_before_calling?: string[] | null
+          scheduling_intent?: Json | null
           strengths?: string[] | null
           suggestions_next_call?: string[] | null
           talk_ratio_them?: number | null

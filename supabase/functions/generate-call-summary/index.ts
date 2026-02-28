@@ -106,7 +106,8 @@ serve(async (req) => {
 - concern_signals: count of concerns
 - engagement_score: 0-10 rating
 - should_create_lead: boolean indicating if lead should be created in CRM
-- salesforce_sync_recommended: boolean for CRM sync`
+- salesforce_sync_recommended: boolean for CRM sync
+- scheduling_intent: If a follow-up meeting, demo, or callback was discussed, extract { date: "YYYY-MM-DD or relative like 'next Thursday'", time: "HH:MM or relative like 'morning'", contact_name: "person name", meeting_type: "demo|follow-up|call|meeting", raw_phrase: "exact quote from transcript" }. Set to null if no scheduling was discussed.`
           },
           {
             role: "user",
@@ -184,6 +185,7 @@ serve(async (req) => {
       positive_signals: analysis.positive_signals,
       concern_signals: analysis.concern_signals,
       engagement_score: analysis.engagement_score,
+      scheduling_intent: analysis.scheduling_intent || null,
     }, { onConflict: 'recording_id' });
 
     if (summaryError) console.error("Summary error:", summaryError);

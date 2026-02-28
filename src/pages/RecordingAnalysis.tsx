@@ -16,7 +16,8 @@ import {
   FileText,
   Send,
   User,
-  Link2
+  Link2,
+  CalendarCheck
 } from 'lucide-react';
 import { WaveformPlayer } from '@/components/playback/WaveformPlayer';
 import { TranscriptSync } from '@/components/playback/TranscriptSync';
@@ -111,6 +112,8 @@ export default function RecordingAnalysis() {
   const [shareEmail, setShareEmail] = useState('');
   const [isGeneratingTranscript, setIsGeneratingTranscript] = useState(false);
   const [generateTranscriptError, setGenerateTranscriptError] = useState<string | null>(null);
+  const [schedulingIntent, setSchedulingIntent] = useState<any>(null);
+  const [schedulingDismissed, setSchedulingDismissed] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const transcriptTriggerRef = useRef(false);
@@ -118,6 +121,7 @@ export default function RecordingAnalysis() {
   useEffect(() => {
     fetchRecording();
     fetchComments();
+    fetchSchedulingIntent();
   }, [id, user]);
 
   const generateTranscript = useCallback(async () => {
@@ -210,6 +214,22 @@ export default function RecordingAnalysis() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSchedulingIntent = async () => {
+    if (!id || !user) return;
+    try {
+      const { data } = await supabase
+        .from('call_summaries')
+        .select('scheduling_intent')
+        .eq('recording_id', id)
+        .maybeSingle();
+      if (data?.scheduling_intent) {
+        setSchedulingIntent(data.scheduling_intent);
+      }
+    } catch (error) {
+      console.error('Error fetching scheduling intent:', error);
     }
   };
 
@@ -425,6 +445,39 @@ export default function RecordingAnalysis() {
             </Button>
           </div>
         </div>
+
+        {/* Scheduling Intent Banner */}
+        {schedulingIntent && !schedulingDismissed && (
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-primary/30 bg-primary/5">
+            <CalendarCheck className="h-5 w-5 text-primary shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">
+                AI detected a follow-up: {schedulingIntent.meeting_type || 'Meeting'} 
+                {schedulingIntent.date && ` on ${schedulingIntent.date}`}
+                {schedulingIntent.time && ` at ${schedulingIntent.time}`}
+                {schedulingIntent.contact_name && ` with ${schedulingIntent.contact_name}`}
+              </p>
+              {schedulingIntent.raw_phrase && (
+                <p className="text-xs text-muted-foreground mt-0.5 italic">"{schedulingIntent.raw_phrase}"</p>
+              )}
+            </div>
+            <Button
+              size="sm"
+              onClick={() => {
+                navigate('/schedule', { state: { prefill: schedulingIntent } });
+              }}
+            >
+              Schedule It
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSchedulingDismissed(true)}
+            >
+              Dismiss
+            </Button>
+          </div>
+        )}
 
         {/* Waveform Player */}
         {audioUrl && (

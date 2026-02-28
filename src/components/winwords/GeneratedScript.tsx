@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Copy, Check, Sparkles, Target, MessageSquare, Shield, 
-  ChevronRight, Lightbulb, AlertTriangle, TrendingUp, FileText 
+  ChevronRight, Lightbulb, AlertTriangle, TrendingUp, FileText,
+  Mic, Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -16,6 +18,7 @@ interface ScriptData {
   confidence_score: number;
   estimated_success_rate: string;
   sections: Record<string, any>;
+  section_scores?: Record<string, number>;
   key_moments?: Array<{ moment: string; script: string; timing: string }>;
   power_phrases?: string[];
   words_to_avoid?: string[];
@@ -25,7 +28,13 @@ interface ScriptData {
 
 interface GeneratedScriptProps {
   script: ScriptData;
-  onUseScript: () => void;
+  onUseScript: (selectedLines?: { section: string; text: string; order: number }[]) => void;
+}
+
+interface SelectableLine {
+  section: string;
+  text: string;
+  order: number;
 }
 
 // Helper to convert script to plain text for copying
@@ -38,12 +47,20 @@ function scriptToPlainText(script: ScriptData): string {
   lines.push('=' .repeat(50));
   lines.push('');
 
-  // Sections
   if (script.sections) {
     Object.entries(script.sections).forEach(([key, section]: [string, any]) => {
       lines.push(`## ${key.replace(/_/g, ' ').toUpperCase()}`);
       if (section.goal) lines.push(`Goal: ${section.goal}`);
+      if (section.delivery_notes) lines.push(`🎙 Delivery: ${section.delivery_notes}`);
       lines.push('');
+
+      if (section.script_lines) {
+        lines.push('Script Lines:');
+        section.script_lines.forEach((l: string, i: number) => {
+          lines.push(`  ${i + 1}. ${l}`);
+        });
+        lines.push('');
+      }
 
       if (section.variations) {
         lines.push('Options:');
@@ -85,7 +102,6 @@ function scriptToPlainText(script: ScriptData): string {
         lines.push('');
       }
 
-      // Objection handlers
       if (section.common_objections) {
         lines.push('OBJECTION HANDLERS:');
         section.common_objections.forEach((obj: any) => {
@@ -101,28 +117,24 @@ function scriptToPlainText(script: ScriptData): string {
     });
   }
 
-  // Power phrases
   if (script.power_phrases?.length) {
     lines.push('## POWER PHRASES');
     script.power_phrases.forEach(p => lines.push(`  ✓ "${p}"`));
     lines.push('');
   }
 
-  // Words to avoid
   if (script.words_to_avoid?.length) {
     lines.push('## WORDS TO AVOID');
     script.words_to_avoid.forEach(w => lines.push(`  ✗ ${w}`));
     lines.push('');
   }
 
-  // Success indicators
   if (script.success_indicators?.length) {
     lines.push('## SUCCESS INDICATORS (Listen for these)');
     script.success_indicators.forEach(s => lines.push(`  ✓ ${s}`));
     lines.push('');
   }
 
-  // Key moments
   if (script.key_moments?.length) {
     lines.push('## KEY MOMENTS');
     script.key_moments.forEach(m => {
@@ -133,7 +145,6 @@ function scriptToPlainText(script: ScriptData): string {
     lines.push('');
   }
 
-  // Next steps
   if (script.suggested_next_steps?.length) {
     lines.push('## SUGGESTED NEXT STEPS');
     script.suggested_next_steps.forEach((s, i) => lines.push(`  ${i + 1}. ${s}`));
@@ -147,8 +158,69 @@ function scriptToPlainText(script: ScriptData): string {
   return lines.join('\n');
 }
 
+// Extract all selectable lines from script
+function extractSelectableLines(script: ScriptData): SelectableLine[] {
+  const lines: SelectableLine[] = [];
+  let order = 0;
+  
+  if (!script.sections) return lines;
+  
+  Object.entries(script.sections).forEach(([key, section]: [string, any]) => {
+    if (section.script_lines) {
+      section.script_lines.forEach((l: string) => {
+        lines.push({ section: key, text: l, order: order++ });
+      });
+    }
+    if (section.variations) {
+      section.variations.forEach((v: string) => {
+        lines.push({ section: key, text: v, order: order++ });
+      });
+    }
+    if (section.key_points) {
+      section.key_points.forEach((p: string) => {
+        lines.push({ section: key, text: p, order: order++ });
+      });
+    }
+    if (section.options) {
+      section.options.forEach((opt: string) => {
+        lines.push({ section: key, text: opt, order: order++ });
+      });
+    }
+  });
+  
+  return lines;
+}
+
+function SectionScoreBadge({ score }: { score: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star
+          key={i}
+          className={cn(
+            'h-3 w-3',
+            i < score ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground/30'
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const [selectedLines, setSelectedLines] = useState<Set<number>>(new Set());
+
+  const allLines = extractSelectableLines(script);
+
+  const toggleLine = useCallback((order: number) => {
+    setSelectedLines(prev => {
+      const next = new Set(prev);
+      if (next.has(order)) next.delete(order);
+      else next.add(order);
+      return next;
+    });
+  }, []);
 
   const copyToClipboard = (text: string, section: string) => {
     navigator.clipboard.writeText(text);
@@ -163,16 +235,31 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
     toast.success('Full script copied to clipboard!');
   };
 
+  const handleUseScript = () => {
+    if (selectedLines.size > 0) {
+      const lines = allLines.filter(l => selectedLines.has(l.order));
+      localStorage.setItem('active_script_lines', JSON.stringify(lines));
+      onUseScript(lines);
+      toast.success(`${lines.length} lines saved for your next call!`);
+    } else {
+      onUseScript();
+    }
+  };
+
   const getConfidenceColor = (score: number) => {
     if (score >= 80) return 'text-green-600 bg-green-500/10';
     if (score >= 60) return 'text-yellow-600 bg-yellow-500/10';
     return 'text-orange-600 bg-orange-500/10';
   };
 
+  const isLineInSection = (sectionKey: string, text: string) => {
+    return allLines.find(l => l.section === sectionKey && l.text === text);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with confidence score */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -182,10 +269,15 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
             <p className="text-sm text-muted-foreground">{script.estimated_success_rate}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Badge className={cn('text-lg px-3 py-1', getConfidenceColor(script.confidence_score))}>
             {script.confidence_score}% Confidence
           </Badge>
+          {selectedLines.size > 0 && (
+            <Badge variant="secondary" className="text-sm">
+              {selectedLines.size} lines selected
+            </Badge>
+          )}
           <Button 
             variant="outline" 
             onClick={copyFullScript} 
@@ -194,9 +286,9 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
             <FileText className="h-4 w-4" />
             Copy Full Script
           </Button>
-          <Button onClick={onUseScript} className="gap-2">
+          <Button onClick={handleUseScript} className="gap-2">
             <Check className="h-4 w-4" />
-            Use This Script
+            {selectedLines.size > 0 ? `Use Script (${selectedLines.size} lines)` : 'Use This Script'}
           </Button>
         </div>
       </div>
@@ -222,10 +314,15 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
             <Card key={key} className="overflow-hidden">
               <CardHeader className="py-3 bg-muted/50">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base capitalize flex items-center gap-2">
-                    <Target className="h-4 w-4 text-primary" />
-                    {key.replace(/_/g, ' ')}
-                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base capitalize flex items-center gap-2">
+                      <Target className="h-4 w-4 text-primary" />
+                      {key.replace(/_/g, ' ')}
+                    </CardTitle>
+                    {script.section_scores?.[key] && (
+                      <SectionScoreBadge score={script.section_scores[key]} />
+                    )}
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -243,16 +340,58 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
                 )}
               </CardHeader>
               <CardContent className="py-4 space-y-3">
+                {/* Delivery Notes */}
+                {section.delivery_notes && (
+                  <div className="flex items-start gap-2 p-3 bg-indigo-500/5 rounded-lg border border-indigo-500/15">
+                    <Mic className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
+                    <p className="text-sm italic text-indigo-600 dark:text-indigo-400">{section.delivery_notes}</p>
+                  </div>
+                )}
+
+                {/* Script Lines */}
+                {section.script_lines && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Script Lines</p>
+                    {section.script_lines.map((l: string, i: number) => {
+                      const line = isLineInSection(key, l);
+                      const isSelected = line ? selectedLines.has(line.order) : false;
+                      return (
+                        <div key={i} className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                          {line && (
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleLine(line.order)}
+                              className="mt-0.5"
+                            />
+                          )}
+                          <p className="text-sm font-medium">{l}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {/* Variations */}
                 {section.variations && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Options</p>
-                    {section.variations.map((v: string, i: number) => (
-                      <div key={i} className="flex items-start gap-2 p-3 bg-muted/30 rounded-lg">
-                        <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                        <p className="text-sm">{v}</p>
-                      </div>
-                    ))}
+                    {section.variations.map((v: string, i: number) => {
+                      const line = isLineInSection(key, v);
+                      const isSelected = line ? selectedLines.has(line.order) : false;
+                      return (
+                        <div key={i} className="flex items-start gap-2 p-3 bg-muted/30 rounded-lg">
+                          {line && (
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleLine(line.order)}
+                              className="mt-0.5"
+                            />
+                          )}
+                          <ChevronRight className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                          <p className="text-sm">{v}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -260,12 +399,23 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
                 {section.key_points && (
                   <div className="space-y-2">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Key Points</p>
-                    {section.key_points.map((point: string, i: number) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                        <p className="text-sm">{point}</p>
-                      </div>
-                    ))}
+                    {section.key_points.map((point: string, i: number) => {
+                      const line = isLineInSection(key, point);
+                      const isSelected = line ? selectedLines.has(line.order) : false;
+                      return (
+                        <div key={i} className="flex items-start gap-2">
+                          {line && (
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleLine(line.order)}
+                              className="mt-0.5"
+                            />
+                          )}
+                          <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                          <p className="text-sm">{point}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -286,12 +436,23 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
                 {/* Options (CTAs) */}
                 {section.options && (
                   <div className="space-y-2">
-                    {section.options.map((opt: string, i: number) => (
-                      <div key={i} className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                        <TrendingUp className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                        <p className="text-sm">{opt}</p>
-                      </div>
-                    ))}
+                    {section.options.map((opt: string, i: number) => {
+                      const line = isLineInSection(key, opt);
+                      const isSelected = line ? selectedLines.has(line.order) : false;
+                      return (
+                        <div key={i} className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                          {line && (
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleLine(line.order)}
+                              className="mt-0.5"
+                            />
+                          )}
+                          <TrendingUp className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                          <p className="text-sm">{opt}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
