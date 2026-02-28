@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  Plus, Clock, Sparkles, AlertTriangle, Bell, Phone, CalendarIcon
+  Plus, Clock, Sparkles, AlertTriangle, Bell, Phone, CalendarIcon, Repeat
 } from 'lucide-react';
 import { format, isSameDay, isAfter, isBefore, startOfDay } from 'date-fns';
 import { Switch } from '@/components/ui/switch';
@@ -20,7 +20,9 @@ import { AIScheduleDialog } from '@/components/schedule/AIScheduleDialog';
 import { FollowUpPrompt } from '@/components/schedule/FollowUpPrompt';
 import { ScheduleEmailDialog } from '@/components/schedule/ScheduleEmailDialog';
 import { ScheduleDetailPanel } from '@/components/schedule/ScheduleDetailPanel';
+import { CallOutcomeDialog } from '@/components/schedule/CallOutcomeDialog';
 import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
+import { useCallReminders } from '@/hooks/useCallReminders';
 
 interface ScheduledCall {
   id: string;
@@ -36,6 +38,10 @@ interface ScheduledCall {
   prep_notes: string | null;
   reminder_sent?: boolean;
   reminder_minutes_before?: number;
+  outcome?: string | null;
+  outcome_notes?: string | null;
+  recurrence_rule?: string | null;
+  recurrence_parent_id?: string | null;
 }
 
 interface RecentRecording {
@@ -93,6 +99,7 @@ export default function Schedule() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { checkConflicts } = useScheduleAssistant();
+  useCallReminders();
   
   const [calls, setCalls] = useState<ScheduledCall[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,14 +111,25 @@ export default function Schedule() {
   const [conflicts, setConflicts] = useState<{id: string; title: string}[]>([]);
   const [emailDialogCall, setEmailDialogCall] = useState<ScheduledCall | null>(null);
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [isOutcomeDialogOpen, setIsOutcomeDialogOpen] = useState(false);
   const [enableReminder, setEnableReminder] = useState(true);
   const [reminderMinutes, setReminderMinutes] = useState('30');
+  const [recurrenceRule, setRecurrenceRule] = useState('none');
   const [demoMode, setDemoMode] = useState(false);
 
   const [newCall, setNewCall] = useState({
     title: '', contactName: '', contactEmail: '', scheduledAt: '',
-    scheduledTime: '09:00', duration: '30', meetingUrl: '', meetingProvider: 'zoom', prepNotes: ''
+    scheduledTime: '09:00', duration: '30', meetingUrl: '', meetingProvider: 'zoom', prepNotes: '',
   });
+
+  // Auto-open outcome dialog when selecting a past call without outcome
+  const handleSelectCall = (call: ScheduledCall) => {
+    setSelectedCall(call);
+    const isPastCall = isBefore(new Date(call.scheduled_at), new Date());
+    if (isPastCall && call.status === 'scheduled' && !call.outcome) {
+      setIsOutcomeDialogOpen(true);
+    }
+  };
 
   useEffect(() => {
     if (demoMode) {
@@ -196,12 +214,14 @@ export default function Schedule() {
           scheduled_at: scheduledDateTime.toISOString(), duration_minutes: parseInt(newCall.duration),
           meeting_url: newCall.meetingUrl || null, meeting_provider: newCall.meetingProvider || null,
           prep_notes: newCall.prepNotes || null, status: 'scheduled',
-          reminder_minutes_before: enableReminder ? parseInt(reminderMinutes) : 0, reminder_sent: false
+          reminder_minutes_before: enableReminder ? parseInt(reminderMinutes) : 0, reminder_sent: false,
+          recurrence_rule: recurrenceRule !== 'none' ? recurrenceRule : null,
         } as any);
       if (error) throw error;
       toast({ title: 'Call scheduled successfully!' });
       setIsCreateOpen(false);
       setNewCall({ title: '', contactName: '', contactEmail: '', scheduledAt: '', scheduledTime: '09:00', duration: '30', meetingUrl: '', meetingProvider: 'zoom', prepNotes: '' });
+      setRecurrenceRule('none');
       fetchCalls();
     } catch (error) {
       console.error('Error scheduling call:', error);
@@ -282,6 +302,27 @@ export default function Schedule() {
                   </div>
                   <div className="space-y-2"><Label>Meeting Link (optional)</Label><Input placeholder="https://zoom.us/j/..." value={newCall.meetingUrl} onChange={(e) => setNewCall({ ...newCall, meetingUrl: e.target.value })} /></div>
                   <div className="space-y-2"><Label>Prep Notes (optional)</Label><Input placeholder="Key topics to discuss..." value={newCall.prepNotes} onChange={(e) => setNewCall({ ...newCall, prepNotes: e.target.value })} /></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Repeat</Label>
+                      <Select value={recurrenceRule} onValueChange={setRecurrenceRule}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No repeat</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="biweekly">Biweekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2 flex flex-col justify-end">
+                      {recurrenceRule !== 'none' && (
+                        <Badge variant="outline" className="text-xs w-fit flex items-center gap-1">
+                          <Repeat className="h-3 w-3" /> Repeats {recurrenceRule}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                     <div className="flex items-center gap-2"><Bell className="h-4 w-4 text-muted-foreground" /><Label htmlFor="reminder-toggle" className="cursor-pointer">Reminder</Label></div>
                     <div className="flex items-center gap-2">
@@ -327,7 +368,7 @@ export default function Schedule() {
                 {upcomingCalls.map((call) => (
                   <button
                     key={call.id}
-                    onClick={() => setSelectedCall(call)}
+                    onClick={() => handleSelectCall(call)}
                     className={`w-full text-left p-3 rounded-lg mb-1 transition-all text-sm ${
                       selectedCall?.id === call.id
                         ? 'bg-primary/10 border border-primary/30'
@@ -342,13 +383,20 @@ export default function Schedule() {
                         {call.status === 'scheduled' ? 'Upcoming' : call.status}
                       </Badge>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                     <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {format(new Date(call.scheduled_at), 'MMM d, h:mm a')}
                     </p>
-                    {call.title !== call.contact_name && call.contact_name && (
-                      <p className="text-[10px] text-muted-foreground truncate mt-0.5">{call.title}</p>
-                    )}
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {call.title !== call.contact_name && call.contact_name && (
+                        <p className="text-[10px] text-muted-foreground truncate">{call.title}</p>
+                      )}
+                      {call.recurrence_rule && (
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 flex items-center gap-0.5">
+                          <Repeat className="h-2.5 w-2.5" /> {call.recurrence_rule}
+                        </Badge>
+                      )}
+                    </div>
                   </button>
                 ))}
 
@@ -362,7 +410,7 @@ export default function Schedule() {
                     {pastCalls.map((call) => (
                       <button
                         key={call.id}
-                        onClick={() => setSelectedCall(call)}
+                        onClick={() => handleSelectCall(call)}
                         className={`w-full text-left p-3 rounded-lg mb-1 transition-all text-sm opacity-70 ${
                           selectedCall?.id === call.id
                             ? 'bg-primary/10 border border-primary/30 opacity-100'
@@ -374,13 +422,18 @@ export default function Schedule() {
                             {call.contact_name || call.title}
                           </span>
                           <Badge variant="outline" className="text-[10px] shrink-0 px-1.5 py-0">
-                            {call.status}
+                            {call.outcome || call.status}
                           </Badge>
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {format(new Date(call.scheduled_at), 'MMM d, h:mm a')}
                         </p>
+                        {call.recurrence_rule && (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 mt-0.5 flex items-center gap-0.5 w-fit">
+                            <Repeat className="h-2.5 w-2.5" /> {call.recurrence_rule}
+                          </Badge>
+                        )}
                       </button>
                     ))}
                   </>
@@ -420,6 +473,13 @@ export default function Schedule() {
 
       <AIScheduleDialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen} onSuccess={fetchCalls} preSelectedRecordingId={preSelectedRecordingId} />
       <ScheduleEmailDialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen} call={emailDialogCall} />
+      <CallOutcomeDialog
+        open={isOutcomeDialogOpen}
+        onOpenChange={setIsOutcomeDialogOpen}
+        call={selectedCall}
+        onOutcomeLogged={() => { if (demoMode) { /* demo refresh */ } else { fetchCalls(); } }}
+        isDemoMode={demoMode}
+      />
     </DashboardLayout>
   );
 }
