@@ -1,92 +1,155 @@
 
 
-# Schedule CRM Enhancement Plan
+# WinWords Appointment Setter + Script-to-Call + Auto-Scheduling
 
 ## Overview
 
-Four interconnected features that turn the Schedule tab into a complete call workflow: reminders that notify you before calls, outcome tracking after calls, recurring scheduling for regular check-ins, and automatic lead pipeline updates.
+Three interconnected enhancements: (1) replace Objection Handling with the Appointment Setter scenario using the Downsell and Close methodology, (2) let users cherry-pick script lines and transfer them into the live call interface as a reference panel with coaching pop-ups, and (3) automatically detect scheduling intent from call transcripts and prompt users to book follow-ups.
 
-## Feature 1: In-App Call Reminders with Browser Notifications
+AI Freestyle is **not** a WinWords scenario -- it activates automatically when an inbound call is answered (covered in a separate inbound call plan).
 
-**What it does:** Shows a toast notification and optional browser push alert when a scheduled call is approaching.
+---
 
-**How it works:**
-- A new `useCallReminders` hook polls upcoming calls every 60 seconds
-- When a call is within the configured reminder window (e.g. 15/30/60 min), it fires a toast and requests browser notification permission
-- Tracks which calls have already been notified locally to avoid duplicates
-- Mounted inside `Schedule.tsx` (and optionally `DashboardLayout.tsx` for app-wide alerts)
+## Part 1: Appointment Setter Scenario
 
-**Changes:**
-- New file: `src/hooks/useCallReminders.ts`
-- Modified: `src/pages/Schedule.tsx` -- mount the hook
-- Modified: `src/components/layout/DashboardLayout.tsx` -- mount hook for app-wide reminders
+### ScenarioSelector.tsx
 
-## Feature 2: Call Outcome Tracking
+Remove the `objection_handling` entry. Add `appointment_setter` in its place, positioned directly after `cold_call`:
 
-**What it does:** After a scheduled call's time passes, prompts the user to log the outcome (Connected, Voicemail, No Show, Rescheduled, Cancelled). Based on the outcome, suggests a follow-up action.
+**New order:**
+1. Cold Call
+2. Appointment Setter (NEW -- CalendarCheck icon, indigo/cyan color)
+3. Discovery
+4. Demo
+5. Negotiation
+6. Renewal
 
-**How it works:**
-- Add `outcome` and `outcome_notes` columns to `scheduled_calls` table
-- New `CallOutcomeDialog` component shows after selecting a past call with status still "scheduled"
-- Selecting an outcome updates the call status and suggests next action (e.g., "Voicemail" suggests scheduling a retry in 2 days)
-- The ScheduleDetailPanel shows outcome info for past calls
+### Edge Function (winwords-generate/index.ts)
 
-**Changes:**
-- Database migration: add `outcome` (text, nullable) and `outcome_notes` (text, nullable) to `scheduled_calls`
-- New file: `src/components/schedule/CallOutcomeDialog.tsx`
-- Modified: `src/components/schedule/ScheduleDetailPanel.tsx` -- show outcome badge, prompt for outcome on past unresolved calls
-- Modified: `src/pages/Schedule.tsx` -- trigger outcome dialog when selecting a past call without outcome
+**Validation schema:** Change enum from `['cold_call', 'discovery', 'demo', 'negotiation', 'renewal', 'objection_handling']` to `['cold_call', 'appointment_setter', 'discovery', 'demo', 'negotiation', 'renewal']`.
 
-## Feature 3: Recurring Call Scheduling
+**New scenario template:**
+```text
+appointment_setter:
+  name: "Appointment Setter"
+  sections: [intro_double_tap, pattern_interrupt, upfront_contract, 
+             headline_pitch, downsell_and_close, schedule_meeting, 
+             post_book_qualification]
+  focus: "Use the Downsell and Close framework to book meetings at scale"
+```
 
-**What it does:** When creating a call, users can set it to repeat (weekly, biweekly, monthly). The system creates the next occurrence automatically when the current one is completed.
+**System prompt injection** (conditional on `scenario === 'appointment_setter'`): The full Downsell and Close methodology as coaching context -- 7-step flow with delivery guidance (late-night FM DJ voice, double-tap name, intentional pauses, low/slow tonality). Each section in the JSON output includes `script_lines` (exact wording), `delivery_notes` (tonality/pacing tips), and `variations`.
 
-**How it works:**
-- Add `recurrence_rule` (text, nullable -- values: `weekly`, `biweekly`, `monthly`) and `recurrence_parent_id` (uuid, nullable) to `scheduled_calls`
-- When a recurring call gets an outcome logged, auto-create the next occurrence with the same details shifted forward
-- Show a small "Repeats weekly" badge on recurring calls in the list
+### GeneratedScript.tsx
 
-**Changes:**
-- Database migration: add `recurrence_rule` and `recurrence_parent_id` to `scheduled_calls`
-- Modified: `src/pages/Schedule.tsx` -- add recurrence selector to the create dialog, auto-create next occurrence on outcome
-- Modified: call list items -- show recurrence badge
+Add rendering for `delivery_notes` and `script_lines` fields. Delivery notes appear as subtle italic text with a microphone icon under each script section, giving the user performance coaching alongside the words.
 
-## Feature 4: Pipeline Stage Sync with Leads
+---
 
-**What it does:** After logging a call outcome, offer to update the linked lead's pipeline stage. For example, "Connected" on a discovery call could move the lead from "new" to "contacted".
+## Part 2: Script Cherry-Pick and Transfer to Call Interface
 
-**How it works:**
-- When a call outcome is logged and the call has a matching lead (by `contact_name`), show a suggestion to update the lead's `lead_status`
-- Outcome-to-stage mapping: Connected -> "contacted", Proposal Discussed -> "proposal", No Show (3x) -> "lost"
-- Single button in the outcome dialog: "Update lead to [stage]?" with accept/skip
+### How it works
 
-**Changes:**
-- Modified: `src/components/schedule/CallOutcomeDialog.tsx` -- add lead status suggestion after outcome selection
-- Uses existing `leads` table `lead_status` column (no schema change needed)
+**In GeneratedScript.tsx -- Cherry-picking:**
+- Each script variation, key point, and CTA line gets a checkbox next to it
+- Users toggle lines on/off. A counter shows "7 lines selected"
+- The "Use This Script" button saves selected lines to `localStorage` under key `active_script_lines` as `{ section, text, order }[]`
+- Lines are grouped by section for easy reference during the call
+
+**In CallInterface.tsx -- Script Reference Panel:**
+- On mount, check `localStorage` for `active_script_lines`
+- If present, switch from the current 2-column layout to a **3-column layout**:
+  - Left: `ScriptReferencePanel` -- cherry-picked lines as a checklist
+  - Center: Coaching pop-ups (top) + main area
+  - Right: `LiveSummaryPanel`
+- If no script is active, keep the existing 2-column layout unchanged
+
+**ScriptReferencePanel (new component):**
+- Scrollable checklist grouped by section name
+- Users tap lines to check them off (strikethrough + green check) as they deliver them
+- Progress bar at top: "3 of 7 lines delivered"
+- "Clear Script" button to dismiss and revert to 2-column layout
+- Lines are read-only during the call (no re-ordering)
+
+**CoachingPopup (new component):**
+- When a script is active, AI coaching signals render as auto-dismissing slide-down banners at the top of the center column instead of the sidebar
+- Each banner auto-dismisses after 5-8 seconds based on urgency
+- Max 2 banners visible at once; newest pushes older ones
+- Users can pin a suggestion (keeps it visible) or dismiss early
+- The coaching analysis logic stays the same (`LiveCoachingSidebar` logic) -- just the rendering changes
+- When no script is active, the existing `LiveCoachingSidebar` component is used as-is
+
+---
+
+## Part 3: Auto-Scheduling from Transcription
+
+### How it works
+
+The existing `generate-call-summary` edge function already runs post-call and extracts `next_steps`. We extend it to also detect scheduling intent.
+
+**Edge function change (generate-call-summary/index.ts):**
+- Add to the AI prompt: "If a follow-up meeting was discussed, extract `scheduling_intent: { date, time, contact_name, meeting_type, raw_phrase }` from the transcript"
+- Store the result in a new `scheduling_intent` JSONB column on `call_summaries`
+
+**Database migration:**
+- Add `scheduling_intent` (jsonb, nullable) to `call_summaries`
+
+**Frontend -- post-call prompt:**
+- In `RecordingAnalysis.tsx` (which loads `call_summaries`): if `scheduling_intent` is present and non-null, show a toast/banner: "AI detected a follow-up: [date] with [contact]. Schedule it?"
+- Clicking the toast opens the `ScheduleConfirmModal` pre-filled with the extracted data
+- User confirms or dismisses -- no ghost meetings
+
+**Per-section scoring:**
+- Add a `section_scores` field to the WinWords JSON output for appointment setter scripts
+- Each section gets a 1-5 score based on how well it follows the methodology
+- Displayed as small star ratings or score badges on each section header in GeneratedScript
 
 ---
 
 ## Technical Details
 
-### Database Migration (single migration)
+### Database Migration
 
 ```sql
-ALTER TABLE scheduled_calls
-  ADD COLUMN IF NOT EXISTS outcome text,
-  ADD COLUMN IF NOT EXISTS outcome_notes text,
-  ADD COLUMN IF NOT EXISTS recurrence_rule text,
-  ADD COLUMN IF NOT EXISTS recurrence_parent_id uuid REFERENCES scheduled_calls(id);
+ALTER TABLE call_summaries 
+  ADD COLUMN IF NOT EXISTS scheduling_intent jsonb;
 ```
 
 ### New Files
-1. `src/hooks/useCallReminders.ts` -- polling hook for upcoming call alerts
-2. `src/components/schedule/CallOutcomeDialog.tsx` -- outcome logging + lead stage suggestion
+1. `src/components/calling/ScriptReferencePanel.tsx` -- checklist panel for cherry-picked script lines during calls
+2. `src/components/calling/CoachingPopup.tsx` -- auto-dismissing coaching banner component for script-active calls
 
 ### Modified Files
-1. `src/pages/Schedule.tsx` -- recurrence in create dialog, outcome dialog trigger, reminder hook
-2. `src/components/schedule/ScheduleDetailPanel.tsx` -- outcome display, past-call prompt
-3. `src/components/layout/DashboardLayout.tsx` -- app-wide reminder hook mount
+1. `src/components/winwords/ScenarioSelector.tsx` -- remove Objection Handling, add Appointment Setter, reorder
+2. `supabase/functions/winwords-generate/index.ts` -- update enum, add template, inject Downsell and Close methodology prompt, add delivery_notes to output schema
+3. `src/components/winwords/GeneratedScript.tsx` -- add checkboxes for cherry-picking lines, render delivery_notes, store selected lines to localStorage
+4. `src/pages/WinWords.tsx` -- update scenario type references (objection_handling to appointment_setter)
+5. `src/components/calling/CallInterface.tsx` -- detect active script, render 3-column layout with ScriptReferencePanel + CoachingPopup
+6. `supabase/functions/generate-call-summary/index.ts` -- add scheduling_intent extraction to AI prompt
+7. `src/pages/RecordingAnalysis.tsx` -- show auto-schedule prompt when scheduling_intent detected
 
-### Demo Mode
-All four features will work with demo data -- mock outcomes, recurrence badges, and simulated reminder toasts for demo calls approaching within the hour.
+### Scenario Grid (Final Order)
+1. Cold Call
+2. Appointment Setter (Downsell and Close)
+3. Discovery
+4. Demo
+5. Negotiation
+6. Renewal
+
+### Call Interface Layout (with active script)
+
+```text
++------------------+-------------------------+------------------+
+| Script Reference | Coaching Pop-ups (top)  | Live Summary     |
+| (checklist)      | [auto-dismiss banners]  |                  |
+|                  |                         |                  |
+| [ ] Line 1      | (empty when no popups)  |                  |
+| [x] Line 2      |                         |                  |
+| [ ] Line 3      |                         |                  |
+|                  |                         |                  |
+| Progress: 1/3   |                         |                  |
++------------------+-------------------------+------------------+
+```
+
+Without active script: existing 2-column layout (LiveCoachingSidebar + LiveSummaryPanel) is unchanged.
 
