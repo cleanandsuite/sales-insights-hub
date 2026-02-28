@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { LeadCard } from '@/components/leads/LeadCard';
 import { AILeadStatus } from '@/components/leads/AILeadStatus';
-import { QuickOverviewCards } from '@/components/leads/QuickOverviewCards';
+
 import { PriorityAlerts } from '@/components/leads/PriorityAlerts';
 import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { Button } from '@/components/ui/button';
@@ -396,15 +396,10 @@ export default function Leads() {
                 todaysLeads={stats.todaysLeads}
                 weeklyLeads={stats.weeklyLeads}
                 conversionRate={stats.conversionRate}
-                avgResponseTime={stats.avgResponseTime}
-                onToggleAI={() => setAiActive(!aiActive)}
-              />
-
-              <QuickOverviewCards
-                newLeadsToday={stats.todaysLeads}
                 pendingFollowups={pendingFollowups}
                 hotLeads={hotLeads}
                 recentCalls={leads.filter(l => l.call_duration_seconds).length}
+                onToggleAI={() => setAiActive(!aiActive)}
               />
 
               {alerts.length > 0 && (
