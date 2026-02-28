@@ -27,6 +27,9 @@ import { LiveCoachingSidebar } from '@/components/recording/LiveCoachingSidebar'
 import { LiveSummaryPanel } from '@/components/recording/LiveSummaryPanel';
 import { ScriptReferencePanel, type ScriptLine } from './ScriptReferencePanel';
 import { CoachingPopup, type CoachingSignal } from './CoachingPopup';
+import { AutoDispositionBadge } from './AutoDispositionBadge';
+import { PreCallBriefBanner, type LeadContext } from './PreCallBriefBanner';
+import { PowerDialerControls } from './PowerDialerControls';
 
 interface CallInterfaceProps {
   phoneNumber: string;
@@ -34,9 +37,10 @@ interface CallInterfaceProps {
   onClose: () => void;
   onCallNextLead?: () => void;
   nextLeadName?: string;
+  leadContext?: LeadContext | null;
 }
 
-export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, nextLeadName }: CallInterfaceProps) {
+export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, nextLeadName, leadContext }: CallInterfaceProps) {
   const navigate = useNavigate();
   
   const {
@@ -54,6 +58,7 @@ export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, 
     holdCall,
     unholdCall,
     sendDTMF,
+    dropVoicemail,
     transcripts,
     isTranscribing,
     duration,
@@ -137,8 +142,6 @@ export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, 
     }
   }, [isReady, hasStartedCall, phoneNumber, startCall, incrementCallCount]);
 
-  // No auto-navigate — user stays on coaching screen after call ends
-
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -203,6 +206,11 @@ export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, 
 
   return (
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
+      {/* Pre-Call Context Banner */}
+      {leadContext && (
+        <PreCallBriefBanner leadContext={leadContext} callStatus={callStatus} />
+      )}
+
       {/* Header */}
       <div className="border-b border-border bg-card p-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -231,6 +239,9 @@ export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, 
                     On Hold
                   </Badge>
                 )}
+                {isCallEnded && savedRecordingId && (
+                  <AutoDispositionBadge recordingId={savedRecordingId} />
+                )}
               </div>
             </div>
           </div>
@@ -243,6 +254,7 @@ export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, 
                 onToggleMute={() => muteAudio(!isMuted)}
                 onToggleHold={handleToggleHold}
                 onSendDTMF={sendDTMF}
+                onDropVoicemail={dropVoicemail}
                 volume={volume}
                 onVolumeChange={setVolume}
               />
@@ -337,21 +349,31 @@ export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, 
         </div>
       )}
 
-      {/* Footer with Call Limit */}
+      {/* Power Dialer + Footer */}
       <div className="border-t border-border bg-card p-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <CallLimitIndicator
-            callsToday={callsToday}
-            dailyLimit={dailyLimit}
-            warmupDay={warmupDay}
-            enforced={limitEnforced}
-          />
-          {isCallEnded && transcripts.filter(t => t.isFinal).length > 0 && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <FileText className="h-4 w-4" />
-              {transcripts.filter(t => t.isFinal).length} transcript segments captured
-            </div>
+        <div className="max-w-4xl mx-auto space-y-3">
+          {/* Power Dialer Controls - show after call ends when next lead available */}
+          {isCallEnded && onCallNextLead && (
+            <PowerDialerControls
+              onCallNextLead={onCallNextLead}
+              nextLeadName={nextLeadName}
+            />
           )}
+
+          <div className="flex items-center justify-between">
+            <CallLimitIndicator
+              callsToday={callsToday}
+              dailyLimit={dailyLimit}
+              warmupDay={warmupDay}
+              enforced={limitEnforced}
+            />
+            {isCallEnded && transcripts.filter(t => t.isFinal).length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                {transcripts.filter(t => t.isFinal).length} transcript segments captured
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

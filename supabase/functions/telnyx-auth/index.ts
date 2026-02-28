@@ -61,8 +61,42 @@ Deno.serve(async (req) => {
       .eq('status', 'active')
       .maybeSingle();
 
-    // Get caller ID action
+    // Get caller ID action — with local presence matching
     if (action === 'get_caller_id') {
+      const destinationNumber = body.destination_number;
+
+      // Try local presence matching if destination number provided
+      if (destinationNumber) {
+        // Extract area code from destination (strip +1 prefix, take first 3 digits)
+        const cleanDest = destinationNumber.replace(/[^\d]/g, '');
+        const destAreaCode = cleanDest.startsWith('1') ? cleanDest.slice(1, 4) : cleanDest.slice(0, 3);
+
+        if (destAreaCode && destAreaCode.length === 3) {
+          // Fetch all active phone lines for this user
+          const { data: allLines } = await serviceSupabase
+            .from('user_phone_lines')
+            .select('phone_number')
+            .eq('user_id', userId)
+            .eq('status', 'active');
+
+          if (allLines && allLines.length > 0) {
+            const match = allLines.find(line => {
+              const cleanLine = (line.phone_number || '').replace(/[^\d]/g, '');
+              const lineAreaCode = cleanLine.startsWith('1') ? cleanLine.slice(1, 4) : cleanLine.slice(0, 3);
+              return lineAreaCode === destAreaCode;
+            });
+
+            if (match) {
+              console.log(`[TELNYX-AUTH] Local presence match: ${match.phone_number} for area code ${destAreaCode}`);
+              return new Response(
+                JSON.stringify({ caller_id: match.phone_number }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+          }
+        }
+      }
+
       const callerId = phoneLine?.phone_number || Deno.env.get('TELNYX_CALLER_ID');
       
       if (!callerId) {

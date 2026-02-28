@@ -107,7 +107,9 @@ serve(async (req) => {
 - engagement_score: 0-10 rating
 - should_create_lead: boolean indicating if lead should be created in CRM
 - salesforce_sync_recommended: boolean for CRM sync
-- scheduling_intent: If a follow-up meeting, demo, or callback was discussed, extract { date: "YYYY-MM-DD or relative like 'next Thursday'", time: "HH:MM or relative like 'morning'", contact_name: "person name", meeting_type: "demo|follow-up|call|meeting", raw_phrase: "exact quote from transcript" }. Set to null if no scheduling was discussed.`
+- scheduling_intent: If a follow-up meeting, demo, or callback was discussed, extract { date: "YYYY-MM-DD or relative like 'next Thursday'", time: "HH:MM or relative like 'morning'", contact_name: "person name", meeting_type: "demo|follow-up|call|meeting", raw_phrase: "exact quote from transcript" }. Set to null if no scheduling was discussed.
+- call_disposition: classify the call outcome as exactly one of: "connected_interested", "connected_not_interested", "voicemail", "no_answer", "gatekeeper", "callback_requested", "meeting_booked", "wrong_number"
+- disposition_confidence: 0-100 confidence in the disposition classification`
           },
           {
             role: "user",
@@ -189,6 +191,19 @@ serve(async (req) => {
     }, { onConflict: 'recording_id' });
 
     if (summaryError) console.error("Summary error:", summaryError);
+
+    // Save disposition to call_recordings
+    if (analysis.call_disposition) {
+      const { error: dispError } = await supabase
+        .from("call_recordings")
+        .update({
+          call_disposition: analysis.call_disposition as string,
+          disposition_confidence: (analysis.disposition_confidence as number) || null,
+        })
+        .eq("id", recording_id);
+      if (dispError) console.error("Disposition update error:", dispError);
+      else console.log("Disposition saved:", analysis.call_disposition, analysis.disposition_confidence);
+    }
 
     // Create lead if we have contact info and AI recommends it
     const leadInfo = analysis.lead_info || contact_info;

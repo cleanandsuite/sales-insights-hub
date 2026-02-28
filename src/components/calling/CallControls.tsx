@@ -18,7 +18,8 @@ import {
   Play, 
   Hash, 
   Volume2,
-  VolumeX
+  VolumeX,
+  Voicemail,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
@@ -29,6 +30,7 @@ interface CallControlsProps {
   onToggleMute: () => void;
   onToggleHold: () => void;
   onSendDTMF: (digit: string) => void;
+  onDropVoicemail?: () => void;
   volume?: number;
   onVolumeChange?: (volume: number) => void;
   className?: string;
@@ -47,12 +49,14 @@ export function CallControls({
   onToggleMute,
   onToggleHold,
   onSendDTMF,
+  onDropVoicemail,
   volume = 100,
   onVolumeChange,
   className,
 }: CallControlsProps) {
   const [keypadOpen, setKeypadOpen] = useState(false);
   const [volumeOpen, setVolumeOpen] = useState(false);
+  const [vmConfirm, setVmConfirm] = useState(false);
 
   return (
     <TooltipProvider>
@@ -135,6 +139,45 @@ export function CallControls({
             </div>
           </PopoverContent>
         </Popover>
+
+        {/* Voicemail Drop */}
+        {onDropVoicemail && (
+          <Popover open={vmConfirm} onOpenChange={setVmConfirm}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-10 w-10"
+                  >
+                    <Voicemail className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Drop Voicemail</TooltipContent>
+            </Tooltip>
+            <PopoverContent className="w-56 p-3" align="center">
+              <p className="text-sm mb-2">Leave voicemail and hang up?</p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => {
+                    setVmConfirm(false);
+                    onDropVoicemail();
+                  }}
+                >
+                  Drop VM
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => setVmConfirm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
 
         {/* Volume Control */}
         {onVolumeChange && (
