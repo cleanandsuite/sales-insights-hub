@@ -229,10 +229,14 @@ export default function Leads() {
   const [demoMode, setDemoMode] = useState(false);
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
+  const [activeCallName, setActiveCallName] = useState<string | undefined>(undefined);
   const [pendingCallLead, setPendingCallLead] = useState<Lead | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importRefreshKey, setImportRefreshKey] = useState(0);
+  // For imported leads call-next flow
+  const [importedLeadsList, setImportedLeadsList] = useState<any[]>([]);
+  const [currentImportedLeadIndex, setCurrentImportedLeadIndex] = useState(-1);
   const [stats, setStats] = useState({
     todaysLeads: 0, weeklyLeads: 0, conversionRate: 28, avgResponseTime: '1.2 hrs'
   });
@@ -303,7 +307,35 @@ export default function Leads() {
   };
 
   const handleStartCall = (phoneNumber: string, callName?: string) => {
-    setShowCallDialog(false); setActiveCall(phoneNumber); setPendingCallLead(null);
+    setShowCallDialog(false); setActiveCall(phoneNumber); setActiveCallName(callName); setPendingCallLead(null);
+  };
+
+  const handleStartCallWithImportedLead = (lead: any, allLeads: any[]) => {
+    if (!lead.phone_number) {
+      toast.error('No phone number for this lead. Add a phone number first.');
+      return;
+    }
+    setImportedLeadsList(allLeads.filter((l: any) => l.phone_number));
+    const idx = allLeads.findIndex((l: any) => l.id === lead.id);
+    setCurrentImportedLeadIndex(idx >= 0 ? idx : 0);
+    setActiveCall(lead.phone_number);
+    setActiveCallName(lead.contact_name);
+  };
+
+  const handleCallNextLead = () => {
+    const nextIdx = currentImportedLeadIndex + 1;
+    if (nextIdx < importedLeadsList.length) {
+      const nextLead = importedLeadsList[nextIdx];
+      setCurrentImportedLeadIndex(nextIdx);
+      setActiveCall(nextLead.phone_number);
+      setActiveCallName(nextLead.contact_name);
+    } else {
+      toast.info('No more leads in the list');
+      setActiveCall(null);
+      setActiveCallName(undefined);
+      setImportedLeadsList([]);
+      setCurrentImportedLeadIndex(-1);
+    }
   };
 
   const handleEmail = (lead: Lead) => {
@@ -331,7 +363,17 @@ export default function Leads() {
 
   return (
     <>
-      {activeCall && <CallInterface phoneNumber={activeCall} onClose={() => setActiveCall(null)} />}
+      {activeCall && (
+        <CallInterface
+          phoneNumber={activeCall}
+          callName={activeCallName}
+          onClose={() => { setActiveCall(null); setActiveCallName(undefined); setImportedLeadsList([]); setCurrentImportedLeadIndex(-1); }}
+          onCallNextLead={importedLeadsList.length > 0 && currentImportedLeadIndex < importedLeadsList.length - 1 ? handleCallNextLead : undefined}
+          nextLeadName={importedLeadsList.length > 0 && currentImportedLeadIndex < importedLeadsList.length - 1
+            ? importedLeadsList[currentImportedLeadIndex + 1]?.contact_name
+            : undefined}
+        />
+      )}
       <CallDialog open={showCallDialog} onOpenChange={setShowCallDialog} onStartCall={handleStartCall} />
       <ImportLeadsDialog
         open={showImportDialog}
@@ -495,7 +537,11 @@ export default function Leads() {
 
             {/* Imported Leads Tab */}
             <TabsContent value="imported" className="mt-4">
-              <ImportedLeadsTable refreshKey={importRefreshKey} demoMode={demoMode} />
+              <ImportedLeadsTable
+                refreshKey={importRefreshKey}
+                demoMode={demoMode}
+                onStartCallWithLead={handleStartCallWithImportedLead}
+              />
             </TabsContent>
           </Tabs>
         </div>

@@ -1658,6 +1658,7 @@ export type Database = {
           location: string | null
           notes: string | null
           pain_point: string | null
+          phone_number: string | null
           previous_rep: string | null
           user_id: string
         }
@@ -1672,6 +1673,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           pain_point?: string | null
+          phone_number?: string | null
           previous_rep?: string | null
           user_id: string
         }
@@ -1686,6 +1688,7 @@ export type Database = {
           location?: string | null
           notes?: string | null
           pain_point?: string | null
+          phone_number?: string | null
           previous_rep?: string | null
           user_id?: string
         }

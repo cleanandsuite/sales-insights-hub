@@ -32,9 +32,11 @@ interface CallInterfaceProps {
   phoneNumber: string;
   callName?: string;
   onClose: () => void;
+  onCallNextLead?: () => void;
+  nextLeadName?: string;
 }
 
-export function CallInterface({ phoneNumber, callName, onClose }: CallInterfaceProps) {
+export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, nextLeadName }: CallInterfaceProps) {
   const navigate = useNavigate();
   
   const {
@@ -251,6 +253,17 @@ export function CallInterface({ phoneNumber, callName, onClose }: CallInterfaceP
                   <Download className="h-4 w-4" />
                   Download Transcript
                 </Button>
+                {onCallNextLead && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={onCallNextLead}
+                    className="gap-2"
+                  >
+                    <Phone className="h-4 w-4" />
+                    Call Next{nextLeadName ? `: ${nextLeadName}` : ' Lead'}
+                  </Button>
+                )}
                 <Button
                   variant="secondary"
                   onClick={() => {

@@ -20,6 +20,7 @@ interface ImportedLead {
   contact_date: string;
   contact_time: string;
   lead_type: 'hot' | 'warm' | 'cold';
+  phone_number: string;
 }
 
 interface ImportLeadsDialogProps {
@@ -84,6 +85,7 @@ export function ImportLeadsDialog({ open, onOpenChange, onImportComplete }: Impo
     contact_date: '',
     contact_time: '',
     lead_type: 'warm',
+    phone_number: '',
   });
 
   const processFile = useCallback((file: File) => {
@@ -108,6 +110,7 @@ export function ImportLeadsDialog({ open, onOpenChange, onImportComplete }: Impo
       const dateIdx = headers.findIndex(h => h.includes('date'));
       const timeIdx = headers.findIndex(h => h.includes('time'));
       const typeIdx = headers.findIndex(h => h.includes('type') || h.includes('lead'));
+      const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('mobile') || h.includes('cell') || h.includes('number'));
 
       const leads: ImportedLead[] = rows.slice(1).map(row => {
         const rawType = (typeIdx >= 0 ? row[typeIdx] : '').toLowerCase().trim();
@@ -120,6 +123,7 @@ export function ImportLeadsDialog({ open, onOpenChange, onImportComplete }: Impo
           contact_date: dateIdx >= 0 ? row[dateIdx] || '' : '',
           contact_time: timeIdx >= 0 ? row[timeIdx] || '' : '',
           lead_type,
+          phone_number: phoneIdx >= 0 ? row[phoneIdx] || '' : '',
         };
       }).filter(l => l.contact_name.length > 0);
 
@@ -159,6 +163,7 @@ export function ImportLeadsDialog({ open, onOpenChange, onImportComplete }: Impo
       contact_date: l.contact_date || null,
       contact_time: l.contact_time || null,
       lead_type: l.lead_type,
+      phone_number: l.phone_number || null,
     }));
 
     const { error } = await supabase.from('imported_leads' as any).insert(rows as any);
@@ -169,7 +174,7 @@ export function ImportLeadsDialog({ open, onOpenChange, onImportComplete }: Impo
     } else {
       toast.success(`${rows.length} lead(s) imported successfully`);
       setParsedLeads([]);
-      setManual({ contact_name: '', business: '', location: '', previous_rep: '', contact_date: '', contact_time: '', lead_type: 'warm' });
+      setManual({ contact_name: '', business: '', location: '', previous_rep: '', contact_date: '', contact_time: '', lead_type: 'warm', phone_number: '' });
       setFileName('');
       onImportComplete();
       onOpenChange(false);
@@ -217,7 +222,7 @@ export function ImportLeadsDialog({ open, onOpenChange, onImportComplete }: Impo
               <FileSpreadsheet className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
               <p className="font-medium text-foreground">Drop your CSV here or click to browse</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Columns: Name, Business, Location, Previous Rep, Date, Time, Lead Type
+                Columns: Name, Business, Location, Previous Rep, Date, Time, Lead Type, Phone
               </p>
               {fileName && (
                 <Badge variant="secondary" className="mt-3">
@@ -280,6 +285,10 @@ export function ImportLeadsDialog({ open, onOpenChange, onImportComplete }: Impo
               <div>
                 <Label htmlFor="m-biz">Business</Label>
                 <Input id="m-biz" value={manual.business} onChange={e => setManual(p => ({ ...p, business: e.target.value }))} placeholder="Acme Corp" />
+              </div>
+              <div>
+                <Label htmlFor="m-phone">Phone Number</Label>
+                <Input id="m-phone" value={manual.phone_number} onChange={e => setManual(p => ({ ...p, phone_number: e.target.value }))} placeholder="+1 (555) 123-4567" />
               </div>
               <div>
                 <Label htmlFor="m-loc">Location</Label>
