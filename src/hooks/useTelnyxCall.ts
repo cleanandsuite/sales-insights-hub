@@ -20,6 +20,7 @@ interface UseTelnyxCallReturn {
   holdCall: () => void;
   unholdCall: () => void;
   sendDTMF: (digit: string) => void;
+  dropVoicemail: () => Promise<void>;
   
   // Transcription (from useCallRecorder)
   transcripts: { text: string; speaker: 'user' | 'remote'; timestamp: number; isFinal: boolean }[];
@@ -314,7 +315,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
       // Get caller ID from edge function
       const { data: { session } } = await supabase.auth.getSession();
       const callerIdResponse = await supabase.functions.invoke('telnyx-auth', {
-        body: { action: 'get_caller_id' },
+        body: { action: 'get_caller_id', destination_number: formattedNumber },
         headers: { Authorization: `Bearer ${session?.access_token}` }
       });
 
@@ -379,9 +380,30 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
 
   const setVolume = useCallback((newVolume: number) => {
     setVolumeState(newVolume);
-    // If we have a remote audio element, we could control it here
-    // For now we'll handle this in the component
   }, []);
+
+  const dropVoicemail = useCallback(async () => {
+    if (!callRef.current) return;
+    try {
+      const callControlId = callRef.current.id;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      await supabase.functions.invoke('telnyx-voicemail-drop', {
+        body: { call_control_id: callControlId },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      // End call locally
+      callRef.current.hangup();
+      callRef.current = null;
+      stopDurationTimer();
+      setCallStatus('ended');
+      await finalizeAndSaveRecording();
+    } catch (err: any) {
+      console.error('[TELNYX] VM drop error:', err);
+    }
+  }, [finalizeAndSaveRecording, stopDurationTimer]);
 
   // Initialize on mount
   useEffect(() => {
@@ -416,6 +438,7 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
     holdCall,
     unholdCall,
     sendDTMF,
+    dropVoicemail,
     transcripts,
     isTranscribing,
     duration,

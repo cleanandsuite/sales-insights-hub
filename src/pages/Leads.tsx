@@ -237,6 +237,7 @@ export default function Leads() {
   // For imported leads call-next flow
   const [importedLeadsList, setImportedLeadsList] = useState<any[]>([]);
   const [currentImportedLeadIndex, setCurrentImportedLeadIndex] = useState(-1);
+  const [activeLeadContext, setActiveLeadContext] = useState<any>(null);
   const [stats, setStats] = useState({
     todaysLeads: 0, weeklyLeads: 0, conversionRate: 28, avgResponseTime: '1.2 hrs'
   });
@@ -320,6 +321,17 @@ export default function Leads() {
     setCurrentImportedLeadIndex(idx >= 0 ? idx : 0);
     setActiveCall(lead.phone_number);
     setActiveCallName(lead.contact_name);
+    setActiveLeadContext({
+      contact_name: lead.contact_name,
+      business: lead.business,
+      location: lead.location,
+      lead_type: lead.lead_type,
+      pain_point: lead.pain_point,
+      previous_rep: lead.previous_rep,
+      notes: lead.notes,
+      contact_date: lead.contact_date,
+      phone_number: lead.phone_number,
+    });
   };
 
   const handleCallNextLead = () => {
@@ -329,12 +341,24 @@ export default function Leads() {
       setCurrentImportedLeadIndex(nextIdx);
       setActiveCall(nextLead.phone_number);
       setActiveCallName(nextLead.contact_name);
+      setActiveLeadContext({
+        contact_name: nextLead.contact_name,
+        business: nextLead.business,
+        location: nextLead.location,
+        lead_type: nextLead.lead_type,
+        pain_point: nextLead.pain_point,
+        previous_rep: nextLead.previous_rep,
+        notes: nextLead.notes,
+        contact_date: nextLead.contact_date,
+        phone_number: nextLead.phone_number,
+      });
     } else {
       toast.info('No more leads in the list');
       setActiveCall(null);
       setActiveCallName(undefined);
       setImportedLeadsList([]);
       setCurrentImportedLeadIndex(-1);
+      setActiveLeadContext(null);
     }
   };
 
@@ -367,11 +391,12 @@ export default function Leads() {
         <CallInterface
           phoneNumber={activeCall}
           callName={activeCallName}
-          onClose={() => { setActiveCall(null); setActiveCallName(undefined); setImportedLeadsList([]); setCurrentImportedLeadIndex(-1); }}
+          onClose={() => { setActiveCall(null); setActiveCallName(undefined); setImportedLeadsList([]); setCurrentImportedLeadIndex(-1); setActiveLeadContext(null); }}
           onCallNextLead={importedLeadsList.length > 0 && currentImportedLeadIndex < importedLeadsList.length - 1 ? handleCallNextLead : undefined}
           nextLeadName={importedLeadsList.length > 0 && currentImportedLeadIndex < importedLeadsList.length - 1
             ? importedLeadsList[currentImportedLeadIndex + 1]?.contact_name
             : undefined}
+          leadContext={activeLeadContext}
         />
       )}
       <CallDialog open={showCallDialog} onOpenChange={setShowCallDialog} onStartCall={handleStartCall} />

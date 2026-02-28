@@ -417,11 +417,13 @@ export type Database = {
           ai_suggestions: Json | null
           analyzed_at: string | null
           audio_url: string | null
+          call_disposition: string | null
           call_score_id: string | null
           created_at: string
           crm_sync_status: string | null
           deal_analysis_id: string | null
           deleted_at: string | null
+          disposition_confidence: number | null
           duration_seconds: number | null
           file_name: string
           file_size: number | null
@@ -446,11 +448,13 @@ export type Database = {
           ai_suggestions?: Json | null
           analyzed_at?: string | null
           audio_url?: string | null
+          call_disposition?: string | null
           call_score_id?: string | null
           created_at?: string
           crm_sync_status?: string | null
           deal_analysis_id?: string | null
           deleted_at?: string | null
+          disposition_confidence?: number | null
           duration_seconds?: number | null
           file_name: string
           file_size?: number | null
@@ -475,11 +479,13 @@ export type Database = {
           ai_suggestions?: Json | null
           analyzed_at?: string | null
           audio_url?: string | null
+          call_disposition?: string | null
           call_score_id?: string | null
           created_at?: string
           crm_sync_status?: string | null
           deal_analysis_id?: string | null
           deleted_at?: string | null
+          disposition_confidence?: number | null
           duration_seconds?: number | null
           file_name?: string
           file_size?: number | null
