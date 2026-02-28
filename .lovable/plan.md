@@ -1,55 +1,136 @@
 
 
-# Merge Lead Stats into One Unified Header Strip
+# Embedded Outbound Email System
 
-## Problem
+## Overview
 
-Two separate card rows on the Leads page show overlapping data:
-- **AI Lead Status**: Today's Leads, This Week, Conversion Rate, Avg Response + AI status + Pause button
-- **Quick Overview Cards**: New Leads (Today) [duplicate], Follow-ups (Pending), Hot Leads (Priority), Recent Calls (Last 24h)
+Add a simple, compact outbound email system that lets users send emails directly from SellSig using their own SMTP server credentials (Gmail, Outlook, custom). No external email client needed.
 
-This is confusing and wastes vertical space.
-
-## Solution
-
-Merge everything into a single, compact **AI Lead Status** bar that contains all 6 unique metrics in one row, with the AI status indicator and Pause button inline.
+## Architecture
 
 ```text
-+--------------------------------------------------------------+
-| [*] AI Active  |  0 Today  |  0 Week  |  28% Conv  |  1.2h  |
-|                |  0 Follow-ups  |  4 Hot  |  8 Calls  | [Pause]|
-+--------------------------------------------------------------+
+User configures SMTP once in Settings
+            |
+            v
++---------------------------+
+| user_email_settings table |  (encrypted credentials)
++---------------------------+
+            |
+    When user clicks "Send" 
+            |
+            v
++---------------------------+
+| send-outbound-email       |  (Edge Function)
+| - Decrypts SMTP creds     |
+| - Connects via SMTP       |
+| - Sends email             |
+| - Logs to sent_emails     |
++---------------------------+
+            |
+            v
++---------------------------+
+| sent_emails table         |  (audit trail)
++---------------------------+
 ```
 
-### Layout
+## Changes
 
-The redesigned component will be a single card with:
-- **Top row**: AI status dot + "ACTIVE" badge + Pause button (right-aligned)
-- **Stats grid** (6 columns on desktop, 3x2 on tablet, 2x3 on mobile):
-  1. Today's Leads (merged -- single source of truth)
-  2. This Week
-  3. Conversion Rate
-  4. Follow-ups (Pending) -- from QuickOverview
-  5. Hot Leads (Priority) -- from QuickOverview
-  6. Recent Calls (Last 24h) -- from QuickOverview
-- "Avg Response" gets dropped (least actionable metric) to keep 6 clean tiles
+### 1. Database: `user_email_settings` table
 
-Each stat tile keeps the colored icon from QuickOverviewCards for visual distinction.
+Stores each user's SMTP configuration (one row per user):
+- `id` (uuid, PK)
+- `user_id` (uuid, NOT NULL, unique)
+- `smtp_host` (text) -- e.g. smtp.gmail.com
+- `smtp_port` (integer) -- e.g. 587
+- `smtp_username` (text) -- email address
+- `smtp_password` (text) -- app password (stored encrypted)
+- `from_name` (text) -- display name
+- `from_email` (text) -- sender address
+- `use_tls` (boolean, default true)
+- `created_at`, `updated_at`
 
-## Technical Plan
+RLS: Users can only read/write their own row.
 
-### Modified Files
+### 2. Database: `sent_emails` table
 
-| File | Change |
-|------|--------|
-| `src/components/leads/AILeadStatus.tsx` | Rewrite to accept all 6 metrics + render as a single compact card with icon-colored stat tiles |
-| `src/pages/Leads.tsx` | Remove `QuickOverviewCards` import and usage; pass `pendingFollowups`, `hotLeads`, `recentCalls` to `AILeadStatus` instead |
+Audit log of all sent emails:
+- `id` (uuid, PK)
+- `user_id` (uuid, NOT NULL)
+- `to_email` (text, NOT NULL)
+- `subject` (text)
+- `body_preview` (text) -- first 200 chars
+- `status` (text) -- 'sent', 'failed'
+- `error_message` (text, nullable)
+- `related_type` (text, nullable) -- 'scheduled_call', 'lead', etc.
+- `related_id` (text, nullable)
+- `created_at`
 
-### Props Change for AILeadStatus
+RLS: Users can only view their own sent emails.
 
-Add three new props: `pendingFollowups`, `hotLeads`, `recentCalls`. Remove `avgResponseTime` (or keep it as an optional tooltip).
+### 3. Edge Function: `send-outbound-email`
 
-### QuickOverviewCards
+- Accepts: `{ to, subject, body, relatedType?, relatedId? }`
+- Fetches the user's SMTP settings from `user_email_settings`
+- Uses Deno's SMTP client (`denomailer`) to send via the user's SMTP server
+- Logs result to `sent_emails`
+- Returns success/failure
 
-The component file stays in the codebase but is no longer imported in `Leads.tsx`.
+### 4. New Component: `src/components/settings/EmailSettingsCard.tsx`
+
+Compact card in the Settings page with:
+- Preset buttons: Gmail, Outlook, Custom (auto-fills host/port)
+- Fields: SMTP Host, Port, Username, Password (app password), From Name, From Email, TLS toggle
+- "Test Connection" button that sends a test email to themselves
+- "Save" button
+- Status indicator showing if email is configured
+
+### 5. New Hook: `src/hooks/useOutboundEmail.ts`
+
+- `sendEmail(to, subject, body, relatedType?, relatedId?)` -- calls the edge function
+- `isSending` loading state
+- `isConfigured` -- checks if user has SMTP settings saved
+
+### 6. Modified: `src/components/schedule/ScheduleEmailDialog.tsx`
+
+Add a "Send" button alongside existing "Copy" and "Open in Email Client":
+- If email is configured: shows blue "Send" button that sends directly
+- If not configured: shows tooltip "Set up email in Settings"
+- After sending: shows success confirmation inline
+
+### 7. Modified: `src/components/leads/LeadDetailPopup.tsx`
+
+Update the Email action button to open a compact inline email composer (similar to ScheduleEmailDialog) that can send directly.
+
+### 8. Modified: `src/pages/Settings.tsx`
+
+Add the `EmailSettingsCard` to the existing settings layout, under a new "Email" tab or within the existing notifications section.
+
+## UX Design
+
+The email settings card will be minimal:
+
+```text
++------------------------------------------+
+| Outbound Email Setup                     |
+| [Gmail] [Outlook] [Custom]   <- presets  |
+|                                          |
+| Host: [smtp.gmail.com    ]  Port: [587]  |
+| Username: [you@gmail.com          ]      |
+| App Password: [********           ]      |
+| From Name: [Your Name             ]      |
+| [x] Use TLS                             |
+|                                          |
+| [Test Connection]          [Save]        |
++------------------------------------------+
+```
+
+The send button in email dialogs will be compact -- just a "Send" icon button that replaces the current "Open in Email Client" when SMTP is configured.
+
+## Technical Notes
+
+- SMTP sending uses `denomailer` (Deno-native SMTP library) in the edge function
+- Gmail users need an "App Password" (not their regular password) -- we show a help link
+- Credentials are stored per-user with RLS protection
+- The edge function validates the user owns the SMTP settings before using them
+- Email body is sent as plain text (no HTML formatting needed for sales outreach)
 
