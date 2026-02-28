@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CallDialog } from '@/components/calling/CallDialog';
 import { CallInterface } from '@/components/calling/CallInterface';
 import { CommandBar } from '@/components/dashboard/CommandBar';
@@ -58,12 +58,22 @@ function useRealKPIs() {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
   const [activeCallName, setActiveCallName] = useState<string | undefined>(undefined);
   const { user } = useAuth();
   const kpis = useRealKPIs();
   const quote = getDailyQuote();
+
+  // Auto-open dialer when navigated from WinWords with script
+  useEffect(() => {
+    if ((location.state as any)?.openDialer) {
+      setShowCallDialog(true);
+      // Clear the state so it doesn't re-trigger on re-renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
 
