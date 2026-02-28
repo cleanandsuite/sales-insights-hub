@@ -36,9 +36,53 @@ type SortKey = 'contact_name' | 'business' | 'contact_date' | 'created_at';
 
 interface ImportedLeadsTableProps {
   refreshKey: number;
+  demoMode?: boolean;
 }
 
-export function ImportedLeadsTable({ refreshKey }: ImportedLeadsTableProps) {
+const DEMO_IMPORTED_LEADS: ImportedLead[] = [
+  {
+    id: 'demo-imp-1', user_id: 'demo', contact_name: 'Priya Sharma',
+    business: 'NovaTech Solutions', location: 'Dallas, TX', previous_rep: 'Mike Torres',
+    contact_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
+    contact_time: '10:30 AM', lead_type: 'hot',
+    pain_point: 'CRM adoption stalled — reps refusing to log calls',
+    notes: 'Reached out after webinar attendance', created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: 'demo-imp-2', user_id: 'demo', contact_name: 'Derek Wallace',
+    business: 'Apex Manufacturing', location: 'Detroit, MI', previous_rep: 'Sarah Lin',
+    contact_date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
+    contact_time: '2:00 PM', lead_type: 'warm',
+    pain_point: 'No visibility into field rep performance',
+    notes: 'Referral from existing customer', created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: 'demo-imp-3', user_id: 'demo', contact_name: 'Lisa Chang',
+    business: 'Bright Horizons Education', location: 'Boston, MA', previous_rep: null,
+    contact_date: new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0],
+    contact_time: '9:15 AM', lead_type: 'hot',
+    pain_point: 'Losing deals to competitors with AI coaching tools',
+    notes: 'Inbound from LinkedIn ad campaign', created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: 'demo-imp-4', user_id: 'demo', contact_name: 'Robert Finch',
+    business: 'Summit Financial Group', location: 'Charlotte, NC', previous_rep: 'Amy Park',
+    contact_date: new Date(Date.now() - 10 * 86400000).toISOString().split('T')[0],
+    contact_time: '4:45 PM', lead_type: 'cold',
+    pain_point: 'Exploring options for Q3 budget cycle',
+    notes: 'Met at SaaStr conference', created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
+  },
+  {
+    id: 'demo-imp-5', user_id: 'demo', contact_name: 'Angela Morris',
+    business: 'Velocity Staffing', location: 'Phoenix, AZ', previous_rep: 'Derek Kim',
+    contact_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
+    contact_time: '11:00 AM', lead_type: 'warm',
+    pain_point: 'High rep turnover — need faster onboarding',
+    notes: 'Downloaded whitepaper on AI sales coaching', created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+];
+
+export function ImportedLeadsTable({ refreshKey, demoMode = false }: ImportedLeadsTableProps) {
   const { user } = useAuth();
   const [leads, setLeads] = useState<ImportedLead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +109,14 @@ export function ImportedLeadsTable({ refreshKey }: ImportedLeadsTableProps) {
     setLoading(false);
   };
 
-  useEffect(() => { fetchLeads(); }, [user, refreshKey]);
+  useEffect(() => {
+    if (demoMode) {
+      setLeads(DEMO_IMPORTED_LEADS);
+      setLoading(false);
+    } else {
+      fetchLeads();
+    }
+  }, [user, refreshKey, demoMode]);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();

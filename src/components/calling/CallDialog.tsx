@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 interface CallDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onStartCall: (phoneNumber: string) => void;
+  onStartCall: (phoneNumber: string, callName?: string) => void;
   isConnecting?: boolean;
 }
 
@@ -41,6 +41,7 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
   };
   const navigate = useNavigate();
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [callName, setCallName] = useState('');
   const {
     callsToday,
     dailyLimit,
@@ -54,7 +55,7 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (phoneNumber.trim() && canMakeCall) {
-      onStartCall(phoneNumber.trim());
+      onStartCall(phoneNumber.trim(), callName.trim() || undefined);
     }
   };
 
@@ -94,8 +95,19 @@ export function CallDialog({ open, onOpenChange, onStartCall, isConnecting }: Ca
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col">
+          {/* Call name input */}
+          <div className="px-6 pt-2">
+            <input
+              type="text"
+              value={callName}
+              onChange={(e) => setCallName(e.target.value)}
+              placeholder="Name this call (e.g. Discovery - Acme Corp)"
+              className="w-full text-sm text-center bg-muted/30 border border-border/50 rounded-lg px-3 py-2 placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/50"
+            />
+          </div>
+
           {/* Phone number display */}
-          <div className="px-6 py-4 text-center min-h-[72px] flex items-center justify-center">
+          <div className="px-6 py-3 text-center min-h-[64px] flex items-center justify-center">
             <span className={cn(
               'font-mono tracking-wider transition-all',
               phoneNumber.length > 12 ? 'text-xl' : 'text-2xl',

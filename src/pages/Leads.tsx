@@ -302,7 +302,7 @@ export default function Leads() {
     else toast.error('No phone number available');
   };
 
-  const handleStartCall = (phoneNumber: string) => {
+  const handleStartCall = (phoneNumber: string, callName?: string) => {
     setShowCallDialog(false); setActiveCall(phoneNumber); setPendingCallLead(null);
   };
 
@@ -495,7 +495,7 @@ export default function Leads() {
 
             {/* Imported Leads Tab */}
             <TabsContent value="imported" className="mt-4">
-              <ImportedLeadsTable refreshKey={importRefreshKey} />
+              <ImportedLeadsTable refreshKey={importRefreshKey} demoMode={demoMode} />
             </TabsContent>
           </Tabs>
         </div>
