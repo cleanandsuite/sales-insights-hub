@@ -1,4 +1,4 @@
-import { Phone, Search, Presentation, Scale, RefreshCw, Shield } from 'lucide-react';
+import { Phone, CalendarCheck, Search, Presentation, Scale, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const scenarios = [
@@ -8,6 +8,13 @@ const scenarios = [
     description: 'Break the ice and secure a meeting',
     icon: Phone,
     color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  },
+  {
+    id: 'appointment_setter',
+    name: 'Appointment Setter',
+    description: 'Downsell & Close to book meetings at scale',
+    icon: CalendarCheck,
+    color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
   },
   {
     id: 'discovery',
@@ -36,13 +43,6 @@ const scenarios = [
     description: 'Celebrate wins and expand',
     icon: RefreshCw,
     color: 'bg-teal-500/10 text-teal-500 border-teal-500/20',
-  },
-  {
-    id: 'objection_handling',
-    name: 'Objection Handling',
-    description: 'Turn objections into opportunities',
-    icon: Shield,
-    color: 'bg-red-500/10 text-red-500 border-red-500/20',
   },
 ];
 

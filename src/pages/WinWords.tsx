@@ -209,7 +209,10 @@ export default function WinWords() {
     generateMutation.mutate();
   };
 
-  const handleUseScript = () => {
+  const handleUseScript = (selectedLines?: { section: string; text: string; order: number }[]) => {
+    if (selectedLines && selectedLines.length > 0) {
+      localStorage.setItem('active_script_lines', JSON.stringify(selectedLines));
+    }
     setShowOutcomeTracker(true);
   };
 

@@ -25,6 +25,8 @@ import { CallNotes } from './CallNotes';
 import { CallLimitIndicator } from './CallLimitIndicator';
 import { LiveCoachingSidebar } from '@/components/recording/LiveCoachingSidebar';
 import { LiveSummaryPanel } from '@/components/recording/LiveSummaryPanel';
+import { ScriptReferencePanel, type ScriptLine } from './ScriptReferencePanel';
+import { CoachingPopup, type CoachingSignal } from './CoachingPopup';
 
 interface CallInterfaceProps {
   phoneNumber: string;
@@ -68,6 +70,34 @@ export function CallInterface({ phoneNumber, callName, onClose }: CallInterfaceP
   } = useCallLimits();
 
   const { coachStyle } = useLiveCoaching();
+
+  // Script reference panel state
+  const [activeScriptLines, setActiveScriptLines] = useState<ScriptLine[] | null>(null);
+  const [coachingSignals, setCoachingSignals] = useState<CoachingSignal[]>([]);
+
+  // Load active script from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('active_script_lines');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setActiveScriptLines(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const clearScript = useCallback(() => {
+    setActiveScriptLines(null);
+    localStorage.removeItem('active_script_lines');
+  }, []);
+
+  const handleDismissSignal = useCallback((id: string) => {
+    // Signal dismissed - no-op for now, CoachingPopup handles removal internally
+  }, []);
 
   // Combine transcripts into a single string for analysis
   const fullTranscript = useMemo(() => {
@@ -249,14 +279,34 @@ export function CallInterface({ phoneNumber, callName, onClose }: CallInterfaceP
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden p-4">
-        <div className="max-w-6xl mx-auto h-full grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* AI Coaching Panel */}
-          <LiveCoachingSidebar
-            transcript={fullTranscript}
-            coachStyle={coachStyle}
-            isRecording={callStatus === 'connected'}
-            isPaused={false}
-          />
+        <div className={cn(
+          "max-w-7xl mx-auto h-full grid gap-4",
+          activeScriptLines ? "grid-cols-1 lg:grid-cols-[280px_1fr_1fr]" : "grid-cols-1 lg:grid-cols-2"
+        )}>
+          {/* Script Reference Panel (only when script is active) */}
+          {activeScriptLines && (
+            <ScriptReferencePanel lines={activeScriptLines} onClear={clearScript} />
+          )}
+
+          {/* AI Coaching - popup mode when script active, sidebar when not */}
+          {activeScriptLines ? (
+            <div className="flex flex-col h-full">
+              <CoachingPopup signals={coachingSignals} onDismiss={handleDismissSignal} />
+              <LiveCoachingSidebar
+                transcript={fullTranscript}
+                coachStyle={coachStyle}
+                isRecording={callStatus === 'connected'}
+                isPaused={false}
+              />
+            </div>
+          ) : (
+            <LiveCoachingSidebar
+              transcript={fullTranscript}
+              coachStyle={coachStyle}
+              isRecording={callStatus === 'connected'}
+              isPaused={false}
+            />
+          )}
 
           {/* Live Summary Panel */}
           <LiveSummaryPanel

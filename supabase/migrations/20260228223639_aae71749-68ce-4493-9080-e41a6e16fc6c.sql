@@ -1,0 +1,1 @@
+ALTER TABLE public.call_summaries ADD COLUMN IF NOT EXISTS scheduling_intent jsonb;
