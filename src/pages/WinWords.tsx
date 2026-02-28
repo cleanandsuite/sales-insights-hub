@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getToastErrorMessage } from '@/lib/errorSanitizer';
+import { useNavigate } from 'react-router-dom';
 import { 
   Trophy, Sparkles, ArrowRight, Loader2, 
   FileText, BarChart3, History 
@@ -56,6 +57,7 @@ interface DealContext {
 
 export default function WinWords() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   
   const [activeTab, setActiveTab] = useState('generate');
@@ -213,7 +215,8 @@ export default function WinWords() {
     if (selectedLines && selectedLines.length > 0) {
       localStorage.setItem('active_script_lines', JSON.stringify(selectedLines));
     }
-    setShowOutcomeTracker(true);
+    // Navigate directly to the dashboard with the dialer open
+    navigate('/dashboard', { state: { openDialer: true } });
   };
 
   const resetForm = () => {
