@@ -1643,6 +1643,51 @@ export type Database = {
         }
         Relationships: []
       }
+      imported_leads: {
+        Row: {
+          business: string | null
+          contact_date: string | null
+          contact_name: string
+          contact_time: string | null
+          created_at: string
+          id: string
+          lead_type: string | null
+          location: string | null
+          notes: string | null
+          pain_point: string | null
+          previous_rep: string | null
+          user_id: string
+        }
+        Insert: {
+          business?: string | null
+          contact_date?: string | null
+          contact_name: string
+          contact_time?: string | null
+          created_at?: string
+          id?: string
+          lead_type?: string | null
+          location?: string | null
+          notes?: string | null
+          pain_point?: string | null
+          previous_rep?: string | null
+          user_id: string
+        }
+        Update: {
+          business?: string | null
+          contact_date?: string | null
+          contact_name?: string
+          contact_time?: string | null
+          created_at?: string
+          id?: string
+          lead_type?: string | null
+          location?: string | null
+          notes?: string | null
+          pain_point?: string | null
+          previous_rep?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       invitation_check_logs: {
         Row: {
           checked_at: string | null
