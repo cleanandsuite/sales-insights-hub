@@ -39,7 +39,7 @@ export function PerformanceRadarChart({ currentSkills, previousSkills }: Perform
   const hasData = data.some(d => d.current > 0);
 
   return (
-    <Card className="relative overflow-hidden bg-[#0d0d1a] border border-indigo-500/20 col-span-1">
+    <Card className="relative overflow-hidden bg-[#0d0d1a] border border-indigo-500/20 h-full">
       {/* Glow background */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-purple-900/10 pointer-events-none" />
 

@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
+import { useUserRole } from '@/hooks/useUserRole';
 import { CoachingROIDashboard } from '@/components/coaching/CoachingROIDashboard';
 import { CoachingQueueCard } from '@/components/coaching/CoachingQueueCard';
 import { CompletedCoachingList } from '@/components/coaching/CompletedCoachingList';
 import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
 import { EnhancedSkillsTab } from '@/components/coaching/EnhancedSkillsTab';
+import { ManagerCoachingCommands } from '@/components/coaching/ManagerCoachingCommands';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 
@@ -49,6 +51,7 @@ export default function Analytics() {
   const { data, loading, error, refetch } = useAnalyticsV2(timeRange);
   const { user } = useAuth();
   const { isEnterprise } = useEnterpriseSubscription();
+  const { isManager } = useUserRole();
 
   // Coaching state
   const [coachingLoading, setCoachingLoading] = useState(true);
@@ -237,26 +240,37 @@ export default function Analytics() {
             </div>
           </TabsContent>
 
-          {/* Analytics: Skills Tab */}
+          {/* Analytics: Skills Tab - Radar is now primary/first */}
           <TabsContent value="skills" className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <PerformanceRadarChart 
-                currentSkills={data.currentSkills} 
-                previousSkills={data.previousSkills} 
-              />
-              <SkillTrendChart trends={data.skillTrends} />
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+              {/* Radar Chart - Primary, takes 2 cols */}
+              <div className="lg:col-span-2">
+                <PerformanceRadarChart 
+                  currentSkills={data.currentSkills} 
+                  previousSkills={data.previousSkills} 
+                />
+              </div>
+              {/* Stats on the right side of radar */}
+              <div className="lg:col-span-3">
+                {!coachingLoading && (
+                  <EnhancedSkillsTab 
+                    overallScore={overallScore}
+                    callsAnalyzed={callsAnalyzed}
+                    skills={skills}
+                  />
+                )}
+              </div>
             </div>
-            {!coachingLoading && (
-              <EnhancedSkillsTab 
-                overallScore={overallScore}
-                callsAnalyzed={callsAnalyzed}
-                skills={skills}
-              />
-            )}
+            <SkillTrendChart trends={data.skillTrends} />
           </TabsContent>
 
-          {/* Coaching: Queue Tab */}
-          <TabsContent value="coaching-queue" className="mt-0">
+          {/* Coaching: Queue Tab - Now with Manager Commands */}
+          <TabsContent value="coaching-queue" className="mt-0 space-y-6">
+            {/* Manager Commands Section - shown to managers/enterprise */}
+            {(isManager || isEnterprise) && (
+              <ManagerCoachingCommands />
+            )}
+            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
                 <CoachingQueueCard />

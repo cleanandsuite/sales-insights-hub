@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveContainer, ComposedChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { BarChart3 } from 'lucide-react';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { TrendingUp } from 'lucide-react';
 
 interface CallData {
   date: string;
@@ -41,7 +41,7 @@ export const CallsOverTimeChart = memo(function CallsOverTimeChart({ data }: Cal
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
       <CardHeader className="relative pb-2">
         <CardTitle className="flex items-center gap-2 text-base font-semibold">
-          <BarChart3 className="h-5 w-5 text-primary" />
+          <TrendingUp className="h-5 w-5 text-primary" />
           Call Volume & Quality Over Time
         </CardTitle>
         <p className="text-xs text-muted-foreground">Daily call count with average score overlay</p>
@@ -50,11 +50,15 @@ export const CallsOverTimeChart = memo(function CallsOverTimeChart({ data }: Cal
         {hasData ? (
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={data} margin={{ top: 10, right: 30, left: -10, bottom: 0 }}>
+              <AreaChart data={data} margin={{ top: 10, right: 30, left: -10, bottom: 0 }}>
                 <defs>
+                  <linearGradient id="colorCalls" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                  </linearGradient>
                   <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(177, 70%, 41%)" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="hsl(177, 70%, 41%)" stopOpacity={0} />
+                    <stop offset="95%" stopColor="hsl(177, 70%, 41%)" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid 
@@ -104,14 +108,16 @@ export const CallsOverTimeChart = memo(function CallsOverTimeChart({ data }: Cal
                     <span style={{ color: 'hsl(var(--foreground))', fontSize: 12 }}>{value}</span>
                   )}
                 />
-                <Bar 
+                <Area
                   yAxisId="left"
-                  dataKey="calls" 
+                  type="monotone"
+                  dataKey="calls"
                   name="Calls"
-                  fill="hsl(var(--primary))" 
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={40}
-                  opacity={0.8}
+                  stroke="hsl(var(--primary))"
+                  fill="url(#colorCalls)"
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 4, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                 />
                 <Area
                   yAxisId="right"
@@ -122,14 +128,15 @@ export const CallsOverTimeChart = memo(function CallsOverTimeChart({ data }: Cal
                   fill="url(#colorScore)"
                   strokeWidth={2}
                   dot={false}
+                  activeDot={{ r: 4, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                 />
-              </ComposedChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         ) : (
           <div className="h-[280px] flex items-center justify-center">
             <div className="text-center">
-              <BarChart3 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+              <TrendingUp className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
               <p className="text-muted-foreground text-sm">
                 No call data yet. Start recording calls to see your activity trends.
               </p>
