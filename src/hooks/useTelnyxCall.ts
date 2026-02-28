@@ -104,6 +104,19 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
 
       try {
         const blob = await stopRecording();
+
+        const durationSeconds = connectedAtRef.current
+          ? Math.max(0, Math.round((Date.now() - connectedAtRef.current) / 1000))
+          : durationRef.current;
+
+        // Calls under 30 seconds are dismissed — no recording, no stats.
+        // They still count toward total calls made (incrementCallCount already fired).
+        if (durationSeconds < 30) {
+          console.log('[TELNYX] Call under 30s — skipping recording & analysis');
+          setIsSaving(false);
+          return;
+        }
+
         if (!blob || blob.size === 0) {
           throw new Error('No audio captured');
         }
@@ -129,10 +142,6 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
           throw uploadError;
         }
 
-        const durationSeconds = connectedAtRef.current
-          ? Math.max(0, Math.round((Date.now() - connectedAtRef.current) / 1000))
-          : durationRef.current;
-
         const liveTranscription = getFinalTranscriptText(transcriptsRef.current);
 
         const { data: inserted, error: dbError } = await supabase
@@ -140,7 +149,6 @@ export function useTelnyxCall(): UseTelnyxCallReturn {
           .insert({
             user_id: session.user.id,
             file_name: fileName,
-            // Store the storage path for private playback via signed URLs
             audio_url: filePath,
             file_url: null,
             duration_seconds: durationSeconds,
