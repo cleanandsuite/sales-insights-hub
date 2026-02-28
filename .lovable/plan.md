@@ -1,114 +1,55 @@
 
 
-# Leads Tab Redesign: Import System + Modern UI
+# Merge Lead Stats into One Unified Header Strip
 
-## Overview
+## Problem
 
-Redesign the Leads page with a modern feed-style layout inspired by the ZoomInfo Sales Coach reference, adding sub-tabs (All Leads / Imported Leads), a CSV import modal, and an expanded lead detail popup with auto-generated WinWords scripts.
+Two separate card rows on the Leads page show overlapping data:
+- **AI Lead Status**: Today's Leads, This Week, Conversion Rate, Avg Response + AI status + Pause button
+- **Quick Overview Cards**: New Leads (Today) [duplicate], Follow-ups (Pending), Hot Leads (Priority), Recent Calls (Last 24h)
 
-## Visual Design
+This is confusing and wastes vertical space.
+
+## Solution
+
+Merge everything into a single, compact **AI Lead Status** bar that contains all 6 unique metrics in one row, with the AI status indicator and Pause button inline.
 
 ```text
 +--------------------------------------------------------------+
-| HEADER: Leads title + Demo toggle + Export + Import buttons   |
-+--------------------------------------------------------------+
-| TABS: [All Leads] [Imported Leads]                            |
-+--------------------------------------------------------------+
-|                                                               |
-| ALL LEADS TAB:                                                |
-| +------------------+-------------------+-------------------+  |
-| | AI Status Bar    | Stats Cards Row   | Priority Alerts   |  |
-| +------------------+-------------------+-------------------+  |
-| | FEED (60%)                   | SIDEBAR (40%)             |  |
-| | Search + Filter bar          | Recent Activity Feed      |  |
-| | Lead cards (existing)        | Quick actions             |  |
-| +------------------------------+---------------------------+  |
-|                                                               |
-| IMPORTED LEADS TAB:                                           |
-| +----------------------------------------------------------+ |
-| | Filter bar: Type (hot/warm/cold) + Search                 | |
-| | Table: Name | Business | Location | Prev Rep | Date |     | |
-| |   Time | Lead Type (color badge)                           | |
-| | Rows clickable -> Lead Detail Popup                        | |
-| +----------------------------------------------------------+ |
+| [*] AI Active  |  0 Today  |  0 Week  |  28% Conv  |  1.2h  |
+|                |  0 Follow-ups  |  4 Hot  |  8 Calls  | [Pause]|
 +--------------------------------------------------------------+
 ```
 
-## Changes
+### Layout
 
-### 1. Database Migration: `imported_leads` table
+The redesigned component will be a single card with:
+- **Top row**: AI status dot + "ACTIVE" badge + Pause button (right-aligned)
+- **Stats grid** (6 columns on desktop, 3x2 on tablet, 2x3 on mobile):
+  1. Today's Leads (merged -- single source of truth)
+  2. This Week
+  3. Conversion Rate
+  4. Follow-ups (Pending) -- from QuickOverview
+  5. Hot Leads (Priority) -- from QuickOverview
+  6. Recent Calls (Last 24h) -- from QuickOverview
+- "Avg Response" gets dropped (least actionable metric) to keep 6 clean tiles
 
-Create a new `imported_leads` table to store CSV-uploaded leads separately:
-- `id` (uuid, PK)
-- `user_id` (uuid, NOT NULL)
-- `contact_name` (text, NOT NULL)
-- `business` (text)
-- `location` (text)
-- `previous_rep` (text)
-- `contact_date` (date)
-- `contact_time` (time)
-- `lead_type` (text: 'hot', 'warm', 'cold')
-- `pain_point` (text) -- auto-filled by AI or manual
-- `notes` (text)
-- `created_at` (timestamptz, default now())
+Each stat tile keeps the colored icon from QuickOverviewCards for visual distinction.
 
-RLS: Users can only CRUD their own rows. Managers can view team members' rows.
+## Technical Plan
 
-### 2. New Components
+### Modified Files
 
-| Component | Purpose |
-|-----------|---------|
-| `src/components/leads/ImportLeadsDialog.tsx` | CSV upload modal with field mapping, drag-drop zone, and manual entry fallback |
-| `src/components/leads/ImportedLeadsTable.tsx` | Sortable/filterable table for imported leads with color-coded type badges |
-| `src/components/leads/LeadDetailPopup.tsx` | Expanded modal with header, pain point, activity timeline, WinWords script section, and action buttons |
+| File | Change |
+|------|--------|
+| `src/components/leads/AILeadStatus.tsx` | Rewrite to accept all 6 metrics + render as a single compact card with icon-colored stat tiles |
+| `src/pages/Leads.tsx` | Remove `QuickOverviewCards` import and usage; pass `pendingFollowups`, `hotLeads`, `recentCalls` to `AILeadStatus` instead |
 
-### 3. ImportLeadsDialog
+### Props Change for AILeadStatus
 
-- Drag-and-drop CSV upload zone
-- CSV parsing with field detection (Name, Business, Location, Previous Rep, Date, Time, Lead Type)
-- Preview table before confirming import
-- Manual single-entry form as alternative
-- Zod validation on all fields
-- Inserts into `imported_leads` table
+Add three new props: `pendingFollowups`, `hotLeads`, `recentCalls`. Remove `avgResponseTime` (or keep it as an optional tooltip).
 
-### 4. ImportedLeadsTable
+### QuickOverviewCards
 
-- Sortable columns (Name, Business, Date)
-- Color-coded Lead Type badges: red (hot), orange (warm), blue (cold)
-- Type filter dropdown + search bar
-- Click row to open `LeadDetailPopup`
-
-### 5. LeadDetailPopup
-
-Sections inside a Dialog:
-- **Header**: Name, Business, Location, Lead Type badge, AI Confidence gauge, Re-score button
-- **Pain Point**: Auto-filled text area (editable)
-- **Recent Activity**: Timeline of previous contacts with date/time/rep
-- **WinWords Script** (new): Calls the existing `winwords-generate` edge function with company name and target role to auto-generate a cold call script. Displays the script with sections (Greeting, Value Prop, Competitor Differentiation, CTA). Includes a "Regenerate" and "Copy" button.
-- **Actions**: Call, Email, Schedule, Proposal, Note buttons
-
-### 6. Modified: `src/pages/Leads.tsx`
-
-- Add Tabs component with "All Leads" and "Imported Leads" sub-tabs below the header
-- Add Import button (blue, Upload icon) next to Export
-- "All Leads" tab renders existing content (unchanged)
-- "Imported Leads" tab renders `ImportedLeadsTable`
-- Modernize the overall layout with cleaner spacing and the SellSig blue/white color scheme
-
-### 7. WinWords Integration
-
-The `LeadDetailPopup` will call the existing `winwords-generate` edge function with:
-- `scenario: 'cold_call'`
-- `companyResearch: { name: business }` from the imported lead
-- `persona: { role: title/role }` if available
-
-This reuses the existing AI script generation without any new backend work.
-
-## Technical Details
-
-- CSV parsing: Use native `FileReader` + simple CSV parser (split by commas/newlines with quote handling)
-- No new edge functions needed -- reuses `winwords-generate`
-- Database migration adds `imported_leads` table with RLS policies
-- All new components use existing UI primitives (Dialog, Table, Badge, Button, Tabs)
-- Responsive: Table becomes card-based on mobile
+The component file stays in the codebase but is no longer imported in `Leads.tsx`.
 
