@@ -60,7 +60,7 @@ export function SkillTrendChart({ trends }: SkillTrendChartProps) {
   const hasData = trends.length > 0;
 
   return (
-    <Card className="relative overflow-hidden lg:col-span-2 bg-[#0d0d1a] border border-indigo-500/20">
+    <Card className="relative overflow-hidden bg-[#0d0d1a] border border-indigo-500/20">
       {/* Glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/10 via-transparent to-purple-900/10 pointer-events-none" />
 

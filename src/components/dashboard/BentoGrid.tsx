@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BentoWidget } from './BentoWidget';
-import { Phone, Star, DollarSign, Target, BarChart3, Lightbulb } from 'lucide-react';
+import { Phone, Star, DollarSign, Target, BarChart3, Lightbulb, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface BentoGridProps {
   kpis: { callsToday: number; callsWeek: number; avgScore: number };
@@ -10,12 +13,34 @@ interface BentoGridProps {
 
 export function BentoGrid({ kpis, className }: BentoGridProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [roiStats, setRoiStats] = useState({ avgWinProb: 0, suggestionsApplied: 0, totalSuggestions: 0, trend: 'stable' as string });
+
+  useEffect(() => {
+    if (!user) return;
+    Promise.all([
+      supabase.from('coaching_sessions').select('win_probability, overall_score').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
+      supabase.from('coaching_metrics').select('was_applied').eq('user_id', user.id),
+    ]).then(([sessionsRes, metricsRes]) => {
+      const sessions = sessionsRes.data || [];
+      const metrics = metricsRes.data || [];
+      const avgWinProb = sessions.length > 0 ? Math.round(sessions.reduce((a, s) => a + (s.win_probability || 0), 0) / sessions.length) : 0;
+      setRoiStats({
+        avgWinProb,
+        suggestionsApplied: metrics.filter(m => m.was_applied).length,
+        totalSuggestions: metrics.length,
+        trend: sessions.length >= 2 && (sessions[0]?.overall_score || 0) > (sessions[1]?.overall_score || 0) ? 'up' : 'stable',
+      });
+    });
+  }, [user]);
 
   const coachingTip = kpis.avgScore >= 70
     ? 'Focus on closing — your discovery is strong'
     : kpis.avgScore > 0
       ? 'Ask more open-ended questions early'
       : 'Make your first call to unlock tips';
+
+  const adoptionRate = roiStats.totalSuggestions > 0 ? Math.round((roiStats.suggestionsApplied / roiStats.totalSuggestions) * 100) : 0;
 
   return (
     <div className={cn('space-y-3', className)}>
@@ -30,7 +55,7 @@ export function BentoGrid({ kpis, className }: BentoGridProps) {
           icon={Phone}
           iconColor="text-primary"
           subtitle={`${kpis.callsWeek} this week`}
-          onClick={() => navigate('/recordings')}
+          onClick={() => navigate('/dashboard')}
         />
         <BentoWidget
           label="Avg Score"
@@ -41,20 +66,20 @@ export function BentoGrid({ kpis, className }: BentoGridProps) {
           onClick={() => navigate('/analytics')}
         />
         <BentoWidget
-          label="Revenue"
-          value="$301K"
-          icon={DollarSign}
-          iconColor="text-success"
-          subtitle="60% of goal"
-          onClick={() => navigate('/enterprise')}
-        />
-        <BentoWidget
-          label="Win Rate"
-          value="68%"
+          label="Win Prob"
+          value={roiStats.avgWinProb > 0 ? `${roiStats.avgWinProb}%` : '—'}
           icon={Target}
           iconColor="text-accent"
-          subtitle="24W / 11L"
-          onClick={() => navigate('/enterprise')}
+          subtitle="Coaching avg"
+          onClick={() => navigate('/analytics')}
+        />
+        <BentoWidget
+          label="Adoption"
+          value={roiStats.totalSuggestions > 0 ? `${adoptionRate}%` : '—'}
+          icon={CheckCircle2}
+          iconColor="text-success"
+          subtitle={`${roiStats.suggestionsApplied}/${roiStats.totalSuggestions} applied`}
+          onClick={() => navigate('/analytics')}
         />
         <BentoWidget
           label="Pipeline"
@@ -69,7 +94,7 @@ export function BentoGrid({ kpis, className }: BentoGridProps) {
           value=""
           icon={Lightbulb}
           iconColor="text-accent"
-          onClick={() => navigate('/coaching')}
+          onClick={() => navigate('/analytics')}
         >
           <span className="text-xs text-foreground font-medium leading-snug -mt-2">
             {coachingTip}

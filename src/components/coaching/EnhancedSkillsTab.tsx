@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { 
-  Trophy, BarChart3, Zap, Target, TrendingUp, TrendingDown, 
+  Trophy, Zap, Target, TrendingUp, TrendingDown, 
   ChevronDown, ChevronRight, Brain, Play, Sparkles, Calendar,
   Users, Flame, CheckCircle2, ArrowUpRight
 } from 'lucide-react';
@@ -220,9 +220,9 @@ export function EnhancedSkillsTab({ overallScore, callsAnalyzed, skills }: Enhan
         </Badge>
       </div>
 
-      {/* Top Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Overall Score with Potential */}
+      {/* Top Stats Row - 3 cards instead of 4, calls analyzed merged into overall score */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Overall Score with Calls Analyzed merged */}
         <div className="card-gradient rounded-xl border border-border/50 p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -251,22 +251,9 @@ export function EnhancedSkillsTab({ overallScore, callsAnalyzed, skills }: Enhan
             <Progress value={overallScore} className="h-1.5 flex-1" />
             <span className="text-xs text-muted-foreground">{potentialAvg - overallScore} to go</span>
           </div>
-        </div>
-
-        {/* Calls Analyzed */}
-        <div className="card-gradient rounded-xl border border-border/50 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-primary" />
-            </div>
-            <Badge variant="outline" className="text-xs text-success gap-1">
-              <TrendingUp className="h-3 w-3" />
-              +12%
-            </Badge>
+          <div className="mt-2 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">{callsAnalyzed}</span> calls analyzed
           </div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Calls Analyzed</p>
-          <span className="text-3xl font-bold text-foreground">{callsAnalyzed}</span>
-          <p className="text-xs text-muted-foreground mt-2">vs 18 last period</p>
         </div>
 
         {/* XP Earned */}
@@ -325,7 +312,7 @@ export function EnhancedSkillsTab({ overallScore, callsAnalyzed, skills }: Enhan
           
           {/* Milestones */}
           <div className="absolute top-0 left-0 right-0 h-3 flex items-center">
-            {[50, 60, 70, potentialAvg].map((milestone, i) => {
+            {[50, 60, 70, potentialAvg].map((milestone) => {
               const position = ((milestone - 50) / (potentialAvg - 50)) * 100;
               const achieved = currentAvg >= milestone;
               return (
@@ -522,7 +509,7 @@ export function EnhancedSkillsTab({ overallScore, callsAnalyzed, skills }: Enhan
           ))}
         </div>
 
-        {/* Right Sidebar: Quick Wins + Radar */}
+        {/* Right Sidebar: Quick Wins */}
         <div className="space-y-4">
           {/* Quick Wins Panel */}
           <div className="card-gradient rounded-xl border border-border/50 p-5">
@@ -556,121 +543,6 @@ export function EnhancedSkillsTab({ overallScore, callsAnalyzed, skills }: Enhan
                   <p className="text-xs text-muted-foreground mt-1">{win.skill}</p>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Radar Chart Placeholder */}
-          <div className="card-gradient rounded-xl border border-border/50 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Target className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Skill Radar</h3>
-            </div>
-            
-            {/* Simple Radar Visualization */}
-            <div className="relative aspect-square">
-              <svg viewBox="0 0 200 200" className="w-full h-full">
-                {/* Background grid */}
-                {[20, 40, 60, 80, 100].map((r) => (
-                  <circle
-                    key={r}
-                    cx="100"
-                    cy="100"
-                    r={r * 0.8}
-                    fill="none"
-                    stroke="hsl(var(--border))"
-                    strokeWidth="1"
-                    opacity={0.3}
-                  />
-                ))}
-                
-                {/* Axis lines */}
-                {enhancedSkills.map((_, i) => {
-                  const angle = (i * 360 / 5 - 90) * Math.PI / 180;
-                  const x = 100 + Math.cos(angle) * 80;
-                  const y = 100 + Math.sin(angle) * 80;
-                  return (
-                    <line
-                      key={i}
-                      x1="100"
-                      y1="100"
-                      x2={x}
-                      y2={y}
-                      stroke="hsl(var(--border))"
-                      strokeWidth="1"
-                      opacity={0.3}
-                    />
-                  );
-                })}
-
-                {/* Team Average polygon */}
-                <polygon
-                  points={enhancedSkills.map((skill, i) => {
-                    const angle = (i * 360 / 5 - 90) * Math.PI / 180;
-                    const r = skill.teamAvg * 0.8;
-                    return `${100 + Math.cos(angle) * r},${100 + Math.sin(angle) * r}`;
-                  }).join(' ')}
-                  fill="hsl(var(--muted-foreground) / 0.1)"
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeWidth="1"
-                  opacity={0.5}
-                />
-
-                {/* Potential polygon */}
-                <polygon
-                  points={enhancedSkills.map((skill, i) => {
-                    const angle = (i * 360 / 5 - 90) * Math.PI / 180;
-                    const r = skill.potential * 0.8;
-                    return `${100 + Math.cos(angle) * r},${100 + Math.sin(angle) * r}`;
-                  }).join(' ')}
-                  fill="hsl(var(--primary) / 0.1)"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 2"
-                />
-
-                {/* Current score polygon */}
-                <polygon
-                  points={enhancedSkills.map((skill, i) => {
-                    const angle = (i * 360 / 5 - 90) * Math.PI / 180;
-                    const r = skill.current * 0.8;
-                    return `${100 + Math.cos(angle) * r},${100 + Math.sin(angle) * r}`;
-                  }).join(' ')}
-                  fill="hsl(var(--foreground) / 0.1)"
-                  stroke="hsl(var(--foreground))"
-                  strokeWidth="2"
-                />
-
-                {/* Skill labels */}
-                {enhancedSkills.map((skill, i) => {
-                  const angle = (i * 360 / 5 - 90) * Math.PI / 180;
-                  const x = 100 + Math.cos(angle) * 95;
-                  const y = 100 + Math.sin(angle) * 95;
-                  return (
-                    <text
-                      key={skill.name}
-                      x={x}
-                      y={y}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-muted-foreground text-[8px]"
-                    >
-                      {skill.icon}
-                    </text>
-                  );
-                })}
-              </svg>
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center justify-center gap-4 mt-2 text-xs">
-              <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-foreground" />
-                <span className="text-muted-foreground">You</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-primary" />
-                <span className="text-muted-foreground">Potential</span>
-              </div>
             </div>
           </div>
         </div>
