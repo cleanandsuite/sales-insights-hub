@@ -138,6 +138,11 @@ export function ScheduleEmailDialog({ open, onOpenChange, call }: ScheduleEmailD
           {generated && (
             <>
               <div className="space-y-2">
+                <Label>To</Label>
+                <Input value={call?.contact_email || ''} readOnly className="bg-muted/50" />
+              </div>
+
+              <div className="space-y-2">
                 <Label>Subject</Label>
                 <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
               </div>
@@ -161,19 +166,17 @@ export function ScheduleEmailDialog({ open, onOpenChange, call }: ScheduleEmailD
               {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
               {copied ? 'Copied' : 'Copy'}
             </Button>
-            {call.contact_email && !isConfigured && (
-              <Button onClick={handleOpenInClient}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in Email Client
-              </Button>
-            )}
-            {isConfigured && call.contact_email && (
+            {call.contact_email && (
               <Button onClick={async () => {
-                const ok = await sendEmail(call.contact_email!, subject, body, 'scheduled_call', call.id);
-                if (ok) setSent(true);
+                if (isConfigured) {
+                  const ok = await sendEmail(call.contact_email!, subject, body, 'scheduled_call', call.id);
+                  if (ok) setSent(true);
+                } else {
+                  handleOpenInClient();
+                }
               }} disabled={isSending || sent}>
                 {sent ? <Check className="h-4 w-4 mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-                {sent ? 'Sent' : isSending ? 'Sending...' : 'Send'}
+                {sent ? 'Sent' : isSending ? 'Sending...' : 'Send Email'}
               </Button>
             )}
             {!isConfigured && (
@@ -181,7 +184,7 @@ export function ScheduleEmailDialog({ open, onOpenChange, call }: ScheduleEmailD
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="text-xs text-muted-foreground self-center">
-                      Set up email in Settings to send directly
+                      Set up SMTP in Settings for direct send
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>Go to Settings → Email tab</TooltipContent>
