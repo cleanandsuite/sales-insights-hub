@@ -105,8 +105,89 @@ export function ScheduleDetailPanel({ call, onEmailDialog, onStartRecording }: S
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDetails();
+    if (call.id.startsWith('demo-')) {
+      loadDemoDetails();
+    } else {
+      loadDetails();
+    }
   }, [call.id]);
+
+  const loadDemoDetails = () => {
+    setLead({
+      id: 'demo-lead',
+      contact_name: call.contact_name || 'Unknown',
+      company: call.title.split('—')[1]?.trim() || call.title.split('—')[0]?.trim() || null,
+      title: 'VP of Sales',
+      email: call.contact_email,
+      phone: '+1 (555) 234-5678',
+      location: 'San Francisco, CA',
+      lead_status: 'qualified',
+      primary_pain_point: 'Sales team lacks real-time coaching during calls',
+      budget_info: '$50K–$120K annually',
+      timeline: 'Q2 2026',
+      competitor_status: 'Evaluating Gong and Chorus',
+      urgency_level: 'high',
+      priority_score: 85,
+      engagement_score: 72,
+      is_hot_lead: true,
+    });
+    setRecording({
+      id: 'demo-rec',
+      name: `Call with ${call.contact_name}`,
+      file_name: 'demo-recording.mp3',
+      duration_seconds: 1245,
+      created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
+      summary: `Discussed their current sales enablement stack and identified key gaps in call coaching and real-time guidance. ${call.contact_name} expressed strong interest in AI-powered conversation intelligence and asked about integration with their existing CRM.`,
+      sentiment_score: 0.78,
+      key_topics: ['AI coaching', 'CRM integration', 'ROI', 'Team onboarding'],
+    });
+    setScore({
+      overall_score: 76,
+      discovery_score: 82,
+      rapport_score: 71,
+      closing_score: 68,
+      objection_handling_score: 74,
+      talk_ratio: 42,
+    });
+    setCallSummary({
+      key_points: [
+        'Currently using a manual coaching process with weekly 1:1s',
+        'Team of 25 reps across 3 regions',
+        'Interested in real-time AI suggestions during live calls',
+        'CTO needs to approve any new integrations',
+      ],
+      objections_raised: [
+        'Concerned about data privacy and call recording consent',
+        'Wants to see ROI evidence from similar-sized companies',
+      ],
+      agreed_next_steps: [
+        'Send case studies from financial services clients',
+        'Schedule a technical deep-dive with their CTO',
+        'Prepare a custom ROI projection for their team size',
+      ],
+      emotional_tone: 'Cautiously optimistic',
+      engagement_score: 78,
+      strengths: ['Strong discovery questions', 'Good rapport building'],
+      improvements: ['Could have addressed pricing earlier', 'Missed opportunity to demo live'],
+      suggestions_next_call: [
+        'Lead with the ROI calculator — they are data-driven',
+        'Bring up the compliance certifications early to address privacy concerns',
+        'Propose a 2-week pilot with 5 reps to reduce perceived risk',
+      ],
+      review_before_calling: ['Check if CTO has availability', 'Prepare competitor comparison'],
+      watch_out_for: ['Budget freeze risk in Q3', 'Champion may be leaving the company'],
+    });
+    setTotalDials(4);
+    setTotalConversations(3);
+    setLastConversationDate(new Date(Date.now() - 7 * 86400000).toISOString());
+    setActivities([
+      { id: 'demo-act-1', type: 'call', title: 'Discovery Call', description: 'Initial discovery — discussed pain points and current stack', date: new Date(Date.now() - 7 * 86400000).toISOString() },
+      { id: 'demo-act-2', type: 'email', title: 'Sent Case Studies', description: 'Shared 3 case studies from similar-sized sales teams', date: new Date(Date.now() - 5 * 86400000).toISOString() },
+      { id: 'demo-act-3', type: 'call', title: 'Follow-up Call', description: 'Reviewed case studies, answered technical questions about integrations', date: new Date(Date.now() - 3 * 86400000).toISOString() },
+      { id: 'demo-act-4', type: 'note', title: 'Internal Note', description: 'Champion confirmed budget approval path — needs CTO sign-off', date: new Date(Date.now() - 2 * 86400000).toISOString() },
+    ]);
+    setLoading(false);
+  };
 
   const loadDetails = async () => {
     setLoading(true);

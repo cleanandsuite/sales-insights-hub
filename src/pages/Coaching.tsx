@@ -208,10 +208,6 @@ export default function Coaching() {
               <Target className="h-4 w-4" />
               Skills
             </TabsTrigger>
-            <TabsTrigger value="training" className="gap-2">
-              <BookOpen className="h-4 w-4" />
-              Training
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="queue" className="mt-0">
@@ -250,50 +246,6 @@ export default function Coaching() {
             />
           </TabsContent>
 
-          <TabsContent value="training" className="mt-0">
-            <div className="card-gradient rounded-xl border border-border/50 p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-primary" />
-                Training Recommendations
-              </h2>
-
-              <div className="space-y-4">
-                {recommendations.map((rec) => (
-                  <div
-                    key={rec.id}
-                    className="p-4 rounded-lg bg-muted/50 border border-border/50"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <Award className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-primary uppercase tracking-wide mb-1">
-                          {rec.skill_area.replace('_', ' ')}
-                        </p>
-                        <p className="text-sm text-foreground">{rec.recommendation}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-3 pl-11">
-                      <Button size="sm" variant="outline" className="text-xs">
-                        Start Practice
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-xs">
-                        Skip
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-
-                {recommendations.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">
-                    No recommendations yet. Complete more calls to get personalized tips!
-                  </p>
-                )}
-              </div>
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>

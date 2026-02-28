@@ -14,10 +14,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/leads', icon: Target, label: 'Leads' },
-  { to: '/analytics', icon: BarChart3, label: 'Analytics & Coaching' },
   { to: '/winwords', icon: Sparkles, label: 'WinWords' },
+  { to: '/schedule', icon: Calendar, label: 'Schedule' },
+  { to: '/analytics', icon: BarChart3, label: 'Analytics & Coaching' },
   { to: '/leaderboard', icon: Medal, label: 'Leaderboard' },
   { to: '/enterprise', icon: Building2, label: 'Enterprise' },
 ];

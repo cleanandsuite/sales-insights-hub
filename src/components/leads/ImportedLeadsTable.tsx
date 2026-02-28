@@ -42,7 +42,7 @@ interface ImportedLeadsTableProps {
 const DEMO_IMPORTED_LEADS: ImportedLead[] = [
   {
     id: 'demo-imp-1', user_id: 'demo', contact_name: 'Priya Sharma',
-    business: 'NovaTech Solutions', location: 'Dallas, TX', previous_rep: 'Mike Torres',
+    business: 'Salesforce', location: 'San Francisco, CA', previous_rep: 'Mike Torres',
     contact_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
     contact_time: '10:30 AM', lead_type: 'hot',
     pain_point: 'CRM adoption stalled — reps refusing to log calls',
@@ -50,7 +50,7 @@ const DEMO_IMPORTED_LEADS: ImportedLead[] = [
   },
   {
     id: 'demo-imp-2', user_id: 'demo', contact_name: 'Derek Wallace',
-    business: 'Apex Manufacturing', location: 'Detroit, MI', previous_rep: 'Sarah Lin',
+    business: 'Tesla', location: 'Austin, TX', previous_rep: 'Sarah Lin',
     contact_date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
     contact_time: '2:00 PM', lead_type: 'warm',
     pain_point: 'No visibility into field rep performance',
@@ -58,7 +58,7 @@ const DEMO_IMPORTED_LEADS: ImportedLead[] = [
   },
   {
     id: 'demo-imp-3', user_id: 'demo', contact_name: 'Lisa Chang',
-    business: 'Bright Horizons Education', location: 'Boston, MA', previous_rep: null,
+    business: 'HubSpot', location: 'Boston, MA', previous_rep: null,
     contact_date: new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0],
     contact_time: '9:15 AM', lead_type: 'hot',
     pain_point: 'Losing deals to competitors with AI coaching tools',
@@ -66,7 +66,7 @@ const DEMO_IMPORTED_LEADS: ImportedLead[] = [
   },
   {
     id: 'demo-imp-4', user_id: 'demo', contact_name: 'Robert Finch',
-    business: 'Summit Financial Group', location: 'Charlotte, NC', previous_rep: 'Amy Park',
+    business: 'JPMorgan Chase', location: 'New York, NY', previous_rep: 'Amy Park',
     contact_date: new Date(Date.now() - 10 * 86400000).toISOString().split('T')[0],
     contact_time: '4:45 PM', lead_type: 'cold',
     pain_point: 'Exploring options for Q3 budget cycle',
@@ -74,7 +74,7 @@ const DEMO_IMPORTED_LEADS: ImportedLead[] = [
   },
   {
     id: 'demo-imp-5', user_id: 'demo', contact_name: 'Angela Morris',
-    business: 'Velocity Staffing', location: 'Phoenix, AZ', previous_rep: 'Derek Kim',
+    business: 'Deloitte', location: 'Chicago, IL', previous_rep: 'Derek Kim',
     contact_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
     contact_time: '11:00 AM', lead_type: 'warm',
     pain_point: 'High rep turnover — need faster onboarding',
