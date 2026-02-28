@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Copy, Check, Sparkles, Loader2, ExternalLink } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Mail, Copy, Check, Sparkles, Loader2, ExternalLink, Send } from 'lucide-react';
 import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
+import { useOutboundEmail } from '@/hooks/useOutboundEmail';
 import { useToast } from '@/hooks/use-toast';
 
 interface ScheduledCall {
@@ -30,12 +32,14 @@ interface ScheduleEmailDialogProps {
 
 export function ScheduleEmailDialog({ open, onOpenChange, call }: ScheduleEmailDialogProps) {
   const { generateCallEmail, isGeneratingEmail } = useScheduleAssistant();
+  const { sendEmail, isSending, isConfigured } = useOutboundEmail();
   const { toast } = useToast();
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
   const [copied, setCopied] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     if (open && call && !generated) {
@@ -49,6 +53,7 @@ export function ScheduleEmailDialog({ open, onOpenChange, call }: ScheduleEmailD
       setSubject('');
       setBody('');
       setCustomPrompt('');
+      setSent(false);
     }
   }, [open]);
 
@@ -156,11 +161,32 @@ export function ScheduleEmailDialog({ open, onOpenChange, call }: ScheduleEmailD
               {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
               {copied ? 'Copied' : 'Copy'}
             </Button>
-            {call.contact_email && (
+            {call.contact_email && !isConfigured && (
               <Button onClick={handleOpenInClient}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open in Email Client
               </Button>
+            )}
+            {isConfigured && call.contact_email && (
+              <Button onClick={async () => {
+                const ok = await sendEmail(call.contact_email!, subject, body, 'scheduled_call', call.id);
+                if (ok) setSent(true);
+              }} disabled={isSending || sent}>
+                {sent ? <Check className="h-4 w-4 mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                {sent ? 'Sent' : isSending ? 'Sending...' : 'Send'}
+              </Button>
+            )}
+            {!isConfigured && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-xs text-muted-foreground self-center">
+                      Set up email in Settings to send directly
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Go to Settings → Email tab</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </DialogFooter>
         )}

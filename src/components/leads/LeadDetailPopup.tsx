@@ -3,10 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useOutboundEmail } from '@/hooks/useOutboundEmail';
 import { toast } from 'sonner';
-import { Phone, Mail, Calendar, FileText, StickyNote, RefreshCw, Copy, Sparkles, MapPin, Building2, User, Clock } from 'lucide-react';
+import { Phone, Mail, Calendar, FileText, StickyNote, RefreshCw, Copy, Sparkles, MapPin, Building2, User, Clock, Send, Check, X } from 'lucide-react';
 import type { ImportedLead } from './ImportedLeadsTable';
 
 const TYPE_STYLES: Record<string, string> = {
@@ -24,11 +27,17 @@ interface LeadDetailPopupProps {
 
 export function LeadDetailPopup({ lead, open, onOpenChange, onLeadUpdated }: LeadDetailPopupProps) {
   const { user } = useAuth();
+  const { sendEmail, isSending, isConfigured } = useOutboundEmail();
   const [painPoint, setPainPoint] = useState(lead.pain_point || '');
   const [savingPain, setSavingPain] = useState(false);
   const [script, setScript] = useState<string | null>(null);
   const [generatingScript, setGeneratingScript] = useState(false);
   const [confidence] = useState(() => Math.floor(60 + Math.random() * 35));
+  const [showEmailComposer, setShowEmailComposer] = useState(false);
+  const [emailTo, setEmailTo] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
   const savePainPoint = async () => {
     setSavingPain(true);
@@ -206,12 +215,49 @@ export function LeadDetailPopup({ lead, open, onOpenChange, onLeadUpdated }: Lea
             )}
           </div>
 
+          {/* Email Composer */}
+          {showEmailComposer && (
+            <div className="space-y-3 p-4 rounded-lg border border-border bg-muted/30">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-primary" /> Compose Email
+                </h4>
+                <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setShowEmailComposer(false)}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Input value={emailTo} onChange={e => setEmailTo(e.target.value)} placeholder="recipient@email.com" className="h-8 text-sm" />
+                <Input value={emailSubject} onChange={e => setEmailSubject(e.target.value)} placeholder="Subject" className="h-8 text-sm" />
+                <Textarea value={emailBody} onChange={e => setEmailBody(e.target.value)} placeholder="Email body..." rows={4} className="text-sm" />
+              </div>
+              <div className="flex gap-2">
+                {isConfigured ? (
+                  <Button size="sm" className="gap-1" disabled={isSending || emailSent || !emailTo}
+                    onClick={async () => {
+                      const ok = await sendEmail(emailTo, emailSubject, emailBody, 'lead', lead.id);
+                      if (ok) setEmailSent(true);
+                    }}>
+                    {emailSent ? <Check className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
+                    {emailSent ? 'Sent' : isSending ? 'Sending...' : 'Send'}
+                  </Button>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Set up email in Settings → Email to send directly</p>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex flex-wrap gap-2 pt-4 border-t">
             <Button size="sm" className="gap-2">
               <Phone className="h-3.5 w-3.5" /> Call
             </Button>
-            <Button size="sm" variant="outline" className="gap-2">
+            <Button size="sm" variant="outline" className="gap-2" onClick={() => {
+              setShowEmailComposer(true);
+              setEmailSent(false);
+              if (!emailSubject) setEmailSubject(`Following up - ${lead.contact_name}`);
+            }}>
               <Mail className="h-3.5 w-3.5" /> Email
             </Button>
             <Button size="sm" variant="outline" className="gap-2">
