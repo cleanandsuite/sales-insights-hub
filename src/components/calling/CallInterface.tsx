@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,9 @@ import {
   MessageSquare,
   AlertCircle,
   User,
-  Users
+  Users,
+  Download,
+  FileText,
 } from 'lucide-react';
 import { useTelnyxCall, CallStatus } from '@/hooks/useTelnyxCall';
 import { useCallLimits } from '@/hooks/useCallLimits';
@@ -26,10 +28,11 @@ import { LiveSummaryPanel } from '@/components/recording/LiveSummaryPanel';
 
 interface CallInterfaceProps {
   phoneNumber: string;
+  callName?: string;
   onClose: () => void;
 }
 
-export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
+export function CallInterface({ phoneNumber, callName, onClose }: CallInterfaceProps) {
   const navigate = useNavigate();
   
   const {
@@ -102,24 +105,7 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     }
   }, [isReady, hasStartedCall, phoneNumber, startCall, incrementCallCount]);
 
-  // Navigate to recording analysis when call ends and recording is saved
-  useEffect(() => {
-    if (callStatus === 'ended' && hasStartedCall && !isSaving && savedRecordingId) {
-      const timer = setTimeout(() => {
-        onClose();
-        navigate(`/recording/${savedRecordingId}`);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-    // If call ended but no recording saved (e.g. very short call / error), go back to dashboard
-    if (callStatus === 'ended' && hasStartedCall && !isSaving && !savedRecordingId) {
-      const timer = setTimeout(() => {
-        onClose();
-        navigate('/dashboard');
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [callStatus, hasStartedCall, isSaving, savedRecordingId, onClose, navigate]);
+  // No auto-navigate — user stays on coaching screen after call ends
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -167,6 +153,22 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
     }
   };
 
+  const isCallEnded = callStatus === 'ended';
+
+  const handleDownloadTranscript = useCallback(() => {
+    const text = transcripts
+      .filter(t => t.isFinal)
+      .map(t => `[${t.speaker === 'user' ? 'You' : 'Caller'}] ${t.text}`)
+      .join('\n\n');
+    const blob = new Blob([text || 'No transcription available.'], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${callName || phoneNumber}-transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [transcripts, callName, phoneNumber]);
+
   return (
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
       {/* Header */}
@@ -177,7 +179,8 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
               <Phone className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">{phoneNumber}</h2>
+              {callName && <h2 className="text-lg font-semibold">{callName}</h2>}
+              <p className={cn(callName ? 'text-sm text-muted-foreground' : 'text-lg font-semibold')}>{phoneNumber}</p>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge className={cn('text-xs', getStatusColor(callStatus))}>
                   {getStatusText(callStatus)}
@@ -212,88 +215,41 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
                 onVolumeChange={setVolume}
               />
             )}
-            <Button
-              variant="destructive"
-              onClick={() => {
-                endCall();
-              }}
-              className="gap-2"
-            >
-              <PhoneOff className="h-4 w-4" />
-              {isSaving ? 'Saving…' : 'End Call'}
-            </Button>
+            {isCallEnded ? (
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleDownloadTranscript} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Download Transcript
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    onClose();
+                    if (savedRecordingId) navigate(`/recording/${savedRecordingId}`);
+                    else navigate('/dashboard');
+                  }}
+                  className="gap-2"
+                >
+                  {savedRecordingId ? 'View Analysis' : 'Back to Dashboard'}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="destructive"
+                onClick={() => { endCall(); }}
+                className="gap-2"
+              >
+                <PhoneOff className="h-4 w-4" />
+                {isSaving ? 'Saving…' : 'End Call'}
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden p-4">
-        <div className="max-w-6xl mx-auto h-full grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Live Transcription */}
-          <Card className="flex flex-col">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-primary" />
-                Live Transcription
-                {isTranscribing && (
-                  <Badge variant="outline" className="ml-auto text-xs">
-                    <span className="h-2 w-2 rounded-full bg-success animate-pulse mr-1" />
-                    Active
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                {transcripts.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-                    <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
-                    <p className="text-sm">Transcription will appear here...</p>
-                    {callStatus !== 'connected' && (
-                      <p className="text-xs mt-1">Waiting for call to connect</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {transcripts.map((segment, idx) => (
-                      <div
-                        key={idx}
-                        className={cn(
-                          'p-3 rounded-lg',
-                          segment.speaker === 'user'
-                            ? 'bg-primary/10 ml-8'
-                            : 'bg-muted mr-8'
-                        )}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          {segment.speaker === 'user' ? (
-                            <User className="h-3 w-3 text-primary" />
-                          ) : (
-                            <Users className="h-3 w-3 text-muted-foreground" />
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {segment.speaker === 'user' ? 'You' : 'Caller'}
-                          </span>
-                          {!segment.isFinal && (
-                            <Badge variant="outline" className="text-xs ml-auto">
-                              ...
-                            </Badge>
-                          )}
-                        </div>
-                        <p className={cn(
-                          'text-sm',
-                          !segment.isFinal && 'text-muted-foreground italic'
-                        )}>
-                          {segment.text}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-
+        <div className="max-w-6xl mx-auto h-full grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* AI Coaching Panel */}
           <LiveCoachingSidebar
             transcript={fullTranscript}
@@ -320,13 +276,19 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
 
       {/* Footer with Call Limit */}
       <div className="border-t border-border bg-card p-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
           <CallLimitIndicator
             callsToday={callsToday}
             dailyLimit={dailyLimit}
             warmupDay={warmupDay}
             enforced={limitEnforced}
           />
+          {isCallEnded && transcripts.filter(t => t.isFinal).length > 0 && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FileText className="h-4 w-4" />
+              {transcripts.filter(t => t.isFinal).length} transcript segments captured
+            </div>
+          )}
         </div>
       </div>
 
@@ -338,10 +300,10 @@ export function CallInterface({ phoneNumber, onClose }: CallInterfaceProps) {
         </div>
       )}
 
-      {/* Success hint (optional) */}
-      {callStatus === 'ended' && savedRecordingId && !saveError && (
+      {/* Success hint */}
+      {isCallEnded && savedRecordingId && !saveError && (
         <div className="absolute bottom-28 left-1/2 -translate-x-1/2 bg-card text-foreground border border-border px-4 py-2 rounded-lg text-sm">
-          Recording saved.
+          Recording saved — coaching insights preserved above.
         </div>
       )}
 

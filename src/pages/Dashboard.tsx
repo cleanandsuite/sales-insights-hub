@@ -60,6 +60,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
+  const [activeCallName, setActiveCallName] = useState<string | undefined>(undefined);
   const { user } = useAuth();
   const kpis = useRealKPIs();
   const quote = getDailyQuote();
@@ -69,14 +70,15 @@ export default function Dashboard() {
   return (
     <>
       {activeCall && (
-        <CallInterface phoneNumber={activeCall} onClose={() => setActiveCall(null)} />
+        <CallInterface phoneNumber={activeCall} callName={activeCallName} onClose={() => { setActiveCall(null); setActiveCallName(undefined); }} />
       )}
       <CallDialog
         open={showCallDialog}
         onOpenChange={setShowCallDialog}
-        onStartCall={(phone) => {
+        onStartCall={(phone, name) => {
           setShowCallDialog(false);
           setActiveCall(phone);
+          setActiveCallName(name);
         }}
       />
       <DashboardLayout>
