@@ -33,6 +33,7 @@ import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
 import { ProfileTab } from '@/components/settings/ProfileTab';
 import { SalesforceTab } from '@/components/settings/SalesforceTab';
 import { ExperimentsTab } from '@/components/settings/ExperimentsTab';
+import { EmailSettingsCard } from '@/components/settings/EmailSettingsCard';
 import { useAdminRole } from '@/hooks/useAdminRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -258,8 +259,12 @@ export default function Settings() {
               <span className="hidden xs:inline">Privacy</span>
             </TabsTrigger>
             <TabsTrigger value="invites" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
-              <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Invites</span>
+            </TabsTrigger>
+            <TabsTrigger value="email" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+              <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Email</span>
             </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="experiments" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
@@ -626,6 +631,11 @@ export default function Settings() {
           {/* Salesforce */}
           <TabsContent value="salesforce">
             <SalesforceTab />
+          </TabsContent>
+
+          {/* Email */}
+          <TabsContent value="email">
+            <EmailSettingsCard />
           </TabsContent>
 
           {/* Experiments (Admin only) */}

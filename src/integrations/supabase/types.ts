@@ -2658,6 +2658,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sent_emails: {
+        Row: {
+          body_preview: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          related_id: string | null
+          related_type: string | null
+          status: string
+          subject: string | null
+          to_email: string
+          user_id: string
+        }
+        Insert: {
+          body_preview?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          related_id?: string | null
+          related_type?: string | null
+          status?: string
+          subject?: string | null
+          to_email: string
+          user_id: string
+        }
+        Update: {
+          body_preview?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          related_id?: string | null
+          related_type?: string | null
+          status?: string
+          subject?: string | null
+          to_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       skill_progress: {
         Row: {
           id: string
@@ -3143,6 +3182,48 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_status?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_email_settings: {
+        Row: {
+          created_at: string
+          from_email: string
+          from_name: string
+          id: string
+          smtp_host: string
+          smtp_password: string
+          smtp_port: number
+          smtp_username: string
+          updated_at: string
+          use_tls: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_email?: string
+          from_name?: string
+          id?: string
+          smtp_host?: string
+          smtp_password?: string
+          smtp_port?: number
+          smtp_username?: string
+          updated_at?: string
+          use_tls?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_email?: string
+          from_name?: string
+          id?: string
+          smtp_host?: string
+          smtp_password?: string
+          smtp_port?: number
+          smtp_username?: string
+          updated_at?: string
+          use_tls?: boolean
           user_id?: string
         }
         Relationships: []
