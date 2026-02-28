@@ -1,130 +1,114 @@
 
 
-# Modern Dashboard Redesign: Command Center + Feed + Focus Mode
+# Leads Tab Redesign: Import System + Modern UI
 
 ## Overview
 
-Replace the current tabbed card-grid dashboard with a modern, single-view "Command Center" layout that combines a smart action bar, activity feed, dynamic bento widgets, and a focus-mode spotlight -- all on one page without tabs.
+Redesign the Leads page with a modern feed-style layout inspired by the ZoomInfo Sales Coach reference, adding sub-tabs (All Leads / Imported Leads), a CSV import modal, and an expanded lead detail popup with auto-generated WinWords scripts.
 
-## Design Concept
-
-The new dashboard has four distinct zones arranged vertically:
+## Visual Design
 
 ```text
 +--------------------------------------------------------------+
-| COMMAND BAR (greeting + quick actions + AI status inline)     |
+| HEADER: Leads title + Demo toggle + Export + Import buttons   |
 +--------------------------------------------------------------+
-| SPOTLIGHT: Focus card -- one rotating priority (next call,    |
-|   hottest deal, coaching tip) with prev/next navigation       |
-+----------------------------+---------------------------------+
-| LIVE FEED (60%)            | BENTO WIDGETS (40%)             |
-| Chronological activity     | - KPI sparkline cards           |
-|   stream with inline       | - Revenue mini-chart            |
-|   actions (call, email,    | - Win rate ring                 |
-|   view recording)          | - AI coaching tip               |
-+----------------------------+---------------------------------+
+| TABS: [All Leads] [Imported Leads]                            |
++--------------------------------------------------------------+
+|                                                               |
+| ALL LEADS TAB:                                                |
+| +------------------+-------------------+-------------------+  |
+| | AI Status Bar    | Stats Cards Row   | Priority Alerts   |  |
+| +------------------+-------------------+-------------------+  |
+| | FEED (60%)                   | SIDEBAR (40%)             |  |
+| | Search + Filter bar          | Recent Activity Feed      |  |
+| | Lead cards (existing)        | Quick actions             |  |
+| +------------------------------+---------------------------+  |
+|                                                               |
+| IMPORTED LEADS TAB:                                           |
+| +----------------------------------------------------------+ |
+| | Filter bar: Type (hot/warm/cold) + Search                 | |
+| | Table: Name | Business | Location | Prev Rep | Date |     | |
+| |   Time | Lead Type (color badge)                           | |
+| | Rows clickable -> Lead Detail Popup                        | |
+| +----------------------------------------------------------+ |
++--------------------------------------------------------------+
 ```
 
-## Detailed Changes
+## Changes
 
-### 1. Command Bar (replaces DashboardHeader + AIStatusBar + Quote)
+### 1. Database Migration: `imported_leads` table
 
-A single, compact top strip that merges the greeting, AI status indicator, key metrics, and the Start Call CTA into one row. The daily quote becomes a subtle tooltip on a small icon rather than a full-width block.
+Create a new `imported_leads` table to store CSV-uploaded leads separately:
+- `id` (uuid, PK)
+- `user_id` (uuid, NOT NULL)
+- `contact_name` (text, NOT NULL)
+- `business` (text)
+- `location` (text)
+- `previous_rep` (text)
+- `contact_date` (date)
+- `contact_time` (time)
+- `lead_type` (text: 'hot', 'warm', 'cold')
+- `pain_point` (text) -- auto-filled by AI or manual
+- `notes` (text)
+- `created_at` (timestamptz, default now())
 
-- Left: Greeting text (smaller, single line)
-- Center: Inline AI status dot + 3 compact KPI pills (Calls Today, Avg Score, Week Total)
-- Right: Start Call button (same red CTA)
+RLS: Users can only CRUD their own rows. Managers can view team members' rows.
 
-### 2. Spotlight / Focus Mode (new component)
-
-A large, full-width card that cycles through the user's top priorities:
-- **Next scheduled call** (with countdown timer + one-click start)
-- **Hottest deal at risk** (with health indicator + suggested action)
-- **AI coaching insight** (today's top improvement suggestion)
-
-Users click left/right arrows or dots to cycle. Auto-advances every 15 seconds. Shows a subtle progress bar indicating time until next rotation.
-
-### 3. Activity Feed (replaces Recordings Table)
-
-A vertical timeline/feed on the left (60% width on desktop, full-width on mobile) showing recent events in chronological order:
-- Call recordings (with inline play button, score badge, duration)
-- Deal stage changes
-- AI analysis completions
-- Scheduled call reminders
-
-Each feed item is a compact card with:
-- Icon + timestamp (relative)
-- Title + one-line summary
-- Inline action buttons (View Analysis, Start Call, Open Deal)
-- Score/status badge
-
-The feed replaces the table format -- each row becomes a card in the stream.
-
-### 4. Bento Widget Grid (replaces MetricCards + Revenue tab)
-
-The right side (40% width, stacks below feed on mobile) shows a 2x3 grid of small, dense widget cards:
-
-| Widget | Content |
-|--------|---------|
-| Calls Today | Number + sparkline of last 7 days |
-| Avg Score | Number + colored ring indicator |
-| Revenue | Mini bar chart (last 4 months) |
-| Win Rate | Donut/ring with percentage |
-| Pipeline | Value + deal count |
-| AI Tip | One-line coaching suggestion |
-
-Each widget is clickable, navigating to the relevant detail page.
-
-### 5. Remove Tabs
-
-The current Calls/Revenue tab split goes away. Everything is visible at once in the single-view layout. Revenue data is consolidated into the bento widgets and the spotlight rotation.
-
-## Technical Plan
-
-### New Components
+### 2. New Components
 
 | Component | Purpose |
 |-----------|---------|
-| `src/components/dashboard/CommandBar.tsx` | Merged header + AI status + KPIs in one row |
-| `src/components/dashboard/SpotlightCard.tsx` | Rotating focus card with priorities |
-| `src/components/dashboard/ActivityFeed.tsx` | Timeline feed of recent calls/events |
-| `src/components/dashboard/ActivityFeedItem.tsx` | Individual feed item card |
-| `src/components/dashboard/BentoWidget.tsx` | Small metric widget with optional sparkline |
-| `src/components/dashboard/BentoGrid.tsx` | 2-column grid of BentoWidgets |
+| `src/components/leads/ImportLeadsDialog.tsx` | CSV upload modal with field mapping, drag-drop zone, and manual entry fallback |
+| `src/components/leads/ImportedLeadsTable.tsx` | Sortable/filterable table for imported leads with color-coded type badges |
+| `src/components/leads/LeadDetailPopup.tsx` | Expanded modal with header, pain point, activity timeline, WinWords script section, and action buttons |
 
-### Modified Files
+### 3. ImportLeadsDialog
 
-| File | Changes |
-|------|---------|
-| `src/pages/Dashboard.tsx` | Complete rewrite of the layout using new components; remove Tabs, keep data fetching logic (useRealKPIs, recordings query) |
-| `src/components/dashboard/index.ts` | Export new components |
+- Drag-and-drop CSV upload zone
+- CSV parsing with field detection (Name, Business, Location, Previous Rep, Date, Time, Lead Type)
+- Preview table before confirming import
+- Manual single-entry form as alternative
+- Zod validation on all fields
+- Inserts into `imported_leads` table
 
-### Removed/Deprecated (code stays, just unused)
+### 4. ImportedLeadsTable
 
-- `DashboardOverview.tsx` (already unused)
-- The tabs structure in Dashboard.tsx
+- Sortable columns (Name, Business, Date)
+- Color-coded Lead Type badges: red (hot), orange (warm), blue (cold)
+- Type filter dropdown + search bar
+- Click row to open `LeadDetailPopup`
 
-### Data Flow
+### 5. LeadDetailPopup
 
-- **CommandBar**: Receives `userName`, `kpis`, `onStartCall` -- same data as today
-- **SpotlightCard**: Fetches scheduled calls (from `scheduled_calls`), at-risk deals (from `mockDeals`), and generates a coaching tip from recent scores
-- **ActivityFeed**: Queries `call_recordings` (same as RecordingsTable today) but renders as feed cards instead of a table
-- **BentoGrid**: Receives `kpis` + static revenue/pipeline data (same mock data currently in Revenue tab)
+Sections inside a Dialog:
+- **Header**: Name, Business, Location, Lead Type badge, AI Confidence gauge, Re-score button
+- **Pain Point**: Auto-filled text area (editable)
+- **Recent Activity**: Timeline of previous contacts with date/time/rep
+- **WinWords Script** (new): Calls the existing `winwords-generate` edge function with company name and target role to auto-generate a cold call script. Displays the script with sections (Greeting, Value Prop, Competitor Differentiation, CTA). Includes a "Regenerate" and "Copy" button.
+- **Actions**: Call, Email, Schedule, Proposal, Note buttons
 
-### Responsive Behavior
+### 6. Modified: `src/pages/Leads.tsx`
 
-- **Desktop (lg+)**: Command bar full-width, spotlight full-width, feed + bento side-by-side (60/40)
-- **Tablet (md)**: Same layout but bento drops to 2-column below feed
-- **Mobile (sm)**: Everything stacks vertically: Command bar, spotlight, bento (2-col grid), feed
+- Add Tabs component with "All Leads" and "Imported Leads" sub-tabs below the header
+- Add Import button (blue, Upload icon) next to Export
+- "All Leads" tab renders existing content (unchanged)
+- "Imported Leads" tab renders `ImportedLeadsTable`
+- Modernize the overall layout with cleaner spacing and the SellSig blue/white color scheme
 
-### Animations
+### 7. WinWords Integration
 
-- Spotlight card transitions with a subtle slide + fade
-- Feed items animate in with staggered `fadeIn` (using existing keyframes)
-- Bento widgets use the existing `hover:-translate-y-0.5` lift effect
-- Numbers use the existing `animate-count-up` class
+The `LeadDetailPopup` will call the existing `winwords-generate` edge function with:
+- `scenario: 'cold_call'`
+- `companyResearch: { name: business }` from the imported lead
+- `persona: { role: title/role }` if available
 
-### No Database Changes
+This reuses the existing AI script generation without any new backend work.
 
-This is a pure frontend redesign. All data sources remain the same (Supabase queries for recordings/scores, mock data for revenue/deals).
+## Technical Details
+
+- CSV parsing: Use native `FileReader` + simple CSV parser (split by commas/newlines with quote handling)
+- No new edge functions needed -- reuses `winwords-generate`
+- Database migration adds `imported_leads` table with RLS policies
+- All new components use existing UI primitives (Dialog, Table, Badge, Button, Tabs)
+- Responsive: Table becomes card-based on mobile
 
