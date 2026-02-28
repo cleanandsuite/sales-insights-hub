@@ -2517,8 +2517,12 @@ export type Database = {
           id: string
           meeting_provider: string | null
           meeting_url: string | null
+          outcome: string | null
+          outcome_notes: string | null
           prep_notes: string | null
           recording_id: string | null
+          recurrence_parent_id: string | null
+          recurrence_rule: string | null
           reminder_minutes_before: number
           reminder_sent: boolean
           scheduled_at: string
@@ -2537,8 +2541,12 @@ export type Database = {
           id?: string
           meeting_provider?: string | null
           meeting_url?: string | null
+          outcome?: string | null
+          outcome_notes?: string | null
           prep_notes?: string | null
           recording_id?: string | null
+          recurrence_parent_id?: string | null
+          recurrence_rule?: string | null
           reminder_minutes_before?: number
           reminder_sent?: boolean
           scheduled_at: string
@@ -2557,8 +2565,12 @@ export type Database = {
           id?: string
           meeting_provider?: string | null
           meeting_url?: string | null
+          outcome?: string | null
+          outcome_notes?: string | null
           prep_notes?: string | null
           recording_id?: string | null
+          recurrence_parent_id?: string | null
+          recurrence_rule?: string | null
           reminder_minutes_before?: number
           reminder_sent?: boolean
           scheduled_at?: string
@@ -2580,6 +2592,13 @@ export type Database = {
             columns: ["recording_id"]
             isOneToOne: false
             referencedRelation: "call_recordings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_calls_recurrence_parent_id_fkey"
+            columns: ["recurrence_parent_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_calls"
             referencedColumns: ["id"]
           },
         ]

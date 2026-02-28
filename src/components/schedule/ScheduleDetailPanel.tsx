@@ -364,8 +364,18 @@ export function ScheduleDetailPanel({ call, onEmailDialog, onStartRecording }: S
         {/* Status */}
         <div className="space-y-2">
           <h3 className="text-sm font-bold text-foreground">Status</h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {getStatusBadge(call.status)}
+            {(call as any).outcome && (
+              <Badge className="bg-primary/15 text-primary border-primary/30 text-xs capitalize">
+                Outcome: {(call as any).outcome}
+              </Badge>
+            )}
+            {(call as any).recurrence_rule && (
+              <Badge variant="outline" className="text-xs capitalize flex items-center gap-1">
+                🔄 Repeats {(call as any).recurrence_rule}
+              </Badge>
+            )}
             {lead?.is_hot_lead && (
               <Badge className="bg-destructive/15 text-destructive border-destructive/30 text-xs">🔥 Hot</Badge>
             )}

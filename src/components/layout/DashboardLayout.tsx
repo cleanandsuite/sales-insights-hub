@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Sidebar, MobileHeader } from './Sidebar';
 import { useSidebarState } from '@/contexts/SidebarContext';
 import { cn } from '@/lib/utils';
+import { useCallReminders } from '@/hooks/useCallReminders';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -9,6 +10,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isCollapsed } = useSidebarState();
+  useCallReminders();
   
   return (
     <div className="min-h-screen bg-background">
