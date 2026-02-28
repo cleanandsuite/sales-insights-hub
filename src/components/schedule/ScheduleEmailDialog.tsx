@@ -54,6 +54,17 @@ export function ScheduleEmailDialog({ open, onOpenChange, call }: ScheduleEmailD
 
   const handleGenerate = async () => {
     if (!call) return;
+    
+    // Demo calls (fake IDs) can't be looked up in the database — generate a template client-side
+    if (call.id.startsWith('demo-')) {
+      const contactName = call.contact_name || 'there';
+      const meetingDate = new Date(call.scheduled_at).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      setSubject(`Following up: ${call.title}`);
+      setBody(`Hi ${contactName},\n\nThank you for taking the time to connect. I wanted to follow up on our ${call.title.toLowerCase()} scheduled for ${meetingDate}.\n\n${call.prep_notes ? `A few things I'd like to cover:\n${call.prep_notes}\n\n` : ''}Please let me know if you have any questions or need to adjust the time.\n\nBest regards,\n[Your Name]`);
+      setGenerated(true);
+      return;
+    }
+
     const result = await generateCallEmail(call.id, customPrompt || undefined);
     if (result) {
       setSubject(result.subject);
