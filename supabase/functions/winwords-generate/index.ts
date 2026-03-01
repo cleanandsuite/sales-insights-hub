@@ -253,7 +253,18 @@ For EACH section, include:
 - delivery_notes: string with tonality/pacing coaching
 - variations: alternative approaches
 
-Also include section_scores (1-5) rating how well each section follows the methodology.
+PER-SECTION SCORING (CRITICAL — Gong-style):
+You MUST include a "section_scores" object in your response. For EACH section key, provide:
+{
+  "section_key": {
+    "score": <1-5 integer>,
+    "label": "<human-readable section name>",
+    "max_score": 5,
+    "coaching_tip": "<1-2 sentence specific coaching tip to improve this section>",
+    "benchmark": "<what top performers do differently in this section>"
+  }
+}
+Example: "intro_double_tap": { "score": 4, "label": "Intro (Double-Tap Name)", "max_score": 5, "coaching_tip": "Add a 1.5s pause between the two name mentions for maximum pattern interrupt effect.", "benchmark": "Top 10% of setters nail the pause timing — it creates curiosity, not confusion." }
 ` : '';
 
     // Cold call specific prompt injection (Ultimate Cold Caller brain)
@@ -344,7 +355,7 @@ Format your response as a valid JSON object with this structure:
       "fallback": "If they resist"
     }
   },
-  ${scenario === 'appointment_setter' || scenario === 'cold_call' ? '"section_scores": { "opening": 4, "value_proposition": 5, "discovery": 4 },' : ''}
+  ${scenario === 'appointment_setter' || scenario === 'cold_call' ? '"section_scores": { "section_key": { "score": 4, "label": "Section Name", "max_score": 5, "coaching_tip": "Specific improvement tip", "benchmark": "What top performers do" } },' : ''}
   "key_moments": [
     {"moment": "Description", "script": "Exact words to say", "timing": "When to use"}
   ],
