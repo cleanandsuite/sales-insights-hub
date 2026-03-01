@@ -24,7 +24,7 @@ import { AnalyticsOverviewCards } from '@/components/analytics/AnalyticsOverview
 import { PerformanceRadarChart } from '@/components/analytics/PerformanceRadarChart';
 import { ScoreDistributionChart } from '@/components/analytics/ScoreDistributionChart';
 import { SkillTrendChart } from '@/components/analytics/SkillTrendChart';
-import { SkillBreakdownPanel } from '@/components/analytics/SkillBreakdownPanel';
+// SkillBreakdownPanel is now integrated inside PerformanceRadarChart
 import { TimeHeatmap } from '@/components/analytics/TimeHeatmap';
 import { TalkRatioDonut } from '@/components/analytics/TalkRatioDonut';
 import { TopPatternsGrid } from '@/components/analytics/TopPatternsGrid';
@@ -291,10 +291,6 @@ export default function Analytics() {
                 )}
               </div>
             </div>
-            <SkillBreakdownPanel
-              currentSkills={data.currentSkills}
-              previousSkills={data.previousSkills}
-            />
             <SkillTrendChart trends={data.skillTrends} />
           </TabsContent>
 
