@@ -7,10 +7,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Copy, Check, Sparkles, Target, MessageSquare, Shield, 
   ChevronRight, Lightbulb, AlertTriangle, TrendingUp, FileText,
-  Mic, Star
+  Mic, Star, BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+
+interface SectionScoreData {
+  score: number;
+  label?: string;
+  max_score?: number;
+  coaching_tip?: string;
+  benchmark?: string;
+}
 
 interface ScriptData {
   script_id: string;
@@ -18,7 +26,7 @@ interface ScriptData {
   confidence_score: number;
   estimated_success_rate: string;
   sections: Record<string, any>;
-  section_scores?: Record<string, number>;
+  section_scores?: Record<string, number | SectionScoreData>;
   key_moments?: Array<{ moment: string; script: string; timing: string }>;
   power_phrases?: string[];
   words_to_avoid?: string[];
@@ -191,20 +199,41 @@ function extractSelectableLines(script: ScriptData): SelectableLine[] {
   return lines;
 }
 
-function SectionScoreBadge({ score }: { score: number }) {
+function normalizeSectionScore(val: number | SectionScoreData): SectionScoreData {
+  if (typeof val === 'number') return { score: val, max_score: 5 };
+  return val;
+}
+
+function SectionScoreBadge({ score }: { score: number | SectionScoreData }) {
+  const data = normalizeSectionScore(score);
   return (
     <div className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: data.max_score || 5 }).map((_, i) => (
         <Star
           key={i}
           className={cn(
             'h-3 w-3',
-            i < score ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground/30'
+            i < data.score ? 'text-yellow-500 fill-yellow-500' : 'text-muted-foreground/30'
           )}
         />
       ))}
     </div>
   );
+}
+
+function getScoreColor(score: number, max: number = 5) {
+  const pct = score / max;
+  if (pct >= 0.8) return 'bg-green-500';
+  if (pct >= 0.6) return 'bg-yellow-500';
+  return 'bg-orange-500';
+}
+
+function getScoreLabel(score: number, max: number = 5) {
+  const pct = score / max;
+  if (pct >= 0.8) return 'Strong';
+  if (pct >= 0.6) return 'Good';
+  if (pct >= 0.4) return 'Needs Work';
+  return 'Weak';
 }
 
 export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
@@ -299,6 +328,12 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
             <MessageSquare className="h-4 w-4" />
             Script
           </TabsTrigger>
+          {script.section_scores && Object.keys(script.section_scores).length > 0 && (
+            <TabsTrigger value="scores" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Section Scores
+            </TabsTrigger>
+          )}
           <TabsTrigger value="objections" className="gap-2">
             <Shield className="h-4 w-4" />
             Objections
@@ -467,6 +502,110 @@ export function GeneratedScript({ script, onUseScript }: GeneratedScriptProps) {
             </Card>
           ))}
         </TabsContent>
+
+        {/* Section Scores Tab (Gong-style) */}
+        {script.section_scores && Object.keys(script.section_scores).length > 0 && (
+          <TabsContent value="scores" className="space-y-4 mt-4">
+            {/* Overall Score Summary */}
+            {(() => {
+              const entries = Object.entries(script.section_scores!);
+              const totalScore = entries.reduce((sum, [, v]) => sum + normalizeSectionScore(v).score, 0);
+              const maxTotal = entries.reduce((sum, [, v]) => sum + (normalizeSectionScore(v).max_score || 5), 0);
+              const avgPct = Math.round((totalScore / maxTotal) * 100);
+              return (
+                <Card>
+                  <CardHeader className="py-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-primary" />
+                        Talk Track Score
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-bold">{avgPct}%</span>
+                        <Badge variant="secondary" className={cn(
+                          avgPct >= 80 ? 'bg-green-500/10 text-green-700 dark:text-green-400' :
+                          avgPct >= 60 ? 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
+                          'bg-orange-500/10 text-orange-700 dark:text-orange-400'
+                        )}>
+                          {avgPct >= 80 ? 'Strong' : avgPct >= 60 ? 'Good' : 'Needs Work'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="py-3">
+                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full transition-all', getScoreColor(totalScore, maxTotal))}
+                        style={{ width: `${avgPct}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {totalScore}/{maxTotal} total points across {entries.length} sections
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })()}
+
+            {/* Per-Section Breakdown */}
+            {Object.entries(script.section_scores!).map(([key, value]) => {
+              const data = normalizeSectionScore(value);
+              const pct = Math.round((data.score / (data.max_score || 5)) * 100);
+              return (
+                <Card key={key}>
+                  <CardContent className="py-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-primary shrink-0" />
+                        <span className="font-medium text-sm">
+                          {data.label || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={cn(
+                          'text-xs',
+                          pct >= 80 ? 'border-green-500/30 text-green-600' :
+                          pct >= 60 ? 'border-yellow-500/30 text-yellow-600' :
+                          'border-orange-500/30 text-orange-600'
+                        )}>
+                          {getScoreLabel(data.score, data.max_score || 5)}
+                        </Badge>
+                        <span className="text-sm font-bold tabular-nums">{data.score}/{data.max_score || 5}</span>
+                      </div>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={cn('h-full rounded-full transition-all', getScoreColor(data.score, data.max_score || 5))}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+
+                    {/* Coaching tip */}
+                    {data.coaching_tip && (
+                      <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                        <Lightbulb className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-primary mb-0.5">Coaching Tip</p>
+                          <p className="text-sm text-muted-foreground">{data.coaching_tip}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Benchmark */}
+                    {data.benchmark && (
+                      <div className="flex items-start gap-2 p-2 rounded-lg">
+                        <TrendingUp className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                        <p className="text-xs text-muted-foreground italic">{data.benchmark}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+        )}
 
         <TabsContent value="objections" className="space-y-4 mt-4">
           {script.sections?.objection_handlers?.common_objections ? (
