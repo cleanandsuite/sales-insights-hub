@@ -1,87 +1,115 @@
 
 
-# Implement Cold Call Center Fixes
+# Ultimate Cold Caller AI Brain
 
 ## Overview
 
-Implement the 5 remaining features from the approved plan: auto-disposition, pre-call context banner, power dialer mode, voicemail drop, and local presence dialing.
+Add a new "Ultimate Cold Caller" AI brain that integrates into two places: (1) the WinWords cold call script generation system prompt, and (2) the live coaching engine as a new coach style selectable in Settings > AI. The brain encodes a complete cold-call training methodology (Micah's tips, DOS opener, Hormozi trust gap, Andy Elliot's 3 Yeses, Sudbury gatekeeper scripts, high-sensory language, etc.).
+
+This plan focuses on integrating the brain into the existing architecture rather than building an entirely separate app, since the platform already has live coaching, script generation, call simulation, analytics, and gamification infrastructure.
 
 ---
 
-## 1. Auto-Disposition
+## 1. New Coach Style: "Ultimate Cold Caller"
 
-**Database migration**: Add `call_disposition` (text) and `disposition_confidence` (integer) columns to `call_recordings`.
+**Edge function (`live-coach/index.ts`)**: Add a new entry `ultimate_cold_caller` to the `COACH_PROMPTS` map with the full cold-call training archive as the system prompt. This brain covers:
 
-**Edge function (`generate-call-summary/index.ts`)**: Add `call_disposition` and `disposition_confidence` to the AI prompt. After analysis, update `call_recordings` with the disposition. Dispositions: `connected_interested`, `connected_not_interested`, `voicemail`, `no_answer`, `gatekeeper`, `callback_requested`, `meeting_booked`, `wrong_number`.
+- Micah's 6 tips (novel language, low/slow tonality, clear enunciation, upfront contracts, strategic pauses, transition statements, pullback booking)
+- DOS opener methodology
+- High-sensory language library (wheelhouse, salt mines, bags of money, bananas)
+- Hormozi's trust gap + give-away-the-farm value stacking
+- Andy Elliot's 3 Yeses framework
+- Sudbury's gatekeeper bypass scripts
+- Frame control and belief transfer techniques
+- Phase detection (Opener / Pitch / Objection / Close) with probability scoring
+- Tonality cues (low & slow, pause here, slight smile voice)
+- Natural filler injection (ums/ahs for authenticity)
 
-**New component (`AutoDispositionBadge.tsx`)**: Shows the AI-classified disposition with confidence percentage after a call ends. Includes a dropdown to override the disposition with one click (updates `call_recordings` directly).
+The prompt will instruct the AI to return suggestions with:
+- Exact next line with natural flow markers
+- Tonality cue
+- Current call phase + progress
+- Probability of continuing the call (green 70%+)
+- High-sensory language options when appropriate
 
-**CallInterface integration**: After call ends and `savedRecordingId` is available, show the `AutoDispositionBadge` in the post-call header area. When calling from imported leads, auto-update the lead's `lead_type` based on disposition (e.g., `meeting_booked` -> hot).
+**Coach style selector (`CoachStyleSelector.tsx`)**: Add "Ultimate Cold Caller" as a new style option with id `ultimate_cold_caller`, lion emoji, and traits like "Full Archive", "Phase Detection", "Tonality Cues".
 
----
-
-## 2. Pre-Call Context Banner
-
-**New component (`PreCallBriefBanner.tsx`)**: A compact, collapsible banner showing lead context at the top of `CallInterface`: contact name, company, location, lead type badge, pain point, previous rep, notes. Auto-collapses when `callStatus === 'connected'`, expandable via click.
-
-**Integration**: Add optional `leadContext` prop to `CallInterface`. Pass the full imported lead data from `Leads.tsx` when starting a call from the imported leads list.
-
----
-
-## 3. Power Dialer Mode
-
-**New component (`PowerDialerControls.tsx`)**: A control bar shown after a call ends when `onCallNextLead` is available. Features:
-- Toggle to enable/disable auto-dial (saved to localStorage)
-- Configurable delay: 3s, 5s, 10s, 15s
-- Visual countdown timer
-- Cancel button to stop the auto-dial
-- Auto-triggers `onCallNextLead()` when countdown reaches 0
-
-**CallInterface integration**: Render `PowerDialerControls` in the post-call area when `onCallNextLead` is available. Cancel countdown if user clicks any other button (View Analysis, Back to Dashboard, manual Call Next Lead).
+**Hook (`useLiveCoaching.ts`)**: Add `ultimate_cold_caller` to the `CoachStyle` type union.
 
 ---
 
-## 4. Voicemail Drop
+## 2. WinWords Cold Call Script Enhancement
 
-**New edge function (`telnyx-voicemail-drop/index.ts`)**: Authenticated function that accepts `call_control_id` and optionally `audio_url`. Uses the Telnyx Call Control API to play audio and then hang up. Falls back to a system default message if no custom audio is provided.
+**Edge function (`winwords-generate/index.ts`)**: When `scenario === 'cold_call'`, inject the Ultimate Cold Caller methodology into the system prompt (similar to how `appointment_setter` already has a dedicated methodology injection). This includes:
 
-**Hook change (`useTelnyxCall.ts`)**: Add `dropVoicemail()` method that invokes the edge function with the current call's control ID, then hangs up locally.
-
-**UI (`CallControls.tsx`)**: Add a "Drop VM" button (Voicemail icon) to the call controls. On click, shows a confirmation tooltip/popover: "Leave voicemail and hang up?" On confirm, calls `dropVoicemail()`.
-
-**Config**: Add `[functions.telnyx-voicemail-drop] verify_jwt = false` to `supabase/config.toml`.
+- DOS opener variations
+- 3 Yeses flow integration
+- Gatekeeper bypass scripts
+- Voicemail competitor drop scripts
+- High-sensory language requirements
+- Tonality/delivery coaching per section
+- Phase scoring (like appointment setter's `section_scores`)
+- Success probability estimate per section
 
 ---
 
-## 5. Local Presence Dialing
+## 3. Settings > AI Section
 
-**Edge function (`telnyx-auth/index.ts`)**: When `action === 'get_caller_id'` and a `destination_number` is provided in the body, query `user_phone_lines` for all active lines for the user. If any line's area code matches the destination's area code, return that number as `caller_id`. Otherwise fall back to default.
+**Settings page (`Settings.tsx`)**: Add a new card in the AI tab below the Live AI Coaching section titled "AI Brains" that shows the Ultimate Cold Caller brain as a selectable preset. When selected, it sets the coach style to `ultimate_cold_caller` and enables live coaching automatically.
 
-**Hook change (`useTelnyxCall.ts`)**: Pass the destination phone number in the `get_caller_id` request body so the edge function can do area code matching.
+The card will show:
+- Brain name: "Ultimate Cold Caller"
+- Description: Complete cold-call training archive with real-time phase detection, tonality cues, and probability scoring
+- Base booking rate: 30-45%
+- Methodologies included (listed as badges)
+- "Activate" button that sets coach style + enables coaching
 
 ---
 
 ## Technical Details
 
-### Database Migration
+### Modified Files
 
-```sql
-ALTER TABLE call_recordings 
-  ADD COLUMN IF NOT EXISTS call_disposition text,
-  ADD COLUMN IF NOT EXISTS disposition_confidence integer;
+1. **`supabase/functions/live-coach/index.ts`** -- Add `ultimate_cold_caller` system prompt (~2000 chars) to `COACH_PROMPTS` map
+2. **`supabase/functions/winwords-generate/index.ts`** -- Add cold call methodology injection block (similar to `appointmentSetterContext`) for `scenario === 'cold_call'`
+3. **`src/hooks/useLiveCoaching.ts`** -- Add `'ultimate_cold_caller'` to `CoachStyle` type
+4. **`src/components/settings/CoachStyleSelector.tsx`** -- Add Ultimate Cold Caller to `COACH_STYLES` array
+5. **`src/pages/Settings.tsx`** -- Add "AI Brains" card in the AI tab
+
+### No Database Changes Required
+
+The existing `ai_lead_settings.live_coach_style` column is a text field and already supports any string value -- no migration needed.
+
+### Coach Style Entry
+
+```text
+id: "ultimate_cold_caller"
+name: "Ultimate Cold Caller"
+icon: lion emoji
+description: "Complete cold-call training archive. Real-time phase detection, tonality cues, high-sensory language, and probability scoring. 30-45% booking rate methodology."
+traits: ["Full Archive", "Phase Detection", "Tonality Cues", "30-45% Book Rate"]
+color: border-red-500 bg-red-500/10
 ```
 
-### New Files
-1. `src/components/calling/AutoDispositionBadge.tsx`
-2. `src/components/calling/PreCallBriefBanner.tsx`
-3. `src/components/calling/PowerDialerControls.tsx`
-4. `supabase/functions/telnyx-voicemail-drop/index.ts`
+### Live Coach System Prompt (Summary)
 
-### Modified Files
-1. `supabase/functions/generate-call-summary/index.ts` -- add disposition fields to prompt and save to `call_recordings`
-2. `src/components/calling/CallInterface.tsx` -- add `leadContext` prop, mount PreCallBriefBanner, AutoDispositionBadge, PowerDialerControls
-3. `src/components/calling/CallControls.tsx` -- add "Drop VM" button
-4. `src/hooks/useTelnyxCall.ts` -- add `dropVoicemail()`, pass destination to `get_caller_id`
-5. `src/pages/Leads.tsx` -- pass full lead context to CallInterface
-6. `supabase/functions/telnyx-auth/index.ts` -- local presence area code matching logic
+The `ultimate_cold_caller` prompt will encode:
+- Phase detection (Opener -> Value Prop -> Discovery -> Objection -> Close)
+- Per-phase scoring and probability
+- Exact-line suggestions with natural fillers
+- Tonality cues per suggestion
+- High-sensory language options
+- Methodology tags (DOS, 3 Yeses, Hormozi, Sudbury, etc.)
+- Response format adds `phase`, `probability`, `tonality_cue`, and `sensory_options` fields
+
+### WinWords Cold Call Injection
+
+Similar to the existing `appointmentSetterContext` block, a `coldCallContext` variable will inject the methodology when `scenario === 'cold_call'`, adding:
+- DOS opener variations requirement
+- 3 Yeses framework integration
+- Gatekeeper bypass section
+- Voicemail drop script section
+- High-sensory language requirements
+- Delivery/tonality coaching per section
+- Section-level success probability scores
 
