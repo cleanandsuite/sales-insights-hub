@@ -1,10 +1,10 @@
 import { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { Sidebar, MobileHeader } from './Sidebar';
 import { useSidebarState } from '@/contexts/SidebarContext';
 import { cn } from '@/lib/utils';
 import { useCallReminders } from '@/hooks/useCallReminders';
 import { HelpCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 interface DashboardLayoutProps {
@@ -13,7 +13,6 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isCollapsed } = useSidebarState();
-  const navigate = useNavigate();
   useCallReminders();
   
   return (
@@ -31,12 +30,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={() => navigate('/support')}
+            <Link
+              to="/support"
               className="fixed bottom-5 right-5 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
             >
               <HelpCircle className="h-5 w-5" />
-            </button>
+            </Link>
           </TooltipTrigger>
           <TooltipContent side="left">Help & Support</TooltipContent>
         </Tooltip>

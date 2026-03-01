@@ -3,10 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Phone, AlertTriangle, Lightbulb, ChevronLeft, ChevronRight, 
-  Clock, ArrowRight 
+  Clock, ArrowRight, Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { mockPriorityDeals } from '@/data/dashboardMockData';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SpotlightCardProps {
   onStartCall: () => void;
@@ -16,7 +17,7 @@ interface SpotlightCardProps {
 }
 
 interface SpotlightSlide {
-  type: 'call' | 'deal' | 'coaching';
+  type: 'call' | 'deal' | 'coaching' | 'leads';
   icon: typeof Phone;
   iconBg: string;
   badge: string;
@@ -29,8 +30,24 @@ interface SpotlightSlide {
 export function SpotlightCard({ onStartCall, onNavigate, avgScore, className }: SpotlightCardProps) {
   const [active, setActive] = useState(0);
   const [progress, setProgress] = useState(0);
+  const { user } = useAuth();
+  const [staleLeadCount, setStaleLeadCount] = useState(0);
+  const [unreviewedCoaching, setUnreviewedCoaching] = useState(0);
 
-  const atRiskDeal = mockPriorityDeals.find(d => d.health === 'at_risk');
+  // Fetch real intelligence
+  useEffect(() => {
+    if (!user) return;
+    const fiveDaysAgo = new Date();
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+
+    Promise.all([
+      supabase.from('leads').select('id', { count: 'exact' }).eq('user_id', user.id).lt('updated_at', fiveDaysAgo.toISOString()).limit(1),
+      supabase.from('coaching_sessions').select('id', { count: 'exact' }).eq('user_id', user.id).limit(1),
+    ]).then(([leadsRes, coachingRes]) => {
+      setStaleLeadCount(leadsRes.count || 0);
+      setUnreviewedCoaching(coachingRes.count || 0);
+    });
+  }, [user]);
 
   const slides: SpotlightSlide[] = [
     {
@@ -43,15 +60,15 @@ export function SpotlightCard({ onStartCall, onNavigate, avgScore, className }: 
       subtitle: 'Start a call to build momentum and hit your daily targets.',
       action: { label: 'Start Call', onClick: onStartCall },
     },
-    ...(atRiskDeal ? [{
-      type: 'deal' as const,
-      icon: AlertTriangle,
+    ...(staleLeadCount > 0 ? [{
+      type: 'leads' as const,
+      icon: Users,
       iconBg: 'bg-warning/10 text-warning',
-      badge: 'At Risk',
-      badgeClass: 'bg-destructive/10 text-destructive border-destructive/20',
-      title: `${atRiskDeal.name} — ${atRiskDeal.company}`,
-      subtitle: atRiskDeal.alert || `Next: ${atRiskDeal.nextAction}`,
-      action: { label: 'View Deal', onClick: () => onNavigate('/enterprise') },
+      badge: 'Attention Needed',
+      badgeClass: 'bg-warning/10 text-warning border-warning/20',
+      title: `${staleLeadCount} lead${staleLeadCount !== 1 ? 's' : ''} haven't been contacted in 5+ days`,
+      subtitle: 'Re-engage before they go cold.',
+      action: { label: 'View Leads', onClick: () => onNavigate('/leads') },
     }] : []),
     {
       type: 'coaching',
@@ -78,7 +95,7 @@ export function SpotlightCard({ onStartCall, onNavigate, avgScore, className }: 
     const interval = setInterval(() => {
       setProgress(p => {
         if (p >= 100) { next(); return 0; }
-        return p + (100 / 150); // 15s = 150 ticks at 100ms
+        return p + (100 / 150);
       });
     }, 100);
     return () => clearInterval(interval);
@@ -88,8 +105,9 @@ export function SpotlightCard({ onStartCall, onNavigate, avgScore, className }: 
 
   return (
     <div className={cn(
-      'relative rounded-2xl border border-border/50 bg-card p-5 sm:p-6 overflow-hidden',
-      'shadow-sm transition-all duration-300',
+      'relative rounded-2xl p-5 sm:p-6 overflow-hidden',
+      'card-premium',
+      'border-l-4 border-l-primary/40',
       className
     )}>
       {/* Progress bar */}
