@@ -62,12 +62,13 @@ const URGENCY_STYLES = {
   low: 'border-l-2 border-l-muted',
 };
 
-const STYLE_LABELS = {
+const STYLE_LABELS: Record<string, { name: string; icon: string; color: string }> = {
   sellsig: { name: 'Discovery Booker', icon: '🧘', color: 'bg-emerald-500' },
   cardone: { name: 'Energy Booster', icon: '🔥', color: 'bg-orange-500' },
   belfort: { name: 'Layered Closer', icon: '🎯', color: 'bg-blue-500' },
   highticket: { name: 'High Stakes Closer', icon: '💎', color: 'bg-purple-500' },
   neutral: { name: 'Balanced', icon: '⚖️', color: 'bg-muted' },
+  ultimate_cold_caller: { name: 'Ultimate Cold Caller', icon: '🦁', color: 'bg-red-500' },
 };
 
 export function LiveCoachingSidebar({ 
