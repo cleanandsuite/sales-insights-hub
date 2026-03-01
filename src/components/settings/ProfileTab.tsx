@@ -56,6 +56,7 @@ export function ProfileTab() {
   const [newDifferentiator, setNewDifferentiator] = useState('');
   const [companyResearch, setCompanyResearch] = useState<CompanyResearchData | null>(null);
   const [isResearchingCompany, setIsResearchingCompany] = useState(false);
+  const { isDemoMode, isAdmin, toggleDemoMode, loading: demoLoading } = useDemoMode();
   const [profile, setProfile] = useState<Profile>({
     full_name: '',
     company: '',
@@ -185,7 +186,6 @@ export function ProfileTab() {
     );
   }
 
-  const { isDemoMode, isAdmin, toggleDemoMode, loading: demoLoading } = useDemoMode();
 
   return (
     <div className="space-y-8 max-w-3xl">
