@@ -3,6 +3,7 @@ import { LayoutDashboard, LogOut, Calendar, Settings, Target, BarChart3, Sparkle
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useSidebarState } from '@/contexts/SidebarContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -11,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { SellSigLogo, SellSigIcon } from '@/components/ui/SellSigLogo';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { PlanBadge } from '@/components/ui/PlanBadge';
 
 const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -75,10 +78,14 @@ function NavItem({ item, isCollapsed, onNavClick }: NavItemProps) {
 }
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { isManager } = useUserRole();
   const { isAdmin } = useAdminRole();
   const { isCollapsed, toggleCollapse } = useSidebarState();
+  const { plan } = useSubscription();
+  
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
   
   // All users see Dashboard, Enterprise, Call Activity, WinWords, Leads, Analytics, Schedule, Coaching
   let navItems = [...baseNavItems];
@@ -141,8 +148,35 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         ))}
       </nav>
 
-      {/* Sign Out & Toggle */}
+      {/* User Profile + Sign Out & Toggle */}
       <div className="border-t border-sidebar-border p-3 space-y-2">
+        {/* User identity card */}
+        {isCollapsed ? (
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <div className="flex justify-center py-1">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">{initials}</AvatarFallback>
+                </Avatar>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="font-medium">
+              <div>{displayName}</div>
+              <PlanBadge plan={plan} className="mt-1" />
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg bg-muted/30">
+            <Avatar className="h-8 w-8 shrink-0">
+              <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">{initials}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{displayName}</p>
+              <PlanBadge plan={plan} />
+            </div>
+          </div>
+        )}
+
         {isCollapsed ? (
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>

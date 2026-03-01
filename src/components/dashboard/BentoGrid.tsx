@@ -83,10 +83,10 @@ export function BentoGrid({ kpis, className }: BentoGridProps) {
         />
         <BentoWidget
           label="Pipeline"
-          value="$2.1M"
+          value="—"
           icon={BarChart3}
           iconColor="text-primary"
-          subtitle="47 open deals"
+          subtitle="View deals →"
           onClick={() => navigate('/enterprise')}
         />
         <BentoWidget
