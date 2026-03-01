@@ -32,7 +32,7 @@ interface CoachingSuggestion {
 
 interface LiveCoachingSidebarProps {
   transcript: string;
-  coachStyle: 'sellsig' | 'cardone' | 'belfort' | 'highticket' | 'neutral';
+  coachStyle: 'sellsig' | 'cardone' | 'belfort' | 'highticket' | 'neutral' | 'ultimate_cold_caller';
   isRecording: boolean;
   isPaused: boolean;
   onSuggestionFeedback?: (suggestionId: string, helpful: boolean) => void;

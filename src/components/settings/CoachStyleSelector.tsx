@@ -58,6 +58,14 @@ const COACH_STYLES = [{
   traits: ["Balanced", "Professional", "Flexible"],
   color: "border-muted bg-muted/30",
   badgeColor: "bg-muted-foreground"
+}, {
+  id: "ultimate_cold_caller",
+  name: "Ultimate Cold Caller",
+  icon: "🦁",
+  description: "Complete cold-call training archive. Real-time phase detection, tonality cues, high-sensory language, and probability scoring. 30-45% booking rate methodology.",
+  traits: ["Full Archive", "Phase Detection", "Tonality Cues", "30-45% Book Rate"],
+  color: "border-red-500 bg-red-500/10",
+  badgeColor: "bg-red-500"
 }];
 export function CoachStyleSelector({
   onStyleChange,
