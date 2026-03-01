@@ -21,6 +21,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useDemoMode } from "@/hooks/useDemoMode";
+import { demoROIMetrics, demoTopSuggestions, demoRiskAlerts } from "@/data/demoData";
 
 interface CoachingMetric {
   id: string;
@@ -53,6 +55,7 @@ interface TopSuggestion {
 
 export const AICoachingAnalytics = () => {
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const [isLoading, setIsLoading] = useState(true);
   const [metrics, setMetrics] = useState<ROIMetrics>({
     aiAssistedWinRate: 0,
@@ -176,8 +179,15 @@ export const AICoachingAnalytics = () => {
   };
 
   useEffect(() => {
+    if (isDemoMode) {
+      setMetrics(demoROIMetrics);
+      setTopSuggestions(demoTopSuggestions);
+      setRiskAlerts(demoRiskAlerts);
+      setIsLoading(false);
+      return;
+    }
     fetchAnalytics();
-  }, [user?.id]);
+  }, [user?.id, isDemoMode]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {

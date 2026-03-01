@@ -13,6 +13,8 @@ import {
   Clock, CheckCircle2, PlayCircle, XCircle, User
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoCoachingAssignments } from '@/data/demoData';
 
 interface CoachingAssignment {
   id: string;
@@ -29,6 +31,7 @@ interface CoachingAssignment {
 
 export function CoachingQueueCard() {
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const [assignments, setAssignments] = useState<CoachingAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAssignment, setSelectedAssignment] = useState<CoachingAssignment | null>(null);
@@ -37,8 +40,13 @@ export function CoachingQueueCard() {
   const [dialogAction, setDialogAction] = useState<'start' | 'complete' | 'dismiss' | null>(null);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setAssignments(demoCoachingAssignments);
+      setLoading(false);
+      return;
+    }
     if (user) fetchAssignments();
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const fetchAssignments = async () => {
     if (!user) return;

@@ -382,3 +382,82 @@ export const demoCoachingRecommendations = [
   { id: '2', skill_area: 'objection_handling', recommendation: 'Use "feel, felt, found" when Summit Financial raises compliance concerns', resource_url: null, resource_type: 'article', is_completed: false },
   { id: '3', skill_area: 'discovery', recommendation: 'Ask more SPIN-style situation questions with new leads like James Wilson', resource_url: null, resource_type: 'practice', is_completed: false },
 ];
+
+// ──── Coaching Queue Demo Data ────
+export const demoCoachingAssignments = [
+  {
+    id: 'demo-ca-1',
+    coaching_type: 'objection_handling',
+    priority: 'high' as const,
+    reason: "Review Lisa Park's objection handling — she raised API compatibility concerns during POC",
+    status: 'pending',
+    notes: 'Focus on technical objection reframing techniques',
+    due_date: new Date(Date.now() + 2 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+    assigned_by_name: 'Manager',
+    assigned_by_avatar: undefined,
+  },
+  {
+    id: 'demo-ca-2',
+    coaching_type: 'high_stakes_closer',
+    priority: 'critical' as const,
+    reason: 'Complete closing technique training before the DataSync Pro proposal review with CFO',
+    status: 'in_progress',
+    notes: 'Emily Rodriguez deal is worth $42k — needs strong close',
+    due_date: new Date(Date.now() + 1 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+    assigned_by_name: 'Sales Director',
+    assigned_by_avatar: undefined,
+  },
+  {
+    id: 'demo-ca-3',
+    coaching_type: 'discovery_booker',
+    priority: 'medium' as const,
+    reason: 'Improve discovery call structure — James Wilson call was too short (11 min)',
+    status: 'pending',
+    notes: null,
+    due_date: new Date(Date.now() + 5 * 86400000).toISOString(),
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    assigned_by_name: 'Manager',
+    assigned_by_avatar: undefined,
+  },
+];
+
+// ──── AI Coaching Analytics Demo Data ────
+export const demoROIMetrics = {
+  aiAssistedWinRate: 68,
+  nonAiWinRate: 42,
+  avgVelocityWithAi: 18,
+  avgVelocityWithoutAi: 32,
+  avgDealSizeWithAi: 72000,
+  avgDealSizeWithoutAi: 48000,
+  totalSuggestions: 47,
+  appliedSuggestions: 34,
+  positiveOutcomes: 28,
+};
+
+export const demoTopSuggestions = [
+  { text: 'objection_handling', applied: 12, positive: 10, effectiveness: 83 },
+  { text: 'discovery', applied: 9, positive: 7, effectiveness: 78 },
+  { text: 'closing', applied: 8, positive: 6, effectiveness: 75 },
+  { text: 'rapport_building', applied: 5, positive: 5, effectiveness: 100 },
+];
+
+export const demoRiskAlerts = [
+  {
+    id: 'demo-4',
+    contact_name: 'James Wilson',
+    company: 'Velocity Partners',
+    risk_level: 'high',
+    predicted_close_date: null,
+    ai_confidence: 65,
+  },
+  {
+    id: 'demo-6',
+    contact_name: 'Robert Finch',
+    company: 'Summit Financial',
+    risk_level: 'high',
+    predicted_close_date: new Date(Date.now() + 45 * 86400000).toISOString(),
+    ai_confidence: 72,
+  },
+];
