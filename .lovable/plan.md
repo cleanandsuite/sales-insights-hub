@@ -1,115 +1,113 @@
 
 
-# Ultimate Cold Caller AI Brain
+# Making SellSig Feel Commercial-Grade
 
-## Overview
+## The Diagnosis
 
-Add a new "Ultimate Cold Caller" AI brain that integrates into two places: (1) the WinWords cold call script generation system prompt, and (2) the live coaching engine as a new coach style selectable in Settings > AI. The brain encodes a complete cold-call training methodology (Micah's tips, DOS opener, Hormozi trust gap, Andy Elliot's 3 Yeses, Sudbury gatekeeper scripts, high-sensory language, etc.).
+The app has strong functionality but is missing the **trust signals, polish layers, and guided experience** that separate a prototype from a product customers pay $129+/mo for. Here's what's off:
 
-This plan focuses on integrating the brain into the existing architecture rather than building an entirely separate app, since the platform already has live coaching, script generation, call simulation, analytics, and gamification infrastructure.
+### 1. No User Presence or Identity
 
----
+The sidebar has zero indication of who's logged in -- no avatar, no name, no plan badge. Every commercial SaaS (HubSpot, Gong, Salesloft) anchors the user with their identity. Without it, the app feels anonymous and temporary.
 
-## 1. New Coach Style: "Ultimate Cold Caller"
+### 2. No Onboarding / Setup Checklist
 
-**Edge function (`live-coach/index.ts`)**: Add a new entry `ultimate_cold_caller` to the `COACH_PROMPTS` map with the full cold-call training archive as the system prompt. This brain covers:
+New users land on a dashboard with empty states that say "No calls yet" with a faded icon. Commercial apps show a **setup progress checklist** ("Complete your profile", "Make your first call", "Connect your calendar" -- 2/5 done). This gives direction and makes the product feel intentional.
 
-- Micah's 6 tips (novel language, low/slow tonality, clear enunciation, upfront contracts, strategic pauses, transition statements, pullback booking)
-- DOS opener methodology
-- High-sensory language library (wheelhouse, salt mines, bags of money, bananas)
-- Hormozi's trust gap + give-away-the-farm value stacking
-- Andy Elliot's 3 Yeses framework
-- Sudbury's gatekeeper bypass scripts
-- Frame control and belief transfer techniques
-- Phase detection (Opener / Pitch / Objection / Close) with probability scoring
-- Tonality cues (low & slow, pause here, slight smile voice)
-- Natural filler injection (ums/ahs for authenticity)
+### 3. Hardcoded Mock Data Leaking Through
 
-The prompt will instruct the AI to return suggestions with:
-- Exact next line with natural flow markers
-- Tonality cue
-- Current call phase + progress
-- Probability of continuing the call (green 70%+)
-- High-sensory language options when appropriate
+The BentoGrid shows **"$2.1M" and "47 open deals"** as static strings. This immediately signals "demo" to any buyer. Real data or honest empty states -- never fake numbers mixed with real ones.
 
-**Coach style selector (`CoachStyleSelector.tsx`)**: Add "Ultimate Cold Caller" as a new style option with id `ultimate_cold_caller`, lion emoji, and traits like "Full Archive", "Phase Detection", "Tonality Cues".
+### 4. No Notification Center
 
-**Hook (`useLiveCoaching.ts`)**: Add `ultimate_cold_caller` to the `CoachStyle` type union.
+No bell icon anywhere. Commercial products surface alerts (missed follow-ups, coaching nudges, deal risks) through a notification dropdown. This is table stakes for a paid tool.
+
+### 5. No Plan/Usage Awareness
+
+Users can't see what plan they're on, how many call minutes they've used, or when their billing cycle resets without digging into Settings. A subtle usage indicator in the sidebar creates urgency and shows value.
+
+### 6. No Global Search / Keyboard Shortcuts
+
+No command palette (Cmd+K). Commercial tools let power users search across leads, recordings, and deals from anywhere. Even just a hint ("Cmd+K") in the command bar signals sophistication.
+
+### 7. No Help/Support Access Point
+
+No persistent "?" button or support widget visible in the app shell. Users have to navigate to a separate Support page. A floating help button is standard for any paid SaaS.
 
 ---
 
-## 2. WinWords Cold Call Script Enhancement
+## The Plan
 
-**Edge function (`winwords-generate/index.ts`)**: When `scenario === 'cold_call'`, inject the Ultimate Cold Caller methodology into the system prompt (similar to how `appointment_setter` already has a dedicated methodology injection). This includes:
+### A. Sidebar: User Profile Card + Plan Badge
+**File: `src/components/layout/Sidebar.tsx`**
 
-- DOS opener variations
-- 3 Yeses flow integration
-- Gatekeeper bypass scripts
-- Voicemail competitor drop scripts
-- High-sensory language requirements
-- Tonality/delivery coaching per section
-- Phase scoring (like appointment setter's `section_scores`)
-- Success probability estimate per section
+Add a user profile section at the bottom of the sidebar (above Sign Out) showing:
+- User avatar (initials fallback)
+- Display name (truncated)
+- Plan badge ("Pro", "Starter", "Enterprise") pulled from subscription status
+- Subtle usage bar (call minutes used / total)
+
+### B. Onboarding Checklist Widget
+**New file: `src/components/dashboard/OnboardingChecklist.tsx`**
+
+A dismissible card on the Dashboard that tracks setup progress:
+- Profile completed (has full_name)
+- First call made (call_recordings count > 0)
+- Calendar connected (calendar_connections exists)
+- First script generated (winwords_scripts count > 0)
+- Coach style selected (ai_lead_settings exists)
+
+Shows as a progress ring + checklist. Disappears once all 5 are done or user dismisses it (stored in localStorage).
+
+**File: `src/pages/Dashboard.tsx`** -- Add the checklist between CommandBar and SpotlightCard.
+
+### C. Remove Hardcoded Mock Data from BentoGrid
+**File: `src/components/dashboard/BentoGrid.tsx`**
+
+Replace the fake "$2.1M" pipeline widget with real data from the `deals` or `leads` table, or show a honest empty state ("No deals tracked yet") with a CTA to the deals page.
+
+### D. Notification Bell in Command Bar
+**New file: `src/components/dashboard/NotificationBell.tsx`**
+
+A bell icon with unread count badge, dropdown showing:
+- Overdue follow-ups (from leads.next_action_due)
+- At-risk deals (from mock or real pipeline)
+- Coaching nudges (unreviewed coaching sessions)
+
+**File: `src/components/dashboard/CommandBar.tsx`** -- Add the bell between KPI pills and Start Call button.
+
+### E. Global Search Hint
+**File: `src/components/dashboard/CommandBar.tsx`**
+
+Add a "Search..." pill with a keyboard shortcut hint (Cmd+K) that opens a command palette dialog for searching leads, recordings, and navigating pages.
+
+**New file: `src/components/dashboard/GlobalSearch.tsx`** -- Command palette using the existing `cmdk` dependency (already installed).
+
+### F. Floating Help Button
+**File: `src/components/layout/DashboardLayout.tsx`**
+
+Add a fixed-position "?" circle button (bottom-right) that links to the Support page or opens a quick-help popover with links to docs, support, and keyboard shortcuts.
+
+### G. Plan Badge Component
+**New file: `src/components/ui/PlanBadge.tsx`**
+
+A small reusable badge that shows the user's current plan tier with appropriate color coding (Starter = blue, Pro = purple, Enterprise = gold).
 
 ---
 
-## 3. Settings > AI Section
+## Summary of Changes
 
-**Settings page (`Settings.tsx`)**: Add a new card in the AI tab below the Live AI Coaching section titled "AI Brains" that shows the Ultimate Cold Caller brain as a selectable preset. When selected, it sets the coach style to `ultimate_cold_caller` and enables live coaching automatically.
+| File | Change |
+|------|--------|
+| `src/components/layout/Sidebar.tsx` | Add user profile card with avatar, name, plan badge |
+| `src/components/dashboard/CommandBar.tsx` | Add notification bell + global search hint |
+| `src/components/dashboard/BentoGrid.tsx` | Replace hardcoded mock data with real queries or empty states |
+| `src/components/layout/DashboardLayout.tsx` | Add floating help button |
+| `src/pages/Dashboard.tsx` | Add onboarding checklist widget |
+| `src/components/dashboard/OnboardingChecklist.tsx` | **New** -- setup progress checklist |
+| `src/components/dashboard/NotificationBell.tsx` | **New** -- bell dropdown with alerts |
+| `src/components/dashboard/GlobalSearch.tsx` | **New** -- Cmd+K command palette |
+| `src/components/ui/PlanBadge.tsx` | **New** -- plan tier badge |
 
-The card will show:
-- Brain name: "Ultimate Cold Caller"
-- Description: Complete cold-call training archive with real-time phase detection, tonality cues, and probability scoring
-- Base booking rate: 30-45%
-- Methodologies included (listed as badges)
-- "Activate" button that sets coach style + enables coaching
-
----
-
-## Technical Details
-
-### Modified Files
-
-1. **`supabase/functions/live-coach/index.ts`** -- Add `ultimate_cold_caller` system prompt (~2000 chars) to `COACH_PROMPTS` map
-2. **`supabase/functions/winwords-generate/index.ts`** -- Add cold call methodology injection block (similar to `appointmentSetterContext`) for `scenario === 'cold_call'`
-3. **`src/hooks/useLiveCoaching.ts`** -- Add `'ultimate_cold_caller'` to `CoachStyle` type
-4. **`src/components/settings/CoachStyleSelector.tsx`** -- Add Ultimate Cold Caller to `COACH_STYLES` array
-5. **`src/pages/Settings.tsx`** -- Add "AI Brains" card in the AI tab
-
-### No Database Changes Required
-
-The existing `ai_lead_settings.live_coach_style` column is a text field and already supports any string value -- no migration needed.
-
-### Coach Style Entry
-
-```text
-id: "ultimate_cold_caller"
-name: "Ultimate Cold Caller"
-icon: lion emoji
-description: "Complete cold-call training archive. Real-time phase detection, tonality cues, high-sensory language, and probability scoring. 30-45% booking rate methodology."
-traits: ["Full Archive", "Phase Detection", "Tonality Cues", "30-45% Book Rate"]
-color: border-red-500 bg-red-500/10
-```
-
-### Live Coach System Prompt (Summary)
-
-The `ultimate_cold_caller` prompt will encode:
-- Phase detection (Opener -> Value Prop -> Discovery -> Objection -> Close)
-- Per-phase scoring and probability
-- Exact-line suggestions with natural fillers
-- Tonality cues per suggestion
-- High-sensory language options
-- Methodology tags (DOS, 3 Yeses, Hormozi, Sudbury, etc.)
-- Response format adds `phase`, `probability`, `tonality_cue`, and `sensory_options` fields
-
-### WinWords Cold Call Injection
-
-Similar to the existing `appointmentSetterContext` block, a `coldCallContext` variable will inject the methodology when `scenario === 'cold_call'`, adding:
-- DOS opener variations requirement
-- 3 Yeses framework integration
-- Gatekeeper bypass section
-- Voicemail drop script section
-- High-sensory language requirements
-- Delivery/tonality coaching per section
-- Section-level success probability scores
+No database changes required -- all data sources already exist.
 
