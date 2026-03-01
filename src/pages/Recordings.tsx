@@ -15,6 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { getToastErrorMessage } from '@/lib/errorSanitizer';
 import { transcodeToMp3 } from '@/lib/audioTranscoder';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoRecordings } from '@/data/demoData';
 
 interface CallRecording {
   id: string;
@@ -66,6 +68,7 @@ interface UploadedFile {
 
 export default function Recordings() {
   const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
@@ -83,6 +86,11 @@ export default function Recordings() {
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setRecordings(demoRecordings as CallRecording[]);
+      setLoading(false);
+      return;
+    }
     async function fetchData() {
       if (!user) return;
 
@@ -113,7 +121,7 @@ export default function Recordings() {
     }
 
     fetchData();
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '0:00';

@@ -16,6 +16,8 @@ import {
   ClipboardList
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoCoachingSkills, demoCoachingRecommendations } from '@/data/demoData';
 import { useAuth } from '@/hooks/useAuth';
 import { useEnterpriseSubscription } from '@/hooks/useEnterpriseSubscription';
 import { CoachingROIDashboard } from '@/components/coaching/CoachingROIDashboard';
@@ -43,6 +45,7 @@ interface Recommendation {
 export default function Coaching() {
   const { user } = useAuth();
   const { isEnterprise } = useEnterpriseSubscription();
+  const { isDemoMode } = useDemoMode();
   const [loading, setLoading] = useState(true);
   const [overallScore, setOverallScore] = useState(0);
   const [callsAnalyzed, setCallsAnalyzed] = useState(0);
@@ -50,8 +53,16 @@ export default function Coaching() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setOverallScore(78);
+      setCallsAnalyzed(12);
+      setSkills(demoCoachingSkills);
+      setRecommendations(demoCoachingRecommendations as Recommendation[]);
+      setLoading(false);
+      return;
+    }
     fetchCoachingData();
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const fetchCoachingData = async () => {
     if (!user) return;

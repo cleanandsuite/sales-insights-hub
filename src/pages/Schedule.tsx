@@ -8,11 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import { 
   Plus, Clock, Sparkles, AlertTriangle, Bell, Phone, CalendarIcon, Repeat
 } from 'lucide-react';
 import { format, isSameDay, isAfter, isBefore, startOfDay } from 'date-fns';
-import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,8 @@ import { ScheduleDetailPanel } from '@/components/schedule/ScheduleDetailPanel';
 import { CallOutcomeDialog } from '@/components/schedule/CallOutcomeDialog';
 import { useScheduleAssistant } from '@/hooks/useScheduleAssistant';
 import { useCallReminders } from '@/hooks/useCallReminders';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoScheduledCalls } from '@/data/demoData';
 
 interface ScheduledCall {
   id: string;
@@ -51,48 +53,7 @@ interface RecentRecording {
   created_at: string;
 }
 
-const DEMO_SCHEDULED_CALLS: ScheduledCall[] = [
-  {
-    id: 'demo-sc-1', title: 'Discovery Call — TechFlow Solutions',
-    description: 'Initial discovery with VP of Sales', contact_name: 'Sarah Mitchell',
-    contact_email: 'sarah@techflow.io',
-    scheduled_at: new Date(Date.now() + 2 * 3600000).toISOString(),
-    duration_minutes: 30, meeting_url: 'https://zoom.us/j/demo1', meeting_provider: 'zoom',
-    status: 'scheduled', prep_notes: 'Review their current tech stack. Prepare ROI comparison.',
-  },
-  {
-    id: 'demo-sc-2', title: 'Follow-up — CloudScale Inc',
-    description: 'Second call to discuss feature requirements', contact_name: 'Marcus Chen',
-    contact_email: 'mchen@cloudscale.com',
-    scheduled_at: new Date(Date.now() + 26 * 3600000).toISOString(),
-    duration_minutes: 45, meeting_url: null, meeting_provider: 'other',
-    status: 'scheduled', prep_notes: 'Bring feature comparison doc. Address timeline concerns.',
-  },
-  {
-    id: 'demo-sc-3', title: 'Proposal Review — DataSync Pro',
-    description: 'Walk through customized proposal with CFO present', contact_name: 'Emily Rodriguez',
-    contact_email: 'emily.r@datasyncpro.com',
-    scheduled_at: new Date(Date.now() + 50 * 3600000).toISOString(),
-    duration_minutes: 60, meeting_url: 'https://teams.microsoft.com/demo', meeting_provider: 'teams',
-    status: 'scheduled', prep_notes: 'CFO-ready ROI deck. Pilot program details ready.',
-  },
-  {
-    id: 'demo-sc-4', title: 'Quarterly Check-in — Pinnacle Group',
-    description: 'Regular account review', contact_name: 'David Park',
-    contact_email: 'dpark@pinnacle.com',
-    scheduled_at: new Date(Date.now() - 48 * 3600000).toISOString(),
-    duration_minutes: 30, meeting_url: null, meeting_provider: 'zoom',
-    status: 'completed', prep_notes: 'Review usage metrics and upsell opportunities.',
-  },
-  {
-    id: 'demo-sc-5', title: 'Cold Outreach — Summit Financial',
-    description: 'First contact after conference meeting', contact_name: 'Robert Finch',
-    contact_email: 'rfinch@summitfin.com',
-    scheduled_at: new Date(Date.now() - 24 * 3600000).toISOString(),
-    duration_minutes: 15, meeting_url: null, meeting_provider: 'other',
-    status: 'completed', prep_notes: 'Met at SaaStr — interested in Q3 budget cycle.',
-  },
-];
+// Demo scheduled calls now come from centralized demoData.ts
 
 export default function Schedule() {
   const navigate = useNavigate();
@@ -115,7 +76,7 @@ export default function Schedule() {
   const [enableReminder, setEnableReminder] = useState(true);
   const [reminderMinutes, setReminderMinutes] = useState('30');
   const [recurrenceRule, setRecurrenceRule] = useState('none');
-  const [demoMode, setDemoMode] = useState(false);
+  const { isDemoMode: demoMode } = useDemoMode();
 
   const [newCall, setNewCall] = useState({
     title: '', contactName: '', contactEmail: '', scheduledAt: '',
@@ -133,8 +94,8 @@ export default function Schedule() {
 
   useEffect(() => {
     if (demoMode) {
-      setCalls(DEMO_SCHEDULED_CALLS);
-      const upcoming = DEMO_SCHEDULED_CALLS.find(c => isAfter(new Date(c.scheduled_at), new Date())) || DEMO_SCHEDULED_CALLS[0];
+      setCalls(demoScheduledCalls as ScheduledCall[]);
+      const upcoming = (demoScheduledCalls as ScheduledCall[]).find(c => isAfter(new Date(c.scheduled_at), new Date())) || demoScheduledCalls[0] as ScheduledCall;
       setSelectedCall(upcoming);
       setLoading(false);
     } else {
@@ -245,11 +206,6 @@ export default function Schedule() {
             <p className="text-xs text-muted-foreground">Plan and prepare for upcoming calls</p>
           </div>
           <div className="flex gap-2 items-center">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border">
-              <Sparkles className={`h-3.5 w-3.5 ${demoMode ? 'text-primary' : 'text-muted-foreground'}`} />
-              <Label htmlFor="schedule-demo" className="text-xs font-medium cursor-pointer">Demo</Label>
-              <Switch id="schedule-demo" checked={demoMode} onCheckedChange={setDemoMode} />
-            </div>
             <Button variant="outline" size="sm" onClick={() => { setPreSelectedRecordingId(null); setIsAIDialogOpen(true); }}>
               <Sparkles className="h-4 w-4 mr-1" /> AI Schedule
             </Button>

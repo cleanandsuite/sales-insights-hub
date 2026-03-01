@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS demo_mode_enabled boolean NOT NULL DEFAULT false;

@@ -6,11 +6,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getToastErrorMessage } from '@/lib/errorSanitizer';
-import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart, Monitor, Search, Briefcase, CheckCircle2, MapPin, Volume2 } from 'lucide-react';
+import { User, Building, Mail, Save, Loader2, Sparkles, X, Plus, Zap, Target, Award, Shield, Clock, DollarSign, Users, Headphones, BarChart, Monitor, Search, Briefcase, CheckCircle2, MapPin, Volume2, FlaskConical } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { toast as sonnerToast } from 'sonner';
+import { useDemoMode } from '@/hooks/useDemoMode';
 
 interface CompanyResearchData {
   name: string;
@@ -183,8 +185,38 @@ export function ProfileTab() {
     );
   }
 
+  const { isDemoMode, isAdmin, toggleDemoMode, loading: demoLoading } = useDemoMode();
+
   return (
     <div className="space-y-8 max-w-3xl">
+      {/* Demo Mode Toggle — Admin Only */}
+      {isAdmin && (
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <FlaskConical className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Demo Mode</h2>
+                <p className="text-xs text-muted-foreground">Load Pinnacle Software sample data across all tools</p>
+              </div>
+            </div>
+            <Switch
+              checked={isDemoMode}
+              onCheckedChange={() => toggleDemoMode()}
+              disabled={demoLoading}
+            />
+          </div>
+          {isDemoMode && (
+            <p className="text-xs text-primary mt-3 flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3" />
+              Demo mode active — all pages show Pinnacle Software sample data
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Profile Incomplete Banner */}
       {!isProfileComplete && (
         <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex items-center gap-3">
