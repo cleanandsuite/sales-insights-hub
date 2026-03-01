@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Phone, Circle, Quote } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotificationBell } from './NotificationBell';
+import { GlobalSearch } from './GlobalSearch';
 
 interface CommandBarProps {
   userName: string;
@@ -63,8 +65,11 @@ export function CommandBar({ userName, kpis, quote, onStartCall, className }: Co
         </Badge>
       </div>
 
-      {/* Right: Start Call CTA */}
-      <Button
+      {/* Right: Search + Bell + Start Call CTA */}
+      <div className="flex items-center gap-2 shrink-0">
+        <GlobalSearch />
+        <NotificationBell />
+        <Button
         onClick={onStartCall}
         className={cn(
           'gap-2 font-bold shadow-lg shrink-0',
@@ -74,8 +79,9 @@ export function CommandBar({ userName, kpis, quote, onStartCall, className }: Co
         )}
       >
         <Phone className="h-4 w-4" />
-        Start Call
-      </Button>
+          Start Call
+        </Button>
+      </div>
     </div>
   );
 }

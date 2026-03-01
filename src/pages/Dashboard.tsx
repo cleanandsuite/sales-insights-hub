@@ -7,6 +7,7 @@ import { CommandBar } from '@/components/dashboard/CommandBar';
 import { SpotlightCard } from '@/components/dashboard/SpotlightCard';
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 import { BentoGrid } from '@/components/dashboard/BentoGrid';
+import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -100,6 +101,9 @@ export default function Dashboard() {
             quote={quote}
             onStartCall={() => setShowCallDialog(true)}
           />
+
+          {/* Onboarding Checklist */}
+          <OnboardingChecklist />
 
           {/* Spotlight */}
           <SpotlightCard
