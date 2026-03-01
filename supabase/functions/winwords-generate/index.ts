@@ -256,6 +256,39 @@ For EACH section, include:
 Also include section_scores (1-5) rating how well each section follows the methodology.
 ` : '';
 
+    // Cold call specific prompt injection (Ultimate Cold Caller brain)
+    const coldCallContext = scenario === 'cold_call' ? `
+
+CRITICAL METHODOLOGY — ULTIMATE COLD CALLER BRAIN:
+Generate the script using the complete cold-call training archive:
+
+1. **DOS OPENER** (Disarm-Opener-Setup): Lead with unexpected honesty to break auto-pilot. Pattern interrupt first, then set an upfront contract before any pitch. Include 3+ DOS opener variations.
+
+2. **ANDY ELLIOT'S 3 YESES**: Structure the flow to secure three micro-agreements before the main ask. Each "yes" stacks commitment. Mark where each Yes should land in the script.
+
+3. **GATEKEEPER BYPASS** (Sudbury Method): Include a dedicated gatekeeper section with confident, brief scripts. Sound like you belong: "Hey, it's [Name] — is [DM] around?" No over-explaining.
+
+4. **HIGH-SENSORY LANGUAGE**: Every section MUST use vivid, non-corporate language — "wheelhouse", "salt mines", "bags of money", "bananas", "home run". Paint mental pictures, never recite features.
+
+5. **HORMOZI TRUST GAP + VALUE STACK**: Bridge stranger→advisor gap by giving massive upfront value. Show so much insight they feel compelled to continue.
+
+6. **VOICEMAIL COMPETITOR DROP**: Include a voicemail script that name-drops a competitor success story to create FOMO and urgency.
+
+7. **TONALITY/DELIVERY COACHING**: For EACH section, include delivery_notes with:
+   - Voice: "Late-night FM DJ — low, slow, confident, warm"
+   - Pacing: "Intentional pauses after key phrases"
+   - Inflection: "Downward on statements, slight upward only on genuine questions"
+   - Natural fillers: Include strategic "um" or "actually" for authenticity
+
+8. **PHASE SCORING**: Include section_scores (1-5) and success_probability (%) for each section.
+
+9. **PULLBACK BOOKING**: When prospect hesitates, go LOWER not higher: "I'm not asking for a meeting — just 10 minutes to see if it's worth exploring."
+
+10. **UPFRONT CONTRACT**: "I'll be honest, I'm not sure if what we do is even relevant to you. Can I take 30 seconds to explain, and you tell me if it's worth a longer chat?"
+
+TARGET BOOKING RATE: 30-45% (vs 8-12% industry average). Every line must serve the booking.
+` : '';
+
     const systemPrompt = `You are WINWORDS, an elite AI sales coach that generates winning sales scripts. 
 You have analyzed millions of successful sales conversations and know exactly what works.
 
@@ -264,7 +297,7 @@ Your scripts are:
 - Personalized to the buyer's role, industry, and pain points
 - Designed for natural conversation flow
 - Proven to convert based on real data
-${appointmentSetterContext}
+${appointmentSetterContext}${coldCallContext}
 Always include:
 1. Multiple opener variations
 2. Key talking points with exact wording
@@ -311,7 +344,7 @@ Format your response as a valid JSON object with this structure:
       "fallback": "If they resist"
     }
   },
-  ${scenario === 'appointment_setter' ? '"section_scores": { "intro_double_tap": 4, "pattern_interrupt": 5 },' : ''}
+  ${scenario === 'appointment_setter' || scenario === 'cold_call' ? '"section_scores": { "opening": 4, "value_proposition": 5, "discovery": 4 },' : ''}
   "key_moments": [
     {"moment": "Description", "script": "Exact words to say", "timing": "When to use"}
   ],

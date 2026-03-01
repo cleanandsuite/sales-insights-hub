@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-export type CoachStyle = 'sellsig' | 'cardone' | 'belfort' | 'highticket' | 'neutral';
+export type CoachStyle = 'sellsig' | 'cardone' | 'belfort' | 'highticket' | 'neutral' | 'ultimate_cold_caller';
 
 interface LiveCoachingSettings {
   isEnabled: boolean;

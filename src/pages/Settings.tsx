@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,7 +38,56 @@ import { useAdminRole } from '@/hooks/useAdminRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useLiveCoaching } from '@/hooks/useLiveCoaching';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
+function AIBrainsCard() {
+  const { coachStyle, setCoachStyle, setEnabled, loading } = useLiveCoaching();
+  const { toast } = useToast();
+  const isActive = coachStyle === 'ultimate_cold_caller';
+
+  const handleActivate = async () => {
+    await setCoachStyle('ultimate_cold_caller');
+    await setEnabled(true);
+    toast({ title: '🦁 Ultimate Cold Caller activated', description: 'Live coaching is now using the full cold-call training archive.' });
+  };
+
+  if (loading) return null;
+
+  return (
+    <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-4">
+      <h2 className="text-lg font-semibold text-foreground">AI Brains</h2>
+      <p className="text-sm text-muted-foreground">Pre-built coaching systems with specialized methodologies</p>
+
+      <Card className={`p-5 border-2 transition-all ${isActive ? 'border-red-500 bg-red-500/10' : 'border-border hover:border-red-500/50'}`}>
+        <div className="flex items-start gap-4">
+          <div className="text-4xl">🦁</div>
+          <div className="flex-1 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-lg">Ultimate Cold Caller</span>
+              {isActive && <Badge className="bg-red-500">Active</Badge>}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Complete cold-call training archive with real-time phase detection, tonality cues, high-sensory language, and probability scoring.
+            </p>
+            <p className="text-sm font-medium text-red-400">Base booking rate: 30-45% (vs 8-12% industry avg)</p>
+            <div className="flex flex-wrap gap-1.5">
+              {['DOS Opener', '3 Yeses', 'Hormozi Value Stack', 'Sudbury Gatekeeper', 'Phase Detection', 'Tonality Cues', 'High-Sensory Language', 'Pullback Booking'].map(m => (
+                <Badge key={m} variant="outline" className="text-xs">{m}</Badge>
+              ))}
+            </div>
+            {!isActive && (
+              <Button size="sm" className="mt-2 bg-red-500 hover:bg-red-600" onClick={handleActivate}>
+                Activate Brain
+              </Button>
+            )}
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
 interface UserSettings {
   default_mic_device_id: string | null;
   default_speaker_device_id: string | null;
@@ -379,6 +428,9 @@ export default function Settings() {
                 <h2 className="text-lg font-semibold text-foreground mb-4">Live AI Coaching</h2>
                 <CoachStyleSelector />
               </div>
+
+              {/* AI Brains Section */}
+              <AIBrainsCard />
 
               {/* General AI Preferences */}
               <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
