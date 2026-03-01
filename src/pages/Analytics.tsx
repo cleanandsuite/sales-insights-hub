@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDemoMode } from '@/hooks/useDemoMode';
-import { demoCoachingSkills, demoCoachingRecommendations } from '@/data/demoData';
+import { demoCoachingSkills, demoCoachingRecommendations, demoAnalyticsData } from '@/data/demoData';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAnalyticsV2, TimeRange } from '@/hooks/useAnalyticsV2';
 import { AlertTriangle, RefreshCw, Brain, Target, BookOpen, ClipboardList } from 'lucide-react';
@@ -56,7 +56,23 @@ export default function Analytics() {
   const { isDemoMode } = useDemoMode();
 
   const loading = realLoading;
-  const data = realData;
+  const data = isDemoMode ? {
+    totalCalls: { value: demoAnalyticsData.totalCalls, change: 15, isPositive: true },
+    avgScore: { value: demoAnalyticsData.avgScore, change: 8, isPositive: true },
+    winRate: { value: 42, change: 5, isPositive: true },
+    avgDuration: { value: demoAnalyticsData.avgDuration, change: 12, isPositive: true },
+    talkRatio: demoAnalyticsData.talkRatio,
+    avgQuestions: { value: 7, change: 2, isPositive: true },
+    currentSkills: { ...demoAnalyticsData.currentSkills, engagement: 85 },
+    previousSkills: { ...demoAnalyticsData.previousSkills, engagement: 78 },
+    skillTrends: demoAnalyticsData.skillTrends.map(s => ({ ...s, overall: Math.round((s.rapport + s.discovery + s.presentation + s.closing + s.objectionHandling) / 5) })),
+    scoreDistribution: demoAnalyticsData.scoreDistribution.map(s => ({ ...s, percentage: Math.round((s.count / 10) * 100) })),
+    callsByTimeSlot: demoAnalyticsData.callsByTimeSlot.map(s => ({ ...s, day: 'Mon', successRate: 70 })),
+    topPatterns: demoAnalyticsData.topPatterns,
+    improvementAreas: demoAnalyticsData.improvementAreas.map(a => ({ area: a.area, frequency: 3, priority: 'high' as const, recommendation: a.suggestion })),
+    competitorMentions: demoAnalyticsData.competitorMentions.map(c => ({ competitor: c.name, count: c.count, winRate: 65 })),
+    callsOverTime: demoAnalyticsData.callsOverTime.map(c => ({ date: c.date, calls: c.count, avgScore: 78 })),
+  } satisfies import('@/hooks/useAnalyticsV2').AnalyticsDataV2 : realData;
 
   // Coaching state
   const [coachingLoading, setCoachingLoading] = useState(true);

@@ -7,6 +7,7 @@ import {
   CartesianGrid, ReferenceLine, Line, ComposedChart, Legend
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
+import { useDemoMode } from '@/hooks/useDemoMode';
 
 interface PipelineTrendChartProps {
   teamId: string;
@@ -23,14 +24,20 @@ interface WeekData {
 }
 
 export function PipelineTrendChart({ teamId }: PipelineTrendChartProps) {
+  const { isDemoMode } = useDemoMode();
   const [data, setData] = useState<WeekData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<'8w' | '12w' | '6m'>('8w');
   const [target, setTarget] = useState(15000000);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setData(generateSampleData(timeframe === '8w' ? 8 : timeframe === '12w' ? 12 : 24));
+      setLoading(false);
+      return;
+    }
     fetchPipelineData();
-  }, [teamId, timeframe]);
+  }, [teamId, timeframe, isDemoMode]);
 
   const fetchPipelineData = async () => {
     setLoading(true);
