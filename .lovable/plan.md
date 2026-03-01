@@ -1,113 +1,95 @@
 
 
-# Making SellSig Feel Commercial-Grade
+# Fix Runtime Error + Elevate Dashboard to $100-250/mo Commercial Grade
 
-## The Diagnosis
+## Part 1: Fix the Crash
 
-The app has strong functionality but is missing the **trust signals, polish layers, and guided experience** that separate a prototype from a product customers pay $129+/mo for. Here's what's off:
+**Root cause**: `DashboardLayout.tsx` calls `useNavigate()` as a hook, which fails during hot module reload due to a stale React context. The floating help button only needs a simple link, not a navigation hook.
 
-### 1. No User Presence or Identity
+**Fix**: Replace `useNavigate` with a `<Link>` component from react-router-dom in `DashboardLayout.tsx`. This eliminates the hook call entirely.
 
-The sidebar has zero indication of who's logged in -- no avatar, no name, no plan badge. Every commercial SaaS (HubSpot, Gong, Salesloft) anchors the user with their identity. Without it, the app feels anonymous and temporary.
+---
 
-### 2. No Onboarding / Setup Checklist
+## Part 2: Honest Design Assessment
 
-New users land on a dashboard with empty states that say "No calls yet" with a faded icon. Commercial apps show a **setup progress checklist** ("Complete your profile", "Make your first call", "Connect your calendar" -- 2/5 done). This gives direction and makes the product feel intentional.
+The current dashboard is **functional but flat**. Here's what separates it from a $100-250/mo product like Gong, Salesloft, or HubSpot:
 
-### 3. Hardcoded Mock Data Leaking Through
+### What's Missing
 
-The BentoGrid shows **"$2.1M" and "47 open deals"** as static strings. This immediately signals "demo" to any buyer. Real data or honest empty states -- never fake numbers mixed with real ones.
+1. **No visual weight or hierarchy** -- everything is the same visual "volume." Cards, stats, and feeds all look like the same flat rectangles. Premium products use subtle gradients, elevation differences, and accent borders to create visual depth.
 
-### 4. No Notification Center
+2. **No "hero metric"** -- there's no single dominant number that screams value (e.g., Gong's "Revenue at Risk: $2.3M" or HubSpot's pipeline forecast). The BentoGrid shows 6 equal-weight tiles, which dilutes impact.
 
-No bell icon anywhere. Commercial products surface alerts (missed follow-ups, coaching nudges, deal risks) through a notification dropdown. This is table stakes for a paid tool.
+3. **Empty states feel broken, not aspirational** -- "No calls yet" with a faded icon looks like a bug. Premium empty states show illustrations, value propositions, and clear CTAs ("Record your first call and unlock AI coaching").
 
-### 5. No Plan/Usage Awareness
+4. **No data visualization** -- zero charts, graphs, or trend lines on the main dashboard. Every premium sales tool has at least one prominent chart showing trajectory.
 
-Users can't see what plan they're on, how many call minutes they've used, or when their billing cycle resets without digging into Settings. A subtle usage indicator in the sidebar creates urgency and shows value.
+5. **The SpotlightCard feels like a banner ad** -- auto-rotating cards with "Start Call" is generic. Premium products show personalized, actionable intelligence ("3 leads haven't been contacted in 5+ days").
 
-### 6. No Global Search / Keyboard Shortcuts
-
-No command palette (Cmd+K). Commercial tools let power users search across leads, recordings, and deals from anywhere. Even just a hint ("Cmd+K") in the command bar signals sophistication.
-
-### 7. No Help/Support Access Point
-
-No persistent "?" button or support widget visible in the app shell. Users have to navigate to a separate Support page. A floating help button is standard for any paid SaaS.
+6. **Activity Feed is a plain list** -- no sentiment indicators, no visual scoring, no quick-action buttons. Gong's feed shows waveforms, talk ratios, and score badges inline.
 
 ---
 
 ## The Plan
 
-### A. Sidebar: User Profile Card + Plan Badge
-**File: `src/components/layout/Sidebar.tsx`**
-
-Add a user profile section at the bottom of the sidebar (above Sign Out) showing:
-- User avatar (initials fallback)
-- Display name (truncated)
-- Plan badge ("Pro", "Starter", "Enterprise") pulled from subscription status
-- Subtle usage bar (call minutes used / total)
-
-### B. Onboarding Checklist Widget
-**New file: `src/components/dashboard/OnboardingChecklist.tsx`**
-
-A dismissible card on the Dashboard that tracks setup progress:
-- Profile completed (has full_name)
-- First call made (call_recordings count > 0)
-- Calendar connected (calendar_connections exists)
-- First script generated (winwords_scripts count > 0)
-- Coach style selected (ai_lead_settings exists)
-
-Shows as a progress ring + checklist. Disappears once all 5 are done or user dismisses it (stored in localStorage).
-
-**File: `src/pages/Dashboard.tsx`** -- Add the checklist between CommandBar and SpotlightCard.
-
-### C. Remove Hardcoded Mock Data from BentoGrid
-**File: `src/components/dashboard/BentoGrid.tsx`**
-
-Replace the fake "$2.1M" pipeline widget with real data from the `deals` or `leads` table, or show a honest empty state ("No deals tracked yet") with a CTA to the deals page.
-
-### D. Notification Bell in Command Bar
-**New file: `src/components/dashboard/NotificationBell.tsx`**
-
-A bell icon with unread count badge, dropdown showing:
-- Overdue follow-ups (from leads.next_action_due)
-- At-risk deals (from mock or real pipeline)
-- Coaching nudges (unreviewed coaching sessions)
-
-**File: `src/components/dashboard/CommandBar.tsx`** -- Add the bell between KPI pills and Start Call button.
-
-### E. Global Search Hint
-**File: `src/components/dashboard/CommandBar.tsx`**
-
-Add a "Search..." pill with a keyboard shortcut hint (Cmd+K) that opens a command palette dialog for searching leads, recordings, and navigating pages.
-
-**New file: `src/components/dashboard/GlobalSearch.tsx`** -- Command palette using the existing `cmdk` dependency (already installed).
-
-### F. Floating Help Button
+### A. Fix DashboardLayout crash
 **File: `src/components/layout/DashboardLayout.tsx`**
+- Remove `useNavigate` import and hook call
+- Replace the help button with a `<Link to="/support">` wrapper
 
-Add a fixed-position "?" circle button (bottom-right) that links to the Support page or opens a quick-help popover with links to docs, support, and keyboard shortcuts.
+### B. Add a "Hero Metric" section to Dashboard
+**File: `src/pages/Dashboard.tsx`**
+- Add a prominent hero card above the BentoGrid showing the user's most important metric with a trend indicator (e.g., "Your Score Trend" with a sparkline, or "Calls This Week" with a week-over-week delta)
 
-### G. Plan Badge Component
-**New file: `src/components/ui/PlanBadge.tsx`**
+### C. Redesign BentoGrid with visual hierarchy
+**File: `src/components/dashboard/BentoGrid.tsx`**
+- Make the first widget (Calls Today) span full width with a larger font and subtle gradient background
+- Add a mini sparkline/trend indicator to the Avg Score widget
+- Replace the "Pipeline" placeholder with a real empty state that has a branded illustration feel
+- Make the AI Tip widget visually distinct (accent border, subtle glow)
 
-A small reusable badge that shows the user's current plan tier with appropriate color coding (Starter = blue, Pro = purple, Enterprise = gold).
+### D. Upgrade empty states across Dashboard
+**Files: `src/components/dashboard/ActivityFeed.tsx`, `src/components/dashboard/BentoGrid.tsx`**
+- Replace bare "No calls yet" with a branded empty state card: icon + headline + value proposition + CTA button
+- Example: "Your call activity will appear here. Make your first call to see AI-powered insights, scoring, and coaching."
+
+### E. Add a mini trend chart to CommandBar
+**File: `src/components/dashboard/CommandBar.tsx`**
+- Replace the static KPI badges with micro-visualizations (e.g., a 7-dot sparkline next to "Avg Score" showing last 7 days)
+- Add a subtle "streak" indicator ("3-day calling streak" with a flame icon)
+
+### F. Enhance SpotlightCard with real intelligence
+**File: `src/components/dashboard/SpotlightCard.tsx`**
+- Query real data: overdue leads, stale follow-ups, unreviewed coaching sessions
+- Show specific, personalized nudges instead of generic messages
+- Add a subtle gradient border to make it feel premium
+
+### G. Polish ActivityFeedItem with inline scoring
+**File: `src/components/dashboard/ActivityFeedItem.tsx`**
+- Add a color-coded score badge (green/yellow/red circle)
+- Show call duration in a human-readable format
+- Add a subtle hover state with a "View Analysis" action
+
+### H. Add subtle premium visual touches
+**File: `src/index.css`**
+- Add a `.card-premium` utility class with subtle gradient borders
+- Add a `.metric-hero` class for the hero metric section
+- Ensure consistent border-radius, shadow depth, and spacing
 
 ---
 
-## Summary of Changes
+## Technical Details
 
 | File | Change |
 |------|--------|
-| `src/components/layout/Sidebar.tsx` | Add user profile card with avatar, name, plan badge |
-| `src/components/dashboard/CommandBar.tsx` | Add notification bell + global search hint |
-| `src/components/dashboard/BentoGrid.tsx` | Replace hardcoded mock data with real queries or empty states |
-| `src/components/layout/DashboardLayout.tsx` | Add floating help button |
-| `src/pages/Dashboard.tsx` | Add onboarding checklist widget |
-| `src/components/dashboard/OnboardingChecklist.tsx` | **New** -- setup progress checklist |
-| `src/components/dashboard/NotificationBell.tsx` | **New** -- bell dropdown with alerts |
-| `src/components/dashboard/GlobalSearch.tsx` | **New** -- Cmd+K command palette |
-| `src/components/ui/PlanBadge.tsx` | **New** -- plan tier badge |
+| `src/components/layout/DashboardLayout.tsx` | Replace `useNavigate` with `Link` to fix crash |
+| `src/pages/Dashboard.tsx` | Add hero metric section |
+| `src/components/dashboard/BentoGrid.tsx` | Visual hierarchy, remove mock data, upgrade empty states |
+| `src/components/dashboard/CommandBar.tsx` | Micro-visualizations, streak indicator |
+| `src/components/dashboard/SpotlightCard.tsx` | Real data queries, premium styling |
+| `src/components/dashboard/ActivityFeed.tsx` | Branded empty states |
+| `src/components/dashboard/ActivityFeedItem.tsx` | Inline scoring, polish |
+| `src/index.css` | Premium utility classes |
 
-No database changes required -- all data sources already exist.
+No database changes required.
 
