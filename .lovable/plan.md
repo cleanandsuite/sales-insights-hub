@@ -1,95 +1,100 @@
 
 
-# Fix Runtime Error + Elevate Dashboard to $100-250/mo Commercial Grade
+# Unified Demo Mode: Admin-Only Global Toggle in Settings > Profile
 
-## Part 1: Fix the Crash
+## Overview
 
-**Root cause**: `DashboardLayout.tsx` calls `useNavigate()` as a hook, which fails during hot module reload due to a stale React context. The floating help button only needs a simple link, not a navigation hook.
+Create a single global demo mode toggle, visible only to admins, in Settings > Profile. This toggle controls demo data across ALL pages simultaneously. Before enabling demo mode, we'll also need to clear any existing test data so you see clean, consistent "Pinnacle Software" mock data throughout.
 
-**Fix**: Replace `useNavigate` with a `<Link>` component from react-router-dom in `DashboardLayout.tsx`. This eliminates the hook call entirely.
+## Architecture
+
+### 1. Database: Add `demo_mode_enabled` to profiles table
+
+Add a `demo_mode_enabled` boolean column (default `false`) to the `profiles` table. This persists the toggle state across sessions and devices.
+
+### 2. New Hook: `src/hooks/useDemoMode.ts`
+
+A centralized hook that:
+- Reads `demo_mode_enabled` from the user's profile
+- Checks admin role via `useAdminRole()`
+- Returns `{ isDemoMode, isAdmin, toggleDemoMode, loading }`
+- `toggleDemoMode()` updates the database column
+- Non-admins always get `isDemoMode = false`
+
+### 3. Centralized Demo Data: `src/data/demoData.ts`
+
+Single file containing all mock data themed around "Pinnacle Software" (mid-market B2B SaaS):
+- `demoLeads` -- 6 leads at various stages
+- `demoScheduledCalls` -- 5 scheduled calls (reuse existing DEMO_SCHEDULED_CALLS pattern)
+- `demoRecordings` -- 8 call recordings with scores, summaries, topics
+- `demoKPIs` -- dashboard metrics
+- `demoDeals` -- pipeline deals (refactored from existing mockDeals)
+- `demoCallActivities` -- activity feed entries
+- `demoCoachingData` -- skills, recommendations
+- `demoTeamPulse` -- enterprise rep activity
+
+### 4. Demo Toggle in ProfileTab (Admin-Only)
+
+**File: `src/components/settings/ProfileTab.tsx`**
+
+Add a new card at the TOP of the profile page (before the profile incomplete banner), gated behind `isAdmin`:
+- Title: "Demo Mode (Admin Only)"
+- Description: "Load sample data across all tools for testing and demos"
+- A single Switch toggle
+- Warning text: "This replaces all data views with Pinnacle Software sample data"
+
+### 5. Remove Per-Page Demo Toggles
+
+**File: `src/pages/Leads.tsx`**
+- Remove the local `demoMode` state and `handleToggleDemo`
+- Remove the demo toggle Switch from the header
+- Remove the "Demo Mode Active" banner
+- Import `useDemoMode()` and use `isDemoMode` to conditionally show demo data
+
+**File: `src/pages/Schedule.tsx`**
+- Remove local `demoMode` state
+- Remove the demo toggle from the UI
+- Import `useDemoMode()` and use `isDemoMode`
+
+### 6. Wire Demo Mode Into All Pages
+
+Each page imports `useDemoMode()` and conditionally renders demo data:
+
+| Page | Real Data Source | Demo Data Source |
+|------|-----------------|-----------------|
+| Dashboard | Supabase queries | `demoKPIs` |
+| Leads | `leads` table | `demoLeads` |
+| Schedule | `scheduled_calls` table | `demoScheduledCalls` |
+| Recordings | `call_recordings` table | `demoRecordings` |
+| Analytics | `useAnalyticsV2` | `demoAnalyticsData` |
+| Coaching | Supabase queries | `demoCoachingData` |
+| Enterprise | `mockDeals` (current) | `demoDeals` from unified source |
+| Activity Feed | `call_recordings` | `demoCallActivities` |
+
+### 7. Data Cleanup
+
+Before filling in demo data, we'll clear existing test records from your account. This is a one-time operation using the backend -- deleting rows from `call_recordings`, `leads`, `scheduled_calls`, `coaching_sessions`, etc. for your user. This ensures you see only the clean Pinnacle Software data when demo mode is on, and a fresh empty state when it's off.
 
 ---
 
-## Part 2: Honest Design Assessment
+## Technical Summary
 
-The current dashboard is **functional but flat**. Here's what separates it from a $100-250/mo product like Gong, Salesloft, or HubSpot:
+| Action | File |
+|--------|------|
+| **Migrate** | Add `demo_mode_enabled` boolean to `profiles` table |
+| **Create** | `src/hooks/useDemoMode.ts` |
+| **Create** | `src/data/demoData.ts` |
+| **Modify** | `src/components/settings/ProfileTab.tsx` -- add admin-only toggle card |
+| **Modify** | `src/pages/Leads.tsx` -- remove local toggle, use global hook |
+| **Modify** | `src/pages/Schedule.tsx` -- remove local toggle, use global hook |
+| **Modify** | `src/pages/Dashboard.tsx` -- inject demo KPIs when active |
+| **Modify** | `src/pages/Recordings.tsx` -- show demo recordings when active |
+| **Modify** | `src/pages/Analytics.tsx` -- feed demo chart data when active |
+| **Modify** | `src/pages/Coaching.tsx` -- use demo coaching data when active |
+| **Modify** | `src/pages/Enterprise.tsx` -- unify mock data source |
+| **Modify** | `src/components/dashboard/ActivityFeed.tsx` -- demo feed |
+| **Modify** | `src/components/dashboard/SpotlightCard.tsx` -- demo nudges |
+| **Modify** | `src/components/dashboard/OnboardingChecklist.tsx` -- hide in demo |
+| **Clean** | Delete existing test data from your account via backend query |
 
-### What's Missing
-
-1. **No visual weight or hierarchy** -- everything is the same visual "volume." Cards, stats, and feeds all look like the same flat rectangles. Premium products use subtle gradients, elevation differences, and accent borders to create visual depth.
-
-2. **No "hero metric"** -- there's no single dominant number that screams value (e.g., Gong's "Revenue at Risk: $2.3M" or HubSpot's pipeline forecast). The BentoGrid shows 6 equal-weight tiles, which dilutes impact.
-
-3. **Empty states feel broken, not aspirational** -- "No calls yet" with a faded icon looks like a bug. Premium empty states show illustrations, value propositions, and clear CTAs ("Record your first call and unlock AI coaching").
-
-4. **No data visualization** -- zero charts, graphs, or trend lines on the main dashboard. Every premium sales tool has at least one prominent chart showing trajectory.
-
-5. **The SpotlightCard feels like a banner ad** -- auto-rotating cards with "Start Call" is generic. Premium products show personalized, actionable intelligence ("3 leads haven't been contacted in 5+ days").
-
-6. **Activity Feed is a plain list** -- no sentiment indicators, no visual scoring, no quick-action buttons. Gong's feed shows waveforms, talk ratios, and score badges inline.
-
----
-
-## The Plan
-
-### A. Fix DashboardLayout crash
-**File: `src/components/layout/DashboardLayout.tsx`**
-- Remove `useNavigate` import and hook call
-- Replace the help button with a `<Link to="/support">` wrapper
-
-### B. Add a "Hero Metric" section to Dashboard
-**File: `src/pages/Dashboard.tsx`**
-- Add a prominent hero card above the BentoGrid showing the user's most important metric with a trend indicator (e.g., "Your Score Trend" with a sparkline, or "Calls This Week" with a week-over-week delta)
-
-### C. Redesign BentoGrid with visual hierarchy
-**File: `src/components/dashboard/BentoGrid.tsx`**
-- Make the first widget (Calls Today) span full width with a larger font and subtle gradient background
-- Add a mini sparkline/trend indicator to the Avg Score widget
-- Replace the "Pipeline" placeholder with a real empty state that has a branded illustration feel
-- Make the AI Tip widget visually distinct (accent border, subtle glow)
-
-### D. Upgrade empty states across Dashboard
-**Files: `src/components/dashboard/ActivityFeed.tsx`, `src/components/dashboard/BentoGrid.tsx`**
-- Replace bare "No calls yet" with a branded empty state card: icon + headline + value proposition + CTA button
-- Example: "Your call activity will appear here. Make your first call to see AI-powered insights, scoring, and coaching."
-
-### E. Add a mini trend chart to CommandBar
-**File: `src/components/dashboard/CommandBar.tsx`**
-- Replace the static KPI badges with micro-visualizations (e.g., a 7-dot sparkline next to "Avg Score" showing last 7 days)
-- Add a subtle "streak" indicator ("3-day calling streak" with a flame icon)
-
-### F. Enhance SpotlightCard with real intelligence
-**File: `src/components/dashboard/SpotlightCard.tsx`**
-- Query real data: overdue leads, stale follow-ups, unreviewed coaching sessions
-- Show specific, personalized nudges instead of generic messages
-- Add a subtle gradient border to make it feel premium
-
-### G. Polish ActivityFeedItem with inline scoring
-**File: `src/components/dashboard/ActivityFeedItem.tsx`**
-- Add a color-coded score badge (green/yellow/red circle)
-- Show call duration in a human-readable format
-- Add a subtle hover state with a "View Analysis" action
-
-### H. Add subtle premium visual touches
-**File: `src/index.css`**
-- Add a `.card-premium` utility class with subtle gradient borders
-- Add a `.metric-hero` class for the hero metric section
-- Ensure consistent border-radius, shadow depth, and spacing
-
----
-
-## Technical Details
-
-| File | Change |
-|------|--------|
-| `src/components/layout/DashboardLayout.tsx` | Replace `useNavigate` with `Link` to fix crash |
-| `src/pages/Dashboard.tsx` | Add hero metric section |
-| `src/components/dashboard/BentoGrid.tsx` | Visual hierarchy, remove mock data, upgrade empty states |
-| `src/components/dashboard/CommandBar.tsx` | Micro-visualizations, streak indicator |
-| `src/components/dashboard/SpotlightCard.tsx` | Real data queries, premium styling |
-| `src/components/dashboard/ActivityFeed.tsx` | Branded empty states |
-| `src/components/dashboard/ActivityFeedItem.tsx` | Inline scoring, polish |
-| `src/index.css` | Premium utility classes |
-
-No database changes required.
-
+No new tables needed -- just one column addition to `profiles`.
