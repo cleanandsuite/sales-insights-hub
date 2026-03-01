@@ -32,12 +32,35 @@ export function SalesforceRecordingView({ recording, onSyncComplete }: Salesforc
     setSyncing(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+      if (!user) throw new Error('Not authenticated');
+
+      // Get user's active CRM connection
+      const { data: connection, error: connError } = await supabase
+        .from('crm_connections')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+
+      if (connError) throw connError;
+      if (!connection) {
+        toast({
+          title: 'No CRM connection',
+          description: 'Please connect your Salesforce account in Settings first.',
+          variant: 'destructive',
+        });
+        setSyncing(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('salesforce-sync', {
         body: {
           action: 'link_recording',
           recordingId: recording.id,
-          userId: user?.id
+          connectionId: connection.id,
+          userId: user.id,
+          data: { contactId: `auto_${Date.now()}` }
         }
       });
       
