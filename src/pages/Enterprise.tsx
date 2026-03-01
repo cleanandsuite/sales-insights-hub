@@ -19,6 +19,12 @@ import { OrganizationIntegrations } from '@/components/enterprise/OrganizationIn
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
+// New commercial components
+import { ManagerKPISummary } from '@/components/enterprise/ManagerKPISummary';
+import { ProactiveAlertsBanner } from '@/components/enterprise/ProactiveAlertsBanner';
+import { TeamPulseStrip } from '@/components/enterprise/TeamPulseStrip';
+import { PipelineTrendChart } from '@/components/enterprise/PipelineTrendChart';
+
 // Deal components
 import { PipelineSummaryBar } from '@/components/deals/PipelineSummaryBar';
 import { DealsTable } from '@/components/deals/DealsTable';
@@ -157,7 +163,7 @@ export default function Enterprise() {
       {/* Dark gradient background overlay */}
       <div className="fixed inset-0 bg-gradient-to-br from-[#0a0a1f] via-[#111133] to-[#0a0a1f] -z-10" />
       
-      <div className="space-y-4 sm:space-y-8 animate-fade-in relative">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in relative">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -184,6 +190,22 @@ export default function Enterprise() {
               <span className="text-sm sm:text-base font-semibold text-foreground block">{organization.name}</span>
               <span className="text-xs text-muted-foreground font-mono">ID: {organization.id}</span>
             </div>
+          </div>
+        </div>
+
+        {/* Manager KPI Summary Row */}
+        <ManagerKPISummary />
+
+        {/* Proactive Risk Alerts */}
+        <ProactiveAlertsBanner />
+
+        {/* Team Pulse + Pipeline Forecast side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <div className="lg:col-span-2">
+            <TeamPulseStrip teamId={teamId || undefined} />
+          </div>
+          <div className="lg:col-span-3">
+            <PipelineTrendChart teamId={teamId || 'default'} />
           </div>
         </div>
 
