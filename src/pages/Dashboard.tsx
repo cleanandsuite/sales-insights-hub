@@ -10,6 +10,8 @@ import { BentoGrid } from '@/components/dashboard/BentoGrid';
 import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoKPIs } from '@/data/demoData';
 
 // Daily quote rotation
 const QUOTES = [
@@ -64,7 +66,9 @@ export default function Dashboard() {
   const [activeCall, setActiveCall] = useState<string | null>(null);
   const [activeCallName, setActiveCallName] = useState<string | undefined>(undefined);
   const { user } = useAuth();
-  const kpis = useRealKPIs();
+  const realKpis = useRealKPIs();
+  const { isDemoMode } = useDemoMode();
+  const kpis = isDemoMode ? demoKPIs : realKpis;
   const quote = getDailyQuote();
 
   // Auto-open dialer when navigated from WinWords with script
@@ -102,8 +106,8 @@ export default function Dashboard() {
             onStartCall={() => setShowCallDialog(true)}
           />
 
-          {/* Onboarding Checklist */}
-          <OnboardingChecklist />
+          {/* Onboarding Checklist — hidden in demo mode */}
+          {!isDemoMode && <OnboardingChecklist />}
 
           {/* Spotlight */}
           <SpotlightCard

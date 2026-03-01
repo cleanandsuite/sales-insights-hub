@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoActivityFeed } from '@/data/demoData';
 import { ActivityFeedItem } from './ActivityFeedItem';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,7 @@ interface ActivityFeedProps {
 export function ActivityFeed({ className }: ActivityFeedProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isDemoMode } = useDemoMode();
   const [recordings, setRecordings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -34,7 +37,14 @@ export function ActivityFeed({ className }: ActivityFeedProps) {
     setLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchRecordings(); }, [fetchRecordings]);
+  useEffect(() => {
+    if (isDemoMode) {
+      setRecordings(demoActivityFeed);
+      setLoading(false);
+    } else {
+      fetchRecordings();
+    }
+  }, [fetchRecordings, isDemoMode]);
 
   const filtered = recordings.filter(r => {
     if (!search) return true;

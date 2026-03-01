@@ -9,7 +9,6 @@ import { RecentActivityFeed } from '@/components/leads/RecentActivityFeed';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +21,8 @@ import { CallDialog } from '@/components/calling/CallDialog';
 import { CallInterface } from '@/components/calling/CallInterface';
 import { ImportLeadsDialog } from '@/components/leads/ImportLeadsDialog';
 import { ImportedLeadsTable } from '@/components/leads/ImportedLeadsTable';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoLeads, demoLeadActivities } from '@/data/demoData';
 
 interface Lead {
   id: string;
@@ -60,162 +61,7 @@ interface Lead {
   predicted_deal_value?: number | null;
   ai_assisted?: boolean;
 }
-
-// Demo data for showcasing AI capabilities
-const DEMO_LEADS: Lead[] = [
-  {
-    id: 'demo-1',
-    contact_name: 'Sarah Mitchell',
-    company: 'TechFlow Solutions',
-    title: 'VP of Sales',
-    email: 'sarah@techflow.io',
-    phone: '+1 (555) 234-5678',
-    location: 'San Francisco, CA',
-    ai_confidence: 94,
-    priority_score: 9.2,
-    lead_status: 'qualified',
-    primary_pain_point: 'Current tool requires 3 weeks of onboarding per rep',
-    budget_info: '$50k-100k annual',
-    timeline: '1-3 months',
-    next_action: 'Schedule demo with procurement team',
-    next_action_due: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-    is_hot_lead: true,
-    urgency_level: 'high',
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    call_duration_seconds: 1847,
-    recording_id: null,
-    engagement_score: 92,
-    key_quotes: ['"We need something our reps can use on day one"', '"Budget is approved, just need to finalize vendor"'],
-    agreed_next_steps: ['Send ROI calculator', 'Schedule procurement call Thursday'],
-    bant_budget: 85, bant_authority: 95, bant_need: 90, bant_timeline: 80,
-    sentiment_trend: [{ score: 0.7 }, { score: 0.8 }, { score: 0.9 }],
-    objection_patterns: ['Integration complexity'],
-    next_best_actions: [
-      { action: 'Send case study from similar company', priority: 'high', reason: 'Address integration concerns' },
-      { action: 'Prepare ROI comparison vs current tool', priority: 'medium', reason: 'Budget justification' }
-    ],
-    risk_level: 'low', deal_velocity_days: 14,
-    predicted_close_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
-    predicted_deal_value: 75000, ai_assisted: true
-  },
-  {
-    id: 'demo-2',
-    contact_name: 'Marcus Chen',
-    company: 'CloudScale Inc',
-    title: 'Director of Revenue Operations',
-    email: 'mchen@cloudscale.com',
-    phone: '+1 (555) 345-6789',
-    location: 'Austin, TX',
-    ai_confidence: 78, priority_score: 7.8,
-    lead_status: 'contacted',
-    primary_pain_point: 'Spending 4 hours/week on call reviews manually',
-    budget_info: 'Evaluating options', timeline: '3-6 months',
-    next_action: 'Follow up on feature requirements',
-    next_action_due: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-    is_hot_lead: false, urgency_level: 'medium',
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    call_duration_seconds: 1234, recording_id: null, engagement_score: 74,
-    key_quotes: ['"Manual review is killing our productivity"'],
-    agreed_next_steps: ['Send feature comparison doc'],
-    bant_budget: 60, bant_authority: 70, bant_need: 85, bant_timeline: 50,
-    sentiment_trend: [{ score: 0.6 }, { score: 0.7 }],
-    objection_patterns: ['Timeline uncertainty', 'Need stakeholder buy-in'],
-    next_best_actions: [
-      { action: 'Identify additional stakeholders', priority: 'high', reason: 'Need multi-threading' },
-    ],
-    risk_level: 'medium', deal_velocity_days: 45,
-    predicted_close_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
-    predicted_deal_value: 45000, ai_assisted: true
-  },
-  {
-    id: 'demo-3',
-    contact_name: 'Emily Rodriguez',
-    company: 'DataSync Pro',
-    title: 'Head of Sales Enablement',
-    email: 'emily.r@datasyncpro.com',
-    phone: '+1 (555) 456-7890',
-    location: 'New York, NY',
-    ai_confidence: 88, priority_score: 8.5,
-    lead_status: 'proposal',
-    primary_pain_point: 'Junior reps taking 6 months to ramp',
-    budget_info: '$30k-50k', timeline: 'immediate',
-    next_action: 'Send customized proposal',
-    next_action_due: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-    is_hot_lead: true, urgency_level: 'high',
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    call_duration_seconds: 2156, recording_id: null, engagement_score: 88,
-    key_quotes: ['"We need to cut ramp time in half"'],
-    agreed_next_steps: ['Finalize pricing', 'Set up pilot program'],
-    bant_budget: 75, bant_authority: 80, bant_need: 95, bant_timeline: 90,
-    sentiment_trend: [{ score: 0.75 }, { score: 0.85 }, { score: 0.88 }],
-    objection_patterns: ['Needs CFO approval'],
-    next_best_actions: [
-      { action: 'Prepare CFO-ready ROI deck', priority: 'high', reason: 'CFO is key decision maker' },
-    ],
-    risk_level: 'low', deal_velocity_days: 21,
-    predicted_close_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-    predicted_deal_value: 42000, ai_assisted: true
-  },
-  {
-    id: 'demo-4',
-    contact_name: 'James Wilson',
-    company: 'Velocity Partners',
-    title: 'Sales Manager',
-    email: 'jwilson@velocitypartners.com',
-    phone: '+1 (555) 567-8901',
-    location: 'Chicago, IL',
-    ai_confidence: 65, priority_score: 6.2,
-    lead_status: 'new',
-    primary_pain_point: 'No visibility into rep call quality',
-    budget_info: 'TBD', timeline: '6+ months',
-    next_action: 'Discovery call to understand full needs',
-    next_action_due: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    is_hot_lead: false, urgency_level: 'low',
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    call_duration_seconds: 678, recording_id: null, engagement_score: 55,
-    key_quotes: ['"Just exploring options for now"'],
-    agreed_next_steps: ['Schedule deeper discovery'],
-    bant_budget: 40, bant_authority: 55, bant_need: 70, bant_timeline: 30,
-    sentiment_trend: [{ score: 0.5 }],
-    objection_patterns: ['Early stage', 'No budget allocated'],
-    next_best_actions: [
-      { action: 'Nurture with educational content', priority: 'low', reason: 'Long sales cycle expected' }
-    ],
-    risk_level: 'high', deal_velocity_days: null,
-    predicted_close_date: null, predicted_deal_value: 25000, ai_assisted: true
-  }
-];
-
-const DEMO_ACTIVITIES = [
-  {
-    id: 'demo-act-1', type: 'ai_scored' as const,
-    title: 'AI detected buying signal',
-    description: 'Sarah Mitchell mentioned "budget is approved" - high intent detected',
-    timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    leadId: 'demo-1', confidence: 94
-  },
-  {
-    id: 'demo-act-2', type: 'new_lead' as const,
-    title: 'New hot lead: Sarah Mitchell (TechFlow)',
-    description: 'VP of Sales looking for Gong alternative',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    leadId: 'demo-1', confidence: 94
-  },
-  {
-    id: 'demo-act-3', type: 'ai_scored' as const,
-    title: 'Lead score increased: Emily Rodriguez',
-    description: 'Moved to Proposal stage, confidence up 12%',
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    leadId: 'demo-3', confidence: 88
-  },
-  {
-    id: 'demo-act-4', type: 'new_lead' as const,
-    title: 'New lead: James Wilson (Velocity)',
-    description: 'Sales Manager exploring call quality tools',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    leadId: 'demo-4', confidence: 65
-  }
-];
+// Demo data now comes from centralized demoData.ts
 
 export default function Leads() {
   const { user } = useAuth();
@@ -226,7 +72,7 @@ export default function Leads() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [aiActive, setAiActive] = useState(true);
-  const [demoMode, setDemoMode] = useState(false);
+  const { isDemoMode: demoMode } = useDemoMode();
   const [showCallDialog, setShowCallDialog] = useState(false);
   const [activeCall, setActiveCall] = useState<string | null>(null);
   const [activeCallName, setActiveCallName] = useState<string | undefined>(undefined);
@@ -244,8 +90,8 @@ export default function Leads() {
 
   useEffect(() => {
     if (demoMode) {
-      setLeads(DEMO_LEADS);
-      setStats({ todaysLeads: 2, weeklyLeads: 4, conversionRate: 34, avgResponseTime: '0.8 hrs' });
+      setLeads(demoLeads as Lead[]);
+      setStats({ todaysLeads: 2, weeklyLeads: 6, conversionRate: 34, avgResponseTime: '0.8 hrs' });
       setLoading(false);
     } else {
       fetchLeads();
@@ -287,7 +133,7 @@ export default function Leads() {
   const pendingFollowups = leads.filter(l => l.next_action_due && new Date(l.next_action_due) <= new Date()).length;
 
   const recentActivities = demoMode
-    ? DEMO_ACTIVITIES
+    ? demoLeadActivities
     : leads.slice(0, 5).map(lead => ({
         id: lead.id, type: 'new_lead' as const,
         title: `New lead: ${lead.contact_name}${lead.company ? ` (${lead.company})` : ''}`,
@@ -379,11 +225,7 @@ export default function Leads() {
     navigate('/schedule');
   };
 
-  const handleToggleDemo = () => {
-    setDemoMode(!demoMode);
-    if (!demoMode) toast.success('Demo mode enabled - showing sample AI-generated leads');
-    else toast('Demo mode disabled', { description: 'Showing your actual leads' });
-  };
+  // Demo mode is now controlled globally via Settings > Profile
 
   return (
     <>
@@ -415,11 +257,6 @@ export default function Leads() {
               <p className="text-sm text-muted-foreground mt-1">AI-powered lead generation and management</p>
             </div>
             <div className="flex gap-2 items-center flex-wrap">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50 border border-border">
-                <Sparkles className={`h-4 w-4 ${demoMode ? 'text-primary' : 'text-muted-foreground'}`} />
-                <Label htmlFor="demo-mode" className="text-sm font-medium cursor-pointer">Demo</Label>
-                <Switch id="demo-mode" checked={demoMode} onCheckedChange={handleToggleDemo} />
-              </div>
               <Button variant="outline" size="sm" className="gap-2">
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">Export</span>
@@ -432,16 +269,6 @@ export default function Leads() {
             </div>
           </div>
 
-          {/* Demo Mode Banner */}
-          {demoMode && (
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
-              <div>
-                <p className="font-medium text-sm">Demo Mode Active</p>
-                <p className="text-xs text-muted-foreground">Showing sample AI-generated leads to demonstrate capabilities.</p>
-              </div>
-            </div>
-          )}
 
           {/* Sub-Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -513,9 +340,6 @@ export default function Leads() {
                       {!demoMode && (
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button onClick={() => navigate('/dashboard')}>Start Recording</Button>
-                          <Button variant="outline" onClick={handleToggleDemo} className="gap-2">
-                            <Sparkles className="h-4 w-4" />Try Demo Mode
-                          </Button>
                         </div>
                       )}
                     </div>

@@ -2112,6 +2112,7 @@ export type Database = {
           company: string | null
           company_strengths: string[] | null
           created_at: string
+          demo_mode_enabled: boolean
           full_name: string | null
           id: string
           is_active: boolean | null
@@ -2131,6 +2132,7 @@ export type Database = {
           company?: string | null
           company_strengths?: string[] | null
           created_at?: string
+          demo_mode_enabled?: boolean
           full_name?: string | null
           id?: string
           is_active?: boolean | null
@@ -2150,6 +2152,7 @@ export type Database = {
           company?: string | null
           company_strengths?: string[] | null
           created_at?: string
+          demo_mode_enabled?: boolean
           full_name?: string | null
           id?: string
           is_active?: boolean | null

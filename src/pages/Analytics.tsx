@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDemoMode } from '@/hooks/useDemoMode';
+import { demoCoachingSkills, demoCoachingRecommendations } from '@/data/demoData';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAnalyticsV2, TimeRange } from '@/hooks/useAnalyticsV2';
 import { AlertTriangle, RefreshCw, Brain, Target, BookOpen, ClipboardList } from 'lucide-react';
@@ -16,7 +18,6 @@ import { CoachStyleSelector } from '@/components/settings/CoachStyleSelector';
 import { EnhancedSkillsTab } from '@/components/coaching/EnhancedSkillsTab';
 import { ManagerCoachingCommands } from '@/components/coaching/ManagerCoachingCommands';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect } from 'react';
 
 // Analytics Components
 import { AnalyticsOverviewCards } from '@/components/analytics/AnalyticsOverviewCards';
@@ -48,10 +49,14 @@ interface Recommendation {
 
 export default function Analytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
-  const { data, loading, error, refetch } = useAnalyticsV2(timeRange);
+  const { data: realData, loading: realLoading, error, refetch } = useAnalyticsV2(timeRange);
   const { user } = useAuth();
   const { isEnterprise } = useEnterpriseSubscription();
   const { isManager } = useUserRole();
+  const { isDemoMode } = useDemoMode();
+
+  const loading = realLoading;
+  const data = realData;
 
   // Coaching state
   const [coachingLoading, setCoachingLoading] = useState(true);
@@ -61,8 +66,16 @@ export default function Analytics() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setOverallScore(78);
+      setCallsAnalyzed(12);
+      setSkills(demoCoachingSkills);
+      setRecommendations(demoCoachingRecommendations as Recommendation[]);
+      setCoachingLoading(false);
+      return;
+    }
     fetchCoachingData();
-  }, [user]);
+  }, [user, isDemoMode]);
 
   const fetchCoachingData = async () => {
     if (!user) return;
