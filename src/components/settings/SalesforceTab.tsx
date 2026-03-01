@@ -59,10 +59,13 @@ export function SalesforceTab() {
     if (!user) return;
     try {
       const { data, error } = await supabase.functions.invoke('salesforce-sync', { body: { action: 'get_oauth_url', userId: user.id } });
-      if (error) throw error;
+      if (error) {
+        toast({ title: 'Salesforce Not Configured', description: 'Salesforce OAuth credentials (Client ID & Secret) need to be configured before you can connect.' });
+        return;
+      }
       if (data?.url) { window.location.href = data.url; }
-      else if (data?.error) { toast({ title: 'Configuration Required', description: data.message, variant: 'destructive' }); }
-    } catch (error: unknown) { toast({ title: 'Connection failed', description: getToastErrorMessage(error, 'sync'), variant: 'destructive' }); }
+      else if (data?.error) { toast({ title: 'Configuration Required', description: data.message }); }
+    } catch (error: unknown) { toast({ title: 'Salesforce Not Configured', description: 'Salesforce OAuth credentials need to be set up before you can connect.' }); }
   };
 
   const handleDisconnect = async () => {
