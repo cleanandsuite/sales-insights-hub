@@ -603,6 +603,23 @@
     0 24px 48px hsl(0 0% 0% / 0.06);
 }
 
+/* Hero metric section */
+.metric-hero {
+  background: linear-gradient(135deg, 
+    hsl(var(--primary) / 0.08) 0%,
+    hsl(var(--primary) / 0.02) 100%
+  );
+  border: 1px solid hsl(var(--primary) / 0.15);
+}
+
+.dark .metric-hero {
+  background: linear-gradient(135deg,
+    hsl(var(--primary) / 0.12) 0%,
+    hsl(var(--primary) / 0.04) 100%
+  );
+  border-color: hsl(var(--primary) / 0.2);
+}
+
 .icon-gradient-teal {
   background: linear-gradient(135deg, hsl(166 100% 42%) 0%, hsl(177 70% 41%) 100%);
   color: white;

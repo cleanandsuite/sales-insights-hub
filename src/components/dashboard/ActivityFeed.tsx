@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ActivityFeedItem } from './ActivityFeedItem';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Mic, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Search, Mic, ChevronLeft, ChevronRight, ArrowRight, Phone, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ActivityFeedProps {
@@ -82,9 +82,24 @@ export function ActivityFeed({ className }: ActivityFeedProps) {
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       ) : paginated.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          <Mic className="h-8 w-8 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">{recordings.length === 0 ? 'No calls yet' : 'No matches'}</p>
+        <div className="rounded-2xl border border-dashed border-border/60 p-8 text-center">
+          <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+            <Phone className="h-6 w-6 text-primary" />
+          </div>
+          <h4 className="text-sm font-semibold text-foreground mb-1">
+            {recordings.length === 0 ? 'No calls yet' : 'No matches found'}
+          </h4>
+          <p className="text-xs text-muted-foreground max-w-[240px] mx-auto mb-4">
+            {recordings.length === 0
+              ? 'Record your first call to unlock AI-powered scoring, coaching insights, and performance tracking.'
+              : 'Try a different search term.'}
+          </p>
+          {recordings.length === 0 && (
+            <div className="flex items-center justify-center gap-1.5 text-xs text-accent font-medium">
+              <Sparkles className="h-3 w-3" />
+              AI coaching activates after your first call
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
