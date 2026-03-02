@@ -768,6 +768,18 @@
   animation: cin-pulse-dot 2s ease-in-out infinite;
 }
 
+/* Hero waveform bar breathing */
+@keyframes cin-waveform {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 0.8; }
+}
+
+/* Coaching popup entrance */
+@keyframes cin-coach-pop {
+  0% { opacity: 0; transform: scale(0.85) translateY(6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 /* EKG waveform dash animation */
 @keyframes cin-ekg {
   to { stroke-dashoffset: 0; }
