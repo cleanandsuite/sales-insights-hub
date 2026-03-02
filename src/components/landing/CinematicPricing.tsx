@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, Sparkles } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,6 +27,7 @@ const tiers = [
       'Email support (48-hr SLA)',
     ],
     highlighted: false,
+    premium: false,
     cta: 'Start Free Trial',
   },
   {
@@ -53,6 +54,7 @@ const tiers = [
       '🔗 CRM Sync: Salesforce & HubSpot — coming soon',
     ],
     highlighted: true,
+    premium: false,
     cta: 'Book a Demo',
   },
   {
@@ -60,7 +62,6 @@ const tiers = [
     price: 'Custom',
     period: '',
     desc: 'Tailored for scaling revenue organizations. Advanced performance transparency, accelerated team development, and maximum coaching flexibility.',
-    subheadline: 'Minimum 10 seats · Custom pricing & contract terms',
     features: [
       'Everything in Pro, plus:',
       'Gamified Performance Ranking System',
@@ -73,6 +74,7 @@ const tiers = [
       'Flexible seat scaling',
     ],
     highlighted: false,
+    premium: true,
     cta: '📞 Contact Sales',
     ctaSub: 'Request a personalized demo →',
   },
@@ -103,6 +105,21 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
     return () => ctx.revert();
   }, []);
 
+  const getCardClasses = (tier: typeof tiers[number]) => {
+    const base = 'rounded-[2rem] p-8 flex flex-col transition-all duration-300 cursor-pointer hover:scale-[1.03] hover:-translate-y-1 border';
+
+    if (tier.premium) {
+      return `${base} bg-gradient-to-b from-[#1a1a2e] to-[#16213e] border-white/[0.12] shadow-[0_0_40px_rgba(251,191,36,0.08)] hover:shadow-[0_0_60px_rgba(251,191,36,0.15)]`;
+    }
+    if (tier.highlighted) {
+      return `${base} bg-[hsl(var(--cin-teal))]/10 border-2 border-[hsl(var(--cin-teal))]/30 scale-[1.02] ring-1 ring-[hsl(var(--cin-teal))]/20 hover:bg-[hsl(var(--cin-teal))]/15`;
+    }
+    if (tier.promo && !tier.highlighted) {
+      return `${base} bg-white/[0.03] border-[hsl(var(--cin-teal))]/20 shadow-[0_0_30px_rgba(20,184,166,0.08)] hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(20,184,166,0.15)]`;
+    }
+    return `${base} bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.06]`;
+  };
+
   return (
     <section id="pricing" ref={sectionRef} className="bg-[hsl(var(--cin-bg))] py-24 md:py-32 px-6 md:px-12">
       <div className="max-w-6xl mx-auto">
@@ -112,7 +129,6 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
             Invest in every conversation.
           </h2>
 
-          {/* Toggle */}
           <div className="inline-flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-full p-1">
             <button
               onClick={() => setAnnual(false)}
@@ -131,20 +147,26 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
 
         <div className="grid md:grid-cols-3 gap-6">
           {tiers.map((tier, i) => (
-            <div
-              key={i}
-              data-pricing-card
-              className={`rounded-[2rem] p-8 flex flex-col transition-all duration-500 ${
-                tier.highlighted
-                  ? 'bg-[hsl(var(--cin-teal))]/10 border-2 border-[hsl(var(--cin-teal))]/30 scale-[1.02] ring-1 ring-[hsl(var(--cin-teal))]/20'
-                  : 'bg-white/[0.03] border border-white/[0.08]'
-              }`}
-            >
+            <div key={i} data-pricing-card className={getCardClasses(tier)}>
+              {/* Starter "Best Value" ribbon */}
+              {tier.promo && !tier.highlighted && !tier.premium && (
+                <div className="flex items-center gap-1.5 mb-4">
+                  <Sparkles className="w-4 h-4 text-[hsl(var(--cin-teal))]" />
+                  <span className="text-[hsl(var(--cin-teal))] text-xs font-bold uppercase tracking-wider">Best Value</span>
+                </div>
+              )}
+
               <div className="mb-6">
-                <h3 className={`text-lg font-semibold mb-1 ${tier.highlighted ? 'text-[hsl(var(--cin-teal))]' : 'text-white'}`}>
+                <h3 className={`text-2xl font-bold mb-2 ${
+                  tier.premium
+                    ? 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent'
+                    : tier.highlighted
+                      ? 'text-[hsl(var(--cin-teal))]'
+                      : 'text-white'
+                }`}>
                   {tier.name}
                 </h3>
-                <p className="text-white/40 text-sm">{tier.desc}</p>
+                <p className={`text-base ${tier.premium ? 'text-white/50' : 'text-white/40'}`}>{tier.desc}</p>
                 {'subheadline' in tier && tier.subheadline && (
                   <p className="text-white/50 text-xs mt-2 font-medium">{tier.subheadline}</p>
                 )}
@@ -164,16 +186,21 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                     {annual ? `$${Math.round(parseInt(tier.originalPrice.slice(1)) * 0.8)}` : tier.originalPrice}
                   </span>
                 )}
-                <span className="text-4xl font-bold text-white">
+                <span className={`text-4xl font-bold ${tier.premium ? 'text-gray-200' : 'text-white'}`}>
                   {tier.price === 'Custom' ? tier.price : (annual ? `$${Math.round(parseInt(tier.price.slice(1)) * 0.8)}` : tier.price)}
                 </span>
                 {tier.period && <span className="text-white/40 text-base">{tier.period}</span>}
+                {tier.premium && (
+                  <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">Minimum 10 seats · Custom pricing & contract terms</p>
+                )}
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
                 {tier.features.map((f, j) => (
                   <li key={j} className="flex items-start gap-3 text-white/60 text-sm">
-                    <Check className={`w-4 h-4 mt-0.5 flex-shrink-0 ${tier.highlighted ? 'text-[hsl(var(--cin-teal))]' : 'text-white/30'}`} />
+                    <Check className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                      tier.premium ? 'text-amber-400' : tier.highlighted ? 'text-[hsl(var(--cin-teal))]' : 'text-white/30'
+                    }`} />
                     {f}
                   </li>
                 ))}
@@ -182,10 +209,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
               <div>
                 <button
                   onClick={onStartTrialClick}
-                  className={`magnetic-btn w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2 ${
-                    tier.highlighted
-                      ? 'bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))]'
-                      : 'border border-white/[0.15] text-white hover:bg-white/[0.05]'
+                  className={`magnetic-btn w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+                    tier.premium
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black hover:from-amber-400 hover:to-yellow-500'
+                      : tier.highlighted
+                        ? 'bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))]'
+                        : 'border border-white/[0.15] text-white hover:bg-white/[0.05]'
                   }`}
                 >
                   {tier.cta} <ArrowRight className="w-4 h-4" />
