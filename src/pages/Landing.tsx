@@ -1,16 +1,10 @@
-import { LandingHeader } from '@/components/landing/LandingHeader';
-import { HeroSection } from '@/components/landing/HeroSection';
-import { LogoBarSection } from '@/components/landing/LogoBarSection';
-import { StatsSection } from '@/components/landing/StatsSection';
-import { PlatformSection } from '@/components/landing/PlatformSection';
-import { FeaturesSection } from '@/components/landing/FeaturesSection';
-import { PhoneLineSection } from '@/components/landing/PhoneLineSection';
-import { SocialProofSection } from '@/components/landing/SocialProofSection';
-import { PricingSection } from '@/components/landing/PricingSection';
-import { FAQSection } from '@/components/landing/FAQSection';
-import { CTASection } from '@/components/landing/CTASection';
-import { LandingFooter } from '@/components/landing/LandingFooter';
-import { BuiltBySalesSection } from '@/components/landing/BuiltBySalesSection';
+import { CinematicNavbar } from '@/components/landing/CinematicNavbar';
+import { CinematicHero } from '@/components/landing/CinematicHero';
+import { CinematicFeatures } from '@/components/landing/CinematicFeatures';
+import { CinematicPhilosophy } from '@/components/landing/CinematicPhilosophy';
+import { CinematicProtocol } from '@/components/landing/CinematicProtocol';
+import { CinematicPricing } from '@/components/landing/CinematicPricing';
+import { CinematicFooter } from '@/components/landing/CinematicFooter';
 
 export default function Landing() {
   const handleStartTrialClick = () => {
@@ -18,24 +12,18 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-jakarta landing-grid-bg overflow-x-hidden">
-      <LandingHeader onStartTrialClick={handleStartTrialClick} />
+    <div className="min-h-screen bg-[hsl(var(--cin-bg))] cinematic-noise overflow-x-hidden">
+      <CinematicNavbar onStartTrialClick={handleStartTrialClick} />
 
       <main>
-        <HeroSection onStartTrialClick={handleStartTrialClick} />
-        <LogoBarSection />
-        <StatsSection />
-        <PlatformSection />
-        <FeaturesSection />
-        <PhoneLineSection onStartTrialClick={handleStartTrialClick} />
-        <SocialProofSection />
-        <PricingSection />
-        <FAQSection />
-        <BuiltBySalesSection />
-        <CTASection onStartTrialClick={handleStartTrialClick} />
+        <CinematicHero onStartTrialClick={handleStartTrialClick} />
+        <CinematicFeatures />
+        <CinematicPhilosophy />
+        <CinematicProtocol />
+        <CinematicPricing onStartTrialClick={handleStartTrialClick} />
       </main>
 
-      <LandingFooter />
+      <CinematicFooter />
     </div>
   );
 }
