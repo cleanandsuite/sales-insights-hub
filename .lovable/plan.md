@@ -1,71 +1,63 @@
 
 
-# Switch All LLM Calls from MiniMax M2.5 to DeepSeek V3
+# Update Coach Style Access by Subscription Tier
 
 ## Overview
 
-Replace all 13 edge functions currently using MiniMax M2.5 with DeepSeek V3 via its OpenAI-compatible API. DeepSeek V3 is a high-performance model with 128K context and strong reasoning capabilities.
+Make the Coach Style selector visible to **all** users (Starter, Pro, Enterprise) but only allow selection for Pro and Enterprise plans. Starter users will see all styles but default to "Balanced Coach" with styles locked and a clear upgrade prompt.
 
-## Prerequisites
+## Current Behavior
 
-The `DEEPSEEK_V3_API_KEY` secret is already configured -- no new secrets needed.
+- The entire `CoachStyleSelector` component is hidden (`return null`) unless the user is an Admin or Enterprise user.
+- Non-premium users who somehow see it get a toast saying "Team plan required" when trying to select a non-neutral style.
+
+## New Behavior
+
+- **Starter plan**: Sees all 6 coach styles displayed, but only "Balanced Coach" is selectable. Other styles show a lock icon and "Pro Plan" badge. Clicking a locked style shows upgrade toast. The Live AI Coaching toggle is also locked.
+- **Pro plan**: Full access to all coach styles and live coaching toggle.
+- **Enterprise plan**: Full access (unchanged).
+- **Admin**: Full access (unchanged).
 
 ## Technical Changes
 
-Same mechanical migration as before -- DeepSeek uses the standard OpenAI-compatible format.
+### 1. Remove visibility gate in `CoachStyleSelector` (lines 178-183)
 
-Each edge function changes:
+Remove the `canAccess` check that returns `null`. The component should always render for authenticated users.
+
+### 2. Update subscription check logic (lines 105-120)
+
+Track the actual plan name (not just a boolean) so we can distinguish Starter vs Pro vs Enterprise:
 
 ```text
-// FROM (MiniMax)
-const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
-fetch('https://api.minimaxi.com/v1/chat/completions', {
-  headers: { 'Authorization': `Bearer ${MINIMAX_API_KEY}` },
-  body: JSON.stringify({ model: 'MiniMax-M2.5', ... })
-})
+// Track plan tier instead of just isPremium boolean
+const [userPlan, setUserPlan] = useState<string | null>(null);
 
-// TO (DeepSeek V3)
-const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_V3_API_KEY');
-fetch('https://api.deepseek.com/chat/completions', {
-  headers: { 'Authorization': `Bearer ${DEEPSEEK_API_KEY}` },
-  body: JSON.stringify({ model: 'deepseek-chat', ... })
-})
+// In checkSubscription:
+setUserPlan(data?.plan || null);  // 'single_user', 'team', or null
+
+// Access logic:
+const isPro = userPlan === 'team' || isEnterprise;
+const canAccessCoachStyles = isPro || isAdmin || isEnterprise;
 ```
 
-## Important Notes
+### 3. Update style locking logic (lines 122-129, 210-240)
 
-- DeepSeek's API supports `response_format: { type: "json_object" }`, but since we already removed it during the MiniMax migration and use regex-based JSON extraction, we'll keep that approach for consistency.
-- DeepSeek supports `temperature` in range [0, 2], so no adjustments needed.
-- The `support-chat` function uses streaming -- DeepSeek supports SSE streaming identically.
-- Audio transcription (OpenAI Whisper) remains unchanged.
+Change the lock condition from `!canAccessFeatures && style.id !== "neutral"` to use the new `canAccessCoachStyles` flag. Locked styles show:
+- A lock icon
+- "Pro Plan" badge (instead of "Team Plan")
+- Reduced opacity
 
-## Files to Modify (13 edge functions)
+### 4. Update toast messages (lines 124-128, 136-139)
 
-| # | Edge Function |
-|---|---|
-| 1 | `supabase/functions/ai-lead-score/index.ts` |
-| 2 | `supabase/functions/analyze-conversation/index.ts` |
-| 3 | `supabase/functions/analyze-recording/index.ts` |
-| 4 | `supabase/functions/company-lookup/index.ts` |
-| 5 | `supabase/functions/deal-coach/index.ts` |
-| 6 | `supabase/functions/generate-call-summary/index.ts` |
-| 7 | `supabase/functions/live-coach/index.ts` |
-| 8 | `supabase/functions/live-summary/index.ts` |
-| 9 | `supabase/functions/pain-detector/index.ts` |
-| 10 | `supabase/functions/schedule-assistant/index.ts` |
-| 11 | `supabase/functions/send-schedule-reminders/index.ts` |
-| 12 | `supabase/functions/support-chat/index.ts` |
-| 13 | `supabase/functions/winwords-generate/index.ts` |
+Change "Team plan" references to "Pro plan" with updated pricing:
+- "Coach styles require Pro plan ($250/mo)"
+- "Live AI coaching requires Pro plan ($250/mo)"
 
-## What Stays Unchanged
+### 5. Update premium CTA card (bottom of component)
 
-- `transcribe-audio` -- OpenAI Whisper (speech-to-text)
-- `analyze-recording` Whisper call -- only the chat completion call changes
-- All JSON parsing logic (regex extraction) stays as-is
+Change upgrade text from "Enterprise" to "Pro" for Starter users, with correct pricing.
 
-## Summary
+### File Modified
 
-- 0 new secrets (DEEPSEEK_V3_API_KEY already exists)
-- 13 edge functions updated (mechanical find-and-replace)
-- 0 new files, 0 database changes
+- `src/components/settings/CoachStyleSelector.tsx` -- All changes are in this single file.
 
