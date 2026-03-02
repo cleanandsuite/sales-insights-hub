@@ -18,6 +18,7 @@ interface CoachStyleSelectorProps {
   /** If true, renders in standalone mode for Enterprise users (no admin check) */
   enterpriseMode?: boolean;
 }
+
 const COACH_STYLES = [{
   id: "sellsig",
   name: "Discovery Booker",
@@ -67,6 +68,7 @@ const COACH_STYLES = [{
   color: "border-red-500 bg-red-500/10",
   badgeColor: "bg-red-500"
 }];
+
 export function CoachStyleSelector({
   onStyleChange,
   onEnabledChange,
@@ -79,19 +81,21 @@ export function CoachStyleSelector({
   const [selectedStyle, setSelectedStyle] = useState("neutral");
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isPremium, setIsPremium] = useState(false);
+  const [userPlan, setUserPlan] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSettings();
     checkSubscription();
   }, [user]);
+
   const fetchSettings = async () => {
     if (!user) return;
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("ai_lead_settings").select("live_coach_style, live_coaching_enabled").eq("user_id", user.id).maybeSingle();
+      const { data, error } = await supabase
+        .from("ai_lead_settings")
+        .select("live_coach_style, live_coaching_enabled")
+        .eq("user_id", user.id)
+        .maybeSingle();
       if (data) {
         setSelectedStyle(data.live_coach_style || "neutral");
         setIsEnabled(data.live_coaching_enabled || false);
@@ -102,28 +106,25 @@ export function CoachStyleSelector({
       setLoading(false);
     }
   };
+
   const checkSubscription = async () => {
     if (!user) return;
     try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke("check-subscription");
-      if (data?.plan === "team" || data?.plan === "enterprise") {
-        setIsPremium(true);
-      }
+      const { data, error } = await supabase.functions.invoke("check-subscription");
+      setUserPlan(data?.plan || null);
     } catch (error) {
       console.error("Error checking subscription:", error);
     }
   };
-  // Admins and Enterprise users bypass premium checks
-  const canAccessFeatures = isPremium || isAdmin || isEnterprise;
+
+  // Pro = team plan or enterprise; admins bypass all checks
+  const canAccessCoachStyles = userPlan === "team" || isEnterprise || isAdmin;
 
   const handleStyleChange = async (style: string) => {
-    if (!canAccessFeatures && style !== "neutral") {
+    if (!canAccessCoachStyles && style !== "neutral") {
       toast({
         title: "Premium Feature",
-        description: "Coach styles require Team plan ($99/user/mo)"
+        description: "Coach styles require Pro plan ($250/mo)"
       });
       return;
     }
@@ -131,11 +132,12 @@ export function CoachStyleSelector({
     onStyleChange?.(style);
     await saveSettings(style, isEnabled);
   };
+
   const handleEnabledChange = async (enabled: boolean) => {
-    if (!canAccessFeatures && enabled) {
+    if (!canAccessCoachStyles && enabled) {
       toast({
         title: "Premium Feature",
-        description: "Live AI coaching requires Team plan ($99/user/mo)"
+        description: "Live AI coaching requires Pro plan ($250/mo)"
       });
       return;
     }
@@ -143,12 +145,11 @@ export function CoachStyleSelector({
     onEnabledChange?.(enabled);
     await saveSettings(selectedStyle, enabled);
   };
+
   const saveSettings = async (style: string, enabled: boolean) => {
     if (!user) return;
     try {
-      const {
-        error
-      } = await supabase.from("ai_lead_settings").upsert({
+      const { error } = await supabase.from("ai_lead_settings").upsert({
         user_id: user.id,
         live_coach_style: style,
         live_coaching_enabled: enabled,
@@ -157,9 +158,7 @@ export function CoachStyleSelector({
         onConflict: "user_id"
       });
       if (error) throw error;
-      toast({
-        title: "Settings saved"
-      });
+      toast({ title: "Settings saved" });
     } catch (error) {
       console.error("Error saving settings:", error);
       toast({
@@ -168,18 +167,12 @@ export function CoachStyleSelector({
       });
     }
   };
+
   if (loading || adminLoading || enterpriseLoading) {
     return <div className="animate-pulse space-y-4">
         <div className="h-8 bg-muted rounded w-48" />
         <div className="h-32 bg-muted rounded" />
       </div>;
-  }
-
-  // In enterprise mode, allow Enterprise users; otherwise require admin
-  const canAccess = enterpriseMode ? isEnterprise : isAdmin;
-  
-  if (!canAccess) {
-    return null;
   }
 
   return <div className="space-y-6">
@@ -193,14 +186,14 @@ export function CoachStyleSelector({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!canAccessFeatures && <Badge variant="outline" className="gap-1">
+          {!canAccessCoachStyles && <Badge variant="outline" className="gap-1">
               <Lock className="h-3 w-3" />
-              Team Plan
+              Pro Plan
             </Badge>}
           {isAdmin && <Badge variant="outline" className="gap-1 border-primary text-primary">
               Admin
             </Badge>}
-          <Switch checked={isEnabled} onCheckedChange={handleEnabledChange} disabled={!canAccessFeatures} />
+          <Switch checked={isEnabled} onCheckedChange={handleEnabledChange} disabled={!canAccessCoachStyles} />
         </div>
       </div>
 
@@ -212,7 +205,7 @@ export function CoachStyleSelector({
         <RadioGroup value={selectedStyle} onValueChange={handleStyleChange} className="grid gap-4">
           {COACH_STYLES.map(style => {
           const isSelected = selectedStyle === style.id;
-          const isLocked = !canAccessFeatures && style.id !== "neutral";
+          const isLocked = !canAccessCoachStyles && style.id !== "neutral";
           return <label key={style.id} className={cn("relative flex cursor-pointer rounded-lg border-2 p-4 transition-all", isSelected ? style.color : "border-border hover:border-muted-foreground/50", isLocked && "opacity-60 cursor-not-allowed")}>
                 <RadioGroupItem value={style.id} className="sr-only" disabled={isLocked} />
 
@@ -222,7 +215,10 @@ export function CoachStyleSelector({
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold">{style.name}</span>
-                      {isLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                      {isLocked && <>
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">Pro Plan</Badge>
+                      </>}
                       {isSelected && <Badge className={style.badgeColor}>Active</Badge>}
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">{style.description}</p>
@@ -240,13 +236,13 @@ export function CoachStyleSelector({
         </RadioGroup>
       </div>
 
-      {/* Premium CTA - hide for admins */}
-      {!canAccessFeatures && <Card className="p-4 border-primary/50 bg-primary/5">
+      {/* Premium CTA - hide for users who already have access */}
+      {!canAccessCoachStyles && <Card className="p-4 border-primary/50 bg-primary/5">
           <div className="flex items-center gap-3">
             <Zap className="h-5 w-5 text-primary" />
             <div className="flex-1">
-              <p className="font-medium">Upgrade to Enterprise Now</p>
-              <p className="text-sm text-muted-foreground">Unlock all coach styles and live AI coaching. Call to Book a Demo today. (651) 502-4748</p>
+              <p className="font-medium">Upgrade to Pro Plan</p>
+              <p className="text-sm text-muted-foreground">Unlock all coach styles and live AI coaching for $250/mo. Call to learn more: (651) 502-4748</p>
             </div>
           </div>
         </Card>}
