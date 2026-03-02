@@ -103,14 +103,6 @@ interface UserSettings {
   retention_days: number | null;
 }
 
-interface CRMConnection {
-  id: string;
-  provider: string;
-  instance_url: string | null;
-  is_active: boolean;
-  last_sync_at: string | null;
-  sync_status: string;
-}
 
 export default function Settings() {
   const { user } = useAuth();
@@ -120,7 +112,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
-  const [crmConnections, setCrmConnections] = useState<CRMConnection[]>([]);
+  
   
   const [settings, setSettings] = useState<UserSettings>({
     default_mic_device_id: null,
@@ -140,7 +132,6 @@ export default function Settings() {
   useEffect(() => {
     fetchSettings();
     fetchAudioDevices();
-    fetchCRMConnections();
   }, [user]);
 
   const fetchSettings = async () => {
@@ -175,25 +166,8 @@ export default function Settings() {
     }
   };
 
-  const fetchCRMConnections = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('crm_connections')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      setCrmConnections(data || []);
-    } catch (error) {
-      console.error('Error fetching CRM connections:', error);
-    }
-  };
-
   const handleSave = async () => {
     if (!user) return;
-
     setSaving(true);
     try {
       const { error } = await supabase
@@ -203,46 +177,13 @@ export default function Settings() {
           ...settings,
           updated_at: new Date().toISOString()
         });
-
       if (error) throw error;
-
       toast({ title: 'Settings saved!' });
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast({ 
-        variant: 'destructive',
-        title: 'Failed to save settings'
-      });
+      toast({ variant: 'destructive', title: 'Failed to save settings' });
     } finally {
       setSaving(false);
-    }
-  };
-
-  const connectCRM = async (provider: string) => {
-    if (!user) return;
-
-    try {
-      // For now, create a demo connection
-      const { error } = await supabase
-        .from('crm_connections')
-        .insert({
-          user_id: user.id,
-          provider,
-          instance_url: `https://${provider}.example.com`,
-          is_active: true,
-          sync_status: 'idle'
-        });
-
-      if (error) throw error;
-
-      toast({ title: `${provider} connected!` });
-      fetchCRMConnections();
-    } catch (error) {
-      console.error('Error connecting CRM:', error);
-      toast({ 
-        variant: 'destructive',
-        title: 'Failed to connect CRM'
-      });
     }
   };
 
@@ -286,10 +227,6 @@ export default function Settings() {
             <TabsTrigger value="ai" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">AI</span>
-            </TabsTrigger>
-            <TabsTrigger value="crm" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
-              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">CRM</span>
             </TabsTrigger>
             <TabsTrigger value="salesforce" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -490,83 +427,6 @@ export default function Settings() {
             </div>
           </TabsContent>
 
-          {/* CRM Settings */}
-          <TabsContent value="crm">
-            <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
-              <h2 className="text-lg font-semibold text-foreground">CRM Integrations</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['salesforce', 'hubspot', 'pipedrive'].map((provider) => {
-                  const connection = crmConnections.find(c => c.provider === provider);
-                  
-                  return (
-                    <div
-                      key={provider}
-                      className={`p-4 rounded-lg border ${
-                        connection?.is_active 
-                          ? 'border-success bg-success/5' 
-                          : 'border-border bg-muted/30'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium capitalize text-foreground">{provider}</h3>
-                        {connection?.is_active && (
-                          <Check className="h-4 w-4 text-success" />
-                        )}
-                      </div>
-                      
-                      {connection?.is_active ? (
-                        <div className="space-y-2">
-                          <p className="text-xs text-muted-foreground">
-                            Last sync: {connection.last_sync_at 
-                              ? new Date(connection.last_sync_at).toLocaleString()
-                              : 'Never'
-                            }
-                          </p>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1"
-                            >
-                              <RefreshCw className="h-3 w-3 mr-1" />
-                              Sync
-                            </Button>
-                            <Button size="sm" variant="ghost" className="text-destructive">
-                              Disconnect
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Button 
-                          size="sm" 
-                          onClick={() => provider === 'salesforce' 
-                            ? window.location.href = '/settings/salesforce'
-                            : connectCRM(provider)
-                          }
-                          className="w-full"
-                        >
-                          {provider === 'salesforce' ? 'Configure' : 'Connect'}
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Salesforce Advanced Settings Link */}
-              <div className="pt-4 border-t border-border/50">
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.location.href = '/settings/salesforce'}
-                  className="gap-2"
-                >
-                  <Link2 className="h-4 w-4" />
-                  Advanced Salesforce Settings
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
 
           {/* Notification Settings */}
           <TabsContent value="notifications">
