@@ -147,9 +147,9 @@ serve(async (req) => {
       );
     }
 
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!GROQ_API_KEY) {
-      throw new Error('GROQ_API_KEY not configured');
+    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
+    if (!MINIMAX_API_KEY) {
+      throw new Error('MINIMAX_API_KEY not configured');
     }
 
     const systemPrompt = COACH_PROMPTS[coachStyle] || COACH_PROMPTS.neutral;
@@ -178,14 +178,14 @@ Respond with JSON:
 
 Focus on what's happening RIGHT NOW. Be specific to the conversation.`;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.minimaxi.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'MiniMax-M2.5',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }

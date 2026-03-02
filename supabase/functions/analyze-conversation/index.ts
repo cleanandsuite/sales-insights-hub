@@ -63,9 +63,9 @@ serve(async (req) => {
       );
     }
 
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!GROQ_API_KEY) {
-      throw new Error('GROQ_API_KEY not configured');
+    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
+    if (!MINIMAX_API_KEY) {
+      throw new Error('MINIMAX_API_KEY not configured');
     }
 
     const { transcription, context } = await req.json();
@@ -83,14 +83,14 @@ serve(async (req) => {
 
     console.log('Analyzing conversation for user:', userData.user.id, 'length:', transcription.length);
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.minimaxi.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'MiniMax-M2.5',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { 
@@ -100,17 +100,15 @@ serve(async (req) => {
         ],
         temperature: 0.7,
         max_tokens: 500,
-        response_format: { type: "json_object" }
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
+      console.error('AI API error:', response.status, errorText);
       
-      // Handle rate limits gracefully - return empty analysis instead of error
       if (response.status === 429) {
-        console.log('Rate limited by OpenAI, returning empty analysis');
+        console.log('Rate limited, returning empty analysis');
         return new Response(
           JSON.stringify({ 
             suggestions: [],
@@ -122,11 +120,25 @@ serve(async (req) => {
         );
       }
       
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`AI API error: ${response.status}`);
     }
 
     const result = await response.json();
-    const analysis = JSON.parse(result.choices[0].message.content);
+    const content = result.choices[0].message.content;
+    
+    // Parse JSON from response
+    let analysis;
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        analysis = JSON.parse(jsonMatch[0]);
+      } else {
+        analysis = { suggestions: [], sentiment: 'neutral', keyTopics: [] };
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      analysis = { suggestions: [], sentiment: 'neutral', keyTopics: [] };
+    }
     
     console.log('Analysis result:', JSON.stringify(analysis).substring(0, 200));
 

@@ -120,8 +120,8 @@ serve(async (req) => {
       });
     }
 
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!GROQ_API_KEY) {
+    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
+    if (!MINIMAX_API_KEY) {
       return new Response(JSON.stringify({ error: 'AI not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -154,14 +154,14 @@ Return JSON with structure:
 
 Only include pains that are clearly evident. Be specific and actionable.`;
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.minimaxi.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'MiniMax-M2.5',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Analyze this sales call transcript:\n\n${trimmedTranscript.slice(0, 15000)}` }
