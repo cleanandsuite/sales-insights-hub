@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import {
   Settings as SettingsIcon,
   Mic,
   Volume2,
@@ -23,8 +23,8 @@ import {
   CreditCard,
   Mail,
   UserCircle,
-  FlaskConical
-} from 'lucide-react';
+  FlaskConical } from
+'lucide-react';
 
 import { PasswordChangeCard } from '@/components/settings/PasswordChangeCard';
 import { BillingTab } from '@/components/settings/BillingTab';
@@ -73,20 +73,20 @@ function AIBrainsCard() {
             </p>
             <p className="text-sm font-medium text-red-400">Base booking rate: 30-45% (vs 8-12% industry avg)</p>
             <div className="flex flex-wrap gap-1.5">
-              {['DOS Opener', '3 Yeses', 'Hormozi Value Stack', 'Sudbury Gatekeeper', 'Phase Detection', 'Tonality Cues', 'High-Sensory Language', 'Pullback Booking'].map(m => (
-                <Badge key={m} variant="outline" className="text-xs">{m}</Badge>
-              ))}
+              {['DOS Opener', '3 Yeses', 'Hormozi Value Stack', 'Sudbury Gatekeeper', 'Phase Detection', 'Tonality Cues', 'High-Sensory Language', 'Pullback Booking'].map((m) =>
+              <Badge key={m} variant="outline" className="text-xs">{m}</Badge>
+              )}
             </div>
-            {!isActive && (
-              <Button size="sm" className="mt-2 bg-red-500 hover:bg-red-600" onClick={handleActivate}>
+            {!isActive &&
+            <Button size="sm" className="mt-2 bg-red-500 hover:bg-red-600" onClick={handleActivate}>
                 Activate Brain
               </Button>
-            )}
+            }
           </div>
         </div>
       </Card>
-    </div>
-  );
+    </div>);
+
 }
 interface UserSettings {
   default_mic_device_id: string | null;
@@ -108,12 +108,12 @@ export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { isAdmin } = useAdminRole();
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
-  
-  
+
+
   const [settings, setSettings] = useState<UserSettings>({
     default_mic_device_id: null,
     default_speaker_device_id: null,
@@ -138,14 +138,14 @@ export default function Settings() {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.
+      from('user_settings').
+      select('*').
+      eq('user_id', user.id).
+      maybeSingle();
 
       if (error) throw error;
-      
+
       if (data) {
         setSettings(data as UserSettings);
       }
@@ -160,7 +160,7 @@ export default function Settings() {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       const devices = await navigator.mediaDevices.enumerateDevices();
-      setAudioDevices(devices.filter(d => d.kind === 'audioinput' || d.kind === 'audiooutput'));
+      setAudioDevices(devices.filter((d) => d.kind === 'audioinput' || d.kind === 'audiooutput'));
     } catch (error) {
       console.error('Error getting audio devices:', error);
     }
@@ -170,13 +170,13 @@ export default function Settings() {
     if (!user) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          ...settings,
-          updated_at: new Date().toISOString()
-        });
+      const { error } = await supabase.
+      from('user_settings').
+      upsert({
+        user_id: user.id,
+        ...settings,
+        updated_at: new Date().toISOString()
+      });
       if (error) throw error;
       toast({ title: 'Settings saved!' });
     } catch (error) {
@@ -187,8 +187,8 @@ export default function Settings() {
     }
   };
 
-  const micDevices = audioDevices.filter(d => d.kind === 'audioinput');
-  const speakerDevices = audioDevices.filter(d => d.kind === 'audiooutput');
+  const micDevices = audioDevices.filter((d) => d.kind === 'audioinput');
+  const speakerDevices = audioDevices.filter((d) => d.kind === 'audiooutput');
 
   if (loading) {
     return (
@@ -196,8 +196,8 @@ export default function Settings() {
         <div className="flex items-center justify-center h-96">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
-      </DashboardLayout>
-    );
+      </DashboardLayout>);
+
   }
 
   return (
@@ -242,7 +242,8 @@ export default function Settings() {
             </TabsTrigger>
             <TabsTrigger value="privacy" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Privacy</span>
+              <span className="hidden xs:inline">Security & Privacy
+              </span>
             </TabsTrigger>
             <TabsTrigger value="invites" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
               <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -252,12 +253,11 @@ export default function Settings() {
               <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden xs:inline">Email</span>
             </TabsTrigger>
-            {isAdmin && (
-              <TabsTrigger value="experiments" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
+            {isAdmin && <TabsTrigger value="experiments" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none">
                 <FlaskConical className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden xs:inline">Experiments</span>
               </TabsTrigger>
-            )}
+            }
           </TabsList>
 
           {/* Profile */}
@@ -269,8 +269,8 @@ export default function Settings() {
           <TabsContent value="audio">
             <div className="space-y-6">
               {/* Audio Setup Reminder */}
-              {(!settings.default_mic_device_id || !settings.default_speaker_device_id) && (
-                <div className="flex items-start gap-3 p-4 bg-primary/10 border border-primary/20 rounded-xl">
+              {(!settings.default_mic_device_id || !settings.default_speaker_device_id) &&
+              <div className="flex items-start gap-3 p-4 bg-primary/10 border border-primary/20 rounded-xl">
                   <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Configure your audio devices before recording</p>
@@ -279,7 +279,7 @@ export default function Settings() {
                     </p>
                   </div>
                 </div>
-              )}
+              }
               
               <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-6">
                 <h2 className="text-lg font-semibold text-foreground">Audio Devices</h2>
@@ -288,18 +288,18 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label>Microphone</Label>
                   <Select
-                    value={settings.default_mic_device_id || ''}
-                    onValueChange={(value) => setSettings({ ...settings, default_mic_device_id: value })}
-                  >
+                      value={settings.default_mic_device_id || ''}
+                      onValueChange={(value) => setSettings({ ...settings, default_mic_device_id: value })}>
+
                     <SelectTrigger>
                       <SelectValue placeholder="Select microphone" />
                     </SelectTrigger>
                     <SelectContent>
-                      {micDevices.map((device) => (
+                      {micDevices.map((device) =>
                         <SelectItem key={device.deviceId} value={device.deviceId}>
                           {device.label || 'Microphone'}
                         </SelectItem>
-                      ))}
+                        )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -307,18 +307,18 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label>Speaker</Label>
                   <Select
-                    value={settings.default_speaker_device_id || ''}
-                    onValueChange={(value) => setSettings({ ...settings, default_speaker_device_id: value })}
-                  >
+                      value={settings.default_speaker_device_id || ''}
+                      onValueChange={(value) => setSettings({ ...settings, default_speaker_device_id: value })}>
+
                     <SelectTrigger>
                       <SelectValue placeholder="Select speaker" />
                     </SelectTrigger>
                     <SelectContent>
-                      {speakerDevices.map((device) => (
+                      {speakerDevices.map((device) =>
                         <SelectItem key={device.deviceId} value={device.deviceId}>
                           {device.label || 'Speaker'}
                         </SelectItem>
-                      ))}
+                        )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -328,9 +328,9 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label>Audio Quality</Label>
                   <Select
-                    value={settings.audio_quality}
-                    onValueChange={(value) => setSettings({ ...settings, audio_quality: value })}
-                  >
+                      value={settings.audio_quality}
+                      onValueChange={(value) => setSettings({ ...settings, audio_quality: value })}>
+
                     <SelectTrigger className="w-64">
                       <SelectValue />
                     </SelectTrigger>
@@ -348,9 +348,9 @@ export default function Settings() {
                     <p className="text-sm text-muted-foreground">Reduce background noise during recordings</p>
                   </div>
                   <Switch
-                    checked={settings.noise_cancellation}
-                    onCheckedChange={(checked) => setSettings({ ...settings, noise_cancellation: checked })}
-                  />
+                      checked={settings.noise_cancellation}
+                      onCheckedChange={(checked) => setSettings({ ...settings, noise_cancellation: checked })} />
+
                 </div>
               </div>
               </div>
@@ -378,8 +378,8 @@ export default function Settings() {
                     <Label>Suggestion Frequency</Label>
                     <Select
                       value={settings.suggestion_frequency}
-                      onValueChange={(value) => setSettings({ ...settings, suggestion_frequency: value })}
-                    >
+                      onValueChange={(value) => setSettings({ ...settings, suggestion_frequency: value })}>
+
                       <SelectTrigger className="w-64">
                         <SelectValue />
                       </SelectTrigger>
@@ -398,28 +398,28 @@ export default function Settings() {
                     </div>
                     <Switch
                       checked={settings.auto_analyze}
-                      onCheckedChange={(checked) => setSettings({ ...settings, auto_analyze: checked })}
-                    />
+                      onCheckedChange={(checked) => setSettings({ ...settings, auto_analyze: checked })} />
+
                   </div>
 
                   <div className="space-y-3">
                     <Label>Focus Areas</Label>
                     <div className="flex flex-wrap gap-2">
-                      {['rapport', 'discovery', 'presentation', 'objection_handling', 'closing'].map((area) => (
-                        <Button
-                          key={area}
-                          variant={settings.focus_areas.includes(area) ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => {
-                            const newAreas = settings.focus_areas.includes(area)
-                              ? settings.focus_areas.filter(a => a !== area)
-                              : [...settings.focus_areas, area];
-                            setSettings({ ...settings, focus_areas: newAreas });
-                          }}
-                        >
+                      {['rapport', 'discovery', 'presentation', 'objection_handling', 'closing'].map((area) =>
+                      <Button
+                        key={area}
+                        variant={settings.focus_areas.includes(area) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          const newAreas = settings.focus_areas.includes(area) ?
+                          settings.focus_areas.filter((a) => a !== area) :
+                          [...settings.focus_areas, area];
+                          setSettings({ ...settings, focus_areas: newAreas });
+                        }}>
+
                           {area.replace('_', ' ')}
                         </Button>
-                      ))}
+                      )}
                     </div>
                   </div>
                 </div>
@@ -441,8 +441,8 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={settings.email_notifications}
-                    onCheckedChange={(checked) => setSettings({ ...settings, email_notifications: checked })}
-                  />
+                    onCheckedChange={(checked) => setSettings({ ...settings, email_notifications: checked })} />
+
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -452,8 +452,8 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={settings.push_notifications}
-                    onCheckedChange={(checked) => setSettings({ ...settings, push_notifications: checked })}
-                  />
+                    onCheckedChange={(checked) => setSettings({ ...settings, push_notifications: checked })} />
+
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -463,8 +463,8 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={settings.daily_summary}
-                    onCheckedChange={(checked) => setSettings({ ...settings, daily_summary: checked })}
-                  />
+                    onCheckedChange={(checked) => setSettings({ ...settings, daily_summary: checked })} />
+
                 </div>
               </div>
             </div>
@@ -488,8 +488,8 @@ export default function Settings() {
                     </div>
                     <Switch
                       checked={settings.auto_redact_pii}
-                      onCheckedChange={(checked) => setSettings({ ...settings, auto_redact_pii: checked })}
-                    />
+                      onCheckedChange={(checked) => setSettings({ ...settings, auto_redact_pii: checked })} />
+
                   </div>
 
                   <div className="space-y-2">
@@ -503,8 +503,8 @@ export default function Settings() {
                       max={365}
                       step={30}
                       onValueChange={(value) => setSettings({ ...settings, retention_days: value[0] })}
-                      className="w-64"
-                    />
+                      className="w-64" />
+
                   </div>
 
                   <div className="pt-4 border-t border-border">
@@ -551,13 +551,13 @@ export default function Settings() {
           </TabsContent>
 
           {/* Experiments (Admin only) */}
-          {isAdmin && (
-            <TabsContent value="experiments">
+          {isAdmin &&
+          <TabsContent value="experiments">
               <ExperimentsTab />
             </TabsContent>
-          )}
+          }
         </Tabs>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>);
+
 }
