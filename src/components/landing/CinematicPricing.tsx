@@ -8,10 +8,13 @@ gsap.registerPlugin(ScrollTrigger);
 const tiers = [
   {
     name: 'Starter Plan',
-    price: '$99',
+    originalPrice: '$129',
+    price: '$79',
     period: '/mo',
     desc: 'For individual reps ready to level up.',
-    features: ['Unlimited call recording', 'AI call scoring', 'Post-call summaries', 'Basic coaching insights', 'Email support'],
+    promo: true,
+    promoLabel: '🔥 Limited Time! Only 17 seats left',
+    features: ['1,500 call minutes/month', '⚡ +1,000 bonus minutes (promo)', 'Unlimited call recording', 'AI call scoring', 'Post-call summaries', 'Basic coaching insights', 'Email support'],
     highlighted: false,
     cta: 'Start Free Trial',
   },
@@ -104,7 +107,20 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                 <p className="text-white/40 text-sm">{tier.desc}</p>
               </div>
 
+              {'promo' in tier && tier.promo && (
+                <div className="mb-3">
+                  <span className="inline-block bg-[hsl(var(--cin-teal))]/10 border border-[hsl(var(--cin-teal))]/20 text-[hsl(var(--cin-teal))] text-xs font-bold px-3 py-1 rounded-full">
+                    {tier.promoLabel}
+                  </span>
+                </div>
+              )}
+
               <div className="mb-6">
+                {'originalPrice' in tier && tier.originalPrice && (
+                  <span className="text-xl text-white/30 line-through mr-2">
+                    {annual ? `$${Math.round(parseInt(tier.originalPrice.slice(1)) * 0.8)}` : tier.originalPrice}
+                  </span>
+                )}
                 <span className="text-4xl font-bold text-white">
                   {tier.price === 'Custom' ? tier.price : (annual ? `$${Math.round(parseInt(tier.price.slice(1)) * 0.8)}` : tier.price)}
                 </span>
