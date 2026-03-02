@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { SellSigLogo } from '@/components/ui/SellSigLogo';
 
 interface CinematicNavbarProps {
   onStartTrialClick: () => void;
@@ -47,7 +48,7 @@ export function CinematicNavbar({ onStartTrialClick }: CinematicNavbarProps) {
         `}
       >
         {/* Logo */}
-        <span className="text-white font-bold text-lg tracking-tight">SellSig</span>
+        <SellSigLogo size="sm" variant="light" showTagline={false} linkTo="" className="pointer-events-none" />
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
