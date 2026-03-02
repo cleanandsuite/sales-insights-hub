@@ -57,7 +57,7 @@ export function CinematicPhilosophy() {
 
         {/* Bold statement */}
         <div>
-          <p className="text-2xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
+          <p className="text-2xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white/90">
             {splitWords('We focus on winning')}
             <span data-word className="inline-block mr-[0.3em] opacity-0 text-[hsl(var(--cin-teal))]">the</span>
             <span data-word className="inline-block mr-[0.3em] opacity-0 text-[hsl(var(--cin-teal))]">next</span>
