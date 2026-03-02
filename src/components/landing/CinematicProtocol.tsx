@@ -55,16 +55,16 @@ const steps = [
     title: 'Live Coaching',
     desc: 'While you talk, whisper-mode AI detects sentiment shifts, flags objections in real time, and surfaces the exact rebuttal or question to keep the deal moving forward.',
     viz: <EKGWaveform />,
-    color: 'hsl(var(--cin-purple))',
-    glow: 'radial-gradient(circle, hsla(263,83%,57%,0.15) 0%, transparent 70%)',
+    color: 'hsl(var(--cin-teal))',
+    glow: 'radial-gradient(circle, hsla(168,76%,55%,0.15) 0%, transparent 70%)',
   },
   {
     num: '03',
     title: 'Post-Call Analysis',
     desc: 'Within seconds of hanging up, get automated call scores, deal risk alerts, next-step recommendations, and a coaching plan tailored to what just happened.',
     viz: <LaserScan />,
-    color: 'hsl(var(--cin-teal))',
-    glow: 'radial-gradient(circle, hsla(168,76%,55%,0.15) 0%, transparent 70%)',
+    color: 'hsl(var(--cin-purple))',
+    glow: 'radial-gradient(circle, hsla(263,83%,57%,0.15) 0%, transparent 70%)',
   },
 ];
 
