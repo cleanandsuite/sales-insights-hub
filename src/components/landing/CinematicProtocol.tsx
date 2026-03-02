@@ -6,9 +6,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 function ConcentricCircles() {
   return (
-    <svg viewBox="0 0 200 200" className="w-32 h-32 md:w-48 md:h-48 opacity-20" style={{ animation: 'cin-rotate-slow 20s linear infinite' }}>
+    <svg viewBox="0 0 200 200" className="w-32 h-32 md:w-48 md:h-48 opacity-60" style={{ animation: 'cin-rotate-slow 20s linear infinite' }}>
       {[30, 50, 70, 90].map((r, i) => (
-        <circle key={i} cx="100" cy="100" r={r} fill="none" stroke="hsl(168,76%,40%)" strokeWidth="0.5" opacity={1 - i * 0.2} />
+        <circle key={i} cx="100" cy="100" r={r} fill="none" stroke="hsl(168,76%,55%)" strokeWidth="1.5" opacity={1 - i * 0.15} />
       ))}
     </svg>
   );
@@ -16,11 +16,11 @@ function ConcentricCircles() {
 
 function LaserScan() {
   return (
-    <div className="relative w-32 h-32 md:w-48 md:h-48 overflow-hidden opacity-20">
+    <div className="relative w-32 h-32 md:w-48 md:h-48 overflow-hidden opacity-60">
       {/* Dot grid */}
       <svg viewBox="0 0 200 200" className="w-full h-full">
         {Array.from({ length: 100 }).map((_, i) => (
-          <circle key={i} cx={(i % 10) * 20 + 10} cy={Math.floor(i / 10) * 20 + 10} r="2" fill="hsl(263,83%,57%)" opacity="0.4" />
+          <circle key={i} cx={(i % 10) * 20 + 10} cy={Math.floor(i / 10) * 20 + 10} r="2.5" fill="hsl(263,83%,65%)" opacity="0.7" />
         ))}
       </svg>
       {/* Laser line */}
@@ -32,8 +32,8 @@ function LaserScan() {
 function EKGWaveform() {
   const path = "M0,50 L20,50 L25,20 L30,80 L35,40 L40,60 L45,50 L60,50 L65,10 L70,90 L75,30 L80,70 L85,50 L100,50 L120,50 L125,15 L130,85 L135,35 L140,65 L145,50 L160,50 L180,50 L185,25 L190,75 L195,45 L200,50";
   return (
-    <svg viewBox="0 0 200 100" className="w-40 h-20 md:w-56 md:h-28 opacity-30">
-      <path d={path} fill="none" stroke="hsl(168,76%,40%)" strokeWidth="1.5"
+    <svg viewBox="0 0 200 100" className="w-40 h-20 md:w-56 md:h-28 opacity-60">
+      <path d={path} fill="none" stroke="hsl(168,76%,55%)" strokeWidth="2"
         strokeDasharray="500" strokeDashoffset="500"
         style={{ animation: 'cin-ekg 3s linear infinite' }}
       />
@@ -45,23 +45,26 @@ const steps = [
   {
     num: '01',
     title: 'Pre-Call Intelligence',
-    desc: 'AI scans CRM, past calls, and market signals to build a real-time brief before every conversation.',
+    desc: 'Before you dial, SellSig scans your CRM history, past conversations, and live market signals to build a personalized brief — so you walk into every call prepared to win.',
     viz: <ConcentricCircles />,
     color: 'hsl(var(--cin-teal))',
+    glow: 'radial-gradient(circle, hsla(168,76%,55%,0.15) 0%, transparent 70%)',
   },
   {
     num: '02',
     title: 'Live Coaching',
-    desc: 'Whisper-mode AI detects sentiment shifts, buying signals, and objections — coaching you in real time.',
+    desc: 'While you talk, whisper-mode AI detects sentiment shifts, flags objections in real time, and surfaces the exact rebuttal or question to keep the deal moving forward.',
     viz: <LaserScan />,
     color: 'hsl(var(--cin-purple))',
+    glow: 'radial-gradient(circle, hsla(263,83%,57%,0.15) 0%, transparent 70%)',
   },
   {
     num: '03',
     title: 'Post-Call Analysis',
-    desc: 'Automated scoring, deal risk alerts, and improvement plans generated within seconds of hanging up.',
+    desc: 'Within seconds of hanging up, get automated call scores, deal risk alerts, next-step recommendations, and a coaching plan tailored to what just happened.',
     viz: <EKGWaveform />,
     color: 'hsl(var(--cin-teal))',
+    glow: 'radial-gradient(circle, hsla(168,76%,55%,0.15) 0%, transparent 70%)',
   },
 ];
 
@@ -116,7 +119,8 @@ export function CinematicProtocol() {
               className="bg-white/[0.03] border border-white/[0.08] rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-12 transition-all duration-500"
               style={{ position: 'relative', zIndex: steps.length - i }}
             >
-              <div className="flex-shrink-0 flex items-center justify-center">
+              <div className="flex-shrink-0 flex items-center justify-center relative">
+                <div className="absolute inset-0 scale-150" style={{ background: step.glow }} />
                 {step.viz}
               </div>
               <div>
