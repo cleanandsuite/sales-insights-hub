@@ -1,46 +1,96 @@
 
 
-# Pricing Cards — Visual Upgrade
+# Landing Page Competitive Gap Analysis -- Implementation Plan
 
-## Overview
-Make all three pricing cards more visually distinctive with bolder typography, hover animations, and a premium dark silver/gold theme for the Enterprise card. Move the "Minimum 10 seats" text under the price as a requirement line.
+## What's Missing from the Cinematic Landing Page
 
-## Changes (all in `src/components/landing/CinematicPricing.tsx`)
+After comparing your cinematic page against sellsig.com (live), Gong, Chorus/ZoomInfo, and Salesloft, here are the sections to add. The cinematic page currently has: Navbar, Hero, Features, Philosophy, Protocol, Pricing, Footer. It's missing 6 key sections that competitors use to convert.
 
-### 1. Bigger, Bolder Plan Names
-- Increase plan name `h3` from `text-lg` to `text-2xl font-bold` so each tier title commands attention.
-- Increase description text from `text-sm` to `text-base`.
+## Sections to Add (in order of page flow)
 
-### 2. Starter Plan — Stand Out More
-- Add a subtle teal border glow: `border border-[hsl(var(--cin-teal))]/20 shadow-[0_0_30px_rgba(20,184,166,0.08)]`.
-- Add a "Best Value" or promo ribbon/badge at the top of the card to draw the eye.
+### 1. Logo Trust Bar (after Hero)
+A scrolling/static row of company logos with "Trusted by 2,000+ sales teams" -- matching your live site. Competitors all have this immediately after the hero. Even with placeholder logos, it signals credibility.
 
-### 3. Move "Minimum 10 seats" Under Price
-- Remove `subheadline` from the Enterprise tier data.
-- Render "Minimum 10 seats · Custom pricing & contract terms" directly below the "Custom" price text as a smaller requirement line (e.g., `text-xs text-white/40 mt-1`), not in the description area.
+- Add new component: `CinematicLogoBanner.tsx`
+- Place between `CinematicHero` and `CinematicFeatures` in `Landing.tsx`
+- Dark background, white/muted logo text, subtle fade-in animation
 
-### 4. Hover Animation — Color Inverse + Pop
-- Add a CSS hover effect to each card: `hover:scale-[1.03] hover:-translate-y-1` with a transition.
-- On hover, invert the card style slightly: background brightens, text gets a subtle color shift.
-- Use GSAP or CSS transition for a smooth "pop" feel.
+### 2. Phone Line Section (after Protocol)
+Your live site has a dedicated section showing the phone dashboard mockup. This is a major differentiator vs Gong/Chorus (they don't include a dialer). Bring it into the cinematic design.
 
-### 5. Enterprise Card — Dark Silver & Gold Premium Theme
-- Replace the default `bg-white/[0.03]` with a dark gradient: `bg-gradient-to-b from-[#1a1a2e] to-[#16213e]`.
-- Plan name rendered in a gold gradient text: `bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400` with `bg-clip-text text-transparent`.
-- Feature checkmarks in gold (`text-amber-400`).
-- Border in silver: `border border-white/[0.12]` with a subtle gold glow `shadow-[0_0_40px_rgba(251,191,36,0.08)]`.
-- CTA button styled with gold: `bg-gradient-to-r from-amber-500 to-yellow-600 text-black`.
-- Price text ("Custom") in silver-white.
+- Add new component: `CinematicPhoneLine.tsx`
+- Show the 5,000 min / 3 seats / dedicated number / 99.9% uptime stats
+- Include a mini phone dashboard mockup styled in the cinematic dark theme
 
-### Technical Details
+### 3. Testimonials / Social Proof Section (before Pricing)
+Your live site has three strong testimonials with specific revenue numbers ($340K extra per rep, 38% win rate increase). Competitors like Gong use named customers with titles and logos.
 
-**Data change** — Enterprise tier object:
-- Remove `subheadline` field
-- Add `premium: true` flag
+- Add new component: `CinematicTestimonials.tsx`
+- Three cards with star ratings, quotes, names, and roles
+- Styled in the cinematic palette with subtle glow effects
 
-**Rendering logic:**
-- If `tier.premium`, apply gold/silver classes instead of default
-- Render "Minimum 10 seats · Custom pricing & contract terms" right after the price `div` when `tier.premium` is true
-- Hover classes applied to all cards via Tailwind: `transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1`
-- Starter card gets a special border/glow class when `tier.promo && !tier.highlighted`
+### 4. FAQ Section (after Pricing)
+Your live site has 5 well-written FAQs. The cinematic page has none. Every competitor includes FAQs to handle last-mile objections before conversion.
+
+- Add new component: `CinematicFAQ.tsx`
+- Accordion-style with the 5 FAQs from the live site
+- Covers: phone line details, script builder, live coaching visibility, CRM integrations, Enterprise vs Pro
+
+### 5. "Built by Sales" Emotional Closer (after FAQ)
+Your live site has this powerful section: "We've lived the 8 AM dials that ended in silence." It's a differentiator because Gong/Salesloft feel corporate. This feels human.
+
+- Add new component: `CinematicBuiltBySales.tsx`
+- Short, punchy copy with the three bullet points from the live site
+- Dark cinematic styling with a subtle teal accent
+
+### 6. Final CTA Section (before Footer)
+A strong closing call-to-action with "Start closing more deals today" + social proof reminder + phone number for sales.
+
+- Add new component: `CinematicFinalCTA.tsx`
+- Primary button (Stripe checkout) + secondary "Talk to Sales" (tel: link)
+- "No credit card required. Setup in 15 minutes. Cancel anytime."
+
+## Updated Page Flow
+
+```text
+CinematicNavbar
+CinematicHero
+CinematicLogoBanner      <-- NEW
+CinematicFeatures
+CinematicPhilosophy
+CinematicProtocol
+CinematicPhoneLine       <-- NEW
+CinematicTestimonials    <-- NEW
+CinematicPricing
+CinematicFAQ             <-- NEW
+CinematicBuiltBySales    <-- NEW
+CinematicFinalCTA        <-- NEW
+CinematicFooter
+```
+
+## Technical Details
+
+### Files to create (6 new components):
+- `src/components/landing/CinematicLogoBanner.tsx`
+- `src/components/landing/CinematicPhoneLine.tsx`
+- `src/components/landing/CinematicTestimonials.tsx`
+- `src/components/landing/CinematicFAQ.tsx`
+- `src/components/landing/CinematicBuiltBySales.tsx`
+- `src/components/landing/CinematicFinalCTA.tsx`
+
+### File to modify:
+- `src/pages/Landing.tsx` -- import and render the 6 new components in the correct order
+
+### Design System
+All new components will follow the established cinematic design tokens:
+- Background: `hsl(var(--cin-bg))` (#0A1428)
+- Accent: `hsl(var(--cin-teal))` (teal)
+- Text: white with `/40`, `/50`, `/60` opacity variants
+- Borders: `white/[0.08]`
+- Font: mono uppercase tracking for labels, bold for headings
+- GSAP ScrollTrigger for reveal animations (fade + slide up)
+- Rounded cards with subtle glow effects
+
+### Content Sources
+All copy, testimonials, FAQs, and stats will be pulled from the existing live sellsig.com content -- no new copy needed.
 
