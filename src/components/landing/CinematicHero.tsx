@@ -62,7 +62,7 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
           </div>
 
           <h1 data-hero-anim className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white leading-[0.95] tracking-tight mb-2">
-            Revenue
+            Sales Coach
           </h1>
           <h1 data-hero-anim className="text-5xl md:text-7xl lg:text-8xl font-light italic text-white/90 leading-[0.95] tracking-tight mb-8">
             Intelligence.
