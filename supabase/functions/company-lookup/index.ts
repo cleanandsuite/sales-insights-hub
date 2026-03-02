@@ -52,9 +52,9 @@ serve(async (req) => {
     const cleanCompanyName = companyName.trim().substring(0, 100);
     console.log('Looking up company:', cleanCompanyName, { city, state, confirmed });
 
-    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
-    if (!MINIMAX_API_KEY) {
-      console.error("MINIMAX_API_KEY is not configured");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_V3_API_KEY");
+    if (!DEEPSEEK_API_KEY) {
+      console.error("DEEPSEEK_V3_API_KEY is not configured");
       return new Response(
         JSON.stringify({ error: 'Service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -83,14 +83,14 @@ Provide detailed information in the following JSON format:
 
 Focus on information useful for a B2B sales conversation. If information is not available, use reasonable inferences based on the industry and company size.`;
 
-      const response = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+      const response = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${MINIMAX_API_KEY}`,
+          Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "MiniMax-M2.5",
+          model: "deepseek-chat",
           messages: [
             { 
               role: "system", 
@@ -178,14 +178,14 @@ If no companies match or it's too generic, return:
 
 Only return the JSON, no additional text.`;
 
-    const response = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${MINIMAX_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "MiniMax-M2.5",
+        model: "deepseek-chat",
         messages: [
           { 
             role: "system", 
@@ -245,14 +245,14 @@ Provide comprehensive information in JSON format:
   "techStack": ["Known technology 1", "Technology 2"]
 }`;
 
-          const researchResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+          const researchResponse = await fetch("https://api.deepseek.com/chat/completions", {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${MINIMAX_API_KEY}`,
+              Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "MiniMax-M2.5",
+              model: "deepseek-chat",
               messages: [
                 { 
                   role: "system", 

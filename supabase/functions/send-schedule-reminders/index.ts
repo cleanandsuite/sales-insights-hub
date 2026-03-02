@@ -15,13 +15,13 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_V3_API_KEY");
 
     if (!RESEND_API_KEY) {
       throw new Error("RESEND_API_KEY is not configured");
     }
-    if (!MINIMAX_API_KEY) {
-      throw new Error("MINIMAX_API_KEY is not configured");
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error("DEEPSEEK_V3_API_KEY is not configured");
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -62,14 +62,14 @@ serve(async (req) => {
         if (!userEmail) continue;
 
         // Generate AI prep summary
-        const aiResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+        const aiResponse = await fetch("https://api.deepseek.com/chat/completions", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${MINIMAX_API_KEY}`,
+            Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "MiniMax-M2.5",
+            model: "deepseek-chat",
             messages: [
               {
                 role: "system",

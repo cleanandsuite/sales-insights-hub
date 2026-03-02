@@ -23,10 +23,10 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_V3_API_KEY");
 
-    if (!MINIMAX_API_KEY) {
-      throw new Error("MINIMAX_API_KEY is not configured");
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error("DEEPSEEK_V3_API_KEY is not configured");
     }
 
     const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -80,14 +80,14 @@ serve(async (req) => {
       const transcript = recording.live_transcription || "";
 
       // Enhanced AI extraction with summary, key points, and objections
-      const aiResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+      const aiResponse = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${MINIMAX_API_KEY}`,
+          Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "MiniMax-M2.5",
+          model: "deepseek-chat",
           messages: [
             {
               role: "system",
@@ -192,14 +192,14 @@ ${transcript.slice(0, 12000)}`
         );
       }
 
-      const coachResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+      const coachResponse = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${MINIMAX_API_KEY}`,
+          Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "MiniMax-M2.5",
+          model: "deepseek-chat",
           messages: [
             {
               role: "system",
@@ -253,14 +253,14 @@ ${recording.live_transcription?.slice(0, 10000) || "No transcript available"}`
         .eq("recording_id", recordingId)
         .maybeSingle();
 
-      const emailResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+      const emailResponse = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${MINIMAX_API_KEY}`,
+          Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "MiniMax-M2.5",
+          model: "deepseek-chat",
           messages: [
             {
               role: "system",
@@ -478,14 +478,14 @@ ${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
         );
       }
 
-      const emailResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+      const emailResponse = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${MINIMAX_API_KEY}`,
+          Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "MiniMax-M2.5",
+          model: "deepseek-chat",
           messages: [
             {
               role: "system",

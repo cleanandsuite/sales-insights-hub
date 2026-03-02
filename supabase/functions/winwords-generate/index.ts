@@ -149,9 +149,9 @@ serve(async (req) => {
 
     const { scenario, persona, dealContext, style } = parseResult.data;
     
-    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
-    if (!MINIMAX_API_KEY) {
-      console.error("MINIMAX_API_KEY is not configured");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_V3_API_KEY");
+    if (!DEEPSEEK_API_KEY) {
+      console.error("DEEPSEEK_V3_API_KEY is not configured");
       return new Response(
         JSON.stringify({ error: 'Service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -412,14 +412,14 @@ Generate a comprehensive, personalized script that will WIN this deal. Include s
 
     console.log("Generating WinWords script for scenario:", scenario);
     
-    const response = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${MINIMAX_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "MiniMax-M2.5",
+        model: "deepseek-chat",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }

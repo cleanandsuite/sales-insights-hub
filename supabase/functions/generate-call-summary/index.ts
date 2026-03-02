@@ -48,10 +48,10 @@ serve(async (req) => {
     const transcript = body.transcript || body.transcription;
     const contact_info = body.contact_info;
     
-    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_V3_API_KEY");
     
-    if (!MINIMAX_API_KEY) {
-      throw new Error("MINIMAX_API_KEY is not configured");
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error("DEEPSEEK_V3_API_KEY is not configured");
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -78,14 +78,14 @@ serve(async (req) => {
     const transcriptText = transcript || recording.live_transcription || "";
 
     // Generate comprehensive call summary using AI
-    const aiResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+    const aiResponse = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${MINIMAX_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "MiniMax-M2.5",
+        model: "deepseek-chat",
         messages: [
           {
             role: "system",

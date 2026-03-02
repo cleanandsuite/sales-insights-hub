@@ -63,9 +63,9 @@ serve(async (req) => {
       );
     }
 
-    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
-    if (!MINIMAX_API_KEY) {
-      throw new Error('MINIMAX_API_KEY not configured');
+    const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_V3_API_KEY');
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error('DEEPSEEK_V3_API_KEY not configured');
     }
 
     const { transcription, context } = await req.json();
@@ -83,14 +83,14 @@ serve(async (req) => {
 
     console.log('Analyzing conversation for user:', userData.user.id, 'length:', transcription.length);
 
-    const response = await fetch('https://api.minimaxi.com/v1/chat/completions', {
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'MiniMax-M2.5',
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { 

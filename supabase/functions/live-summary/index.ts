@@ -50,9 +50,9 @@ serve(async (req) => {
       );
     }
 
-    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
-    if (!MINIMAX_API_KEY) {
-      throw new Error('MINIMAX_API_KEY not configured');
+    const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_V3_API_KEY');
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error('DEEPSEEK_V3_API_KEY not configured');
     }
 
     const systemPrompt = `You are a real-time sales call analyzer. Provide a concise, evolving summary of the conversation as it happens.
@@ -80,14 +80,14 @@ Respond with JSON:
 
 Focus on what's most relevant RIGHT NOW. Keep each array to max 3 items.`;
 
-    const response = await fetch('https://api.minimaxi.com/v1/chat/completions', {
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'MiniMax-M2.5',
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
