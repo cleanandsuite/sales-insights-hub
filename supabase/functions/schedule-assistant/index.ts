@@ -23,10 +23,10 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY is not configured");
     }
 
     const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -80,14 +80,14 @@ serve(async (req) => {
       const transcript = recording.live_transcription || "";
 
       // Enhanced AI extraction with summary, key points, and objections
-      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "llama-3.1-8b-instant",
           messages: [
             {
               role: "system",
@@ -183,14 +183,14 @@ ${transcript.slice(0, 12000)}`
         );
       }
 
-      const coachResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const coachResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "llama-3.1-8b-instant",
           messages: [
             {
               role: "system",
@@ -244,14 +244,14 @@ ${recording.live_transcription?.slice(0, 10000) || "No transcript available"}`
         .eq("recording_id", recordingId)
         .maybeSingle();
 
-      const emailResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const emailResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "llama-3.1-8b-instant",
           messages: [
             {
               role: "system",
@@ -461,14 +461,14 @@ ${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
         );
       }
 
-      const emailResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const emailResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "llama-3.1-8b-instant",
           messages: [
             {
               role: "system",

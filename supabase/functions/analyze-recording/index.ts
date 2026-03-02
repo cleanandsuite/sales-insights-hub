@@ -312,19 +312,27 @@ serve(async (req) => {
       );
     }
 
-    console.log('Analyzing with GPT-4...');
+    console.log('Analyzing with Groq Llama...');
     
     // Sanitize transcription before sending to AI (limit length)
     const sanitizedTranscription = finalTranscription.substring(0, 50000);
     
-    const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
+    if (!GROQ_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'GROQ_API_KEY not configured', success: false }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const analysisResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIKey}`,
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'llama-3.1-8b-instant',
         messages: [
           { role: 'system', content: ANALYSIS_PROMPT },
           { role: 'user', content: `Analyze this sales call transcription:\n\n${sanitizedTranscription}` }
