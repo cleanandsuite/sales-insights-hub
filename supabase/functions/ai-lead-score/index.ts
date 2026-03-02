@@ -154,20 +154,20 @@ serve(async (req) => {
 
     console.log('Analyzing lead:', lead_id);
 
-    // Call MiniMax AI for analysis
-    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
-    if (!MINIMAX_API_KEY) {
-      throw new Error('MINIMAX_API_KEY not configured');
+    // Call DeepSeek V3 AI for analysis
+    const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_V3_API_KEY');
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error('DEEPSEEK_V3_API_KEY not configured');
     }
 
-    const aiResponse = await fetch('https://api.minimaxi.com/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'MiniMax-M2.5',
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: AI_SCORING_PROMPT },
           { role: 'user', content: `Analyze this lead and provide scoring:\n\n${JSON.stringify(leadContext, null, 2)}` }

@@ -312,27 +312,27 @@ serve(async (req) => {
       );
     }
 
-    console.log('Analyzing with MiniMax M2.5...');
+    console.log('Analyzing with DeepSeek V3...');
     
     // Sanitize transcription before sending to AI (limit length)
     const sanitizedTranscription = finalTranscription.substring(0, 50000);
     
-    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
-    if (!MINIMAX_API_KEY) {
+    const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_V3_API_KEY');
+    if (!DEEPSEEK_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'MINIMAX_API_KEY not configured', success: false }),
+        JSON.stringify({ error: 'DEEPSEEK_V3_API_KEY not configured', success: false }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    const analysisResponse = await fetch('https://api.minimaxi.com/v1/chat/completions', {
+    const analysisResponse = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'MiniMax-M2.5',
+        model: 'deepseek-chat',
         messages: [
           { role: 'system', content: ANALYSIS_PROMPT },
           { role: 'user', content: `Analyze this sales call transcription:\n\n${sanitizedTranscription}` }

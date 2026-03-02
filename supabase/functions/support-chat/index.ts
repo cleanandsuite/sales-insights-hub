@@ -69,10 +69,10 @@ serve(async (req) => {
       ? sanitizeString(rawFaqContext, 20000) 
       : '';
 
-    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_V3_API_KEY");
     
-    if (!MINIMAX_API_KEY) {
-      throw new Error("MINIMAX_API_KEY is not configured");
+    if (!DEEPSEEK_API_KEY) {
+      throw new Error("DEEPSEEK_V3_API_KEY is not configured");
     }
 
     const systemPrompt = `You are a helpful customer support AI assistant for SellSig, a sales call recording and AI coaching platform.
@@ -94,14 +94,14 @@ IMPORTANT:
 - If asked about something not covered, START with "[LOW_CONFIDENCE]" then say you don't have that information and suggest contacting support
 - For complex account-specific issues (refunds, technical bugs, account access), START with "[LOW_CONFIDENCE]" and recommend submitting a support ticket`;
 
-    const response = await fetch("https://api.minimaxi.com/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${MINIMAX_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "MiniMax-M2.5",
+        model: "deepseek-chat",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,
