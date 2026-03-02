@@ -14,7 +14,18 @@ const tiers = [
     desc: 'For individual reps ready to level up.',
     promo: true,
     promoLabel: '🔥 Limited Time! Only 17 seats left',
-    features: ['1,500 call minutes/month', '⚡ +1,000 bonus minutes (promo)', 'Unlimited call recording', 'AI call scoring', 'Post-call summaries', 'Basic coaching insights', 'Email support'],
+    features: [
+      '1,500 call minutes/month',
+      '⚡ +1,000 bonus minutes (promo)',
+      'Dedicated US business phone number',
+      'Unlimited AI call scripts (limited time)',
+      'Call recording & transcription',
+      'Basic post-call scoring',
+      'Real-time live coaching',
+      'Basic team sharing (link-based)',
+      'Export to PDF/CSV',
+      'Email support (48-hr SLA)',
+    ],
     highlighted: false,
     cta: 'Start Free Trial',
   },
@@ -22,8 +33,25 @@ const tiers = [
     name: 'Pro Small Business',
     price: '$250',
     period: '/mo',
-    desc: 'For teams that want to dominate quota.',
-    features: ['Everything in Essential', 'Real-time whisper coaching', 'Live sentiment analysis', 'Team leaderboard & analytics', 'Coach style customization', 'Priority support'],
+    desc: 'For growing teams — real-time coaching + team visibility that actually improves win rates.',
+    promo: true,
+    promoLabel: '⚡ First 30 days: +5,000 bonus minutes included',
+    subheadline: '📞 Dedicated Business Phone Line · 15,000 min · 5 users · 99.9% uptime',
+    features: [
+      '5 user seats',
+      'Dedicated US business phone number',
+      '15,000 call minutes/month',
+      'Unlimited script generation',
+      'Live emotion & sentiment detection',
+      'Real-time objection coaching',
+      'Full 40-dimension call scoring',
+      'Team management dashboard',
+      'Rank & stats leaderboard',
+      'Role-based access (manager vs. rep)',
+      'Custom script templates (team library)',
+      'Priority support (24-hr SLA + chat)',
+      '🔗 CRM Sync: Salesforce & HubSpot — coming soon',
+    ],
     highlighted: true,
     cta: 'Book a Demo',
   },
@@ -31,10 +59,22 @@ const tiers = [
     name: 'Enterprise Plan',
     price: 'Custom',
     period: '',
-    desc: 'For organizations scaling revenue intelligence.',
-    features: ['Everything in Performance', 'SSO & advanced security', 'Custom integrations', 'Dedicated success manager', 'SLA guarantee', 'Unlimited seats'],
+    desc: 'Tailored for scaling revenue organizations. Advanced performance transparency, accelerated team development, and maximum coaching flexibility.',
+    subheadline: 'Minimum 10 seats · Custom pricing & contract terms',
+    features: [
+      'Everything in Pro, plus:',
+      'Gamified Performance Ranking System',
+      '5 Distinct Elite AI Coaching Systems',
+      'Full-Transparency Management Dashboard',
+      'Dedicated Account Specialist',
+      'Priority 24/7 response SLA',
+      'Quarterly business reviews',
+      'Custom integrations',
+      'Flexible seat scaling',
+    ],
     highlighted: false,
-    cta: 'Contact Sales',
+    cta: '📞 Contact Sales',
+    ctaSub: 'Request a personalized demo →',
   },
 ];
 
@@ -105,9 +145,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                   {tier.name}
                 </h3>
                 <p className="text-white/40 text-sm">{tier.desc}</p>
+                {'subheadline' in tier && tier.subheadline && (
+                  <p className="text-white/50 text-xs mt-2 font-medium">{tier.subheadline}</p>
+                )}
               </div>
 
-              {'promo' in tier && tier.promo && (
+              {'promo' in tier && tier.promo && 'promoLabel' in tier && (
                 <div className="mb-3">
                   <span className="inline-block bg-[hsl(var(--cin-teal))]/10 border border-[hsl(var(--cin-teal))]/20 text-[hsl(var(--cin-teal))] text-xs font-bold px-3 py-1 rounded-full">
                     {tier.promoLabel}
@@ -136,16 +179,21 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                 ))}
               </ul>
 
-              <button
-                onClick={onStartTrialClick}
-                className={`magnetic-btn w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2 ${
-                  tier.highlighted
-                    ? 'bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))]'
-                    : 'border border-white/[0.15] text-white hover:bg-white/[0.05]'
-                }`}
-              >
-                {tier.cta} <ArrowRight className="w-4 h-4" />
-              </button>
+              <div>
+                <button
+                  onClick={onStartTrialClick}
+                  className={`magnetic-btn w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2 ${
+                    tier.highlighted
+                      ? 'bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))]'
+                      : 'border border-white/[0.15] text-white hover:bg-white/[0.05]'
+                  }`}
+                >
+                  {tier.cta} <ArrowRight className="w-4 h-4" />
+                </button>
+                {'ctaSub' in tier && tier.ctaSub && (
+                  <p className="text-center text-white/30 text-xs mt-2">{tier.ctaSub}</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
