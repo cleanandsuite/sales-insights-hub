@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const tiers = [
   {
-    name: 'Essential',
+    name: 'Starter Plan',
     price: '$99',
     period: '/mo',
     desc: 'For individual reps ready to level up.',
