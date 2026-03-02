@@ -23,10 +23,10 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
 
-    if (!GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY is not configured");
+    if (!MINIMAX_API_KEY) {
+      throw new Error("MINIMAX_API_KEY is not configured");
     }
 
     const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -80,14 +80,14 @@ serve(async (req) => {
       const transcript = recording.live_transcription || "";
 
       // Enhanced AI extraction with summary, key points, and objections
-      const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const aiResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
+          Authorization: `Bearer ${MINIMAX_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "MiniMax-M2.5",
           messages: [
             {
               role: "system",
@@ -110,6 +110,8 @@ Return a JSON object with:
 - objections: Array of any objections or concerns raised by the prospect
 - next_steps: Array of agreed next steps or action items
 
+You MUST respond with valid JSON only, no markdown or extra text.
+
 Today's date is: ${new Date().toISOString()}`
             },
             {
@@ -125,7 +127,6 @@ Transcript:
 ${transcript.slice(0, 12000)}`
             }
           ],
-          response_format: { type: "json_object" }
         }),
       });
 
@@ -146,7 +147,15 @@ ${transcript.slice(0, 12000)}`
       }
 
       const aiData = await aiResponse.json();
-      const extraction = JSON.parse(aiData.choices[0].message.content);
+      const rawContent = aiData.choices[0].message.content;
+      
+      let extraction;
+      try {
+        extraction = JSON.parse(rawContent);
+      } catch {
+        const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+        extraction = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+      }
 
       // Merge with lead data and existing summary
       return new Response(JSON.stringify({
@@ -183,14 +192,14 @@ ${transcript.slice(0, 12000)}`
         );
       }
 
-      const coachResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const coachResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
+          Authorization: `Bearer ${MINIMAX_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "MiniMax-M2.5",
           messages: [
             {
               role: "system",
@@ -244,14 +253,14 @@ ${recording.live_transcription?.slice(0, 10000) || "No transcript available"}`
         .eq("recording_id", recordingId)
         .maybeSingle();
 
-      const emailResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const emailResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
+          Authorization: `Bearer ${MINIMAX_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "MiniMax-M2.5",
           messages: [
             {
               role: "system",
@@ -264,7 +273,9 @@ ${recording.live_transcription?.slice(0, 10000) || "No transcript available"}`
 Return a JSON object with:
 - subject: Email subject line (compelling, concise)
 - body: Full email body (formatted with greeting, paragraphs, sign-off placeholder [Your Name])
-- tone: The tone used (professional, friendly, urgent, etc.)`
+- tone: The tone used (professional, friendly, urgent, etc.)
+
+You MUST respond with valid JSON only, no markdown or extra text.`
             },
             {
               role: "user",
@@ -280,7 +291,6 @@ Transcript excerpt:
 ${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
             }
           ],
-          response_format: { type: "json_object" }
         }),
       });
 
@@ -295,7 +305,14 @@ ${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
       }
 
       const emailData = await emailResponse.json();
-      const emailScript = JSON.parse(emailData.choices[0].message.content);
+      const rawEmailContent = emailData.choices[0].message.content;
+      let emailScript;
+      try {
+        emailScript = JSON.parse(rawEmailContent);
+      } catch {
+        const jsonMatch = rawEmailContent.match(/\{[\s\S]*\}/);
+        emailScript = jsonMatch ? JSON.parse(jsonMatch[0]) : { subject: "Follow-up", body: rawEmailContent, tone: "professional" };
+      }
 
       return new Response(JSON.stringify({
         success: true,
@@ -461,14 +478,14 @@ ${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
         );
       }
 
-      const emailResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const emailResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
+          Authorization: `Bearer ${MINIMAX_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "MiniMax-M2.5",
           messages: [
             {
               role: "system",
@@ -481,7 +498,9 @@ ${recording?.live_transcription?.slice(0, 5000) || "No transcript"}`
 Return a JSON object with:
 - subject: Email subject line
 - body: Full email body with greeting, content, and sign-off placeholder [Your Name]
-- tone: The tone used (professional, friendly, etc.)`
+- tone: The tone used (professional, friendly, etc.)
+
+You MUST respond with valid JSON only, no markdown or extra text.`
             },
             {
               role: "user",
@@ -498,7 +517,6 @@ Prep Notes: ${scheduledCall.prep_notes || "None"}
 ${emailCustomPrompt ? `\nCustom Instructions: ${emailCustomPrompt}` : ''}`
             }
           ],
-          response_format: { type: "json_object" }
         }),
       });
 
@@ -519,7 +537,14 @@ ${emailCustomPrompt ? `\nCustom Instructions: ${emailCustomPrompt}` : ''}`
       }
 
       const emailData = await emailResponse.json();
-      const emailScript = JSON.parse(emailData.choices[0].message.content);
+      const rawEmailContent = emailData.choices[0].message.content;
+      let emailScript;
+      try {
+        emailScript = JSON.parse(rawEmailContent);
+      } catch {
+        const jsonMatch = rawEmailContent.match(/\{[\s\S]*\}/);
+        emailScript = jsonMatch ? JSON.parse(jsonMatch[0]) : { subject: "Meeting", body: rawEmailContent, tone: "professional" };
+      }
 
       return new Response(JSON.stringify({
         success: true,

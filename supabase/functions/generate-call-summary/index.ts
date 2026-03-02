@@ -48,10 +48,10 @@ serve(async (req) => {
     const transcript = body.transcript || body.transcription;
     const contact_info = body.contact_info;
     
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
     
-    if (!GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY is not configured");
+    if (!MINIMAX_API_KEY) {
+      throw new Error("MINIMAX_API_KEY is not configured");
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -78,14 +78,14 @@ serve(async (req) => {
     const transcriptText = transcript || recording.live_transcription || "";
 
     // Generate comprehensive call summary using AI
-    const aiResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const aiResponse = await fetch("https://api.minimaxi.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
+        Authorization: `Bearer ${MINIMAX_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "MiniMax-M2.5",
         messages: [
           {
             role: "system",
@@ -109,14 +109,15 @@ serve(async (req) => {
 - salesforce_sync_recommended: boolean for CRM sync
 - scheduling_intent: If a follow-up meeting, demo, or callback was discussed, extract { date: "YYYY-MM-DD or relative like 'next Thursday'", time: "HH:MM or relative like 'morning'", contact_name: "person name", meeting_type: "demo|follow-up|call|meeting", raw_phrase: "exact quote from transcript" }. Set to null if no scheduling was discussed.
 - call_disposition: classify the call outcome as exactly one of: "connected_interested", "connected_not_interested", "voicemail", "no_answer", "gatekeeper", "callback_requested", "meeting_booked", "wrong_number"
-- disposition_confidence: 0-100 confidence in the disposition classification`
+- disposition_confidence: 0-100 confidence in the disposition classification
+
+You MUST respond with valid JSON only, no markdown or extra text.`
           },
           {
             role: "user",
             content: `Analyze this sales call transcript:\n\n${transcriptText}`
           }
         ],
-        response_format: { type: "json_object" }
       }),
     });
 
@@ -144,7 +145,6 @@ serve(async (req) => {
           analysis = JSON.parse(jsonMatch[1].trim());
         } catch (innerError) {
           console.error("JSON extraction also failed:", innerError);
-          // Return minimal valid analysis to prevent complete failure
           analysis = {
             quick_skim: { pain: "Unable to analyze", need: "Unable to analyze" },
             key_points: ["Call analysis failed - please review manually"],

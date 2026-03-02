@@ -178,10 +178,10 @@ serve(async (req) => {
 
     console.log('Starting Deal Coach analysis for recording:', recordingId);
 
-    // Use Groq AI
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!GROQ_API_KEY) {
-      console.error('GROQ_API_KEY not configured');
+    // Use MiniMax AI
+    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
+    if (!MINIMAX_API_KEY) {
+      console.error('MINIMAX_API_KEY not configured');
       return new Response(
         JSON.stringify({ error: 'Service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -191,14 +191,14 @@ serve(async (req) => {
     // Sanitize and limit transcript length for AI
     const sanitizedTranscript = transcript.substring(0, 15000);
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('https://api.minimaxi.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'MiniMax-M2.5',
         messages: [
           { role: 'system', content: DEAL_COACH_PROMPT },
           { 

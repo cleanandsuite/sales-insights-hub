@@ -26,7 +26,7 @@ const validateMessages = (messages: unknown): ChatMessage[] | null => {
     const m = msg as Record<string, unknown>;
     if (typeof m.role !== 'string' || typeof m.content !== 'string') return null;
     if (!['user', 'assistant', 'system'].includes(m.role)) return null;
-    if (m.content.length > 10000) return null; // Max 10k chars per message
+    if (m.content.length > 10000) return null;
     
     validated.push({
       role: m.role,
@@ -34,9 +34,8 @@ const validateMessages = (messages: unknown): ChatMessage[] | null => {
     });
   }
   
-  // Total content length check (prevent abuse)
   const totalLength = validated.reduce((sum, m) => sum + m.content.length, 0);
-  if (totalLength > 50000) return null; // Max 50k total chars
+  if (totalLength > 50000) return null;
   
   return validated;
 };
@@ -58,7 +57,6 @@ serve(async (req) => {
 
     const { messages: rawMessages, faqContext: rawFaqContext } = body;
     
-    // Validate messages array
     const messages = validateMessages(rawMessages);
     if (!messages) {
       return new Response(
@@ -67,15 +65,14 @@ serve(async (req) => {
       );
     }
 
-    // Validate and sanitize FAQ context
     const faqContext = typeof rawFaqContext === 'string' 
       ? sanitizeString(rawFaqContext, 20000) 
       : '';
 
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    const MINIMAX_API_KEY = Deno.env.get("MINIMAX_API_KEY");
     
-    if (!GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY is not configured");
+    if (!MINIMAX_API_KEY) {
+      throw new Error("MINIMAX_API_KEY is not configured");
     }
 
     const systemPrompt = `You are a helpful customer support AI assistant for SellSig, a sales call recording and AI coaching platform.
@@ -97,14 +94,14 @@ IMPORTANT:
 - If asked about something not covered, START with "[LOW_CONFIDENCE]" then say you don't have that information and suggest contacting support
 - For complex account-specific issues (refunds, technical bugs, account access), START with "[LOW_CONFIDENCE]" and recommend submitting a support ticket`;
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetch("https://api.minimaxi.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
+        Authorization: `Bearer ${MINIMAX_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "MiniMax-M2.5",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,

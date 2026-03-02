@@ -312,34 +312,33 @@ serve(async (req) => {
       );
     }
 
-    console.log('Analyzing with Groq Llama...');
+    console.log('Analyzing with MiniMax M2.5...');
     
     // Sanitize transcription before sending to AI (limit length)
     const sanitizedTranscription = finalTranscription.substring(0, 50000);
     
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    if (!GROQ_API_KEY) {
+    const MINIMAX_API_KEY = Deno.env.get('MINIMAX_API_KEY');
+    if (!MINIMAX_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'GROQ_API_KEY not configured', success: false }),
+        JSON.stringify({ error: 'MINIMAX_API_KEY not configured', success: false }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    const analysisResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const analysisResponse = await fetch('https://api.minimaxi.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${MINIMAX_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'MiniMax-M2.5',
         messages: [
           { role: 'system', content: ANALYSIS_PROMPT },
           { role: 'user', content: `Analyze this sales call transcription:\n\n${sanitizedTranscription}` }
         ],
         temperature: 0.5,
         max_tokens: 2000,
-        response_format: { type: "json_object" }
       }),
     });
 
@@ -353,7 +352,18 @@ serve(async (req) => {
     }
 
     const analysisResult = await analysisResponse.json();
-    const analysis = JSON.parse(analysisResult.choices[0].message.content);
+    const rawContent = analysisResult.choices[0].message.content;
+    let analysis;
+    try {
+      analysis = JSON.parse(rawContent);
+    } catch {
+      const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        analysis = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('No JSON found in AI response');
+      }
+    }
     
     console.log('Analysis complete, saving to database...');
 
