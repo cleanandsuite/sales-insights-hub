@@ -1,76 +1,80 @@
 
 
-# Animated Hero: Living Waveform + AI Coaching Signal Popups
+# Redesign SellSig Logo as a Hand-Crafted SVG Mark
 
-## Overview
-Two enhancements to the hero section: (1) animate the static waveform bars into a breathing audio signal, and (2) add floating AI coaching popups that appear at random positions around the waveform area, simulating real-time coaching intelligence.
+## Problem
+The current logo icon is generic blue signal bars with a yellow lightning bolt — exactly the corporate SaaS cliche the brand should avoid. The AI-generated PNG was low quality and not usable.
 
-## What It Will Look Like
-The right side of the hero will feel alive -- waveform bars pulsing like a live call is happening, while coaching bubbles pop in at random spots with messages like "Objection detected -- pivot to ROI" or "Buyer showing interest -- ask for the close now." Each bubble fades in, holds for 4-5 seconds, then fades out. The next one appears at a different location. Only 1 bubble visible at a time to keep it clean.
+## Solution
+Build a new logo entirely as an inline SVG component in code. This gives us:
+- Pixel-perfect at every size (16x16 favicon to billboard)
+- True vector — no raster artifacts
+- Full control over geometry, colors, negative space
+- Matches the cinematic dark theme natively
 
-## Changes
+## New Logo Design: The "Sig" Mark
 
-### 1. Animate the Waveform Bars (`CinematicHero.tsx`)
-- Replace `Math.random()` with deterministic sine-wave heights via `useMemo`
-- Apply CSS `cin-waveform` animation to each bar with staggered delay/duration
-- Increase to ~80 bars for a denser signal look
+A bold geometric "S" that doubles as a **signal spike / rising signature line**:
 
-### 2. Add CSS Keyframes (`src/index.css`)
-- `@keyframes cin-waveform` -- scaleY oscillation (0.3 to 1.0) for bars
-- `@keyframes cin-coach-pop` -- scale + fade entrance for coaching bubbles
-
-### 3. Add Floating Coaching Popups (`CinematicHero.tsx`)
-A self-contained coaching demo loop built directly into the hero:
-
-**Sample coaching signals (rotating):**
-- (red/high) "Objection detected -- use the empathy close"
-- (teal/medium) "Buyer mentioned budget timeline -- pivot to ROI"
-- (teal/medium) "Positive sentiment shift -- ask for the close now"
-- (amber/high) "Losing attention -- pause and re-engage with a question"
-- (green/low) "Decision-maker confirmed -- transition to proposal"
-- (red/high) "Competitor mentioned -- highlight your differentiator"
-
-**Random positioning logic:**
-- Pre-define 6-8 position slots spread across the waveform area (e.g., top-left, center-right, bottom-center, etc.) using percentage-based absolute positioning
-- Each popup randomly picks a slot that was NOT used by the previous popup
-- Slots defined as `{ top: '15%', right: '10%' }`, `{ top: '55%', right: '35%' }`, etc.
-
-**Animation cycle:**
-- Show one popup every ~4.5 seconds
-- Each popup fades/scales in (0.4s), holds for 3.5s, fades out (0.5s)
-- Cycle through all 6 messages, then loop
-- Start after a 2-second delay so the hero text animates in first
-
-**Popup design:**
-- Small glass card: `bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-xl px-4 py-3`
-- Sparkles icon + urgency dot (red/amber/teal) + coaching text in white/80 text-xs
-- Max width ~260px so it doesn't overwhelm the hero
-- Desktop only (`hidden lg:block`) -- same as the waveform
-
-### 4. Technical Implementation
-
-**State management (inside CinematicHero):**
-```
-const [activePopup, setActivePopup] = useState<{index: number, slot: number} | null>(null)
+```text
+    ╱╲
+   ╱  ╲
+  ╱    ╲
+ ╱      ╲______
+╱
+         ╱╲
+        ╱  ╲
+ ______╱    ╲
+              ╲
 ```
 
-**Interval logic in useEffect:**
-- Every 4.5s, pick next message index (cycling 0-5) and a random slot (excluding previous)
-- Set activePopup, then after 3.5s set it to null (fade-out via CSS)
-- Cleanup interval on unmount
+Concept: Two sharp zigzag strokes forming an "S" shape that also reads as a signal waveform spike — like a stock chart breakout or an EKG spike. The negative space between the strokes creates a hidden upward arrow.
 
-**Position slots array:**
-```
-const POPUP_SLOTS = [
-  { top: '10%', right: '5%' },
-  { top: '25%', right: '40%' },
-  { top: '45%', right: '15%' },
-  { top: '60%', right: '50%' },
-  { top: '15%', right: '55%' },
-  { top: '50%', right: '30%' },
-]
-```
+### Design Specs
+- **Shape**: Angular "S" built from two connected chevron/zigzag paths with sharp 45-degree cuts
+- **Color**: Electric chartreuse (#CCFF00) on dark backgrounds, deep near-black (#0A0F1C) on light backgrounds
+- **No gradients** — flat, brutal, single-color fill
+- **No rounded corners** on the mark itself — sharp terminals only
+- **Aspect ratio**: Square (fits in favicon, app icon, social avatar)
 
-### Files to modify
-- `src/index.css` -- add 2 keyframe rules (~10 lines)
-- `src/components/landing/CinematicHero.tsx` -- refactor waveform SVG + add coaching popup system (~80 lines added)
+### Wordmark Update
+- "Sell" in white/foreground, "Sig" in chartreuse (#CCFF00) accent
+- Tighter letter-spacing, bolder weight
+- Drop the "AI Coach" tagline from the logo (move it elsewhere if needed)
+
+## Color Palette Change
+- **Primary accent**: `#CCFF00` (electric chartreuse) — replaces the generic blue
+- **Dark background**: stays `#0A1428` (cinematic)
+- **This is logo-only** — we won't change the full site theme in this task, just the logo mark and wordmark colors
+
+## Files to Modify
+
+### `src/components/ui/SellSigLogo.tsx`
+- Replace the `SellSigIcon` SVG with the new angular "S" / signal spike mark
+- Update color variants: chartreuse accent instead of blue
+- Remove "AI Coach" tagline default (keep as opt-in prop)
+- Update the container styling — remove the rounded background box, let the mark stand alone
+
+### `src/components/landing/CinematicNavbar.tsx`
+- Replace the plain text "SellSig" with the `SellSigLogo` component (light variant, no tagline, small size)
+
+## What This Does NOT Change
+- No raster images involved — pure SVG in code
+- No changes to the cinematic page theme or other components
+- The `SellSigLogo` component API stays the same (size, variant, linkTo props)
+- Other pages using `SellSigLogo` will automatically get the new mark
+
+## Technical Details
+
+The new SVG mark will be approximately:
+```tsx
+<svg viewBox="0 0 32 32" fill="none">
+  {/* Upper zigzag stroke */}
+  <path d="M4 20 L12 8 L20 20" stroke="currentColor" strokeWidth="4" strokeLinecap="square" fill="none" />
+  {/* Lower zigzag stroke */}  
+  <path d="M12 12 L20 24 L28 12" stroke="currentColor" strokeWidth="4" strokeLinecap="square" fill="none" />
+</svg>
+```
+(Exact coordinates will be refined during implementation for visual balance)
+
+The mark uses `currentColor` so it inherits from the parent — chartreuse on dark, near-black on light.
