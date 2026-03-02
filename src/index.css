@@ -696,3 +696,91 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ============================================
+   CINEMATIC LANDING — Enterprise Precision
+   ============================================ */
+
+/* Cinematic CSS Custom Properties */
+:root {
+  --cin-bg: 215 56% 10%;        /* #0A1428 */
+  --cin-teal: 168 76% 40%;      /* #14B8A6 */
+  --cin-purple: 263 83% 57%;    /* #7C3AED */
+  --cin-surface: 0 0% 100% / 0.04;
+  --cin-border: 0 0% 100% / 0.08;
+  --cin-text: 0 0% 100%;
+  --cin-text-muted: 0 0% 100% / 0.6;
+}
+
+/* Global noise overlay */
+.cinematic-noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+}
+
+/* Magnetic button */
+.magnetic-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.magnetic-btn:hover {
+  transform: scale(1.03);
+}
+.magnetic-btn .btn-slide {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.magnetic-btn:hover .btn-slide {
+  transform: translateY(0);
+}
+
+/* Cinematic link lift */
+.cin-lift {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.cin-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Typewriter cursor blink */
+@keyframes cin-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cin-cursor {
+  animation: cin-blink 0.8s step-end infinite;
+}
+
+/* Pulsing status dot */
+@keyframes cin-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.4); }
+}
+.cin-pulse-dot {
+  animation: cin-pulse-dot 2s ease-in-out infinite;
+}
+
+/* EKG waveform dash animation */
+@keyframes cin-ekg {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Rotating SVG */
+@keyframes cin-rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Laser scan */
+@keyframes cin-scan {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
