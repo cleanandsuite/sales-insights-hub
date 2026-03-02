@@ -16,7 +16,7 @@ const tiers = [
     cta: 'Start Free Trial',
   },
   {
-    name: 'Performance',
+    name: 'Pro Small Business',
     price: '$250',
     period: '/mo',
     desc: 'For teams that want to dominate quota.',
@@ -25,7 +25,7 @@ const tiers = [
     cta: 'Book a Demo',
   },
   {
-    name: 'Enterprise',
+    name: 'Enterprise Plan',
     price: 'Custom',
     period: '',
     desc: 'For organizations scaling revenue intelligence.',
