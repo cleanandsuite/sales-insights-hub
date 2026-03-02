@@ -1,28 +1,46 @@
 
 
-# Fix Protocol Section — Visibility and Sales Content
+# Pricing Cards — Visual Upgrade
 
-## Problem
-The SVG visualizations next to "Pre-Call Intelligence" and "Live Coaching" are set to `opacity-20` and `opacity-20` respectively, making them nearly invisible on the dark `#0A1428` background. The EKG waveform is at `opacity-30` which is also faint.
+## Overview
+Make all three pricing cards more visually distinctive with bolder typography, hover animations, and a premium dark silver/gold theme for the Enterprise card. Move the "Minimum 10 seats" text under the price as a requirement line.
 
-## Changes
+## Changes (all in `src/components/landing/CinematicPricing.tsx`)
 
-### File: `src/components/landing/CinematicProtocol.tsx`
+### 1. Bigger, Bolder Plan Names
+- Increase plan name `h3` from `text-lg` to `text-2xl font-bold` so each tier title commands attention.
+- Increase description text from `text-sm` to `text-base`.
 
-**1. Increase SVG visibility**
-- ConcentricCircles: bump from `opacity-20` to `opacity-60`, increase `strokeWidth` from `0.5` to `1.5`, use brighter teal (`hsl(168,76%,55%)`)
-- LaserScan: bump from `opacity-20` to `opacity-60`, increase dot `opacity` from `0.4` to `0.7`, use brighter purple
-- EKGWaveform: bump from `opacity-30` to `opacity-60`, increase `strokeWidth` from `1.5` to `2`
+### 2. Starter Plan — Stand Out More
+- Add a subtle teal border glow: `border border-[hsl(var(--cin-teal))]/20 shadow-[0_0_30px_rgba(20,184,166,0.08)]`.
+- Add a "Best Value" or promo ribbon/badge at the top of the card to draw the eye.
 
-**2. Enrich sales content**
-Update the step descriptions to be more specific and compelling:
+### 3. Move "Minimum 10 seats" Under Price
+- Remove `subheadline` from the Enterprise tier data.
+- Render "Minimum 10 seats · Custom pricing & contract terms" directly below the "Custom" price text as a smaller requirement line (e.g., `text-xs text-white/40 mt-1`), not in the description area.
 
-| Step | Current Title | New Description |
-|------|--------------|-----------------|
-| 01 | Pre-Call Intelligence | "Before you dial, SellSig scans your CRM history, past conversations, and live market signals to build a personalized brief — so you walk into every call prepared to win." |
-| 02 | Live Coaching | "While you talk, whisper-mode AI detects sentiment shifts, flags objections in real time, and surfaces the exact rebuttal or question to keep the deal moving forward." |
-| 03 | Post-Call Analysis | "Within seconds of hanging up, get automated call scores, deal risk alerts, next-step recommendations, and a coaching plan tailored to what just happened." |
+### 4. Hover Animation — Color Inverse + Pop
+- Add a CSS hover effect to each card: `hover:scale-[1.03] hover:-translate-y-1` with a transition.
+- On hover, invert the card style slightly: background brightens, text gets a subtle color shift.
+- Use GSAP or CSS transition for a smooth "pop" feel.
 
-**3. Add subtle glow effect behind each SVG**
-Wrap each visualization in a container with a soft radial gradient glow matching its accent color, giving them more visual presence without looking flat.
+### 5. Enterprise Card — Dark Silver & Gold Premium Theme
+- Replace the default `bg-white/[0.03]` with a dark gradient: `bg-gradient-to-b from-[#1a1a2e] to-[#16213e]`.
+- Plan name rendered in a gold gradient text: `bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400` with `bg-clip-text text-transparent`.
+- Feature checkmarks in gold (`text-amber-400`).
+- Border in silver: `border border-white/[0.12]` with a subtle gold glow `shadow-[0_0_40px_rgba(251,191,36,0.08)]`.
+- CTA button styled with gold: `bg-gradient-to-r from-amber-500 to-yellow-600 text-black`.
+- Price text ("Custom") in silver-white.
+
+### Technical Details
+
+**Data change** — Enterprise tier object:
+- Remove `subheadline` field
+- Add `premium: true` flag
+
+**Rendering logic:**
+- If `tier.premium`, apply gold/silver classes instead of default
+- Render "Minimum 10 seats · Custom pricing & contract terms" right after the price `div` when `tier.premium` is true
+- Hover classes applied to all cards via Tailwind: `transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1`
+- Starter card gets a special border/glow class when `tier.promo && !tier.highlighted`
 
