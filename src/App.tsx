@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { TeamProtectedRoute } from "@/components/TeamProtectedRoute";
 import { Loader2 } from "lucide-react";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { ThemeProvider } from "next-themes";
 
 // Eagerly load the landing page for best initial load performance
 import Index from "./pages/Index";
@@ -59,6 +60,7 @@ const PageLoader = () => (
 );
 
 const App = () => (
+  <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SidebarProvider>
@@ -116,6 +118,7 @@ const App = () => (
       </SidebarProvider>
     </TooltipProvider>
   </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
