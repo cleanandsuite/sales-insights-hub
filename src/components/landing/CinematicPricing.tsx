@@ -28,7 +28,7 @@ const tiers = [
     ],
     highlighted: false,
     premium: false,
-    cta: 'Start Free Trial',
+    cta: 'Start Today',
   },
   {
     name: 'Pro Small Business',
@@ -55,7 +55,7 @@ const tiers = [
     ],
     highlighted: true,
     premium: false,
-    cta: 'Book a Demo',
+    cta: 'Go Pro & Save',
   },
   {
     name: 'Enterprise Plan',

@@ -126,7 +126,7 @@ export function PricingSection() {
             <button
               onClick={handleGetStarted}
               className="block w-full text-center py-3.5 rounded-[10px] text-sm font-bold bg-[#0057FF] text-white shadow-[0_2px_12px_rgba(0,87,255,.25)] hover:bg-[#003FBB] hover:-translate-y-[1px] hover:shadow-[0_6px_24px_rgba(0,87,255,.35)] transition-all">
-              Get Started
+              Start Today
             </button>
           </div>
 
@@ -170,7 +170,7 @@ export function PricingSection() {
             <button
               onClick={handleGetStarted}
               className="block w-full text-center py-3.5 rounded-[10px] text-sm font-bold bg-white text-[#0A1628] hover:bg-[#0057FF] hover:text-white transition-all">
-              Get Started
+              Go Pro & Save
             </button>
             <p className="text-[11px] text-white/30 text-center mt-3">Go from solo to team in one click →</p>
           </div>
