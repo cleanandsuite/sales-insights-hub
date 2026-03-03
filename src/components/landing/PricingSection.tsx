@@ -5,7 +5,7 @@ export function PricingSection() {
   const [annual, setAnnual] = useState(false);
 
   const handleGetStarted = () => {
-    window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank');
+    window.open('https://buy.stripe.com/cNibJ0a5Oc4n8664TI9k402', '_blank');
   };
 
   const starterRegular = annual ? 103 : 129;
