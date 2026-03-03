@@ -80,6 +80,11 @@ const tiers = [
   },
 ];
 
+const PAYMENT_LINKS = {
+  starter: 'https://buy.stripe.com/cNibJ0a5Oc4n8664TI9k402',
+  pro: 'https://buy.stripe.com/3cIeVcb9S9WfgCCae29k403',
+};
+
 interface CinematicPricingProps {
   onStartTrialClick: () => void;
 }
@@ -140,7 +145,7 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
               onClick={() => setAnnual(true)}
               className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${annual ? 'bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))]' : 'text-white/50'}`}
             >
-              Annual <span className="text-xs opacity-70">(-20%)</span>
+              Annual <span className="text-xs opacity-70">(Pro: lock in $79/mo)</span>
             </button>
           </div>
         </div>
@@ -181,15 +186,22 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
               )}
 
               <div className="mb-6">
-                {'originalPrice' in tier && tier.originalPrice && (
+                {'originalPrice' in tier && tier.originalPrice && !tier.highlighted && (
                   <span className="text-xl text-white/30 line-through mr-2">
-                    {annual ? `$${Math.round(parseInt(tier.originalPrice.slice(1)) * 0.8)}` : tier.originalPrice}
+                    {tier.originalPrice}
                   </span>
                 )}
                 <span className={`text-4xl font-bold ${tier.premium ? 'text-gray-200' : 'text-white'}`}>
-                  {tier.price === 'Custom' ? tier.price : (annual ? `$${Math.round(parseInt(tier.price.slice(1)) * 0.8)}` : tier.price)}
+                  {tier.price === 'Custom' 
+                    ? tier.price 
+                    : tier.highlighted && annual 
+                      ? '$79' 
+                      : tier.price}
                 </span>
                 {tier.period && <span className="text-white/40 text-base">{tier.period}</span>}
+                {tier.highlighted && annual && (
+                  <p className="text-[10px] text-[hsl(var(--cin-teal))] mt-1 font-semibold uppercase tracking-wider">🔒 Locked in at annual rate</p>
+                )}
                 {tier.premium && (
                   <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">Minimum 10 seats · Custom pricing & contract terms</p>
                 )}
@@ -208,7 +220,15 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
 
               <div>
                 <button
-                  onClick={onStartTrialClick}
+                  onClick={() => {
+                    if (tier.premium) {
+                      onStartTrialClick();
+                    } else if (tier.highlighted) {
+                      window.open(PAYMENT_LINKS.pro, '_blank');
+                    } else {
+                      window.open(PAYMENT_LINKS.starter, '_blank');
+                    }
+                  }}
                   className={`magnetic-btn w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
                     tier.premium
                       ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black hover:from-amber-400 hover:to-yellow-500'

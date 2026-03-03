@@ -14,7 +14,7 @@ import { CinematicFooter } from '@/components/landing/CinematicFooter';
 
 export default function Landing() {
   const handleStartTrialClick = () => {
-    window.open('https://buy.stripe.com/fZu6oG1zi7O7euubi69k400', '_blank');
+    window.open('https://buy.stripe.com/cNibJ0a5Oc4n8664TI9k402', '_blank');
   };
 
   return (
