@@ -2,7 +2,7 @@ import { Phone, Users, Signal, Clock } from 'lucide-react';
 import { useScrollReveal } from './gsap/useGSAPAnimations';
 
 const stats = [
-  { icon: Phone, value: '5,000', label: 'Minutes / month', sub: 'Included with Pro' },
+  { icon: Phone, value: '15,000', label: 'Minutes / month', sub: 'Included with Pro' },
   { icon: Users, value: '3', label: 'Rep seats', sub: 'Per account' },
   { icon: Signal, value: '1', label: 'Dedicated number', sub: 'US business line' },
   { icon: Clock, value: '99.9%', label: 'Uptime SLA', sub: 'Enterprise-grade' },
