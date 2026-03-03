@@ -124,7 +124,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         {isCollapsed ? (
           <NavLink to="/dashboard" className="flex items-center justify-center">
             <div className="rounded-xl flex items-center justify-center backdrop-blur-sm border border-primary/20 bg-primary/10 h-8 w-8">
-              <SellSigIcon className="h-5 w-5" />
+              <SellSigIcon />
             </div>
           </NavLink>
         ) : (

@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Lock, CheckCircle } from 'lucide-react';
 import { validatePasswordStrength } from '@/lib/secureApiClient';
-import sellsigLogo from '@/assets/sellsig-logo.png';
+import { SellSigLogo } from '@/components/ui/SellSigLogo';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -89,9 +89,7 @@ export default function ResetPassword() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-              <img src={sellsigLogo} alt="SellSig" className="h-8 w-8 object-contain" loading="lazy" />
-            </div>
+            <SellSigLogo size="sm" linkTo="" />
           </div>
           {success ? (
             <>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import { SellSigLogo } from '@/components/ui/SellSigLogo';
 
 interface LandingHeaderProps {
   onStartTrialClick: () => void;
@@ -20,12 +21,7 @@ export function LandingHeader({ onStartTrialClick }: LandingHeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-[500] h-[68px] bg-white/95 backdrop-blur-[20px] backdrop-saturate-[180%] border-b border-[#E4E8F0] flex items-center justify-between px-4 md:px-10">
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 no-underline">
-        <div className="w-8 h-8 bg-[#0057FF] rounded-lg flex items-center justify-center font-bricolage font-extrabold text-white text-base tracking-[-1px]">
-          S
-        </div>
-        <span className="font-bricolage font-bold text-xl tracking-[-0.5px] text-[#0A1628]">SellSig</span>
-      </Link>
+      <SellSigLogo size="sm" linkTo="/" />
 
       {/* Desktop Nav */}
       <nav className="hidden lg:flex items-center gap-1">
