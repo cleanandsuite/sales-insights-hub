@@ -64,6 +64,7 @@ const tiers = [
     desc: 'Tailored for scaling revenue organizations. Advanced performance transparency, accelerated team development, and maximum coaching flexibility.',
     features: [
       'Everything in Pro, plus:',
+      'Custom business-specific AI',
       'Gamified Performance Ranking System',
       '5 Distinct Elite AI Coaching Systems',
       'Full-Transparency Management Dashboard',
@@ -145,7 +146,7 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
               onClick={() => setAnnual(true)}
               className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${annual ? 'bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))]' : 'text-white/50'}`}
             >
-              Annual <span className="text-xs opacity-70">(Pro: lock in $79/mo)</span>
+              Annual <span className="text-xs opacity-70">(Save 20%)</span>
             </button>
           </div>
         </div>
@@ -195,12 +196,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                   {tier.price === 'Custom' 
                     ? tier.price 
                     : tier.highlighted && annual 
-                      ? '$79' 
+                      ? '$200' 
                       : tier.price}
                 </span>
                 {tier.period && <span className="text-white/40 text-base">{tier.period}</span>}
                 {tier.highlighted && annual && (
-                  <p className="text-[10px] text-[hsl(var(--cin-teal))] mt-1 font-semibold uppercase tracking-wider">🔒 Locked in at annual rate</p>
+                  <p className="text-[10px] text-[hsl(var(--cin-teal))] mt-1 font-semibold uppercase tracking-wider">🔒 Save 20% — locked in at annual rate</p>
                 )}
                 {tier.premium && (
                   <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">Minimum 10 seats · Custom pricing & contract terms</p>
