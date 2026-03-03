@@ -19,9 +19,9 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
   className,
 }, ref) => {
   const sizeClasses = {
-    sm: { icon: "h-[72px] w-[72px]", text: "text-2xl", tagline: "text-[10px]" },
-    md: { icon: "h-[108px] w-[108px]", text: "text-3xl", tagline: "text-xs" },
-    lg: { icon: "h-36 w-36", text: "text-4xl", tagline: "text-sm" },
+    sm: { text: "text-[2.7rem]", tagline: "text-[10px]" },
+    md: { text: "text-[3.4rem]", tagline: "text-xs" },
+    lg: { text: "text-[4.5rem]", tagline: "text-sm" },
   };
 
   const variantClasses = {
@@ -42,7 +42,6 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
 
   const logoContent = (
     <div ref={ref} className={cn("flex items-center gap-1.5 hover:opacity-90 transition-opacity group", className)}>
-      <img src={sellsigIcon} alt="SellSig" className={cn(sizes.icon, "object-contain")} loading="lazy" />
       <div className="flex flex-col">
         <span className={cn("font-extrabold tracking-tighter leading-none uppercase", sizes.text, colors.text)}>
           SELL<span className={colors.highlight}>SIG</span>
