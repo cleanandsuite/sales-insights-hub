@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { SellSigLogo } from '@/components/ui/SellSigLogo';
 
@@ -63,14 +64,22 @@ export function CinematicNavbar({ onStartTrialClick }: CinematicNavbarProps) {
           ))}
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={onStartTrialClick}
-          className="hidden md:flex magnetic-btn items-center gap-2 bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))] px-5 py-2 rounded-full text-sm font-semibold"
-        >
-          Book a Demo
-          <ArrowRight className="w-4 h-4" />
-        </button>
+        {/* CTAs */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            to="/auth"
+            className="text-white/60 hover:text-white text-sm font-medium transition-colors"
+          >
+            Sign in
+          </Link>
+          <button
+            onClick={onStartTrialClick}
+            className="magnetic-btn flex items-center gap-2 bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))] px-5 py-2 rounded-full text-sm font-semibold"
+          >
+            Book a Demo
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
 
         {/* Mobile hamburger */}
         <button
