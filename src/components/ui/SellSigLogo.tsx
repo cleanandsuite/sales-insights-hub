@@ -19,20 +19,20 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
   className,
 }, ref) => {
   const sizeClasses = {
-    sm: { icon: "h-12 w-12", text: "text-xl", tagline: "text-[9px]" },
-    md: { icon: "h-[60px] w-[60px]", text: "text-2xl", tagline: "text-[10px]" },
-    lg: { icon: "h-20 w-20", text: "text-3xl", tagline: "text-xs" },
+    sm: { icon: "h-12 w-12", text: "text-2xl", tagline: "text-[10px]" },
+    md: { icon: "h-[72px] w-[72px]", text: "text-3xl", tagline: "text-xs" },
+    lg: { icon: "h-24 w-24", text: "text-4xl", tagline: "text-sm" },
   };
 
   const variantClasses = {
     default: {
       text: "text-foreground",
-      highlight: "text-[#CCFF00]",
+      highlight: "text-[#14B8A6]",
       tagline: "text-muted-foreground",
     },
     light: {
       text: "text-white",
-      highlight: "text-[#CCFF00]",
+      highlight: "text-[#14B8A6]",
       tagline: "text-white/50",
     },
   };
