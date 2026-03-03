@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import sellsigIcon from "@/assets/sellsig-icon.png";
 
 interface SellSigLogoProps {
   size?: "sm" | "md" | "lg";
@@ -27,12 +26,12 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
   const variantClasses = {
     default: {
       text: "text-foreground",
-      highlight: "text-[#14B8A6]",
+      highlight: "text-[hsl(var(--cin-teal,174_60%_51%))]",
       tagline: "text-muted-foreground",
     },
     light: {
       text: "text-white",
-      highlight: "text-[#14B8A6]",
+      highlight: "text-[hsl(var(--cin-teal,174_60%_51%))]",
       tagline: "text-white/50",
     },
   };
@@ -41,7 +40,7 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
   const colors = variantClasses[variant];
 
   const logoContent = (
-    <div ref={ref} className={cn("flex items-center gap-1.5 hover:opacity-90 transition-opacity group", className)}>
+    <div ref={ref} className={cn("flex items-center hover:opacity-90 transition-opacity group", className)}>
       <div className="flex flex-col">
         <span className={cn("font-extrabold tracking-tighter leading-none uppercase", sizes.text, colors.text)}>
           SELL<span className={colors.highlight}>SIG</span>
@@ -64,7 +63,9 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
 
 SellSigLogo.displayName = "SellSigLogo";
 
-// Keep named export for backward compat
+// Compact text-only icon for collapsed sidebar
 export const SellSigIcon = ({ className }: { className?: string }) => (
-  <img src={sellsigIcon} alt="SellSig" className={cn("h-7 w-7 object-contain", className)} loading="lazy" />
+  <span className={cn("font-extrabold text-xs tracking-tighter uppercase text-foreground", className)}>
+    S<span className="text-[hsl(var(--cin-teal,174_60%_51%))]">S</span>
+  </span>
 );
