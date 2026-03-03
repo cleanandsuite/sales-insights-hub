@@ -44,8 +44,8 @@ export const SellSigLogo = React.forwardRef<HTMLDivElement, SellSigLogoProps>(({
     <div ref={ref} className={cn("flex items-center gap-1.5 hover:opacity-90 transition-opacity group", className)}>
       <img src={sellsigIcon} alt="SellSig" className={cn(sizes.icon, "object-contain")} loading="lazy" />
       <div className="flex flex-col">
-        <span className={cn("font-extrabold tracking-tighter leading-none", sizes.text, colors.text)}>
-          Sell<span className={colors.highlight}>Sig</span>
+        <span className={cn("font-extrabold tracking-tighter leading-none uppercase", sizes.text, colors.text)}>
+          SELL<span className={colors.highlight}>SIG</span>
         </span>
         {showTagline && (
           <span className={cn("font-medium tracking-widest uppercase leading-none mt-0.5", sizes.tagline, colors.tagline)}>
