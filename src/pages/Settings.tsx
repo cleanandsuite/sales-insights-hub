@@ -23,8 +23,12 @@ import {
   CreditCard,
   Mail,
   UserCircle,
-  FlaskConical } from
+  FlaskConical,
+  Sun,
+  Moon,
+  Monitor } from
 'lucide-react';
+import { useTheme } from 'next-themes';
 
 import { PasswordChangeCard } from '@/components/settings/PasswordChangeCard';
 import { BillingTab } from '@/components/settings/BillingTab';
@@ -103,6 +107,41 @@ interface UserSettings {
   retention_days: number | null;
 }
 
+function AppearanceSection() {
+  const { theme, setTheme } = useTheme();
+
+  const options = [
+    { value: 'light', label: 'Light', icon: Sun },
+    { value: 'dark', label: 'Dark', icon: Moon },
+  ] as const;
+
+  return (
+    <div className="card-gradient rounded-xl border border-border/50 p-6 space-y-4 mt-6">
+      <h2 className="text-lg font-semibold text-foreground">Appearance</h2>
+      <p className="text-sm text-muted-foreground">Choose your preferred theme</p>
+      <div className="flex gap-3">
+        {options.map((opt) => {
+          const Icon = opt.icon;
+          const active = theme === opt.value;
+          return (
+            <button
+              key={opt.value}
+              onClick={() => setTheme(opt.value)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all text-sm font-medium ${
+                active
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function Settings() {
   const { user } = useAuth();
@@ -263,6 +302,7 @@ export default function Settings() {
           {/* Profile */}
           <TabsContent value="profile">
             <ProfileTab />
+            <AppearanceSection />
           </TabsContent>
 
           {/* Audio Settings */}
