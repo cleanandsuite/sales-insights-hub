@@ -3,8 +3,8 @@ import { useScrollReveal } from './gsap/useGSAPAnimations';
 
 const stats = [
   { icon: Phone, value: '15,000', label: 'Minutes / month', sub: 'Included with Pro' },
-  { icon: Users, value: '3', label: 'Rep seats', sub: 'Per account' },
-  { icon: Signal, value: '1', label: 'Dedicated number', sub: 'US business line' },
+  { icon: Users, value: '5', label: 'Rep seats', sub: 'Per account' },
+  { icon: Signal, value: '5', label: 'Dedicated number', sub: 'US business line' },
   { icon: Clock, value: '99.9%', label: 'Uptime SLA', sub: 'Enterprise-grade' },
 ];
 
