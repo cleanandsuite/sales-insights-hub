@@ -1,80 +1,53 @@
 
 
-# Redesign SellSig Logo as a Hand-Crafted SVG Mark
+# Make the Logo Bigger and Soften the Accent Color
 
-## Problem
-The current logo icon is generic blue signal bars with a yellow lightning bolt — exactly the corporate SaaS cliche the brand should avoid. The AI-generated PNG was low quality and not usable.
+## What's Changing
 
-## Solution
-Build a new logo entirely as an inline SVG component in code. This gives us:
-- Pixel-perfect at every size (16x16 favicon to billboard)
-- True vector — no raster artifacts
-- Full control over geometry, colors, negative space
-- Matches the cinematic dark theme natively
+### 1. Bigger Logo Sizes
+The current sizes are small compared to industry standards. Most SaaS navbars have logos around 36-44px tall, and the current "sm" icon is 48px but the text is only `text-xl` (20px). We'll scale everything up so the logo has real visual weight:
 
-## New Logo Design: The "Sig" Mark
+| Variant | Current Icon | New Icon | Current Text | New Text |
+|---------|-------------|----------|-------------|----------|
+| sm (navbar) | 48px | 48px | text-xl (20px) | text-2xl (24px) |
+| md (auth/headers) | 60px | 72px | text-2xl (24px) | text-3xl (30px) |
+| lg (hero) | 80px | 96px | text-3xl (30px) | text-4xl (36px) |
 
-A bold geometric "S" that doubles as a **signal spike / rising signature line**:
+The icon already got a 70% bump, so the main fix is scaling the text to match and bumping md/lg icons further.
 
-```text
-    ╱╲
-   ╱  ╲
-  ╱    ╲
- ╱      ╲______
-╱
-         ╱╲
-        ╱  ╲
- ______╱    ╲
-              ╲
-```
+### 2. Softer Accent Color
+Replace the harsh lime green `#CCFF00` with the site's existing teal accent `hsl(168, 76%, 40%)` which is approximately `#18B8A6`. This matches the "Book a Demo" button, the cinematic theme accents, and feels more premium and cohesive.
 
-Concept: Two sharp zigzag strokes forming an "S" shape that also reads as a signal waveform spike — like a stock chart breakout or an EKG spike. The negative space between the strokes creates a hidden upward arrow.
-
-### Design Specs
-- **Shape**: Angular "S" built from two connected chevron/zigzag paths with sharp 45-degree cuts
-- **Color**: Electric chartreuse (#CCFF00) on dark backgrounds, deep near-black (#0A0F1C) on light backgrounds
-- **No gradients** — flat, brutal, single-color fill
-- **No rounded corners** on the mark itself — sharp terminals only
-- **Aspect ratio**: Square (fits in favicon, app icon, social avatar)
-
-### Wordmark Update
-- "Sell" in white/foreground, "Sig" in chartreuse (#CCFF00) accent
-- Tighter letter-spacing, bolder weight
-- Drop the "AI Coach" tagline from the logo (move it elsewhere if needed)
-
-## Color Palette Change
-- **Primary accent**: `#CCFF00` (electric chartreuse) — replaces the generic blue
-- **Dark background**: stays `#0A1428` (cinematic)
-- **This is logo-only** — we won't change the full site theme in this task, just the logo mark and wordmark colors
+The color will change in both the `default` and `light` variants of the logo.
 
 ## Files to Modify
 
 ### `src/components/ui/SellSigLogo.tsx`
-- Replace the `SellSigIcon` SVG with the new angular "S" / signal spike mark
-- Update color variants: chartreuse accent instead of blue
-- Remove "AI Coach" tagline default (keep as opt-in prop)
-- Update the container styling — remove the rounded background box, let the mark stand alone
-
-### `src/components/landing/CinematicNavbar.tsx`
-- Replace the plain text "SellSig" with the `SellSigLogo` component (light variant, no tagline, small size)
-
-## What This Does NOT Change
-- No raster images involved — pure SVG in code
-- No changes to the cinematic page theme or other components
-- The `SellSigLogo` component API stays the same (size, variant, linkTo props)
-- Other pages using `SellSigLogo` will automatically get the new mark
+- Update `sizeClasses` to increase text and icon dimensions
+- Change highlight color from `#CCFF00` to `#14B8A6` (the cin-teal) in both variant color maps
+- Update the standalone `SellSigIcon` component size accordingly
 
 ## Technical Details
 
-The new SVG mark will be approximately:
 ```tsx
-<svg viewBox="0 0 32 32" fill="none">
-  {/* Upper zigzag stroke */}
-  <path d="M4 20 L12 8 L20 20" stroke="currentColor" strokeWidth="4" strokeLinecap="square" fill="none" />
-  {/* Lower zigzag stroke */}  
-  <path d="M12 12 L20 24 L28 12" stroke="currentColor" strokeWidth="4" strokeLinecap="square" fill="none" />
-</svg>
-```
-(Exact coordinates will be refined during implementation for visual balance)
+const sizeClasses = {
+  sm: { icon: "h-12 w-12", text: "text-2xl", tagline: "text-[10px]" },
+  md: { icon: "h-[72px] w-[72px]", text: "text-3xl", tagline: "text-xs" },
+  lg: { icon: "h-24 w-24", text: "text-4xl", tagline: "text-sm" },
+};
 
-The mark uses `currentColor` so it inherits from the parent — chartreuse on dark, near-black on light.
+const variantClasses = {
+  default: {
+    text: "text-foreground",
+    highlight: "text-[#14B8A6]",   // teal instead of lime
+    tagline: "text-muted-foreground",
+  },
+  light: {
+    text: "text-white",
+    highlight: "text-[#14B8A6]",   // teal instead of lime
+    tagline: "text-white/50",
+  },
+};
+```
+
+No other files need changes -- all pages importing `SellSigLogo` will automatically pick up the new sizes and color.
