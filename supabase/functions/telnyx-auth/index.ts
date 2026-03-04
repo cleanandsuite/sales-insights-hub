@@ -54,12 +54,52 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { data: phoneLine } = await serviceSupabase
+    let phoneLine = null;
+
+    // 1. Check user's own phone line
+    const { data: ownLine } = await serviceSupabase
       .from('user_phone_lines')
       .select('sip_username, sip_password, phone_number, status')
       .eq('user_id', userId)
       .eq('status', 'active')
       .maybeSingle();
+
+    phoneLine = ownLine;
+
+    // 2. If no own line, check team owner/admin's line (shared line)
+    if (!phoneLine) {
+      const { data: teamMembership } = await serviceSupabase
+        .from('team_members')
+        .select('team_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+
+      if (teamMembership?.team_id) {
+        // Find the team owner's phone line
+        const { data: ownerMember } = await serviceSupabase
+          .from('team_members')
+          .select('user_id')
+          .eq('team_id', teamMembership.team_id)
+          .eq('role', 'owner')
+          .limit(1)
+          .maybeSingle();
+
+        if (ownerMember?.user_id) {
+          const { data: ownerLine } = await serviceSupabase
+            .from('user_phone_lines')
+            .select('sip_username, sip_password, phone_number, status')
+            .eq('user_id', ownerMember.user_id)
+            .eq('status', 'active')
+            .maybeSingle();
+
+          if (ownerLine) {
+            console.log(`[TELNYX-AUTH] Sharing team owner line with member ${userId}`);
+            phoneLine = ownerLine;
+          }
+        }
+      }
+    }
 
     // Get caller ID action — with local presence matching
     if (action === 'get_caller_id') {
@@ -72,15 +112,49 @@ Deno.serve(async (req) => {
         const destAreaCode = cleanDest.startsWith('1') ? cleanDest.slice(1, 4) : cleanDest.slice(0, 3);
 
         if (destAreaCode && destAreaCode.length === 3) {
-          // Fetch all active phone lines for this user
+          // Fetch all active phone lines for this user (or team owner)
+          const lineOwnerId = phoneLine ? userId : userId; // already resolved above
           const { data: allLines } = await serviceSupabase
             .from('user_phone_lines')
             .select('phone_number')
-            .eq('user_id', userId)
+            .eq('user_id', lineOwnerId)
             .eq('status', 'active');
 
-          if (allLines && allLines.length > 0) {
-            const match = allLines.find(line => {
+          // Also check team owner's lines for local presence
+          let combinedLines = allLines || [];
+          if (!ownLine) {
+            const { data: teamMembership } = await serviceSupabase
+              .from('team_members')
+              .select('team_id')
+              .eq('user_id', userId)
+              .limit(1)
+              .maybeSingle();
+
+            if (teamMembership?.team_id) {
+              const { data: ownerMember } = await serviceSupabase
+                .from('team_members')
+                .select('user_id')
+                .eq('team_id', teamMembership.team_id)
+                .eq('role', 'owner')
+                .limit(1)
+                .maybeSingle();
+
+              if (ownerMember?.user_id) {
+                const { data: ownerLines } = await serviceSupabase
+                  .from('user_phone_lines')
+                  .select('phone_number')
+                  .eq('user_id', ownerMember.user_id)
+                  .eq('status', 'active');
+
+                if (ownerLines) {
+                  combinedLines = [...combinedLines, ...ownerLines];
+                }
+              }
+            }
+          }
+
+          if (combinedLines.length > 0) {
+            const match = combinedLines.find(line => {
               const cleanLine = (line.phone_number || '').replace(/[^\d]/g, '');
               const lineAreaCode = cleanLine.startsWith('1') ? cleanLine.slice(1, 4) : cleanLine.slice(0, 3);
               return lineAreaCode === destAreaCode;
