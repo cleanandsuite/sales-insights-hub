@@ -107,6 +107,13 @@ export function CinematicNavbar({ onStartTrialClick }: CinematicNavbarProps) {
               {l.label}
             </button>
           ))}
+          <Link
+            to="/auth"
+            onClick={() => setMobileOpen(false)}
+            className="text-white/70 hover:text-white text-left text-base font-medium"
+          >
+            Sign in
+          </Link>
           <button
             onClick={() => { onStartTrialClick(); setMobileOpen(false); }}
             className="magnetic-btn bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))] px-5 py-3 rounded-full text-sm font-semibold mt-2 flex items-center justify-center gap-2"
