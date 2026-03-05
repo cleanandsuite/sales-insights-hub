@@ -1,45 +1,46 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Check, ArrowRight, Sparkles } from 'lucide-react';
+import { Check, ArrowRight, Sparkles, Shield } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const tiers = [
   {
-    name: 'Starter Plan',
+    name: 'Starter',
     originalPrice: '$129',
     price: '$79',
+    annualPrice: '$63',
     period: '/mo',
     desc: 'For individual reps ready to level up.',
     promo: true,
-    promoLabel: '🔥 Limited Time! Only 17 seats left',
+    promoLabel: '🔥 Limited Time — Only 17 seats left',
     features: [
       '1,500 call minutes/month',
       '⚡ +1,000 bonus minutes (promo)',
       'Dedicated US business phone number',
-      'Unlimited AI call scripts (limited time)',
+      'Unlimited AI call scripts',
       'Call recording & transcription',
       'Basic post-call scoring',
       'Real-time live coaching',
-      'Basic team sharing (link-based)',
       'Export to PDF/CSV',
       'Email support (48-hr SLA)',
     ],
     highlighted: false,
     premium: false,
-    cta: 'Start Today',
+    cta: 'Start Free Trial',
   },
   {
-    name: 'Pro Small Business',
+    name: 'Pro',
     price: '$250',
+    annualPrice: '$200',
     period: '/mo',
-    desc: 'For growing teams — real-time coaching + team visibility that actually improves win rates.',
+    desc: 'For growing teams — coaching + analytics that improve win rates.',
     promo: true,
-    promoLabel: '⚡ First 30 days: +5,000 bonus minutes included',
-    subheadline: '📞 Dedicated Business Phone Line · 15,000 min · 5 users · 99.9% uptime',
+    promoLabel: '⚡ First 30 days: +5,000 bonus minutes',
+    subheadline: '📞 15,000 min · 5 seats · 99.9% uptime',
     features: [
-      '5 user seats',
+      '5 user seats included',
       'Dedicated US business phone number',
       '15,000 call minutes/month',
       'Unlimited script generation',
@@ -48,36 +49,35 @@ const tiers = [
       'Full 40-dimension call scoring',
       'Team management dashboard',
       'Rank & stats leaderboard',
-      'Role-based access (manager vs. rep)',
-      'Custom script templates (team library)',
-      'Priority support (24-hr SLA + chat)',
-      '🔗 CRM Sync: Salesforce & HubSpot — coming soon',
+      'Role-based access control',
+      'Priority support (24-hr SLA)',
     ],
     highlighted: true,
     premium: false,
-    cta: 'Go Pro & Save',
+    cta: 'Start Free Trial',
   },
   {
-    name: 'Enterprise Plan',
+    name: 'Enterprise',
     price: 'Custom',
+    annualPrice: 'Custom',
     period: '',
-    desc: 'Tailored for scaling revenue organizations. Advanced performance transparency, accelerated team development, and maximum coaching flexibility.',
+    desc: 'For scaling revenue orgs. Maximum coaching power & flexibility.',
     features: [
       'Everything in Pro, plus:',
       'Custom business-specific AI',
-      'Gamified Performance Ranking System',
-      '5 Distinct Elite AI Coaching Systems',
-      'Full-Transparency Management Dashboard',
+      'Gamified Performance Ranking',
+      '5 Elite AI Coaching Systems',
+      'Full-Transparency Manager Dashboard',
       'Dedicated Account Specialist',
-      'Priority 24/7 response SLA',
+      'Priority 24/7 support SLA',
       'Quarterly business reviews',
       'Custom integrations',
       'Flexible seat scaling',
     ],
     highlighted: false,
     premium: true,
-    cta: '📞 Contact Sales',
-    ctaSub: 'Request a personalized demo →',
+    cta: 'Talk to Sales',
+    ctaSub: 'Get a personalized demo →',
   },
 ];
 
@@ -112,16 +112,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
   }, []);
 
   const getCardClasses = (tier: typeof tiers[number]) => {
-    const base = 'rounded-[2rem] p-8 flex flex-col transition-all duration-300 cursor-pointer hover:scale-[1.03] hover:-translate-y-1 border';
-
+    const base = 'rounded-[2rem] p-8 flex flex-col transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:-translate-y-1 border';
     if (tier.premium) {
-      return `${base} bg-gradient-to-b from-[#1a1a2e] to-[#16213e] border-white/[0.12] shadow-[0_0_40px_rgba(251,191,36,0.08)] hover:shadow-[0_0_60px_rgba(251,191,36,0.15)]`;
+      return `${base} bg-gradient-to-b from-[#1a1a2e] to-[#16213e] border-white/[0.12] shadow-[0_0_40px_rgba(251,191,36,0.08)]`;
     }
     if (tier.highlighted) {
-      return `${base} bg-[hsl(var(--cin-teal))]/10 border-2 border-[hsl(var(--cin-teal))]/30 scale-[1.02] ring-1 ring-[hsl(var(--cin-teal))]/20 hover:bg-[hsl(var(--cin-teal))]/15`;
-    }
-    if (tier.promo && !tier.highlighted) {
-      return `${base} bg-white/[0.03] border-[hsl(var(--cin-teal))]/20 shadow-[0_0_30px_rgba(20,184,166,0.08)] hover:bg-white/[0.06] hover:shadow-[0_0_40px_rgba(20,184,166,0.15)]`;
+      return `${base} bg-[hsl(var(--cin-teal))]/10 border-2 border-[hsl(var(--cin-teal))]/30 scale-[1.02] ring-1 ring-[hsl(var(--cin-teal))]/20`;
     }
     return `${base} bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.06]`;
   };
@@ -131,9 +127,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-[hsl(var(--cin-teal))] text-xs font-mono uppercase tracking-[0.2em] mb-4">Pricing</p>
-          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-6">
+          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
             Invest in every conversation.
           </h2>
+          <p className="text-white/40 text-base max-w-md mx-auto mb-8">
+            14-day free trial on all plans. No credit card required.
+          </p>
 
           <div className="inline-flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-full p-1">
             <button
@@ -154,11 +153,11 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
         <div className="grid md:grid-cols-3 gap-6">
           {tiers.map((tier, i) => (
             <div key={i} data-pricing-card className={getCardClasses(tier)}>
-              {/* Starter "Best Value" ribbon */}
-              {tier.promo && !tier.highlighted && !tier.premium && (
+              {/* Most Popular badge for Pro */}
+              {tier.highlighted && (
                 <div className="flex items-center gap-1.5 mb-4">
                   <Sparkles className="w-4 h-4 text-[hsl(var(--cin-teal))]" />
-                  <span className="text-[hsl(var(--cin-teal))] text-xs font-bold uppercase tracking-wider">Best Value</span>
+                  <span className="text-[hsl(var(--cin-teal))] text-xs font-bold uppercase tracking-wider">Most Popular</span>
                 </div>
               )}
 
@@ -172,7 +171,7 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                 }`}>
                   {tier.name}
                 </h3>
-                <p className={`text-base ${tier.premium ? 'text-white/50' : 'text-white/40'}`}>{tier.desc}</p>
+                <p className="text-white/40 text-sm">{tier.desc}</p>
                 {'subheadline' in tier && tier.subheadline && (
                   <p className="text-white/50 text-xs mt-2 font-medium">{tier.subheadline}</p>
                 )}
@@ -187,24 +186,22 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
               )}
 
               <div className="mb-6">
-                {'originalPrice' in tier && tier.originalPrice && !tier.highlighted && (
+                {'originalPrice' in tier && tier.originalPrice && !annual && (
                   <span className="text-xl text-white/30 line-through mr-2">
                     {tier.originalPrice}
                   </span>
                 )}
                 <span className={`text-4xl font-bold ${tier.premium ? 'text-gray-200' : 'text-white'}`}>
-                  {tier.price === 'Custom' 
-                    ? tier.price 
-                    : tier.highlighted && annual 
-                      ? '$200' 
-                      : tier.price}
+                  {tier.price === 'Custom' ? tier.price : annual ? tier.annualPrice : tier.price}
                 </span>
                 {tier.period && <span className="text-white/40 text-base">{tier.period}</span>}
-                {tier.highlighted && annual && (
-                  <p className="text-[10px] text-[hsl(var(--cin-teal))] mt-1 font-semibold uppercase tracking-wider">🔒 Save 20% — locked in at annual rate</p>
+                {annual && tier.price !== 'Custom' && (
+                  <p className="text-[10px] text-[hsl(var(--cin-teal))] mt-1 font-semibold uppercase tracking-wider">
+                    Save 20% — billed annually
+                  </p>
                 )}
                 {tier.premium && (
-                  <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">Minimum 10 seats · Custom pricing & contract terms</p>
+                  <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">10+ seats · Custom terms</p>
                 )}
               </div>
 
@@ -212,7 +209,7 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                 {tier.features.map((f, j) => (
                   <li key={j} className="flex items-start gap-3 text-white/60 text-sm">
                     <Check className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                      tier.premium ? 'text-amber-400' : tier.highlighted ? 'text-[hsl(var(--cin-teal))]' : 'text-white/30'
+                      tier.premium ? 'text-amber-400' : 'text-[hsl(var(--cin-teal))]'
                     }`} />
                     {f}
                   </li>
@@ -230,12 +227,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                       window.open(PAYMENT_LINKS.starter, '_blank');
                     }
                   }}
-                  className={`magnetic-btn w-full py-3 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+                  className={`magnetic-btn w-full py-3.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
                     tier.premium
                       ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black hover:from-amber-400 hover:to-yellow-500'
                       : tier.highlighted
                         ? 'bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))]'
-                        : 'border border-white/[0.15] text-white hover:bg-white/[0.05]'
+                        : 'bg-white/[0.08] text-white hover:bg-white/[0.12] border border-white/[0.12]'
                   }`}
                 >
                   {tier.cta} <ArrowRight className="w-4 h-4" />
@@ -248,9 +245,14 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
           ))}
         </div>
 
-        <p className="text-center text-white/30 text-sm mt-8">
-          All plans include a 14-day free trial. No credit card required.
-        </p>
+        {/* Trust bar */}
+        <div className="flex items-center justify-center gap-6 mt-10 text-white/25 text-xs">
+          <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> 256-bit encryption</span>
+          <span>·</span>
+          <span>Cancel anytime</span>
+          <span>·</span>
+          <span>No long-term contracts</span>
+        </div>
       </div>
     </section>
   );

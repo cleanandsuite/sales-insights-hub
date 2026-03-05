@@ -114,7 +114,7 @@ function CursorScheduler() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const sequence = [2, 3, 4]; // T, W, T
+    const sequence = [2, 3, 4];
     let step = 0;
 
     const runStep = () => {
@@ -171,7 +171,6 @@ function CursorScheduler() {
       >
         {saved ? '✓ Saved' : 'Save'}
       </div>
-      {/* Animated cursor */}
       {cursorPos.visible && (
         <svg
           className="absolute pointer-events-none transition-all duration-500 ease-out"
@@ -234,7 +233,7 @@ export function CinematicFeatures() {
     <section id="features" ref={sectionRef} className="bg-[hsl(var(--cin-bg))] py-24 md:py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <p className="text-[hsl(var(--cin-teal))] text-xs font-mono uppercase tracking-[0.2em] mb-4">Functional Artifacts</p>
+          <p className="text-[hsl(var(--cin-teal))] text-xs font-mono uppercase tracking-[0.2em] mb-4">Core Features</p>
           <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
             Three systems. One outcome.
           </h2>

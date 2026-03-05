@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { gsap } from 'gsap';
-import { ArrowRight, Play, Sparkles } from 'lucide-react';
+import { ArrowRight, Play, Sparkles, Shield, Clock, CreditCard } from 'lucide-react';
 
 interface CinematicHeroProps {
   onStartTrialClick: () => void;
@@ -72,25 +72,19 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
   }, []);
 
   useEffect(() => {
-    // Start after 2s delay
     const startTimer = setTimeout(() => {
       showNext();
     }, 2000);
-
     return () => clearTimeout(startTimer);
   }, [showNext]);
 
   useEffect(() => {
     if (activePopup === null) return;
-
-    // After 3.5s start fade out
     const fadeTimer = setTimeout(() => setFading(true), 3500);
-    // After 4s fully gone, show next
     const nextTimer = setTimeout(() => {
       setActivePopup(null);
       setTimeout(showNext, 300);
     }, 4000);
-
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(nextTimer);
@@ -164,7 +158,7 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
       </div>
 
       {/* Content — bottom-left */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pb-20 md:pb-28 pt-32">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pb-16 md:pb-24 pt-32">
         <div className="max-w-3xl">
           <div data-hero-anim className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] mb-8">
             <span className="w-2 h-2 rounded-full bg-[hsl(var(--cin-teal))] cin-pulse-dot" />
@@ -178,28 +172,35 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
             Intelligence.
           </h1>
 
-          <p data-hero-anim className="text-white/50 text-lg md:text-xl max-w-xl leading-relaxed mb-10">
+          <p data-hero-anim className="text-white/60 text-lg md:text-xl max-w-xl leading-relaxed mb-10">
             Real-time AI coaching built by reps, for reps — so every call becomes a win. 
             Stop guessing. Start closing.
           </p>
 
-          <div data-hero-anim className="flex flex-col sm:flex-row gap-4">
+          <div data-hero-anim className="flex flex-col sm:flex-row gap-4 mb-8">
             <button
               onClick={onStartTrialClick}
               className="magnetic-btn inline-flex items-center justify-center gap-2 bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))] px-8 py-4 rounded-full text-base font-semibold"
             >
               <span className="relative z-10 flex items-center gap-2">
-                Book a Demo <ArrowRight className="w-5 h-5" />
+                Start Free Trial <ArrowRight className="w-5 h-5" />
               </span>
               <span className="btn-slide bg-[hsl(168,76%,35%)] rounded-full" />
             </button>
             <button
-              onClick={onStartTrialClick}
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
               className="magnetic-btn inline-flex items-center justify-center gap-2 border border-white/[0.15] text-white px-8 py-4 rounded-full text-base font-medium hover:bg-white/[0.05]"
             >
               <Play className="w-4 h-4" />
-              Start 14-Day Free Trial
+              See Plans & Pricing
             </button>
+          </div>
+
+          {/* Trust micro-strip */}
+          <div data-hero-anim className="flex flex-wrap items-center gap-x-6 gap-y-2 text-white/35 text-xs">
+            <span className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> No credit card required</span>
+            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Setup in 2 minutes</span>
+            <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> SOC 2 compliant</span>
           </div>
         </div>
       </div>

@@ -19,15 +19,15 @@ export function CinematicFinalCTA({ onStartTrialClick }: CinematicFinalCTAProps)
           <span className="italic text-[hsl(var(--cin-teal))]">More Deals Today.</span>
         </h2>
 
-        <p className="text-base text-white/40 mb-10 max-w-md mx-auto">
-          No credit card required. Setup in 15 minutes. Cancel anytime.
+        <p className="text-base text-white/50 mb-10 max-w-md mx-auto">
+          14-day free trial. No credit card required. Setup in 2 minutes. Cancel anytime.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           <button
             ref={glowRef}
             onClick={onStartTrialClick}
-            className="px-8 py-3.5 rounded-full bg-[hsl(var(--cin-teal))] text-black font-semibold text-sm flex items-center gap-2 hover:brightness-110 transition-all"
+            className="px-8 py-4 rounded-full bg-[hsl(var(--cin-teal))] text-black font-semibold text-base flex items-center gap-2 hover:brightness-110 transition-all"
           >
             Start Free Trial
             <ArrowRight className="w-4 h-4" />
@@ -35,7 +35,7 @@ export function CinematicFinalCTA({ onStartTrialClick }: CinematicFinalCTAProps)
 
           <a
             href="tel:+18005551234"
-            className="px-8 py-3.5 rounded-full border border-white/[0.12] text-white/70 font-medium text-sm flex items-center gap-2 hover:bg-white/[0.05] transition-colors"
+            className="px-8 py-4 rounded-full border border-white/[0.12] text-white/70 font-medium text-sm flex items-center gap-2 hover:bg-white/[0.05] transition-colors"
           >
             <Phone className="w-4 h-4" />
             Talk to Sales
