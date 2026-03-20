@@ -1,53 +1,71 @@
 
 
-# Make the Logo Bigger and Soften the Accent Color
+# Pre-Launch Audit: Issues You Will Hit Going Live
 
-## What's Changing
+## CRITICAL (Will break things or cost you money)
 
-### 1. Bigger Logo Sizes
-The current sizes are small compared to industry standards. Most SaaS navbars have logos around 36-44px tall, and the current "sm" icon is 48px but the text is only `text-xl` (20px). We'll scale everything up so the logo has real visual weight:
+### 1. Security: Privilege Escalation Vulnerability
+Users can promote themselves to "manager" role by updating their own `profiles.user_role` column. The UPDATE policy on `profiles` has no column restrictions. Once promoted, they can read all team members' profiles including Stripe billing IDs. **This is exploitable day one.**
 
-| Variant | Current Icon | New Icon | Current Text | New Text |
-|---------|-------------|----------|-------------|----------|
-| sm (navbar) | 48px | 48px | text-xl (20px) | text-2xl (24px) |
-| md (auth/headers) | 60px | 72px | text-2xl (24px) | text-3xl (30px) |
-| lg (hero) | 80px | 96px | text-3xl (30px) | text-4xl (36px) |
+### 2. Security: Users Can Overwrite Their Own Subscription
+The `user_subscriptions` UPDATE RLS policy lets any user set their `status` to `'active'` or modify `stripe_subscription_id` / `stripe_customer_id`. Someone can give themselves a free subscription by running a single update.
 
-The icon already got a 70% bump, so the main fix is scaling the text to match and bumping md/lg icons further.
+### 3. Security: Missing RLS on Sensitive Tables
+- `team_leads_secure` — contains emails, phones, contact names with zero RLS policies
+- `manager_team_stats` — exposes team performance data to any authenticated user
 
-### 2. Softer Accent Color
-Replace the harsh lime green `#CCFF00` with the site's existing teal accent `hsl(168, 76%, 40%)` which is approximately `#18B8A6`. This matches the "Book a Demo" button, the cinematic theme accents, and feels more premium and cohesive.
+### 4. Edge Functions: `getClaims()` Does Not Exist
+Five edge functions (`telnyx-auth`, `telnyx-voicemail-drop`, `telnyx-provision-number`, `telnyx-search-numbers`, `send-outbound-email`) call `supabase.auth.getClaims(token)` which is **not a real Supabase JS method**. These will throw runtime errors. Should be `supabase.auth.getUser(token)`.
 
-The color will change in both the `default` and `light` variants of the logo.
+### 5. Edge Functions: All JWT Verification Disabled
+Every single edge function in `config.toml` has `verify_jwt = false`. While some (like `stripe-webhook`) need this, functions like `transcribe-audio`, `analyze-recording`, `deal-coach`, `winwords-generate`, `live-coach`, `live-summary`, and `send-outbound-email` should validate JWTs. Anyone can call them directly without authentication, burning your DeepSeek/AssemblyAI API credits.
 
-## Files to Modify
+---
 
-### `src/components/ui/SellSigLogo.tsx`
-- Update `sizeClasses` to increase text and icon dimensions
-- Change highlight color from `#CCFF00` to `#14B8A6` (the cin-teal) in both variant color maps
-- Update the standalone `SellSigIcon` component size accordingly
+## HIGH (Will cause user-facing problems)
 
-## Technical Details
+### 6. Pricing Inconsistency
+- `useSubscription.ts` shows Starter at $29 and Enterprise at $99
+- Landing page (`CinematicPricing`) shows Starter at $79 and Pro at $250
+- `create-trial-checkout` uses different price IDs than `useSubscription`
+- Memory says Starter is $79 promo / $129 original — none of these match the code
 
-```tsx
-const sizeClasses = {
-  sm: { icon: "h-12 w-12", text: "text-2xl", tagline: "text-[10px]" },
-  md: { icon: "h-[72px] w-[72px]", text: "text-3xl", tagline: "text-xs" },
-  lg: { icon: "h-24 w-24", text: "text-4xl", tagline: "text-sm" },
-};
+### 7. Password Reset Redirect Hardcoded
+`ForgotPasswordModal.tsx` hardcodes `redirectTo: 'https://sellsig.com/reset-password'`. If you deploy on `lovable.app` or any other domain first, password resets will redirect to the wrong URL.
 
-const variantClasses = {
-  default: {
-    text: "text-foreground",
-    highlight: "text-[#14B8A6]",   // teal instead of lime
-    tagline: "text-muted-foreground",
-  },
-  light: {
-    text: "text-white",
-    highlight: "text-[#14B8A6]",   // teal instead of lime
-    tagline: "text-white/50",
-  },
-};
-```
+### 8. Chrome Extension Targets Wrong Domains
+`manifest.json` and `ExtensionInstallBanner.tsx` target `*.lovable.app` and `localhost` — not `sellsig.com`. The extension won't work on your production domain.
 
-No other files need changes -- all pages importing `SellSigLogo` will automatically pick up the new sizes and color.
+### 9. No `get-checkout-session` or `create-trial-checkout` in config.toml
+These edge functions exist but aren't listed in `config.toml`, meaning they may not deploy or may have unexpected JWT behavior.
+
+---
+
+## MEDIUM (Will cause confusion or ops headaches)
+
+### 10. `test-db` Edge Function Exposed
+A debug/test function is deployed with `verify_jwt = false` — anyone can call it.
+
+### 11. Experiment Assignments Leak User IDs
+The `experiment_assignments` table has an anon policy with `USING (true)`, exposing authenticated user IDs to the public.
+
+### 12. No Error Boundary
+If any lazy-loaded page crashes, users see a white screen. No global `ErrorBoundary` component wraps the routes.
+
+### 13. `robots.txt` Blocks Social Preview Bots
+You block `FacebookBot`, `TwitterBot`, `LinkedInBot`, `Discordbot` — meaning link previews (OG images, titles) won't render when you share your URL on any social platform.
+
+---
+
+## Recommended Fix Order
+
+1. **Lock down RLS** — fix privilege escalation, subscription self-update, missing policies
+2. **Fix `getClaims` → `getUser`** in all 5 edge functions
+3. **Re-enable JWT verification** on sensitive edge functions
+4. **Align pricing** across landing page, hooks, and Stripe
+5. **Add missing functions to config.toml** (`get-checkout-session`, `create-trial-checkout`, `enterprise-checkout`)
+6. **Fix hardcoded domains** (password reset, extension manifest)
+7. **Unblock social bots** in robots.txt
+8. **Remove `test-db`** function
+9. **Add ErrorBoundary** wrapper
+
