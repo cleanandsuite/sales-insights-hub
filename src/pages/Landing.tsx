@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CinematicNavbar } from '@/components/landing/CinematicNavbar';
 import { CinematicHero } from '@/components/landing/CinematicHero';
 import { CinematicLogoBanner } from '@/components/landing/CinematicLogoBanner';
@@ -11,18 +12,39 @@ import { CinematicFAQ } from '@/components/landing/CinematicFAQ';
 import { CinematicBuiltBySales } from '@/components/landing/CinematicBuiltBySales';
 import { CinematicFinalCTA } from '@/components/landing/CinematicFinalCTA';
 import { CinematicFooter } from '@/components/landing/CinematicFooter';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function Landing() {
-  const handleStartTrialClick = () => {
-    window.open('https://buy.stripe.com/cNibJ0a5Oc4n8664TI9k402', '_blank');
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const handleStartTrialClick = async (plan: 'single_user' | 'team' = 'single_user') => {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-trial-checkout', {
+        body: { plan },
+      });
+
+      if (error) throw error;
+      if (!data?.url) throw new Error('No checkout URL returned');
+
+      // Same-tab redirect so the success_url brings the user back properly
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('Checkout error:', err);
+      toast.error('Could not start checkout. Please try again.');
+      setCheckoutLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[hsl(var(--cin-bg))] cinematic-noise overflow-x-hidden">
-      <CinematicNavbar onStartTrialClick={handleStartTrialClick} />
+      <CinematicNavbar onStartTrialClick={() => handleStartTrialClick('single_user')} />
 
       <main>
-        <CinematicHero onStartTrialClick={handleStartTrialClick} />
+        <CinematicHero onStartTrialClick={() => handleStartTrialClick('single_user')} />
         <CinematicLogoBanner />
         <CinematicFeatures />
         <CinematicPhilosophy />
@@ -32,7 +54,7 @@ export default function Landing() {
         <CinematicPricing onStartTrialClick={handleStartTrialClick} />
         <CinematicFAQ />
         <CinematicBuiltBySales />
-        <CinematicFinalCTA onStartTrialClick={handleStartTrialClick} />
+        <CinematicFinalCTA onStartTrialClick={() => handleStartTrialClick('single_user')} />
       </main>
 
       <CinematicFooter />

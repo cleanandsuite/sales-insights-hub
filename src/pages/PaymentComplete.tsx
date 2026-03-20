@@ -121,7 +121,7 @@ export default function PaymentComplete() {
         const { error } = await supabase.auth.signInWithOtp({
           email: emailFromParams,
           options: {
-            emailRedirectTo: `${window.location.origin}/dashboard?subscription=success&from_checkout=true`,
+            emailRedirectTo: `${window.location.origin}/setup-phone`,
           },
         });
 
@@ -182,7 +182,7 @@ export default function PaymentComplete() {
       const { error } = await supabase.auth.signInWithOtp({
         email: emailFromParams,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success&from_checkout=true`,
+          emailRedirectTo: `${window.location.origin}/setup-phone`,
         },
       });
 
@@ -224,7 +224,7 @@ export default function PaymentComplete() {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success&from_checkout=true`,
+          emailRedirectTo: `${window.location.origin}/setup-phone`,
         },
       });
 
@@ -243,7 +243,7 @@ export default function PaymentComplete() {
           }
 
           toast.success('Signed in successfully!');
-          navigate('/dashboard?subscription=success&from_checkout=true');
+          navigate('/setup-phone');
           return;
         }
 
@@ -253,8 +253,9 @@ export default function PaymentComplete() {
       }
 
       if (data.user) {
-        toast.success('Account created! Redirecting to dashboard...');
-        navigate('/dashboard?subscription=success&from_checkout=true');
+        // Email verification required — don't navigate, show confirmation
+        toast.success('Account created! Check your email to verify your account.');
+        setMagicLinkSent(true);
       }
     } catch (err) {
       console.error('Registration error:', err);

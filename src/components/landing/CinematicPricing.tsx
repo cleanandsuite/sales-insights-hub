@@ -81,13 +81,8 @@ const tiers = [
   },
 ];
 
-const PAYMENT_LINKS = {
-  starter: 'https://buy.stripe.com/cNibJ0a5Oc4n8664TI9k402',
-  pro: 'https://buy.stripe.com/3cIeVcb9S9WfgCCae29k403',
-};
-
 interface CinematicPricingProps {
-  onStartTrialClick: () => void;
+  onStartTrialClick: (plan?: 'single_user' | 'team') => void;
 }
 
 export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
@@ -131,7 +126,7 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
             Invest in every conversation.
           </h2>
           <p className="text-white/40 text-base max-w-md mx-auto mb-8">
-            14-day free trial on all plans. No credit card required.
+            14-day free trial on all plans. Cancel anytime.
           </p>
 
           <div className="inline-flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-full p-1">
@@ -220,11 +215,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                 <button
                   onClick={() => {
                     if (tier.premium) {
-                      onStartTrialClick();
+                      // Enterprise: scroll to contact or open mailto
+                      window.location.href = 'mailto:sales@sellsig.com?subject=Enterprise%20Inquiry';
                     } else if (tier.highlighted) {
-                      window.open(PAYMENT_LINKS.pro, '_blank');
+                      onStartTrialClick('team');
                     } else {
-                      window.open(PAYMENT_LINKS.starter, '_blank');
+                      onStartTrialClick('single_user');
                     }
                   }}
                   className={`magnetic-btn w-full py-3.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
