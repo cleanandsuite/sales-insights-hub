@@ -27,15 +27,15 @@ Deno.serve(async (req) => {
     );
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: authData, error: authError } = await anonSupabase.auth.getClaims(token);
-    if (authError || !authData?.claims) {
+    const { data: authData, error: authError } = await anonSupabase.auth.getUser(token);
+    if (authError || !authData?.user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const userId = authData.claims.sub as string;
+    const userId = authData.user.id;
 
     const body = await req.json();
     const { area_code, phone_number } = body;
