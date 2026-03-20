@@ -632,8 +632,10 @@ export default function Recordings() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRecordingRow key={i} />
+            ))}
           </div>
         ) : filteredRecordings.length === 0 ? (
           <div className="card-gradient rounded-xl border border-border/50 p-12 text-center">
