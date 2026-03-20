@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Phone, Play, Pause, Clock, Calendar, TrendingUp, Mic, Download, Search, FileText, Trash2, Upload, File, X, CheckCircle, Loader2 } from 'lucide-react';
+import { SkeletonRecordingRow, SkeletonKPI } from '@/components/ui/SkeletonCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { createPlayableObjectUrl } from '@/lib/audioPlayback';
@@ -631,8 +632,10 @@ export default function Recordings() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonRecordingRow key={i} />
+            ))}
           </div>
         ) : filteredRecordings.length === 0 ? (
           <div className="card-gradient rounded-xl border border-border/50 p-12 text-center">

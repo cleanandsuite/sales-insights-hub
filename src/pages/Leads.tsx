@@ -15,7 +15,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
-import { Search, Filter, Download, Users, Sparkles, Upload, LayoutList, FileSpreadsheet } from 'lucide-react';
+import { Search, Filter, Download, Users, Sparkles, Upload, LayoutList, FileSpreadsheet, UserPlus } from 'lucide-react';
+import { SkeletonLeadCard } from '@/components/ui/SkeletonCard';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { AddLeadDialog } from '@/components/leads/AddLeadDialog';
 import { CallDialog } from '@/components/calling/CallDialog';
 import { CallInterface } from '@/components/calling/CallInterface';
@@ -327,8 +329,10 @@ export default function Leads() {
                   </div>
 
                   {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <div className="space-y-4">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonLeadCard key={i} />
+                      ))}
                     </div>
                   ) : filteredLeads.length === 0 ? (
                     <div className="card-gradient rounded-xl border border-border/50 p-12 text-center">

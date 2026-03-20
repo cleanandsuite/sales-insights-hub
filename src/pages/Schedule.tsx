@@ -397,9 +397,10 @@ export default function Schedule() {
 
                 {calls.length === 0 && !loading && (
                   <div className="p-6 text-center text-sm text-muted-foreground">
-                    <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                    <p>No scheduled calls</p>
-                    <p className="text-xs mt-1">Schedule your first call to get started</p>
+                    <CalendarIcon className="h-10 w-10 mx-auto mb-3 text-primary/40" />
+                    <p className="font-medium text-foreground mb-1">No calls scheduled</p>
+                    <p className="text-xs mt-1">Click "Schedule Call" above to plan your next conversation</p>
+                    <p className="text-xs text-muted-foreground/60 mt-3 italic">💡 Use Cmd+K to quickly navigate anywhere</p>
                   </div>
                 )}
               </div>
