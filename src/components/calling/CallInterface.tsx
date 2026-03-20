@@ -16,6 +16,8 @@ import {
   FileText,
 } from 'lucide-react';
 import { useTelnyxCall, CallStatus } from '@/hooks/useTelnyxCall';
+import { PostCallEmailDraft } from './PostCallEmailDraft';
+import { SMSComposer } from './SMSComposer';
 import { useCallLimits } from '@/hooks/useCallLimits';
 import { useLiveCoaching } from '@/hooks/useLiveCoaching';
 import { cn } from '@/lib/utils';
