@@ -126,7 +126,7 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
             Invest in every conversation.
           </h2>
           <p className="text-white/40 text-base max-w-md mx-auto mb-8">
-            14-day free trial on all plans. No credit card required.
+            14-day free trial on all plans. Cancel anytime.
           </p>
 
           <div className="inline-flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-full p-1">
