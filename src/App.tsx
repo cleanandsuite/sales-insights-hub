@@ -12,6 +12,7 @@ import { TeamProtectedRoute } from "@/components/TeamProtectedRoute";
 import { Loader2 } from "lucide-react";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { ThemeProvider } from "next-themes";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Eagerly load the landing page for best initial load performance
 import Index from "./pages/Index";
