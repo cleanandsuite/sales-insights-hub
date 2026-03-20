@@ -4,6 +4,7 @@ import { demoCoachingSkills, demoCoachingRecommendations, demoAnalyticsData } fr
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAnalyticsV2, TimeRange } from '@/hooks/useAnalyticsV2';
 import { AlertTriangle, RefreshCw, Brain, Target, BookOpen, ClipboardList } from 'lucide-react';
+import { SkeletonKPI, SkeletonChart } from '@/components/ui/SkeletonCard';
 import { AICoachingAnalytics } from '@/components/coaching/AICoachingAnalytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
