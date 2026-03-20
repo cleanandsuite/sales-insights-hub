@@ -1,101 +1,140 @@
 
 
-# Competitive Gap Analysis: What You Need to Be Comparable
+# Usability Upgrades to Stand Out Commercially
 
-Based on auditing your full codebase against competitors (Gong, Salesloft, Outreach, Orum, JustCall, Dialpad), here's what's missing or non-functional, grouped by impact.
-
----
-
-## Tier 1: Table Stakes (Competitors ALL have these — you'll lose deals without them)
-
-### 1. Working CRM Integrations
-Your Integrations page is **100% mock data**. HubSpot shows "connected" with fake stats. Salesforce OAuth exists but the sync functions are shells. No competitor ships without at least one real CRM integration.
-- **Minimum:** Working HubSpot or Salesforce OAuth + bi-directional contact/deal sync
-- **Effort:** Large — requires OAuth flows, webhook listeners, field mapping UI
-
-### 2. Email Sequences / Cadences
-You have zero multi-step outreach capability. Every competitor (Salesloft, Outreach, Apollo) lets reps build email + call + LinkedIn sequences with automated follow-ups. Your `send-outbound-email` is a single-shot function.
-- **Minimum:** Multi-step sequence builder (email → wait → call → wait → email), template library, open/click tracking
-- **Effort:** Large
-
-### 3. Call Search Across All Recordings
-Gong's #1 feature: "Show me every call where a competitor was mentioned." You have per-recording transcript view but **no global transcript search**. Your `ActivityFeed` searches by name/filename only.
-- **Minimum:** Full-text search across all transcripts with keyword highlighting and jump-to-timestamp
-- **Effort:** Medium — requires indexing transcripts in a searchable column or using Postgres full-text search
-
-### 4. SMS / Multi-Channel Outreach
-Most dialers (JustCall, Orum, Salesloft) support SMS alongside calls. You're calls-only.
-- **Minimum:** SMS send/receive via Telnyx (they support it on the same number)
-- **Effort:** Medium
+After auditing the app's UX across all major pages, here are the high-impact usability improvements that would make SellSig feel more polished and competitive against Gong, Salesloft, and Outreach.
 
 ---
 
-## Tier 2: Expected Features (Most competitors have these — noticeable gap)
+## 1. Empty States That Guide Action (Currently Missing)
 
-### 5. Snippet Library / Call Highlights
-Managers and reps can't save/share "best moments" from calls. Gong, Chorus, and Clari all have shareable call snippets with timestamp ranges.
-- **Minimum:** Clip a 30-second segment from a recording, share via link
-- **Effort:** Medium
+**Problem:** When a new user lands on Dashboard, Leads, Recordings, Schedule, or Analytics with zero data, they see blank white space. Competitors show rich, branded empty states with clear CTAs.
 
-### 6. Automated Post-Call Emails
-After a call ends, auto-draft a follow-up email based on the transcript. You have `generateCallEmail` in the schedule assistant but it's not wired to the post-call flow.
-- **Minimum:** After call ends → AI drafts email → rep reviews and sends in one click
-- **Effort:** Small — mostly wiring existing functions together
-
-### 7. Contact/Lead Import from CRM
-Your "Import Leads" supports CSV only. Competitors pull contacts directly from HubSpot/Salesforce with smart filtering (e.g., "leads not contacted in 30 days").
-- **Effort:** Dependent on CRM integration (Tier 1 item)
-
-### 8. Real-Time Notifications (Slack/Email Alerts)
-Your Slack integration is mock. Competitors send Slack alerts for: deal stage changes, at-risk deals, missed follow-ups, coaching moments.
-- **Minimum:** Slack webhook for key events (deal closed, coaching flag, missed call)
-- **Effort:** Small-Medium
+**Fix:** Add illustrated empty states with contextual CTAs to every major page:
+- **Dashboard:** "Make your first call to see your stats" → CTA opens dialer
+- **Recordings:** "No recordings yet" → CTA to start a call or upload
+- **Leads:** "Add your first lead" → CTA opens Add Lead dialog
+- **Schedule:** "Nothing scheduled" → CTA to schedule a call
+- **Analytics:** "Complete 3+ calls to unlock insights" → progress indicator
 
 ---
 
-## Tier 3: Differentiators (Nice-to-have, some competitors have them)
+## 2. Keyboard Shortcuts & Command Palette
 
-### 9. Mobile App
-No mobile experience. Salesloft, Outreach, and JustCall all have mobile apps. Not buildable in Lovable (React web only), but a **responsive mobile web view** for key actions (view schedule, tap-to-call, see coaching) would help.
-- **Effort:** Medium — responsive audit of Dashboard, Schedule, Leads pages
+**Problem:** Power users (sales reps making 50+ calls/day) need speed. No keyboard shortcuts exist. The GlobalSearch is text-only.
 
-### 10. API / Webhook Access for Customers
-Power users and enterprise buyers expect an API to pull call data, scores, and analytics into their own tools. You have none.
-- **Effort:** Medium — expose key edge functions as documented REST endpoints
+**Fix:** Add a command palette (Cmd+K / Ctrl+K) that combines:
+- Quick navigation to any page
+- Start a call (type a number or lead name)
+- Search recordings/transcripts
+- Create a lead
+- Open WinWords
 
-### 11. Conversation Library with Playlists
-Curated playlists of calls by topic: "Best discovery calls," "Objection handling masterclass." Used for onboarding new reps.
-- **Effort:** Medium
-
----
-
-## What's Actually Broken vs. Mock
-
-| Feature | Status |
-|---------|--------|
-| VoIP Dialer | ✅ Real (Telnyx) |
-| Call Recording & Transcription | ✅ Real (AssemblyAI) |
-| AI Scoring | ✅ Real (DeepSeek) |
-| Live Coaching | ✅ Real |
-| WinWords Script Gen | ✅ Real |
-| Leads CRM | ✅ Real (Supabase) |
-| Schedule | ✅ Real |
-| HubSpot Integration | ❌ Mock |
-| Salesforce Integration | ❌ Partial (OAuth only, no sync) |
-| Slack Integration | ❌ Mock |
-| Zoom Integration | ❌ Mock |
-| Leaderboard | ❌ Mock data |
-| Enterprise Deals | ❌ Mock data (mockDeals) |
-| Enterprise Activity | ❌ Mock data |
+This is a signature feature of tools like Linear, Raycast, and Superhuman — it signals "built for power users."
 
 ---
 
-## Recommended Priority Order
+## 3. Toast/Notification System Upgrade
 
-1. **Global transcript search** — small effort, huge value, differentiator
-2. **Post-call email drafting** — wire existing AI to post-call flow
-3. **SMS via Telnyx** — same API you already use
-4. **Real leaderboard** — pull from actual call_recordings + call_scores
-5. **HubSpot OAuth integration** — biggest enterprise blocker
-6. **Email sequences** — largest effort but biggest competitive gap
+**Problem:** Notifications are a simple popover with hardcoded demo data. No real notification persistence, no "mark as read," no notification preferences.
+
+**Fix:** 
+- Store notifications in a `notifications` table
+- Show unread count badge on bell icon
+- Support notification types: overdue follow-ups, coaching available, deal stage changes, missed calls
+- Add "mark all read" and click-to-navigate
+- Optional: browser push notifications for urgent items
+
+---
+
+## 4. Contextual Tooltips & Feature Discovery
+
+**Problem:** Many powerful features (AI coaching styles, WinWords, live coaching) are hidden behind navigation. New users don't discover them.
+
+**Fix:** Add progressive disclosure tooltips:
+- First-time feature highlights (pulse dot on new features)
+- Contextual tips in empty states ("Did you know you can generate scripts with AI?")
+- "What's new" changelog modal accessible from sidebar
+
+---
+
+## 5. Bulk Actions on Leads & Recordings
+
+**Problem:** No way to select multiple leads to call, delete, export, or reassign. No bulk delete/export for recordings. Competitors all support multi-select.
+
+**Fix:**
+- Add checkbox selection to lead cards and recording rows
+- Floating action bar appears when items selected: "Call Selected (Power Dial)", "Export", "Delete", "Assign to Rep"
+- This directly enables power-dialer workflows
+
+---
+
+## 6. Breadcrumb Navigation + Page Titles
+
+**Problem:** Once inside the app, there's no breadcrumb trail. Navigating from a recording detail back to recordings list requires the sidebar. No page-level context.
+
+**Fix:** Add a consistent page header component with:
+- Page title + description
+- Breadcrumbs for nested views (Recording → Analysis)
+- Page-level actions (export, filter toggle)
+
+---
+
+## 7. Loading & Skeleton States
+
+**Problem:** Pages show a spinner while loading. Competitors show skeleton shimmer states that feel faster and more polished.
+
+**Fix:** Replace `<Loader2 className="animate-spin" />` with skeleton card layouts on:
+- Dashboard (KPI cards, activity feed)
+- Leads (lead cards)
+- Recordings (recording rows)
+- Analytics (chart placeholders)
+
+---
+
+## 8. Dark/Light Theme Toggle (Partially Broken)
+
+**Problem:** Settings imports `useTheme` from `next-themes` but the app uses Vite, not Next.js. Theme toggling likely doesn't work.
+
+**Fix:** Either implement a proper Vite-compatible theme provider or remove the toggle and commit to the dark theme (which matches the brand better).
+
+---
+
+## Implementation Priority
+
+| # | Feature | Effort | Impact |
+|---|---------|--------|--------|
+| 1 | Empty states with CTAs | Small | High — first impression for every new user |
+| 2 | Command palette (Cmd+K) | Medium | High — power user differentiator |
+| 3 | Skeleton loading states | Small | Medium — perceived performance |
+| 4 | Bulk actions on Leads | Medium | High — core workflow enabler |
+| 5 | Real notification system | Medium | Medium — retention driver |
+| 6 | Breadcrumbs + page headers | Small | Medium — navigation clarity |
+| 7 | Feature discovery tooltips | Small | Medium — activation improvement |
+| 8 | Fix theme toggle | Small | Low — polish |
+
+---
+
+## Recommended Build Order
+
+1. **Empty states** — instant UX uplift, small effort
+2. **Command palette** — signature "power tool" feel
+3. **Skeleton states** — makes everything feel faster
+4. **Bulk lead actions** — enables real sales workflows
+5. **Notification system** — drives re-engagement
+
+### Files to Create/Edit
+
+| File | Change |
+|------|--------|
+| `src/components/ui/EmptyState.tsx` | New — reusable empty state component |
+| `src/components/dashboard/CommandPalette.tsx` | New — Cmd+K command palette |
+| `src/components/ui/SkeletonCard.tsx` | New — skeleton loading variants |
+| `src/pages/Dashboard.tsx` | Add empty state, skeleton loading |
+| `src/pages/Leads.tsx` | Add empty state, bulk selection |
+| `src/pages/Recordings.tsx` | Add empty state, skeleton loading |
+| `src/pages/Schedule.tsx` | Add empty state |
+| `src/pages/Analytics.tsx` | Add empty state with call threshold |
+| `src/components/layout/DashboardLayout.tsx` | Mount CommandPalette globally |
+| `src/components/dashboard/NotificationBell.tsx` | Wire to real notifications table |
 
