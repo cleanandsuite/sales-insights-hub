@@ -177,10 +177,21 @@ export default function Analytics() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center py-24">
-          <div className="text-center">
-            <div className="h-10 w-10 animate-spin rounded-full border-3 border-primary border-t-transparent mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading analytics...</p>
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-64 bg-muted/60 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonKPI key={i} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <SkeletonChart />
+            <SkeletonChart />
           </div>
         </div>
       </DashboardLayout>
