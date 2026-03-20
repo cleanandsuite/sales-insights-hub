@@ -81,13 +81,8 @@ const tiers = [
   },
 ];
 
-const PAYMENT_LINKS = {
-  starter: 'https://buy.stripe.com/cNibJ0a5Oc4n8664TI9k402',
-  pro: 'https://buy.stripe.com/3cIeVcb9S9WfgCCae29k403',
-};
-
 interface CinematicPricingProps {
-  onStartTrialClick: () => void;
+  onStartTrialClick: (plan?: 'single_user' | 'team') => void;
 }
 
 export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
