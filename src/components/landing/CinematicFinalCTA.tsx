@@ -20,7 +20,7 @@ export function CinematicFinalCTA({ onStartTrialClick }: CinematicFinalCTAProps)
         </h2>
 
         <p className="text-base text-white/50 mb-10 max-w-md mx-auto">
-          14-day free trial. No credit card required. Setup in 2 minutes. Cancel anytime.
+          14-day free trial. Setup in 2 minutes. Cancel anytime.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">

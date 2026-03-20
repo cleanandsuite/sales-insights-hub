@@ -215,11 +215,12 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
                 <button
                   onClick={() => {
                     if (tier.premium) {
-                      onStartTrialClick();
+                      // Enterprise: scroll to contact or open mailto
+                      window.location.href = 'mailto:sales@sellsig.com?subject=Enterprise%20Inquiry';
                     } else if (tier.highlighted) {
-                      window.open(PAYMENT_LINKS.pro, '_blank');
+                      onStartTrialClick('team');
                     } else {
-                      window.open(PAYMENT_LINKS.starter, '_blank');
+                      onStartTrialClick('single_user');
                     }
                   }}
                   className={`magnetic-btn w-full py-3.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
