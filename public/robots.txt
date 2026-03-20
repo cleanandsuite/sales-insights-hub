@@ -26,19 +26,4 @@ Disallow: /
 User-agent: AdsBot-Google
 Disallow: /
 
-User-agent: FacebookBot
-Disallow: /
-
-User-agent: TwitterBot
-Disallow: /
-
-User-agent: LinkedInBot
-Disallow: /
-
-User-agent: Slackbot
-Disallow: /
-
-User-agent: Discordbot
-Disallow: /
-
 Sitemap: https://sellsig.com/sitemap.xml

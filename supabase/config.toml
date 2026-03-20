@@ -24,9 +24,6 @@ verify_jwt = false
 [functions.winwords-generate]
 verify_jwt = false
 
-[functions.test-db]
-verify_jwt = false
-
 [functions.ai-lead-score]
 verify_jwt = false
 
@@ -58,4 +55,49 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-outbound-email]
+verify_jwt = false
+
+[functions.telnyx-auth]
+verify_jwt = false
+
+[functions.telnyx-provision-number]
+verify_jwt = false
+
+[functions.telnyx-search-numbers]
+verify_jwt = false
+
+[functions.telnyx-voicemail-drop]
+verify_jwt = false
+
+[functions.get-checkout-session]
+verify_jwt = false
+
+[functions.create-trial-checkout]
+verify_jwt = false
+
+[functions.enterprise-checkout]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.check-enterprise-subscription]
+verify_jwt = false
+
+[functions.get-pricing]
+verify_jwt = false
+
+[functions.company-lookup]
+verify_jwt = false
+
+[functions.capture-calendar-tokens]
+verify_jwt = false
+
+[functions.send-digest-email]
 verify_jwt = false
