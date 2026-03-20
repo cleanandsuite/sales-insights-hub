@@ -236,7 +236,9 @@ export default function Recordings() {
   const filteredRecordings = recordings.filter(r => {
     const displayName = r.name || r.file_name;
     const matchesSearch = displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.file_name.toLowerCase().includes(searchQuery.toLowerCase());
+                          r.file_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.live_transcription || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.summary || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDate = filterByDate(r);
     return matchesSearch && matchesDate;
   });
