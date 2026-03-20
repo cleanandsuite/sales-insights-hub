@@ -1,71 +1,70 @@
 
 
-# Pre-Launch Audit: Issues You Will Hit Going Live
+# Full Journey Audit: Landing → Stripe → Account → Phone → Dashboard
 
-## CRITICAL (Will break things or cost you money)
+## Critical Disconnects Found
 
-### 1. Security: Privilege Escalation Vulnerability
-Users can promote themselves to "manager" role by updating their own `profiles.user_role` column. The UPDATE policy on `profiles` has no column restrictions. Once promoted, they can read all team members' profiles including Stripe billing IDs. **This is exploitable day one.**
+### 1. Stripe Payment Links vs Checkout Sessions Mismatch
+The landing page CTAs use **Stripe Payment Links** (`https://buy.stripe.com/...`) which open in a new tab. But the `PaymentComplete` page expects a **Checkout Session ID** (`?session_id=...`) to look up the buyer's email via the `get-checkout-session` edge function.
 
-### 2. Security: Users Can Overwrite Their Own Subscription
-The `user_subscriptions` UPDATE RLS policy lets any user set their `status` to `'active'` or modify `stripe_subscription_id` / `stripe_customer_id`. Someone can give themselves a free subscription by running a single update.
+**Problem:** Stripe Payment Links have their success URL configured **in the Stripe Dashboard**, not in code. Unless you've manually configured them to redirect to `https://sellsig.com/payment-complete?session_id={CHECKOUT_SESSION_ID}`, the user will never reach the `/payment-complete` page — or will arrive without a `session_id`, so the email lookup fails and the magic link is never sent.
 
-### 3. Security: Missing RLS on Sensitive Tables
-- `team_leads_secure` — contains emails, phones, contact names with zero RLS policies
-- `manager_team_stats` — exposes team performance data to any authenticated user
+**Fix:** Replace Stripe Payment Links with the existing `create-trial-checkout` edge function. This function creates a proper Checkout Session with the correct `success_url` pointing to `/payment-complete?session_id={CHECKOUT_SESSION_ID}`. The landing page should call this function (unauthenticated) instead of opening payment links.
 
-### 4. Edge Functions: `getClaims()` Does Not Exist
-Five edge functions (`telnyx-auth`, `telnyx-voicemail-drop`, `telnyx-provision-number`, `telnyx-search-numbers`, `send-outbound-email`) call `supabase.auth.getClaims(token)` which is **not a real Supabase JS method**. These will throw runtime errors. Should be `supabase.auth.getUser(token)`.
+### 2. `create-trial-checkout` Is Never Used
+The edge function exists and correctly redirects to `/payment-complete`, but **nothing in the frontend calls it**. The `Landing.tsx` handler just opens a Payment Link URL.
 
-### 5. Edge Functions: All JWT Verification Disabled
-Every single edge function in `config.toml` has `verify_jwt = false`. While some (like `stripe-webhook`) need this, functions like `transcribe-audio`, `analyze-recording`, `deal-coach`, `winwords-generate`, `live-coach`, `live-summary`, and `send-outbound-email` should validate JWTs. Anyone can call them directly without authentication, burning your DeepSeek/AssemblyAI API credits.
+**Fix:** Wire up the landing page CTAs to invoke `create-trial-checkout` and redirect to the returned URL (same tab, not `_blank`).
 
----
+### 3. Signup on PaymentComplete Skips Email Verification
+After payment, the user creates an account via `supabase.auth.signUp()`. Since auto-confirm is disabled, the user must verify their email before they can authenticate. But the code immediately navigates to `/dashboard` on success — which is behind `ProtectedRoute` and will bounce the unverified user to `/auth`.
 
-## HIGH (Will cause user-facing problems)
+**Fix:** After `signUp`, show a "Check your email to verify" message instead of navigating. The magic link / OTP flow already handles this correctly — the password signup path needs the same treatment.
 
-### 6. Pricing Inconsistency
-- `useSubscription.ts` shows Starter at $29 and Enterprise at $99
-- Landing page (`CinematicPricing`) shows Starter at $79 and Pro at $250
-- `create-trial-checkout` uses different price IDs than `useSubscription`
-- Memory says Starter is $79 promo / $129 original — none of these match the code
+### 4. Magic Link Redirects to Dashboard, Skips Phone Setup
+The magic link's `emailRedirectTo` is set to `/dashboard?subscription=success` — it should go to `/setup-phone` so users complete phone provisioning first.
 
-### 7. Password Reset Redirect Hardcoded
-`ForgotPasswordModal.tsx` hardcodes `redirectTo: 'https://sellsig.com/reset-password'`. If you deploy on `lovable.app` or any other domain first, password resets will redirect to the wrong URL.
+**Fix:** Change `emailRedirectTo` to `${origin}/setup-phone`.
 
-### 8. Chrome Extension Targets Wrong Domains
-`manifest.json` and `ExtensionInstallBanner.tsx` target `*.lovable.app` and `localhost` — not `sellsig.com`. The extension won't work on your production domain.
+### 5. Pricing Says "No credit card required" but Card Is Required
+`create-trial-checkout` sets `payment_method_collection: 'always'`, and the Stripe Payment Links also require payment info. The pricing section text "14-day free trial on all plans. No credit card required." is misleading.
 
-### 9. No `get-checkout-session` or `create-trial-checkout` in config.toml
-These edge functions exist but aren't listed in `config.toml`, meaning they may not deploy or may have unexpected JWT behavior.
+**Fix:** Change copy to "14-day free trial. Cancel anytime." or remove the "no credit card" claim.
+
+### 6. Payment Link Opens in New Tab — Broken UX
+`window.open(..., '_blank')` opens Stripe in a new tab. After payment, the success redirect happens in that tab. The original landing page tab stays open, creating confusion.
+
+**Fix:** Use `window.location.href` (same tab) for the checkout redirect.
 
 ---
 
-## MEDIUM (Will cause confusion or ops headaches)
+## Implementation Plan
 
-### 10. `test-db` Edge Function Exposed
-A debug/test function is deployed with `verify_jwt = false` — anyone can call it.
+### Step 1: Replace Payment Links with `create-trial-checkout` calls
+- In `Landing.tsx`, change `handleStartTrialClick` to call `supabase.functions.invoke('create-trial-checkout', { body: { plan: 'single_user' } })` and redirect via `window.location.href = data.url`
+- In `CinematicPricing.tsx`, replace `window.open(PAYMENT_LINKS.starter/pro, '_blank')` with calls to `create-trial-checkout` with the appropriate plan parameter
+- Remove the `PAYMENT_LINKS` constant
 
-### 11. Experiment Assignments Leak User IDs
-The `experiment_assignments` table has an anon policy with `USING (true)`, exposing authenticated user IDs to the public.
+### Step 2: Fix post-signup redirect on PaymentComplete
+- After `supabase.auth.signUp()` succeeds, show "Check your email to verify your account" instead of navigating to `/dashboard`
+- Change all `emailRedirectTo` URLs from `/dashboard?...` to `/setup-phone`
 
-### 12. No Error Boundary
-If any lazy-loaded page crashes, users see a white screen. No global `ErrorBoundary` component wraps the routes.
+### Step 3: Fix misleading pricing copy
+- Change "No credit card required" to "Cancel anytime" in `CinematicPricing.tsx`
 
-### 13. `robots.txt` Blocks Social Preview Bots
-You block `FacebookBot`, `TwitterBot`, `LinkedInBot`, `Discordbot` — meaning link previews (OG images, titles) won't render when you share your URL on any social platform.
+### Step 4: Fix redirect to same tab
+- Already handled by Step 1 (using `window.location.href` instead of `window.open`)
 
 ---
 
-## Recommended Fix Order
+## Files to Edit
 
-1. **Lock down RLS** — fix privilege escalation, subscription self-update, missing policies
-2. **Fix `getClaims` → `getUser`** in all 5 edge functions
-3. **Re-enable JWT verification** on sensitive edge functions
-4. **Align pricing** across landing page, hooks, and Stripe
-5. **Add missing functions to config.toml** (`get-checkout-session`, `create-trial-checkout`, `enterprise-checkout`)
-6. **Fix hardcoded domains** (password reset, extension manifest)
-7. **Unblock social bots** in robots.txt
-8. **Remove `test-db`** function
-9. **Add ErrorBoundary** wrapper
+| File | Change |
+|------|--------|
+| `src/pages/Landing.tsx` | Replace `window.open` with `create-trial-checkout` edge function call |
+| `src/components/landing/CinematicPricing.tsx` | Replace Payment Links with edge function calls; fix "no credit card" copy |
+| `src/components/landing/CinematicNavbar.tsx` | Update `onStartTrialClick` callback pattern |
+| `src/components/landing/CinematicHero.tsx` | Same pattern update |
+| `src/components/landing/CinematicFinalCTA.tsx` | Same pattern update |
+| `src/pages/PaymentComplete.tsx` | Fix post-signup to show email verification message; change `emailRedirectTo` to `/setup-phone` |
 
