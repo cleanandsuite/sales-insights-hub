@@ -15,10 +15,13 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isCollapsed } = useSidebarState();
+  const [showCallDialog, setShowCallDialog] = useState(false);
   useCallReminders();
   
   return (
     <div className="min-h-screen bg-background">
+      <CommandPalette onStartCall={() => setShowCallDialog(true)} />
+      <CallDialog open={showCallDialog} onOpenChange={setShowCallDialog} onStartCall={() => setShowCallDialog(false)} />
       <Sidebar />
       <MobileHeader />
       <main className={cn(
