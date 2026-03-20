@@ -262,7 +262,15 @@ export function CallInterface({ phoneNumber, callName, onClose, onCallNextLead, 
               />
             )}
             {isCallEnded ? (
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <PostCallEmailDraft
+                  transcript={fullTranscript}
+                  contactName={callName}
+                />
+                <SMSComposer
+                  phoneNumber={phoneNumber}
+                  contactName={callName}
+                />
                 <Button variant="outline" size="sm" onClick={handleDownloadTranscript} className="gap-2">
                   <Download className="h-4 w-4" />
                   Download Transcript

@@ -8,16 +8,11 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Trophy, Target, Phone, Flame, TrendingUp,
-  Medal, Crown, Users, RefreshCw, Settings
+  Medal, Crown, Users, RefreshCw, Settings, Loader2
 } from 'lucide-react';
 import { useLeaderboard } from '@/contexts/LeaderboardContext';
+import { useLeaderboardData } from '@/hooks/useLeaderboardData';
 import { cn } from '@/lib/utils';
-
-const formatCurrency = (value: number) => {
-  if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-  if (value >= 1000) return `$${Math.round(value / 1000)}K`;
-  return `$${value}`;
-};
 
 const getRankBadge = (rank: number) => {
   if (rank === 1) {
@@ -50,20 +45,11 @@ const getRankBadge = (rank: number) => {
 export default function Leaderboard() {
   const navigate = useNavigate();
   const { data, toggleEnabled, resetChallenges } = useLeaderboard();
+  const { entries, loading } = useLeaderboardData();
   const [activeTab, setActiveTab] = useState('leaderboard');
   const [showSettings, setShowSettings] = useState(false);
 
-  // Mock leaderboard data (in real app, this comes from DB)
-  const mockEntries = [
-    { id: 'user-1', name: 'Sarah Chen', xp: 25000, quota: 180000, calls: 342, wins: 28 },
-    { id: 'user-2', name: 'You', xp: 12450, quota: 120000, calls: 247, wins: 24 },
-    { id: 'user-3', name: 'Mike Johnson', xp: 18500, quota: 150000, calls: 289, wins: 22 },
-    { id: 'user-4', name: 'Lisa Park', xp: 31000, quota: 210000, calls: 398, wins: 35 },
-    { id: 'user-5', name: 'David Kim', xp: 42000, quota: 250000, calls: 456, wins: 42 },
-  ].sort((a, b) => b.xp - a.xp);
-
-  const yourRank = mockEntries.findIndex(e => e.name === 'You') + 1;
-  const periodOptions = ['weekly', 'monthly', 'all-time'] as const;
+  const yourRank = entries.findIndex(e => e.isYou) + 1;
 
   return (
     <>
@@ -138,9 +124,9 @@ export default function Leaderboard() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm text-muted-foreground">Your Rank</p>
-                        <p className="text-3xl font-bold">{yourRank}</p>
+                        <p className="text-3xl font-bold">{loading ? '...' : yourRank || '-'}</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {yourRank === 1 ? '👑 Top Performer!' : `of ${mockEntries.length} team members`}
+                          {yourRank === 1 ? '👑 Top Performer!' : `of ${entries.length} team members`}
                         </p>
                       </div>
                     </div>
@@ -156,48 +142,59 @@ export default function Leaderboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {mockEntries.map((entry, index) => (
-                        <div
-                          key={entry.id}
-                          className={cn(
-                            "flex flex-col xs:flex-row xs:items-center gap-3 p-3 sm:p-4 rounded-lg border transition-colors",
-                            entry.name === 'You'
-                              ? 'bg-primary/10 border-primary'
-                              : 'bg-muted/30 hover:bg-muted/50'
-                          )}
-                        >
-                          {/* Rank + Name row */}
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className="w-10 xs:w-12 text-center shrink-0">
-                              {getRankBadge(index + 1)}
+                    {loading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : entries.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Phone className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                        <p className="text-sm">No call data yet. Start making calls to appear on the leaderboard!</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {entries.map((entry, index) => (
+                          <div
+                            key={entry.userId}
+                            className={cn(
+                              "flex flex-col xs:flex-row xs:items-center gap-3 p-3 sm:p-4 rounded-lg border transition-colors",
+                              entry.isYou
+                                ? 'bg-primary/10 border-primary'
+                                : 'bg-muted/30 hover:bg-muted/50'
+                            )}
+                          >
+                            {/* Rank + Name row */}
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="w-10 xs:w-12 text-center shrink-0">
+                                {getRankBadge(index + 1)}
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium">{entry.name}</p>
+                                {entry.isYou && (
+                                  <Badge variant="secondary" className="text-xs">You</Badge>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <p className="font-medium">{entry.name}</p>
-                              {entry.name === 'You' && (
-                                <Badge variant="secondary" className="text-xs">You</Badge>
-                              )}
-                            </div>
-                          </div>
 
-                          {/* Stats */}
-                          <div className="grid grid-cols-3 gap-3 sm:gap-6 text-sm ml-13 xs:ml-0">
-                            <div>
-                              <p className="text-muted-foreground text-xs">XP</p>
-                              <p className="font-semibold text-xs sm:text-sm">{entry.xp.toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground text-xs">Quota</p>
-                              <p className="font-semibold text-xs sm:text-sm">{formatCurrency(entry.quota)}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground text-xs">Wins</p>
-                              <p className="font-semibold text-xs sm:text-sm">{entry.wins}</p>
+                            {/* Stats */}
+                            <div className="grid grid-cols-3 gap-3 sm:gap-6 text-sm ml-13 xs:ml-0">
+                              <div>
+                                <p className="text-muted-foreground text-xs">Calls</p>
+                                <p className="font-semibold text-xs sm:text-sm">{entry.totalCalls}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground text-xs">Avg Score</p>
+                                <p className="font-semibold text-xs sm:text-sm">{entry.avgScore}%</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground text-xs">Wins</p>
+                                <p className="font-semibold text-xs sm:text-sm">{entry.wins}</p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -231,7 +228,7 @@ export default function Leaderboard() {
                           <p className="text-sm text-muted-foreground">Best Score</p>
                           <p className="text-2xl font-bold text-primary">
                             {challenge.metric === 'calls' ? `${challenge.bestScore} calls` :
-                             challenge.metric === 'quota' ? formatCurrency(challenge.bestScore) :
+                             challenge.metric === 'quota' ? `$${challenge.bestScore}` :
                              `${challenge.bestScore} wins`}
                           </p>
                         </div>
