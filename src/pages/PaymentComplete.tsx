@@ -182,7 +182,7 @@ export default function PaymentComplete() {
       const { error } = await supabase.auth.signInWithOtp({
         email: emailFromParams,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard?subscription=success&from_checkout=true`,
+          emailRedirectTo: `${window.location.origin}/setup-phone`,
         },
       });
 
