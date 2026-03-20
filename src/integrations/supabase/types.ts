@@ -2766,6 +2766,60 @@ export type Database = {
           },
         ]
       }
+      sms_messages: {
+        Row: {
+          body: string
+          created_at: string
+          direction: string
+          from_number: string
+          id: string
+          lead_id: string | null
+          status: string
+          telnyx_message_id: string | null
+          to_number: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          direction?: string
+          from_number: string
+          id?: string
+          lead_id?: string | null
+          status?: string
+          telnyx_message_id?: string | null
+          to_number: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          direction?: string
+          from_number?: string
+          id?: string
+          lead_id?: string | null
+          status?: string
+          telnyx_message_id?: string | null
+          to_number?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "team_leads_secure"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storage_access_logs: {
         Row: {
           accessed_at: string | null
