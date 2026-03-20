@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sidebar, MobileHeader } from './Sidebar';
 import { useSidebarState } from '@/contexts/SidebarContext';
@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { useCallReminders } from '@/hooks/useCallReminders';
 import { HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { CommandPalette } from '@/components/dashboard/CommandPalette';
+import { CallDialog } from '@/components/calling/CallDialog';
 
 interface DashboardLayoutProps {
   children: ReactNode;
