@@ -151,7 +151,7 @@ export function BillingTab() {
 
           <PricingCard
             name="Enterprise"
-            price={0}
+            price="custom"
             description="Custom pricing for scaling revenue orgs (10+ seats)"
             features={[
               'Everything in Starter & Pro',
