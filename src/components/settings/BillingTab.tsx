@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { PricingCard } from '@/components/pricing/PricingCard';
 import { CancelSubscriptionDialog } from '@/components/settings/CancelSubscriptionDialog';
 import { useSubscription, PRICING_TIERS } from '@/hooks/useSubscription';
