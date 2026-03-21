@@ -22,7 +22,6 @@ export function BillingTab() {
   
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
-  const [teamSize, setTeamSize] = useState(1);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
   const handleStartCheckout = async (planKey: 'single_user') => {
