@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface PricingCardProps {
   name: string;
-  price: number;
+  price: number | 'custom';
   description?: string;
   features: string[];
   isCurrentPlan?: boolean;
