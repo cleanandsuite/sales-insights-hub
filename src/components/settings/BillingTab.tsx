@@ -27,12 +27,10 @@ export function BillingTab() {
   const [teamSize, setTeamSize] = useState(1);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 
-  const handleStartCheckout = async (planKey: 'single_user' | 'enterprise') => {
+  const handleStartCheckout = async (planKey: 'single_user') => {
     setCheckoutLoading(planKey);
     try {
-      // Map 'enterprise' to 'team' for the backend
-      const backendPlanKey = planKey === 'enterprise' ? 'team' : planKey;
-      await startCheckout(backendPlanKey as 'single_user' | 'team', planKey === 'enterprise' ? teamSize : 1);
+      await startCheckout(planKey, 1);
     } catch (error) {
       toast.error('Failed to start checkout');
     } finally {
