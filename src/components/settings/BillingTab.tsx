@@ -63,16 +63,7 @@ export function BillingTab() {
     );
   }
 
-  // Check if Enterprise is coming soon
-  const isEnterprisePlanComingSoon = PRICING_TIERS.enterprise.comingSoon === true;
-  
-  // Map backend plan names to pricing tier keys
-  const getPricingTier = (planName: string | null) => {
-    if (planName === 'team') return PRICING_TIERS.enterprise;
-    if (planName === 'single_user') return PRICING_TIERS.single_user;
-    return null;
-  };
-  const currentTier = getPricingTier(plan);
+  const currentTier = plan === 'single_user' ? PRICING_TIERS.single_user : null;
 
   return (
     <div className="space-y-6">
