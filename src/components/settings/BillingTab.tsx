@@ -161,54 +161,45 @@ export function BillingTab() {
             ctaText={subscribed ? 'Switch to Single' : 'Start Free Trial'}
           />
 
-          <div className="space-y-4">
-            <PricingCard
-              name={PRICING_TIERS.enterprise.name}
-              price={PRICING_TIERS.enterprise.price}
-              description="For sales teams up to 10 users (per user)"
-              features={PRICING_TIERS.enterprise.features}
-              isCurrentPlan={plan === 'team'}
-              isPopular
-              onSelect={() => {}}
-              loading={false}
-              disabled={isEnterprisePlanComingSoon}
-              ctaText={isEnterprisePlanComingSoon ? 'Coming Soon' : (subscribed ? 'Switch to Enterprise' : 'Start Free Trial')}
-            />
-
-            {!isEnterprisePlanComingSoon && plan !== 'team' && (
-              <div className="p-4 rounded-lg border bg-muted/30">
-                <Label htmlFor="teamSize" className="text-sm">Team Size</Label>
-                <div className="flex items-center gap-2 mt-2">
-                  <Input
-                    id="teamSize"
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={teamSize}
-                    onChange={(e) => setTeamSize(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className="w-20"
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    users × ${PRICING_TIERS.enterprise.price} = <strong>${teamSize * PRICING_TIERS.enterprise.price}/mo</strong>
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+          <PricingCard
+            name="Enterprise"
+            price={0}
+            description="Custom pricing for scaling revenue orgs (10+ seats)"
+            features={[
+              'Everything in Starter & Pro',
+              'Custom business-specific AI models',
+              '5 Elite AI Coaching Systems',
+              'Full-Transparency Manager Dashboard',
+              'Gamified Performance Ranking',
+              'SSO & compliance controls',
+              'Dedicated Account Specialist',
+              'Flexible seat scaling',
+            ]}
+            isCurrentPlan={plan === 'team'}
+            isPopular
+            onSelect={() => {
+              window.location.href = 'mailto:sales@sellsig.com?subject=Enterprise%20Plan%20Inquiry';
+            }}
+            loading={false}
+            disabled={false}
+            ctaText="Schedule a Call"
+          />
         </div>
       </div>
 
-      {/* Cancel Membership */}
-      <div className="flex justify-center">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCancelDialogOpen(true)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
-          Cancel Membership
-        </Button>
-      </div>
+      {/* Cancel Membership — only show for subscribed users */}
+      {subscribed && (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCancelDialogOpen(true)}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            Cancel Membership
+          </Button>
+        </div>
+      )}
 
       {/* Cancel Subscription Dialog */}
       <CancelSubscriptionDialog
