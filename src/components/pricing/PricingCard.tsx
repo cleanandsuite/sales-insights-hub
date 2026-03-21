@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface PricingCardProps {
   name: string;
-  price: number;
+  price: number | 'custom';
   description?: string;
   features: string[];
   isCurrentPlan?: boolean;
@@ -52,8 +52,14 @@ export function PricingCard({
           <CardDescription>{description}</CardDescription>
         )}
         <div className="mt-4">
-          <span className="text-4xl font-bold">${price}</span>
-          <span className="text-muted-foreground">/mo</span>
+          {price === 'custom' ? (
+            <span className="text-4xl font-bold">Custom</span>
+          ) : (
+            <>
+              <span className="text-4xl font-bold">${price}</span>
+              <span className="text-muted-foreground">/mo</span>
+            </>
+          )}
         </div>
       </CardHeader>
       

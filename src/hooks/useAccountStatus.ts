@@ -103,7 +103,7 @@ export function useAccountStatus() {
   // Re-check every 60 seconds (only when user is logged in)
   useEffect(() => {
     if (!user || authLoading) return;
-    const interval = setInterval(checkAccountStatus, 60000);
+    const interval = setInterval(checkAccountStatus, 600000); // 10 minutes
     return () => clearInterval(interval);
   }, [user, authLoading, checkAccountStatus]);
 
