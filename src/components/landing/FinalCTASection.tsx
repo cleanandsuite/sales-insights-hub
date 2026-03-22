@@ -19,7 +19,7 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
           </h2>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
             Join sales leaders who use SellSig to transform sales calls into consistent wins. 
-            Start your 14-day free trial today—full access, no hassle.
+            Get started today — full access, no hassle.
           </p>
 
           {/* Social proof */}
