@@ -142,13 +142,13 @@ export default function Auth() {
             ))}
           </ul>
 
-          {startTrial && (
+           {startTrial && (
             <div className="mt-10 p-5 rounded-xl border" style={{ background: 'hsl(168 76% 40% / 0.08)', borderColor: 'hsl(168 76% 40% / 0.2)' }}>
               <p className="font-semibold text-white flex items-center gap-2">
-                🎉 14-Day Free Trial
+                🚀 Get Started
               </p>
               <p className="text-sm text-white/40 mt-1">
-                Full access, no credit card required. Cancel anytime.
+                Sign in to activate your subscription. Cancel anytime.
               </p>
             </div>
           )}
