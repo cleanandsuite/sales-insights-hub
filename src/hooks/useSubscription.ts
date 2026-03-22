@@ -21,7 +21,7 @@ export const PRICING_TIERS: Record<string, {
 }> = {
   single_user: {
     name: 'Starter',
-    priceId: 'price_1SmY6SAbfbNoHWTTYuvR4kHQ',
+    priceId: 'price_1T6jZTAksiqydspmLTedBsM1',
     price: 79,
     features: [
       '1,500 call minutes/month (+1,000 bonus)',
@@ -35,7 +35,7 @@ export const PRICING_TIERS: Record<string, {
   },
   enterprise: {
     name: 'Pro',
-    priceId: 'price_1SmY6YAbfbNoHWTTnHLW4w07',
+    priceId: 'price_1Srk7JAksiqydspmFvSXbkMJ',
     price: 250,
     features: [
       'Everything in Starter',

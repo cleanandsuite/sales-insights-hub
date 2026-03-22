@@ -12,8 +12,8 @@ const logStep = (step: string, details?: any) => {
 };
 
 const PRICE_IDS = {
-  single_user: 'price_1SmY6SAbfbNoHWTTYuvR4kHQ',
-  team: 'price_1SmY6YAbfbNoHWTTnHLW4w07',
+  single_user: 'price_1T6jZTAksiqydspmLTedBsM1',
+  team: 'price_1Srk7JAksiqydspmFvSXbkMJ',
 };
 
 serve(async (req) => {
