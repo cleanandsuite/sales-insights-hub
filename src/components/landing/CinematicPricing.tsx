@@ -9,8 +9,8 @@ const tiers = [
   {
     name: 'Starter',
     originalPrice: '$129',
-    price: '$79.99',
-    annualPrice: '$63.99',
+    price: '$79',
+    annualPrice: '$63',
     period: '/mo',
     desc: 'For individual reps ready to level up.',
     promo: true,
@@ -28,7 +28,7 @@ const tiers = [
     ],
     highlighted: false,
     premium: false,
-    cta: 'Start Free Trial',
+    cta: 'Get Started',
   },
   {
     name: 'Pro',
@@ -54,7 +54,7 @@ const tiers = [
     ],
     highlighted: true,
     premium: false,
-    cta: 'Start Free Trial',
+    cta: 'Get Started',
   },
   {
     name: 'Enterprise',
@@ -126,7 +126,7 @@ export function CinematicPricing({ onStartTrialClick }: CinematicPricingProps) {
             Invest in every conversation.
           </h2>
           <p className="text-white/40 text-base max-w-md mx-auto mb-8">
-            14-day free trial on all plans. Cancel anytime.
+            No long-term contracts. Cancel anytime.
           </p>
 
           <div className="inline-flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-full p-1">

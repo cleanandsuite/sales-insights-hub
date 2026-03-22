@@ -183,7 +183,7 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
               className="magnetic-btn inline-flex items-center justify-center gap-2 bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))] px-8 py-4 rounded-full text-base font-semibold"
             >
               <span className="relative z-10 flex items-center gap-2">
-                Start Free Trial <ArrowRight className="w-5 h-5" />
+                Get Started <ArrowRight className="w-5 h-5" />
               </span>
               <span className="btn-slide bg-[hsl(168,76%,35%)] rounded-full" />
             </button>
@@ -198,7 +198,7 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
 
           {/* Trust micro-strip */}
           <div data-hero-anim className="flex flex-wrap items-center gap-x-6 gap-y-2 text-white/35 text-xs">
-            <span className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> 14-day free trial</span>
+            <span className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> Cancel anytime</span>
             <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Setup in 2 minutes</span>
             <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> SOC 2 compliant</span>
           </div>

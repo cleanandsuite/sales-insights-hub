@@ -54,10 +54,8 @@ serve(async (req) => {
       sessionParams.discounts = [{ coupon }];
       logStep("Applying coupon — no trial period", { coupon });
     } else {
-      // Standard flow: 14-day free trial
-      sessionParams.subscription_data = {
-        trial_period_days: 14,
-      };
+      // Standard flow: no trial
+      logStep("No coupon — standard checkout");
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);

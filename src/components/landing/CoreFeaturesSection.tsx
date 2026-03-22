@@ -109,11 +109,11 @@ export function CoreFeaturesSection({ onStartTrialClick }: CoreFeaturesSectionPr
               onClick={onStartTrialClick}
               className="group gap-2 font-bold text-lg px-10 py-7 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl rounded-xl animate-cta-pulse"
             >
-              Start Your Free Trial Now
+              Get Started Now
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <p className="text-sm text-muted-foreground mt-3">
-              14-day free trial • Full access to AI coaching for sales calls
+              Full access to AI coaching for sales calls • Cancel anytime
             </p>
           </div>
         )}

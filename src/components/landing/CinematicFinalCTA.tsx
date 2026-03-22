@@ -20,7 +20,7 @@ export function CinematicFinalCTA({ onStartTrialClick }: CinematicFinalCTAProps)
         </h2>
 
         <p className="text-base text-white/50 mb-10 max-w-md mx-auto">
-          14-day free trial. Setup in 2 minutes. Cancel anytime.
+          Setup in 2 minutes. Cancel anytime. No contracts.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
@@ -29,7 +29,7 @@ export function CinematicFinalCTA({ onStartTrialClick }: CinematicFinalCTAProps)
             onClick={onStartTrialClick}
             className="px-8 py-4 rounded-full bg-[hsl(var(--cin-teal))] text-black font-semibold text-base flex items-center gap-2 hover:brightness-110 transition-all"
           >
-            Start Free Trial
+            Get Started
             <ArrowRight className="w-4 h-4" />
           </button>
 

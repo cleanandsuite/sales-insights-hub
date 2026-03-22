@@ -19,7 +19,7 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
           </h2>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
             Join sales leaders who use SellSig to transform sales calls into consistent wins. 
-            Start your 14-day free trial today—full access, no hassle.
+            Get started today — full access, no hassle.
           </p>
 
           {/* Social proof */}
@@ -35,12 +35,12 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
               onClick={onStartTrialClick}
               className="group gap-3 font-bold text-lg px-8 py-7 bg-white text-primary hover:bg-white/95 shadow-2xl hover:shadow-3xl rounded-xl animate-cta-pulse"
             >
-              Start Your Free Trial Now
+              Get Started Now
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             <p className="text-sm text-white/80 mt-4 flex flex-wrap items-center justify-center gap-4">
               <span className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4" /> 14-day free trial
+                <CheckCircle className="h-4 w-4" /> Cancel anytime
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4" /> Credit card required

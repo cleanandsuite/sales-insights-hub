@@ -22,7 +22,7 @@ export const PRICING_TIERS: Record<string, {
   single_user: {
     name: 'Starter',
     priceId: 'price_1TDeJ5AksiqydspmW4bgUyrv',
-    price: 79.99,
+    price: 79,
     features: [
       '1,500 call minutes/month (+1,000 bonus)',
       'Dedicated US business phone number',

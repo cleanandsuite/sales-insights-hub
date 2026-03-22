@@ -142,13 +142,13 @@ export default function Auth() {
             ))}
           </ul>
 
-          {startTrial && (
+           {startTrial && (
             <div className="mt-10 p-5 rounded-xl border" style={{ background: 'hsl(168 76% 40% / 0.08)', borderColor: 'hsl(168 76% 40% / 0.2)' }}>
               <p className="font-semibold text-white flex items-center gap-2">
-                🎉 14-Day Free Trial
+                🚀 Get Started
               </p>
               <p className="text-sm text-white/40 mt-1">
-                Full access, no credit card required. Cancel anytime.
+                Sign in to activate your subscription. Cancel anytime.
               </p>
             </div>
           )}
@@ -181,11 +181,11 @@ export default function Auth() {
 
           <div className="space-y-2 mb-8">
             <h2 className="text-2xl font-black text-white tracking-tight">
-              {startTrial ? 'Activate your free trial' : 'Welcome back'}
+              {startTrial ? 'Get started' : 'Welcome back'}
             </h2>
             <p className="text-white/40 text-sm">
               {startTrial
-                ? 'Sign in to start your 14-day free trial'
+                ? 'Sign in to activate your plan'
                 : 'Sign in to your SellSig account'}
             </p>
           </div>
@@ -258,7 +258,7 @@ export default function Auth() {
                   Signing in...
                 </>
               ) : startTrial ? (
-                'Activate Free Trial'
+                'Get Started'
               ) : (
                 'Sign In'
               )}
@@ -274,7 +274,7 @@ export default function Auth() {
 
           {startTrial && (
             <p className="mt-4 text-xs text-center text-white/25">
-              By continuing you agree to our Terms. No charge until day 15.
+              By continuing you agree to our Terms.
             </p>
           )}
 
