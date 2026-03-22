@@ -54,7 +54,7 @@ const tiers = [
     ],
     highlighted: true,
     premium: false,
-    cta: 'Start Free Trial',
+    cta: 'Get Started',
   },
   {
     name: 'Enterprise',
