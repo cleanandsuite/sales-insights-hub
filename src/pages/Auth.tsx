@@ -258,7 +258,7 @@ export default function Auth() {
                   Signing in...
                 </>
               ) : startTrial ? (
-                'Activate Free Trial'
+                'Get Started'
               ) : (
                 'Sign In'
               )}
