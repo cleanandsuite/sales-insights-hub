@@ -181,11 +181,11 @@ export default function Auth() {
 
           <div className="space-y-2 mb-8">
             <h2 className="text-2xl font-black text-white tracking-tight">
-              {startTrial ? 'Activate your free trial' : 'Welcome back'}
+              {startTrial ? 'Get started' : 'Welcome back'}
             </h2>
             <p className="text-white/40 text-sm">
               {startTrial
-                ? 'Sign in to start your 14-day free trial'
+                ? 'Sign in to activate your plan'
                 : 'Sign in to your SellSig account'}
             </p>
           </div>
