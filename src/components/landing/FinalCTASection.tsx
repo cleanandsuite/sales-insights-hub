@@ -40,7 +40,7 @@ export function FinalCTASection({ onStartTrialClick }: FinalCTASectionProps) {
             </Button>
             <p className="text-sm text-white/80 mt-4 flex flex-wrap items-center justify-center gap-4">
               <span className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4" /> 14-day free trial
+                <CheckCircle className="h-4 w-4" /> Cancel anytime
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4" /> Credit card required

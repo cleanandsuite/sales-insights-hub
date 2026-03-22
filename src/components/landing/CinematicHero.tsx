@@ -198,7 +198,7 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
 
           {/* Trust micro-strip */}
           <div data-hero-anim className="flex flex-wrap items-center gap-x-6 gap-y-2 text-white/35 text-xs">
-            <span className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> 14-day free trial</span>
+            <span className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> Cancel anytime</span>
             <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Setup in 2 minutes</span>
             <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> SOC 2 compliant</span>
           </div>

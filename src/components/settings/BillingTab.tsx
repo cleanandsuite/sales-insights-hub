@@ -146,7 +146,7 @@ export function BillingTab() {
             onSelect={() => handleStartCheckout('single_user')}
             loading={checkoutLoading === 'single_user'}
             disabled={!!checkoutLoading}
-            ctaText={subscribed ? 'Switch to Single' : 'Start Free Trial'}
+            ctaText={subscribed ? 'Switch to Single' : 'Get Started'}
           />
 
           <PricingCard

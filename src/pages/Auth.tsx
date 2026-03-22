@@ -274,7 +274,7 @@ export default function Auth() {
 
           {startTrial && (
             <p className="mt-4 text-xs text-center text-white/25">
-              By continuing you agree to our Terms. No charge until day 15.
+              By continuing you agree to our Terms.
             </p>
           )}
 

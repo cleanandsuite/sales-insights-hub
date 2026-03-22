@@ -96,7 +96,7 @@ const faqData = {
     },
     {
       question: "Is there a free trial?",
-      answer: "Yes! We offer a free trial that includes core features so you can experience SellSig before committing to a paid plan."
+      answer: "We don't currently offer a free trial, but you can cancel anytime with no contracts or long-term commitments."
     },
     {
       question: "How do I upgrade or downgrade my plan?",

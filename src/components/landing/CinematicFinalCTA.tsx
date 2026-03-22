@@ -29,7 +29,7 @@ export function CinematicFinalCTA({ onStartTrialClick }: CinematicFinalCTAProps)
             onClick={onStartTrialClick}
             className="px-8 py-4 rounded-full bg-[hsl(var(--cin-teal))] text-black font-semibold text-base flex items-center gap-2 hover:brightness-110 transition-all"
           >
-            Start Free Trial
+            Get Started
             <ArrowRight className="w-4 h-4" />
           </button>
 
