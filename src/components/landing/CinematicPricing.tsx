@@ -9,8 +9,8 @@ const tiers = [
   {
     name: 'Starter',
     originalPrice: '$129',
-    price: '$79.99',
-    annualPrice: '$63.99',
+    price: '$79',
+    annualPrice: '$63',
     period: '/mo',
     desc: 'For individual reps ready to level up.',
     promo: true,
