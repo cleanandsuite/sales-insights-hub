@@ -183,7 +183,7 @@ export function CinematicHero({ onStartTrialClick }: CinematicHeroProps) {
               className="magnetic-btn inline-flex items-center justify-center gap-2 bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))] px-8 py-4 rounded-full text-base font-semibold"
             >
               <span className="relative z-10 flex items-center gap-2">
-                Start Free Trial <ArrowRight className="w-5 h-5" />
+                Get Started <ArrowRight className="w-5 h-5" />
               </span>
               <span className="btn-slide bg-[hsl(168,76%,35%)] rounded-full" />
             </button>
