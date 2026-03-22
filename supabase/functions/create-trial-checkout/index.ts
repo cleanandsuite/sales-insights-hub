@@ -27,17 +27,16 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
-    const { plan = 'single_user', quantity = 1 } = await req.json();
+    const { plan = 'single_user', quantity = 1, coupon } = await req.json();
     const priceId = PRICE_IDS[plan as keyof typeof PRICE_IDS] || PRICE_IDS.single_user;
-    logStep("Request params", { plan, quantity, priceId });
+    logStep("Request params", { plan, quantity, priceId, coupon: coupon || 'none' });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     const origin = req.headers.get("origin") || "http://localhost:5173";
 
-    // Create checkout session for guest (no auth required)
-    // Trial for 14 days, card required upfront
-    const session = await stripe.checkout.sessions.create({
+    // Build checkout session options
+    const sessionParams: any = {
       line_items: [
         {
           price: priceId,
@@ -45,15 +44,23 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      subscription_data: {
-        trial_period_days: 14,
-      },
-      // Post-payment goes to a public page (no auth guard) to avoid /auth bounce.
-      // We pass the Checkout Session ID so the client can fetch the payer email and send a magic link.
       success_url: `${origin}/payment-complete?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/`,
       payment_method_collection: 'always',
-    });
+    };
+
+    if (coupon) {
+      // Promo flow: apply coupon, no free trial
+      sessionParams.discounts = [{ coupon }];
+      logStep("Applying coupon — no trial period", { coupon });
+    } else {
+      // Standard flow: 14-day free trial
+      sessionParams.subscription_data = {
+        trial_period_days: 14,
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
