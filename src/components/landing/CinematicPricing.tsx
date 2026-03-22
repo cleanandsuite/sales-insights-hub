@@ -28,7 +28,7 @@ const tiers = [
     ],
     highlighted: false,
     premium: false,
-    cta: 'Start Free Trial',
+    cta: 'Get Started',
   },
   {
     name: 'Pro',
