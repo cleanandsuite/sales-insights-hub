@@ -50,6 +50,7 @@ const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Enterprise = lazy(() => import("./pages/Enterprise"));
 const Integrations = lazy(() => import("./pages/Integrations"));
 const SetupPhone = lazy(() => import("./pages/SetupPhone"));
+const CostOfLunch = lazy(() => import("./pages/CostOfLunch"));
 
 const queryClient = new QueryClient();
 
