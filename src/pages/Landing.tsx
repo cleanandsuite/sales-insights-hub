@@ -30,8 +30,11 @@ export default function Landing() {
       if (error) throw error;
       if (!data?.url) throw new Error('No checkout URL returned');
 
-      // Same-tab redirect so the success_url brings the user back properly
-      window.location.href = data.url;
+      const newWindow = window.open(data.url, '_blank');
+      if (!newWindow) {
+        window.location.href = data.url;
+      }
+      setCheckoutLoading(false);
     } catch (err) {
       console.error('Checkout error:', err);
       toast.error('Could not start checkout. Please try again.');
