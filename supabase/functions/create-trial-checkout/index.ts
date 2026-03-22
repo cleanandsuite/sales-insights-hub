@@ -12,7 +12,7 @@ const logStep = (step: string, details?: any) => {
 };
 
 const PRICE_IDS = {
-  single_user: 'price_1T6jZTAksiqydspmLTedBsM1',
+  single_user: 'price_1TDeJ5AksiqydspmW4bgUyrv',
   team: 'price_1Srk7JAksiqydspmFvSXbkMJ',
 };
 

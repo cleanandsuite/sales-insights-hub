@@ -86,7 +86,7 @@ export default function CostOfLunch() {
 
         {/* Fine print */}
         <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-          Then $79/mo after the first month. Cancel anytime. No contracts. Full Starter plan access from day one.
+          Then $79.99/mo after the first month. Cancel anytime. No contracts. Full Starter plan access from day one.
         </p>
       </div>
     </div>
