@@ -72,7 +72,7 @@ export function CinematicNavbar({ onStartTrialClick }: CinematicNavbarProps) {
             onClick={onStartTrialClick}
             className="magnetic-btn flex items-center gap-2 bg-[hsl(var(--cin-teal))] text-[hsl(var(--cin-bg))] px-5 py-2 rounded-full text-sm font-semibold"
           >
-            Start Free Trial
+            Get Started
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
